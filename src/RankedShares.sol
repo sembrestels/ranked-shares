@@ -32,6 +32,8 @@ contract RankedShares is PBEAR, Ownable {
     error AlreadyHeld();
     error NotNFTSponsorship();
     error BalanceBelowTotalWeight();
+    error NotFunded();
+    error AlreadyClaimed();
 
     // ---------------------------------------------------------------- events
 
@@ -41,6 +43,8 @@ contract RankedShares is PBEAR, Ownable {
     event Sponsored(uint256 indexed sponsorshipId, address indexed sponsor, uint256 amount, uint256 seats, address nft);
     event SeatClaimed(uint256 indexed sponsorshipId, uint256 indexed tokenId, address indexed holder, address previous);
     event Voted(address indexed voter);
+    event Claimed(uint256 indexed projectId, address indexed recipient, uint256 amount);
+    event Swept(address indexed to, uint256 amount);
 
     // ----------------------------------------------------------------- types
 
@@ -71,6 +75,9 @@ contract RankedShares is PBEAR, Ownable {
     Sponsorship[] internal _sponsorships;
     /// @notice Current holder of the seat keyed by an NFT token id.
     mapping(uint256 => mapping(uint256 => address)) public seatHolder;
+
+    mapping(uint256 => bool) public claimed;
+    uint256 public claimedTotal;
 
     // ----------------------------------------------------------- constructor
 
@@ -217,6 +224,41 @@ contract RankedShares is PBEAR, Ownable {
     function vote(bytes calldata ranks) external inPhase(Phase.Open) beforeDeadline {
         _setBallot(msg.sender, ranks);
         emit Voted(msg.sender);
+    }
+
+    // ----------------------------------------------------------------- tally
+
+    /// @notice Close the voting window and start the tally. Anyone may call it
+    ///         once the deadline has passed. Tokens sent directly to the pool are
+    ///         not part of the budget.
+    function startTally() external inPhase(Phase.Open) {
+        if (block.timestamp < votingDeadline) revert DeadlineNotReached();
+        if (token.balanceOf(address(this)) < totalWeight) revert BalanceBelowTotalWeight();
+        _startTally();
+    }
+
+    // --------------------------------------------------------------- payouts
+
+    /// @notice Pay a funded project's cost to its recipient. Anyone may trigger it.
+    function claim(uint256 projectId) external inPhase(Phase.Done) {
+        if (!funded[projectId]) revert NotFunded();
+        if (claimed[projectId]) revert AlreadyClaimed();
+        claimed[projectId] = true;
+        uint256 amount = cost(projectId);
+        claimedTotal += amount;
+        address recipient = recipientOf[projectId];
+        emit Claimed(projectId, recipient, amount);
+        token.safeTransfer(recipient, amount);
+    }
+
+    /// @notice Withdraw everything the pool holds beyond the funded projects'
+    ///         unclaimed costs: unspent budget plus any stray transfers.
+    function sweep(address to) external onlyOwner inPhase(Phase.Done) {
+        if (to == address(0)) revert ZeroAddress();
+        uint256 owed = spent - claimedTotal;
+        uint256 amount = token.balanceOf(address(this)) - owed;
+        emit Swept(to, amount);
+        token.safeTransfer(to, amount);
     }
 
     // ------------------------------------------------------------- internals
