@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
+
 /// @title PB Expanding Approvals Rule (PB-EAR) engine
 /// @notice Abstract on-chain implementation of Algorithm 1 from Aziz & Lee,
 ///         "Proportionally Representative Participatory Budgeting with Ordinal
@@ -113,6 +115,103 @@ abstract contract PBEAR {
     /// @notice True when no unfunded project fits in the remaining budget.
     function isExhausted() public view returns (bool) {
         return _isExhausted();
+    }
+
+    // ----------------------------------------------------------------- tally
+
+    /// @notice Advances the tally by one iteration: funds one eligible project
+    ///         (highest support, then lowest cost, then lowest id) and deducts
+    ///         exactly its cost from its supporters, or, if nothing is eligible,
+    ///         expands every ballot by one rank level.
+    function step() public {
+        if (!tallyStarted) revert TallyNotStarted();
+        if (tallyDone) revert TallyAlreadyDone();
+
+        uint256 m = _costs.length;
+        uint256 n = _voters.length;
+        uint256 level = rankLevel;
+
+        // Pass 1: weighted j-approval support for every unfunded project.
+        uint256[] memory support = new uint256[](m);
+        for (uint256 i = 0; i < n; i++) {
+            address voter = _voters[i];
+            uint256 w = _weight[voter];
+            if (w == 0) continue;
+            bytes memory ballot = _ballot[voter];
+            if (ballot.length == 0) continue;
+            uint8 defaultRank = _defaultRank[voter];
+            for (uint256 c = 0; c < m; c++) {
+                if (funded[c]) continue;
+                uint8 r = uint8(ballot[c]);
+                if (r == 0) r = defaultRank;
+                if (r <= level) support[c] += w;
+            }
+        }
+
+        // Choose among eligible projects. Support never exceeds the remaining
+        // budget, so an eligible project always fits.
+        bool found;
+        uint256 best;
+        for (uint256 c = 0; c < m; c++) {
+            if (funded[c]) continue;
+            uint256 cost_ = _costs[c];
+            if (support[c] < cost_) continue;
+            if (!found || support[c] > support[best] || (support[c] == support[best] && cost_ < _costs[best])) {
+                found = true;
+                best = c;
+            }
+        }
+
+        if (!found) {
+            if (level >= m) {
+                // Every ballot already approves every project; the remaining
+                // weight is abstaining and can fund nothing.
+                _finish();
+                return;
+            }
+            rankLevel = level + 1;
+            emit RankAdvanced(level + 1);
+            return;
+        }
+
+        // Pass 2: uniform fractional reweighting of the supporters, made
+        // integer-exact by cumulative rounding in voter order.
+        uint256 total = support[best];
+        uint256 thr = _costs[best];
+        uint256 cum = 0;
+        for (uint256 i = 0; i < n; i++) {
+            address voter = _voters[i];
+            uint256 w = _weight[voter];
+            if (w == 0) continue;
+            bytes storage ballot = _ballot[voter];
+            if (ballot.length == 0) continue;
+            uint8 r = uint8(ballot[best]);
+            if (r == 0) r = _defaultRank[voter];
+            if (r > level) continue;
+            uint256 newCum = cum + w;
+            uint256 deduct = Math.mulDiv(newCum, thr, total) - Math.mulDiv(cum, thr, total);
+            _weight[voter] = w - deduct;
+            cum = newCum;
+        }
+
+        funded[best] = true;
+        _fundedOrder.push(best);
+        spent += thr;
+        emit ProjectFunded(best, total, level);
+
+        if (_isExhausted()) _finish();
+    }
+
+    /// @notice Calls `step()` repeatedly until the tally is done or `maxSteps` is reached.
+    function run(uint256 maxSteps) public {
+        for (uint256 i = 0; i < maxSteps && !tallyDone; i++) {
+            step();
+        }
+    }
+
+    function _finish() private {
+        tallyDone = true;
+        emit TallyDone(spent);
     }
 
     // ------------------------------------------------------------- internals
