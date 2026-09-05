@@ -4,8 +4,11 @@
 //! elsewhere; everything above them is one code path.
 
 pub mod ballot;
+pub mod commitments;
 pub mod curve;
 pub mod hash;
+pub mod io;
+pub mod tally;
 pub mod types;
 
 #[cfg(feature = "tools")]

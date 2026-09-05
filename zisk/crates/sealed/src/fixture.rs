@@ -3,6 +3,8 @@
 
 use std::path::PathBuf;
 
+use crate::types::{TallyInput, VoterIn};
+
 pub fn hex_bytes(s: &str) -> Vec<u8> {
     let s = s.trim_start_matches("0x");
     if s.is_empty() {
@@ -28,4 +30,27 @@ pub fn vectors_dir() -> PathBuf {
 pub fn load_json(name: &str) -> serde_json::Value {
     let text = std::fs::read_to_string(vectors_dir().join(name)).expect("fixture file");
     serde_json::from_str(&text).expect("json")
+}
+
+/// Reads a `TallyInput` out of one of the `reference/vectors/zisk/fixture_*.json` scenarios.
+pub fn input_of(fx: &serde_json::Value) -> TallyInput {
+    TallyInput {
+        chain_id: fx["chainId"].as_u64().unwrap(),
+        pool: hex_arr(fx["pool"].as_str().unwrap()),
+        sk: hex_arr(fx["sk"].as_str().unwrap()),
+        costs: fx["costs"].as_array().unwrap().iter().map(|c| hex_u64(c.as_str().unwrap())).collect(),
+        total_weight: hex_u64(fx["totalWeight"].as_str().unwrap()),
+        voters: fx["voters"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| VoterIn {
+                addr: hex_arr(v["addr"].as_str().unwrap()),
+                direct_weight: hex_u64(v["directWeight"].as_str().unwrap()),
+                seat_weight: hex_u64(v["seatWeight"].as_str().unwrap()),
+                direct_ballot: hex_bytes(v["directBallot"].as_str().unwrap()),
+                ciphertext: hex_bytes(v["ciphertext"].as_str().unwrap()),
+            })
+            .collect(),
+    }
 }
