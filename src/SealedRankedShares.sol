@@ -41,6 +41,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     error TranscriptPending();
     error TranscriptMismatch();
     error NotCoordinator();
+    error SealedCountMismatch();
     error ResultMismatch();
     error ProofPending();
     error ResultPending();
@@ -304,6 +305,19 @@ contract SealedRankedShares is PoolBase, IReceiver {
         _close(maxVoters);
     }
 
+    /// @dev Walks `voters` once, from `closeCursor`, keeping the keccak chain over the
+    ///      public entries and the Poseidon2 chain over the sealed ones (spec B6.1). The
+    ///      sealed chain is checkpointed every `batch` entries and at the last one, so
+    ///      after `j` sealed entries the checkpoints written are `checkpoint[1 ..
+    ///      ceil(j / batch)]`, which is what `_advanceIngest` reads as batch `k`'s `hIn`
+    ///      and `hOut`. Chunking never moves a checkpoint: `j` counts sealed entries, not
+    ///      calls.
+    ///
+    ///      Invariant asserted when the walk ends: the entries absorbed equal
+    ///      `sealedCount` (`SealedCountMismatch`). It holds because `voteSealed` needs
+    ///      seat weight and every seat grant registers the address in `voters`, but the
+    ///      whole proof chain is anchored on those checkpoints, so `close` asserts it
+    ///      rather than trusting three hops of reasoning.
     function _close(uint256 maxVoters) internal {
         if (closeCursor == 0) _requireBalanceCoversBudget();
         uint256 n = voters.length;
@@ -337,6 +351,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
         hSealed = hs;
         sealedCursor = j;
         if (end == n) {
+            if (j != sc) revert SealedCountMismatch();
             costsHash = poseidon.hash(_costs);
             inputsRoot = keccak256(abi.encodePacked(hp, hs, sc, costsHash, totalWeight));
             numBatches = sc == 0 ? 1 : (sc + batch - 1) / batch;
