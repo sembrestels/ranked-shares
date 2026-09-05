@@ -159,6 +159,28 @@ See `forge test --match-contract SealedGasTest -vv`.
 `bb`-made proofs from the fixtures) costs about 686k–930k gas per call, one ingest or
 tally group per proof. See `forge test --match-path "test/verifiers/RealProofs.t.sol" -vv`.
 
+## Prover CLI
+
+`prover/src/cli/index.ts` (`cd prover && npx tsx src/cli/index.ts …`, or `npm run cli --`)
+drives a sealed pool from the TypeScript prover of `prover/src/core/`:
+
+```
+prover audit --rpc <url> --pool <addr> [--from-block n]
+prover status --rpc <url> --pool <addr> [--from-block n]
+prover prove --rpc <url> --pool <addr> --private-key <hex> (--master <hex> | --sign) [--threads n]
+```
+
+`audit` replays the reported transcript against the public block read from chain and
+exits non-zero if it does not reproduce it — the same check anyone can run without the
+tallier key. `status` prints phase, ingest progress and the current `stateCommit`.
+`prove` derives the tallier secret from a master secret and the pool's `keySalt`, resumes
+the proof chain from wherever it stands, and submits `advance` for each remaining ingest
+batch and tally group as `--private-key`. The master secret comes either directly
+(`--master`, a raw 32-byte hex secret) or by signing `MASTER_MESSAGE` with the given key
+(`--sign`) — the latter is how the browser prover will derive it from a wallet, so `--sign`
+is the flow to use when the coordinator key is the same wallet that should hold the
+tallier secret; `--master` is for a secret managed separately from that key.
+
 ## Reference implementation
 
 `reference/` is the oracle every port is tested against, in dependency-free Python:

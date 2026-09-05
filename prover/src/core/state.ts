@@ -2,6 +2,7 @@
 import { toBig } from "@lib/field";
 import * as cm from "@lib/commitments";
 import { publicEntries, sealedEntries, sealedVoters, type Voter } from "@lib/entries";
+import { pubkey } from "@lib/grumpkin";
 import { pbearTranscript } from "@lib/pbear";
 import { pack } from "@lib/sealed";
 import type { Snapshot } from "./chain";
@@ -28,6 +29,8 @@ export function rebuild(
   s: ProofPlan["snapshot"] & { nSealedMax: number; mMax: number; batch: number; transcript?: bigint[][] | null },
   sk: bigint,
 ): ProofPlan {
+  const pk = pubkey(sk);
+  if (pk.x !== s.pkX || pk.y !== s.pkY) throw new Error("tallier key mismatch");
   const profile = profileFor(s.nSealedMax, s.mMax, s.batch);
   const sealed = sealedVoters(s.voters);
   const entries = sealedEntries(s.voters, sk, s.m);
