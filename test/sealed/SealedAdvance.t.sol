@@ -8,6 +8,7 @@ import {IHonkVerifier} from "../../src/interfaces/IHonkVerifier.sol";
 import {Poseidon2} from "../../src/lib/Poseidon2.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
+import {MockRevertingVerifier} from "../mocks/MockRevertingVerifier.sol";
 import {FixtureLoader} from "./FixtureLoader.sol";
 
 contract SealedAdvanceTest is FixtureLoader {
@@ -195,6 +196,7 @@ contract SealedAdvanceTest is FixtureLoader {
         assertNotEq(pool.stateCommit(), pool.ingestedState());
         vm.expectEmit(false, false, false, false);
         emit SealedRankedShares.TallyRestarted();
+        vm.prank(coordinator);
         pool.advance("", tallyInputs(0), true);
         assertEq(pool.stateCommit(), uint256(tallyInputs(0)[2]));
         uint256 n = fxCount(".tallyProofs");
@@ -210,9 +212,78 @@ contract SealedAdvanceTest is FixtureLoader {
         pool.advance("", tallyInputs(0), false);
         uint256 before = pool.stateCommit();
         tallyVerifier.setAccept(false);
+        vm.prank(coordinator);
         vm.expectRevert(SealedRankedShares.InvalidProof.selector);
         pool.advance("", tallyInputs(0), true);
         assertEq(pool.stateCommit(), before);
+    }
+
+    /// @dev A proof is public once submitted; without the coordinator gate anyone could
+    ///      replay the first tally group with `restart` and rewind the chain at will.
+    function test_restartByOthersReverts() public {
+        ingestAll();
+        report();
+        pool.advance("", tallyInputs(0), false);
+        uint256 before = pool.stateCommit();
+        address stranger = makeAddr("stranger");
+        vm.prank(stranger);
+        vm.expectRevert(SealedRankedShares.NotCoordinator.selector);
+        pool.advance("", tallyInputs(0), true);
+        assertEq(pool.stateCommit(), before);
+    }
+
+    function test_forwardAdvanceStaysPermissionless() public {
+        ingestAll();
+        report();
+        uint256 n = fxCount(".tallyProofs");
+        assertGt(n, 1);
+        pool.advance("", tallyInputs(0), false);
+        address stranger = makeAddr("stranger");
+        vm.prank(stranger);
+        pool.advance("", tallyInputs(1), false);
+        assertEq(pool.stateCommit(), uint256(tallyInputs(1)[2]));
+    }
+
+    function test_revertingVerifierSurfacesAsInvalidProof() public {
+        MockRevertingVerifier bad = new MockRevertingVerifier();
+        uint64 later = uint64(block.timestamp) + 1000;
+        SealedRankedShares p2 = deployWith(address(bad), address(bad), later);
+        vm.startPrank(owner);
+        p2.addProject(1, recipient);
+        p2.openVoting();
+        vm.stopPrank();
+        vm.warp(later);
+        p2.close(100);
+        bytes32[] memory pi = new bytes32[](10);
+        pi[1] = bytes32(p2.sealedCount());
+        pi[2] = bytes32(p2.projectCount());
+        pi[3] = bytes32(p2.totalWeight());
+        pi[4] = bytes32(p2.tallierPkX());
+        pi[5] = bytes32(p2.tallierPkY());
+        vm.expectRevert(SealedRankedShares.InvalidProof.selector);
+        p2.advance("", pi, false);
+    }
+
+    /// @dev A pool with a fresh token and the fixture's key, so the verifiers can be swapped.
+    function deployWith(address ingest, address tally, uint64 deadline) internal returns (SealedRankedShares) {
+        uint256[] memory pk = fxWords(".pk");
+        SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
+            forwarder: forwarder,
+            coordinator: coordinator,
+            poseidon: IPoseidon2(address(new Poseidon2())),
+            ingestVerifier: IHonkVerifier(ingest),
+            tallyVerifier: IHonkVerifier(tally),
+            tallierPkX: pk[0],
+            tallierPkY: pk[1],
+            keySalt: fxBytes32(".keySalt"),
+            nSealedMax: fxUint(".profile.nSealedMax"),
+            mMax: fxUint(".profile.mMax"),
+            batch: fxUint(".profile.batch"),
+            minDirectVote: fxWord(".minDirectVote"),
+            proofGrace: 1 days,
+            abandonGrace: 7 days
+        });
+        return new SealedRankedShares(new MockERC20(), owner, deadline, cfg);
     }
 
     function test_advanceRejectedOnceDone() public {
@@ -268,6 +339,7 @@ contract SealedAdvanceTest is FixtureLoader {
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            coordinator: coordinator,
             poseidon: IPoseidon2(address(pos2)),
             ingestVerifier: IHonkVerifier(address(iv2)),
             tallyVerifier: IHonkVerifier(address(tv2)),

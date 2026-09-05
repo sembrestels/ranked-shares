@@ -40,6 +40,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     error InvalidProof();
     error TranscriptPending();
     error TranscriptMismatch();
+    error NotCoordinator();
     error ResultMismatch();
     error ProofPending();
     error ResultPending();
@@ -75,6 +76,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
 
     struct Config {
         address forwarder;
+        address coordinator;
         IPoseidon2 poseidon;
         IHonkVerifier ingestVerifier;
         IHonkVerifier tallyVerifier;
@@ -99,6 +101,8 @@ contract SealedRankedShares is PoolBase, IReceiver {
     // ------------------------------------------------------------ immutables
 
     address public immutable forwarder;
+    /// @notice The only address allowed to restart the tally chain (spec B6.5).
+    address public immutable coordinator;
     IPoseidon2 public immutable poseidon;
     IHonkVerifier public immutable ingestVerifier;
     IHonkVerifier public immutable tallyVerifier;
@@ -162,12 +166,13 @@ contract SealedRankedShares is PoolBase, IReceiver {
         PoolBase(token_, owner_, votingDeadline_)
     {
         if (
-            cfg.forwarder == address(0) || address(cfg.poseidon) == address(0)
+            cfg.forwarder == address(0) || cfg.coordinator == address(0) || address(cfg.poseidon) == address(0)
                 || address(cfg.ingestVerifier) == address(0) || address(cfg.tallyVerifier) == address(0)
                 || cfg.nSealedMax == 0 || cfg.mMax == 0 || cfg.mMax > MAX_PROJECTS || cfg.batch == 0
                 || cfg.abandonGrace <= cfg.proofGrace || !Grumpkin.isOnCurve(cfg.tallierPkX, cfg.tallierPkY)
         ) revert InvalidConfig();
         forwarder = cfg.forwarder;
+        coordinator = cfg.coordinator;
         poseidon = cfg.poseidon;
         ingestVerifier = cfg.ingestVerifier;
         tallyVerifier = cfg.tallyVerifier;
@@ -413,9 +418,10 @@ contract SealedRankedShares is PoolBase, IReceiver {
     // ---------------------------------------------------------------- proofs
 
     /// @notice Verify the next proof of the chain: ingest batches first, then tally groups.
-    ///         `restart` is honoured in the tally branch only: a valid proof from the
-    ///         ingested state may replace a wrong tally group, but only by carrying its
-    ///         own proof, so nobody can reset the chain for free (spec B6.5).
+    ///         `restart` is honoured in the tally branch only, and there only from
+    ///         `coordinator`: proofs are public once submitted, so a permissionless restart
+    ///         would let anyone replay the first tally group and rewind the chain at will.
+    ///         Forward calls stay permissionless (spec B6.5).
     function advance(bytes calldata proof, bytes32[] calldata publicInputs, bool restart)
         external
         inPhase(Phase.Tally)
@@ -436,7 +442,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
                 || uint256(pi[4]) != tallierPkX || uint256(pi[5]) != tallierPkY || uint256(pi[6]) != checkpoint[k]
                 || uint256(pi[7]) != checkpoint[k + 1] || uint256(pi[8]) != stateCommit
         ) revert InputMismatch();
-        if (!ingestVerifier.verify(proof, pi)) revert InvalidProof();
+        _verify(ingestVerifier, proof, pi);
         stateCommit = uint256(pi[9]);
         ingestCursor = k + 1;
         if (k + 1 == numBatches) ingestedState = stateCommit;
@@ -444,11 +450,12 @@ contract SealedRankedShares is PoolBase, IReceiver {
     }
 
     function _advanceTally(bytes calldata proof, bytes32[] calldata pi, bool restart) internal {
+        if (restart && msg.sender != coordinator) revert NotCoordinator();
         if (!resultReported) revert TranscriptPending();
         if (pi.length != 7) revert InputMismatch();
         if (restart) stateCommit = ingestedState;
         if (uint256(pi[0]) != costsHash || uint256(pi[1]) != stateCommit) revert InputMismatch();
-        if (!tallyVerifier.verify(proof, pi)) revert InvalidProof();
+        _verify(tallyVerifier, proof, pi);
         stateCommit = uint256(pi[2]);
         emit Advanced();
         if (restart) emit TallyRestarted();
@@ -457,6 +464,16 @@ contract SealedRankedShares is PoolBase, IReceiver {
             uint256[] memory order = _unpackFunded(uint256(pi[5]), uint256(pi[6]));
             if (keccak256(abi.encode(order)) != keccak256(abi.encode(_provisional))) revert ResultMismatch();
             _finalize(order, Finality.Proven);
+        }
+    }
+
+    /// @dev A verifier that reverts on a malformed proof rather than returning false must
+    ///      still read as a rejected proof, never as a failed `advance` of unclear cause.
+    function _verify(IHonkVerifier verifier, bytes calldata proof, bytes32[] calldata pi) internal view {
+        try verifier.verify(proof, pi) returns (bool ok) {
+            if (!ok) revert InvalidProof();
+        } catch {
+            revert InvalidProof();
         }
     }
 

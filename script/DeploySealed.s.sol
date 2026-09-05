@@ -11,7 +11,7 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 
 /// @notice Deploys a SealedRankedShares pool.
 ///
-///   TOKEN=0x… OWNER=0x… VOTING_DEADLINE=<unix> FORWARDER=0x… \
+///   TOKEN=0x… OWNER=0x… VOTING_DEADLINE=<unix> FORWARDER=0x… COORDINATOR=0x… \
 ///   TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
 ///   N_SEALED_MAX=256 M_MAX=16 BATCH=32 MIN_DIRECT_VOTE=10000000 \
 ///   PROOF_GRACE=86400 ABANDON_GRACE=604800 \
@@ -25,6 +25,7 @@ contract DeploySealed is Script {
     function run() external returns (SealedRankedShares pool) {
         SealedRankedShares.Config memory cfg;
         cfg.forwarder = vm.envAddress("FORWARDER");
+        cfg.coordinator = vm.envAddress("COORDINATOR");
         cfg.tallierPkX = vm.envUint("TALLIER_PK_X");
         cfg.tallierPkY = vm.envUint("TALLIER_PK_Y");
         cfg.keySalt = vm.envBytes32("KEY_SALT");

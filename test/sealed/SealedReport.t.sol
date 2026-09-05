@@ -126,6 +126,7 @@ contract SealedReportTest is FixtureLoader {
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon2)),
             ingestVerifier: IHonkVerifier(address(ingest2)),
             tallyVerifier: IHonkVerifier(address(tally2)),

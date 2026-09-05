@@ -27,6 +27,7 @@ abstract contract FixtureLoader is Test {
 
     address internal owner = makeAddr("owner");
     address internal forwarder = makeAddr("forwarder");
+    address internal coordinator = makeAddr("coordinator");
     address internal org = makeAddr("org");
     address internal recipient = makeAddr("recipient");
     uint64 internal constant DEADLINE = 1_000_000;
@@ -96,6 +97,7 @@ abstract contract FixtureLoader is Test {
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon)),
             ingestVerifier: IHonkVerifier(address(ingestVerifier)),
             tallyVerifier: IHonkVerifier(address(tallyVerifier)),

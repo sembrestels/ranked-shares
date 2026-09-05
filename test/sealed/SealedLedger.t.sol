@@ -23,6 +23,7 @@ contract SealedLedgerTest is Test {
 
     address owner = makeAddr("owner");
     address forwarder = makeAddr("forwarder");
+    address coordinator = makeAddr("coordinator");
     address alice = makeAddr("alice");
     address bob = makeAddr("bob");
     address carol = makeAddr("carol");
@@ -38,6 +39,7 @@ contract SealedLedgerTest is Test {
     function config() internal view returns (SealedRankedShares.Config memory) {
         return SealedRankedShares.Config({
             forwarder: forwarder,
+            coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon)),
             ingestVerifier: IHonkVerifier(address(ingestVerifier)),
             tallyVerifier: IHonkVerifier(address(tallyVerifier)),
