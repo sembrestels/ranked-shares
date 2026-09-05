@@ -252,6 +252,24 @@ report size or that gas turns out to be a problem (spike B12.4), the fallback is
 kind-3 `TRANSCRIPT` report delivered in chunks with the running hash carried in
 storage.
 
+**Amendment (2026-09-05): report authorisation.** `msg.sender == forwarder` alone is not
+enough. Chainlink's KeystoneForwarder is a per-chain singleton shared by every workflow
+registered with it, so any other workflow owner could deliver a kind-1 report to this
+pool — writing `provisional`/`transcriptHash`, starting the `proofGrace` clock and, once
+it elapsed, letting `acceptProvisional` finalise a forged result (`inputsRoot` is public,
+so the payload is easy to forge). `onReport` therefore also checks the metadata the
+forwarder prepends — `abi.encodePacked(bytes32 workflowId, bytes10 workflowName, address
+workflowOwner)`, optionally followed by a `bytes2 reportId` — against the immutables
+`workflowOwner` and `workflowName` taken from `Config`: shorter than 62 bytes is
+`BadMetadata`, a mismatch at bytes 42..62 (owner) or, when `workflowName != bytes10(0)`,
+at 32..42 (name) is `WrongWorkflow`. The check runs before the report is decoded and is
+shared with the cre pool as `checkWorkflow` in `src/lib/CreMetadata.sol`. It binds a
+report to a workflow owner, not to a workflow build — `workflowId` is not checked, so
+that owner may redeploy code under the same name and still report; that is the trust
+boundary. `workflowOwner == address(0)` disables the check, for `cre workflow simulate`'s
+MockForwarder (which sends no metadata) only: such a pool must never hold real funds, and
+`script/DeploySealed.s.sol` refuses to deploy one without `ALLOW_ANY_WORKFLOW=1`.
+
 **B6.3 Transcript.** One record per executed step `t = 0, 1, …`, including the
 terminal one:
 

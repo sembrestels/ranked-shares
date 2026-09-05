@@ -117,6 +117,20 @@ off-chain and is finalised by a chain of proofs.
 public half was attested by the DON and can be replayed by anyone from chain data
 (`python3 reference/pbear.py --transcript …` and, later, `prover/cli audit`).
 
+`onReport` is authorised twice: `msg.sender` must be the CRE `forwarder`, and the
+metadata the forwarder prepends (`bytes32 workflowId ‖ bytes10 workflowName ‖ address
+workflowOwner`, plus a `bytes2 reportId` on verified delivery) must name the pool's
+`workflowOwner` and, unless it is `bytes10(0)`, its `workflowName`. The KeystoneForwarder
+is a per-chain singleton shared by every workflow, so the sender check alone would let any
+workflow owner registered with it deliver a kind-1 report — writing the provisional result
+and starting the `proofGrace` clock, after which `acceptProvisional` would finalise it.
+The check binds a report to a workflow owner, not to a specific workflow build
+(`workflowId` is not checked), so that owner may redeploy code under the same name and
+still report: that is the trust boundary. `workflowOwner == address(0)` disables it
+entirely — needed only for `cre workflow simulate`, whose MockForwarder sends no metadata
+at all — and such a pool must never hold real funds; `workflowNameOf(name)` derives the
+`bytes10` from a workflow's name string (SHA-256, hex, first 10 characters, as ASCII).
+
 A restart still needs its own valid proof, so `coordinator` cannot rewrite the result —
 but a proof is public once submitted, so without the restriction anyone could replay the
 first tally group with `restart = true` and rewind the chain at will, holding off an
@@ -133,12 +147,24 @@ Deploy with `script/DeploySealed.s.sol`:
 
 ```
 TOKEN=0x... OWNER=0x... VOTING_DEADLINE=<unix> FORWARDER=0x... COORDINATOR=0x... \
+WORKFLOW_OWNER=0x... WORKFLOW_NAME=ranked-shares-sealed-staging \
 TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
 PROFILE=test|default MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
 PROOF_GRACE=86400 ABANDON_GRACE=604800 \
 [POSEIDON=0x...] [INGEST_VERIFIER=0x...] [TALLY_VERIFIER=0x...] \
 forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
 ```
+
+`WORKFLOW_OWNER` and `WORKFLOW_NAME` are what `onReport` authorises the DON's report
+against (above). `WORKFLOW_NAME` must be exactly the `workflow-name` in
+`cre/workflows/sealed/workflow.yaml` for the target being deployed —
+`ranked-shares-sealed-staging` for `staging-settings` — and `WORKFLOW_OWNER` the address
+of the `CRE_ETH_PRIVATE_KEY` that registers the workflow; the script logs the derived
+`bytes10` next to the name it came from, so a typo is visible before the pool is used.
+Leaving `WORKFLOW_NAME` empty accepts any workflow name from `WORKFLOW_OWNER`. Leaving
+`WORKFLOW_OWNER` unset turns the check off and is refused unless `ALLOW_ANY_WORKFLOW=1`
+is also set: that opt-out exists for `cre workflow simulate`, whose MockForwarder sends
+no metadata, and a pool deployed with it must never hold real funds.
 
 `PROFILE` sets `nSealedMax`, `mMax` and `batch` together (`test` is 8 / 4 / 2, `default`
 256 / 16 / 32); the verifiers are compiled for one profile, so the three are never chosen
@@ -479,3 +505,18 @@ covers the `tally-prover` CLI and the `scripts/e2e-anvil.sh` end-to-end run;
 TOKEN=0x... OWNER=0x... VOTING_DEADLINE=1760000000 \
 forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
 ```
+
+The sealed pools have their own scripts — `script/DeploySealed.s.sol` (noir),
+`script/DeployZisk.s.sol` and `script/DeployCre.s.sol` — documented with the variant
+they deploy. Both CRE-reporting pools (`DeploySealed` and `DeployCre`) additionally take
+`WORKFLOW_OWNER` and `WORKFLOW_NAME`, which authorise `onReport` against the workflow
+allowed to report to that pool:
+
+- `WORKFLOW_OWNER` is the address of the `CRE_ETH_PRIVATE_KEY` that registers the
+  workflow (`cre/.env.example`).
+- `WORKFLOW_NAME` is the `workflow-name` from `cre/workflows/sealed/workflow.yaml` for
+  the target being deployed — `ranked-shares-sealed-staging` for `staging-settings`.
+  Empty accepts any workflow name from `WORKFLOW_OWNER`.
+- `ALLOW_ANY_WORKFLOW=1` is required to deploy with `WORKFLOW_OWNER` unset, which turns
+  the check off. That is for `cre workflow simulate` only — its MockForwarder calls
+  `onReport` with no metadata — and such a pool must never hold real funds.
