@@ -7,6 +7,7 @@ Spec: `docs/superpowers/specs/2026-09-05-sealed-ballots-zisk-design.md`.
 | `crates/pbear` | PB-EAR over `u64`, tested against `reference/pbear.py` |
 | `crates/sealed` | witness types, secp256k1 ECDH + keccak pad, voter chain, `inputsHash`, output hash, `tally::run` |
 | `guest` | the ZisK program: read, run, commit 32 bytes |
+| `prover` | `tally-prover`: keys, encrypt, fetch, check, prove, wrap, export, submit, run |
 
 ## Host
 
@@ -23,6 +24,47 @@ The ELF lands in `target/elf/riscv64ima-zisk-zkvm-elf/release/tally-guest`.
 
 ZisK v1.2.0-alpha. On this machine every ZisK process needs
 `HWLOC_COMPONENTS=-gl` and, for the PLONK wrap, `GLIBC_TUNABLES=glibc.rtld.execstack=2`.
+
+## Prover
+
+    export TALLIER_MASTER=0x…          # 32 bytes; the operator's master secret
+    cargo run -p tally-prover -- keys --salt 0x…                       # pk for a pool's keySalt
+    cargo run -p tally-prover -- encrypt --pk 0x… --voter 0x… --ranks 1,2,3,0
+    cargo run -p tally-prover -- run --rpc $RPC --pool $POOL --workdir /tmp/pool  # after close()
+
+`run` = fetch → check → prove → wrap → export → submit, with `SUBMITTER_KEY` holding the
+key that pays for `finalize` (anyone may call it). Steps are also available one by one.
+Environment overrides: `CARGO_ZISK`, `CARGO_ZISK_DEV`, `ZISK_PROVING_KEY`,
+`ZISK_PROVING_KEY_SNARK`, `TALLY_GUEST_ELF`.
+
+## Where to prove
+
+This box proves on CPU: an Intel iGPU, no CUDA, and ZisK's GPU build needs CUDA 12.9
+and an NVIDIA driver ≥ 525, neither installed here. RunPod-style GPU rentals would speed
+proving but offer no TEE, so the tallier's master secret would leave this machine in the
+clear. GPU-TEE providers billed by the hour — Intel TDX confidential VMs paired with
+NVIDIA Confidential Computing on H100/H200/B300, e.g. Phala Cloud, VoltageGPU, Spheron on
+reservation, Azure NCC H100 v5, Google confidential a3 — would keep the key inside an
+attested enclave instead. A TEE only protects the key: the proof already guarantees the
+tally's correctness regardless of where it runs. None of these have been validated with
+the ZisK GPU build yet.
+
+## End to end
+
+    scripts/e2e-anvil.sh            # fresh anvil, main fixture replayed, committed proof: 5 s, ends `finality 1  funded [1, 2, 0]`
+    scripts/e2e-anvil.sh --prove    # the same with a fresh proof: 28 min 50 s (prove 965 s, wrap 702 s, export 2 s)
+    scripts/arc-probe.sh            # against https://rpc.testnet.arc.io on 2026-09-05: returned 0x…01, initcode 9,270 bytes
+
+The Arc deployment itself needs a funded key: see
+`docs/superpowers/notes/2026-09-05-zisk-arc-runbook.md`.
+
+## Contracts
+
+`src/SealedPool.sol` (shared by cre and zisk), `src/zisk/ZiskRankedShares.sol`,
+`src/cre/CreRankedShares.sol`, the vendored `src/zisk/ZiskVerifier.sol` (AGPL-3.0, from
+the ZisK v1.2.0-alpha PLONK key). `verifySnarkProof` alone costs 515,230 gas
+(`test/zisk/ZiskVerifier.t.sol`); `finalize` with the real verifier costs about 666,683
+gas (`test/zisk/ZiskFinalize.t.sol`). `ZiskVerifier`'s runtime bytecode is 7,183 bytes.
 
 ## Measurements
 
@@ -87,7 +129,9 @@ open; establishing it — on this box or a larger one — is the first thing pla
 measurement work needs to do.
 
 Proving `main` on this machine (CPU, 30 GB RAM plus swap): STARK 20 min (25.8 GiB peak
-RSS, `Proof verified successfully`), PLONK wrap 13 min (25.2 GiB peak RSS, heavy swap).
+RSS, `Proof verified successfully`), PLONK wrap 13 min (25.2 GiB peak RSS, heavy swap). A
+later re-prove of `main` took prove 19m34s, wrap 12m48s; the peak-RSS figures above are
+from the first run only and were not re-measured on the later one.
 `programVK` `0x7d0bd8b882832ec6121439dd210a142169a0e8dc2cbc8c1c0a29633911c1394b`,
 `rootCVadcopFinal` `0x564c2b1bcbd5932c81cfad1fa786a98372eb3d6495257c2d944544334f84382f`
 (ZisK v1.2.0-alpha PLONK key; it equals `getRootCVadcopFinal()` of

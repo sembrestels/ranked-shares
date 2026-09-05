@@ -77,9 +77,12 @@ calls.
 ```
 src/PBEAR.sol           abstract engine: projects, ballots, weights, step()
 src/RankedShares.sol    ERC-20 pool, sponsorships, NFT seats, phases, payouts
+src/SealedPool.sol      shared sealed-pool base for the cre and zisk variants
+src/zisk/               ZiskRankedShares, the vendored ZisK PLONK verifier
+src/cre/                CreRankedShares, the DON-attested variant
 reference/pbear.py      Python reference implementation + brute-force IPSC checker
 reference/zisk/         secp256k1, sealed ballots, commitments and fixtures of the zisk variant
-zisk/                   Rust workspace: PB-EAR, sealed-ballot guest logic, the ZisK guest
+zisk/                   Rust workspace: PB-EAR, sealed-ballot guest logic, the ZisK guest, the tally-prover
 test/                   Foundry tests, including an ffi differential fuzz
 docs/superpowers/       design spec and implementation plan
 ```
@@ -452,8 +455,13 @@ Foundry differential fuzz calls and prints an ABI-encoded `uint256[]` instead.
 
 `reference/zisk/` holds the secp256k1 + keccak scheme of the zisk (and cre) variant and
 its fixtures; `python3 -m zisk.make_fixture` from `reference/` regenerates them, and
-`zisk/README.md` describes the Rust side. Spec:
-`docs/superpowers/specs/2026-09-05-sealed-ballots-zisk-design.md`.
+`zisk/README.md` describes the Rust side. The three sealed variants share
+`src/SealedPool.sol` and differ only in how the sealed half is finalised: `cre` is
+`Attested` by the DON, `noir` is `Proven` over a transcript of chained proofs, and `zisk`
+is `Proven` over the whole tally in one guest program (spec:
+`docs/superpowers/specs/2026-09-05-sealed-ballots-zisk-design.md`). `zisk/README.md`
+covers the `tally-prover` CLI and the `scripts/e2e-anvil.sh` end-to-end run;
+`docs/superpowers/notes/2026-09-05-zisk-arc-runbook.md` covers deploying to Arc.
 
 ## Gas and limits
 
