@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility-audit": {
+      "source": "cuellarfr/design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/accessibility-audit/SKILL.md",
+      "computedHash": "e566229d139130b5e0faae4af120f1357009b0b7006d660aa7e2348f0b161e8f"
+    },
+    "adr-skill": {
+      "source": "vercel/ai",
+      "sourceType": "github",
+      "skillPath": "skills/adr-skill/SKILL.md",
+      "computedHash": "99558cced2e3f911adf3b7badb39eee3feb30ba96789aafe09dc8b245b1a160d"
+    },
+    "atomic-design": {
+      "source": "jwilger/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/atomic-design/SKILL.md",
+      "computedHash": "7ccfec65e59c1d9d9b7d798771b335d49ab99c2e726b17ef6e810782347df857"
+    },
+    "design-systems": {
+      "source": "cuellarfr/design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/design-systems/SKILL.md",
+      "computedHash": "549a8623a1332c4a4f3188d7cefd2c1fad7571bbbfdf171ccc0d965223ee2283"
+    },
+    "design-tokens": {
+      "source": "julianoczkowski/designer-skills",
+      "sourceType": "github",
+      "skillPath": "design-tokens/SKILL.md",
+      "computedHash": "20df23737f28b34cb3d0d808d16a958c5ff3bddf0dcb8eedd700735ecb5ae8d1"
+    },
+    "develop-design-rationale": {
+      "source": "product-on-purpose/pm-skills",
+      "sourceType": "github",
+      "skillPath": "skills/develop-design-rationale/SKILL.md",
+      "computedHash": "077353a347b57a7fddfe23dacb2c473754ab9749f32ddaa0946da1c3e8220d2d"
+    },
+    "jobs-to-be-done": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "jobs-to-be-done/SKILL.md",
+      "computedHash": "d4ec70d690ae20b80664066a55964a9834e4d8134f5812ba6b7fb9104ea7c3b7"
+    },
+    "journey-mapping": {
+      "source": "cuellarfr/design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/journey-mapping/SKILL.md",
+      "computedHash": "0e9c0f35b3e6673f2eb8682f6d34ed502977136fec5c803750dce29a590de47d"
+    },
+    "lean-ux": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "lean-ux/SKILL.md",
+      "computedHash": "daa5d77e5baeb2b8073a5178ae5799da3e62adb07b2a4b67fee84bdf04254aaa"
+    },
+    "nielsen-usability-heuristics": {
+      "source": "dembrandt/dembrandt-skills",
+      "sourceType": "github",
+      "skillPath": "skills/nielsen-usability-heuristics/SKILL.md",
+      "computedHash": "18344fdd990903e9c507b940939f0721c4cf8f82b78b961065248be2205c96cf"
+    },
+    "proto-persona": {
+      "source": "deanpeters/product-manager-skills",
+      "sourceType": "github",
+      "skillPath": "skills/proto-persona/SKILL.md",
+      "computedHash": "b15700fc46ed16aa242f8d98cb6d0cbeb40f8d584cb68550375d0a8bbf679660"
+    },
+    "user-story": {
+      "source": "deanpeters/product-manager-skills",
+      "sourceType": "github",
+      "skillPath": "skills/user-story/SKILL.md",
+      "computedHash": "ca8f8869c1597af5f979130b9b2805c32e6e985e04cdeefe4c99a9a537360b79"
+    },
+    "user-story-mapping": {
+      "source": "deanpeters/product-manager-skills",
+      "sourceType": "github",
+      "skillPath": "skills/user-story-mapping/SKILL.md",
+      "computedHash": "74d6cac90ccbd8a9adbee48feddb26961268c3919d4db6f0f31260c9eac42068"
+    },
+    "user-story-splitting": {
+      "source": "deanpeters/product-manager-skills",
+      "sourceType": "github",
+      "skillPath": "skills/user-story-splitting/SKILL.md",
+      "computedHash": "dbee8a37e4f437479d2bcc103e14e4badd758c09be45268f4d7af46d204207a7"
+    },
+    "ux-heuristics": {
+      "source": "wondelai/skills",
+      "sourceType": "github",
+      "skillPath": "ux-heuristics/SKILL.md",
+      "computedHash": "078959463a4d191d3ff17fd7a0b036697c79da3e86102251c98f76ffa9e66a28"
+    },
+    "ux-research": {
+      "source": "cuellarfr/design-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ux-research/SKILL.md",
+      "computedHash": "41f3feeb3ce9d57dd8abf3b68a6acd8e3fa87ee0dee57fdadeef8cf324a2df16"
+    }
+  }
+}
