@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import {IHonkVerifier} from "../../src/interfaces/IHonkVerifier.sol";
+import {IHonkVerifier} from "../../src/noir/interfaces/IHonkVerifier.sol";
 
 /// @dev Accepts or rejects every proof. `verify` is `view` in the interface, so the mock
 ///      cannot record calls; tests assert on the pool's state changes instead.

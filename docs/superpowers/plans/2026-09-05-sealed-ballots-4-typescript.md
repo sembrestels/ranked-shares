@@ -1,5 +1,11 @@
 # Sealed ballots, plan 4 of 4: TypeScript (CRE workflow, prover, audit)
 
+> **Historical.** The Noir variant's paths and its contract name were moved and renamed
+> on 2026-09-05: `SealedRankedShares` is now `NoirRankedShares`, its Solidity lives under
+> `src/noir/` and `test/noir/`, its Python under `reference/noir/` and its vectors under
+> `reference/vectors/noir/`. Paths below are as they were when the plan was written; see
+> the README's Layout section for the current ones.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** The off-chain half of the sealed-ballot design in TypeScript: one shared crypto and tally library that runs both under CRE's QuickJS and in a browser, the CRE confidential workflow that closes pools and reports the result and transcript, the coordinator's prover (CLI for CI and headless use, web page for the browser), and the `audit` command anyone can run.

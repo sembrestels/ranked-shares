@@ -3,5 +3,5 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 forge build -q
-jq '.abi' out/SealedRankedShares.sol/SealedRankedShares.json > cre/src/abi/SealedRankedShares.json
-echo "cre/src/abi/SealedRankedShares.json updated"
+jq '.abi' out/NoirRankedShares.sol/NoirRankedShares.json > cre/src/abi/NoirRankedShares.json
+echo "cre/src/abi/NoirRankedShares.json updated"

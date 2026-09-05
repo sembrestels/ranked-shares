@@ -10,7 +10,7 @@ import type { Snapshot } from "../src/core/chain";
 import type { Prover } from "../src/core/prove";
 import { planTally, resumeHint, runChain } from "../src/core/submit";
 
-const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/fixture_test_main.json", import.meta.url), "utf8"));
+const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/noir/fixture_test_main.json", import.meta.url), "utf8"));
 const plan = rebuildFromFixture(fx);
 
 const commit = (group: (typeof plan.tallyGroups)[number], which: "stateIn" | "stateOut") => stateCommit(plan.profile, group[which]);

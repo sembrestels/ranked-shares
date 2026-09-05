@@ -6,7 +6,7 @@ import { rebuildFromFixture } from "../src/core/state";
 import { ingestInputs, tallyInputs } from "../src/core/witness";
 import { Prover } from "../src/core/prove";
 
-const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/fixture_test_main.json", import.meta.url), "utf8"));
+const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/noir/fixture_test_main.json", import.meta.url), "utf8"));
 
 describe("proving the test fixture", () => {
   let prover: Prover;

@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import { toBig } from "@lib/field";
 import { rebuild, rebuildFromFixture } from "../src/core/state";
 
-const load = (n: string) => JSON.parse(readFileSync(new URL(`../../reference/vectors/fixture_${n}.json`, import.meta.url), "utf8"));
+const load = (n: string) => JSON.parse(readFileSync(new URL(`../../reference/vectors/noir/fixture_${n}.json`, import.meta.url), "utf8"));
 
 /** The same snapshot `rebuildFromFixture` builds, but with a caller-supplied transcript
  * (rather than `null`, which makes `rebuild` compute a fresh one). */

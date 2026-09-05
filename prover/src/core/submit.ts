@@ -1,6 +1,6 @@
 // prover/src/core/submit.ts — resumes the proof chain and drives `advance` on the pool
 import { toHex, type Account, type Address, type Chain, type PublicClient, type WalletClient } from "viem";
-import abi from "../../../cre/src/abi/SealedRankedShares.json";
+import abi from "../../../cre/src/abi/NoirRankedShares.json";
 import { stateCommit } from "@lib/commitments";
 import { read, type Snapshot } from "./chain";
 import type { ProofPlan } from "./state";
@@ -15,7 +15,7 @@ export type TallyPlan = { g: number; restart: boolean } | "proven";
  * Assumes `plan.tallyGroups` is non-empty; the caller guards that case.
  *
  * `advance(..., restart=true)` resets the on-chain `stateCommit` to `ingestedState`
- * before checking `stateIn` (`_advanceTally`, src/SealedRankedShares.sol), so any
+ * before checking `stateIn` (`_advanceTally`, src/noir/NoirRankedShares.sol), so any
  * restart — whether forced via `opts.restart` or auto-detected because the on-chain
  * state matches none of this transcript's tally groups — must resume at group 0,
  * never at whatever index `findIndex` happened to land on.

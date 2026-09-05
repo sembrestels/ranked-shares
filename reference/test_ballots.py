@@ -26,7 +26,7 @@ class BallotsTest(unittest.TestCase):
         self.assertIsNone(unpack(0x0300, 4))  # rank 3 without ranks 1 and 2
 
     def test_sealed_reexports(self):
-        import sealed
+        from noir import sealed
 
         self.assertIs(sealed.validate, validate)
         self.assertIs(sealed.pack, pack)

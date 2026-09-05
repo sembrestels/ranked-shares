@@ -1,5 +1,11 @@
 # Sealed ballots, plan 1 of 4: Python reference for the Noir design
 
+> **Historical.** The Noir variant's paths and its contract name were moved and renamed
+> on 2026-09-05: `SealedRankedShares` is now `NoirRankedShares`, its Solidity lives under
+> `src/noir/` and `test/noir/`, its Python under `reference/noir/` and its vectors under
+> `reference/vectors/noir/`. Paths below are as they were when the plan was written; see
+> the README's Layout section for the current ones.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Extend `reference/` so that every hash, curve operation, ciphertext, commitment, transcript and circuit state of the sealed-ballot design has one executable Python definition plus checked-in vectors that the Solidity, Noir and TypeScript ports will be tested against.

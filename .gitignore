@@ -3,8 +3,8 @@ out/
 broadcast/
 .env
 __pycache__/
-reference/tools/node_modules/
-reference/tools/package-lock.json
+reference/noir/tools/node_modules/
+reference/noir/tools/package-lock.json
 
 .claude/
 .superpowers/

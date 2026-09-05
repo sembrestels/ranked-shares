@@ -1,6 +1,6 @@
 // cre/scripts/make-master-secret.mjs — print the master secret derived from a wallet
 // signature, or (with --print-pk) the pool's tallier public key derived from that master
-// and a keySalt, so the deployment (`DeploySealed`'s TALLIER_PK_X/Y) and the CRE workflow
+// and a keySalt, so the deployment (`DeployNoir`'s TALLIER_PK_X/Y) and the CRE workflow
 // (which re-derives the same secret key from the same master + keySalt) agree by
 // construction.
 //
@@ -11,7 +11,7 @@
 //
 //   PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs --print-pk --key-salt 0x…
 //     prints `pkX=0x…` / `pkY=0x…` (32-byte hex, matching TALLIER_PK_X/TALLIER_PK_Y in
-//     script/DeploySealed.s.sol) instead of the master secret.
+//     script/DeployNoir.s.sol) instead of the master secret.
 //
 // `node` also works if it resolves `viem` from cre/node_modules; bun imports the `.ts`
 // lib modules directly.

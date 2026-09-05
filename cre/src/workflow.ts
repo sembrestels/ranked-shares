@@ -9,7 +9,7 @@ import {
   type TeeRuntime,
 } from "@chainlink/cre-sdk";
 import { type Address, decodeFunctionResult, encodeFunctionData, erc20Abi, type Hex, hexToBytes, isAddress, zeroAddress } from "viem";
-import abi from "./abi/SealedRankedShares.json";
+import abi from "./abi/NoirRankedShares.json";
 import * as cm from "./lib/commitments";
 import { isSealed, publicEntries, sealedEntries, sealedVoters, type Voter } from "./lib/entries";
 import { pbearTranscript } from "./lib/pbear";
@@ -49,7 +49,7 @@ const VOTER_PAGE = 50;
 type IdleReads = { phase: 0 | 1 | 4; closeChunk: number };
 
 /**
- * `_close` (SealedRankedShares.sol:378) only checks `token.balanceOf(pool) >=
+ * `_close` (NoirRankedShares.sol:378) only checks `token.balanceOf(pool) >=
  * totalWeight` once, at `closeCursor == 0`; a pool whose balance has since dropped below
  * `totalWeight` would otherwise get a `close` report every tick that reverts forever.
  */

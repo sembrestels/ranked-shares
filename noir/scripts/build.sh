@@ -12,8 +12,8 @@ check=0
 if [ "${1:-}" = "--check" ]; then check=1; shift; fi
 profile="${1:-default}"
 case "$profile" in
-  test) dest="../test/verifiers"; suffix="Test" ;;
-  default) dest="../src/verifiers"; suffix="" ;;
+  test) dest="../test/noir/verifiers"; suffix="Test" ;;
+  default) dest="../src/noir/verifiers"; suffix="" ;;
   *) echo "profile must be test or default" >&2; exit 1 ;;
 esac
 

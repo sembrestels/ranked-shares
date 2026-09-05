@@ -6,7 +6,7 @@ import { startFixtureChain, COORDINATOR_KEY } from "../test/helpers/anvil";
 
 function fixtureMaster(): string {
   const here = import.meta.url;
-  const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/fixture_test_main.json", here), "utf8"));
+  const fx = JSON.parse(readFileSync(new URL("../../reference/vectors/noir/fixture_test_main.json", here), "utf8"));
   return fx.master as string;
 }
 

@@ -17,9 +17,9 @@ import { encodeResultReport } from "@lib/report";
 // leaving the resolved path identical under plain Node (used by every other caller here).
 const here = import.meta.url;
 const repoRoot = new URL("../../..", here).pathname;
-const poolAbi = JSON.parse(readFileSync(new URL("../../../cre/src/abi/SealedRankedShares.json", here), "utf8"));
+const poolAbi = JSON.parse(readFileSync(new URL("../../../cre/src/abi/NoirRankedShares.json", here), "utf8"));
 const artifact = (name: string) => JSON.parse(readFileSync(new URL(`../../../out/${name}.sol/${name}.json`, here), "utf8"));
-const DEFAULT_FIXTURE = new URL("../../../reference/vectors/fixture_test_main.json", here);
+const DEFAULT_FIXTURE = new URL("../../../reference/vectors/noir/fixture_test_main.json", here);
 
 // anvil's default (fixed-mnemonic) accounts 0-3.
 const DEPLOYER_KEY: Hex = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -82,7 +82,7 @@ function killAndWait(anvil: ChildProcess): Promise<void> {
 }
 
 /**
- * Deploy a fresh SealedRankedShares pool — token, Poseidon2, both test verifiers, and
+ * Deploy a fresh NoirRankedShares pool — token, Poseidon2, both test verifiers, and
  * the pool itself, configured from `fx` — without opening voting or closing it, so its
  * `inputsRoot` is still the zero default. Assumes anvil is already up at `rpc`. Cheap: a
  * handful of contract deployments, no voting, no proving. `workflow` is the workflow
@@ -123,7 +123,7 @@ export async function deployUnclosedPool(rpc: string, fixture?: URL, workflow: W
     proofGrace: 86400n,
     abandonGrace: 604800n,
   };
-  return deploy("SealedRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
+  return deploy("NoirRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
 }
 
 /**
@@ -156,7 +156,7 @@ export async function deployVoterPool(rpc: string, n: number, fixture?: URL): Pr
   const tallyV = await deploy("TallyVerifierTest");
   const deadline = (await pub.getBlock()).timestamp + 3600n;
   const pool = await deploy(
-    "SealedRankedShares",
+    "NoirRankedShares",
     [
       token,
       DEPLOYER.address,
@@ -318,7 +318,7 @@ export async function replayFixturePool(rpc: string, fx: any): Promise<ReplayedP
     proofGrace: 86400n,
     abandonGrace: 604800n,
   };
-  const pool = await deploy("SealedRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
+  const pool = await deploy("NoirRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
 
   const erc20 = parseAbi(["function mint(address,uint256)", "function approve(address,uint256) returns (bool)"]);
   const w = (account: any) => createWalletClient({ account, chain: foundry, transport: http(rpc) });

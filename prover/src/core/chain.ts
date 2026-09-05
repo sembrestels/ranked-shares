@@ -1,6 +1,6 @@
 // prover/src/core/chain.ts — reads the pool's on-chain state into a Snapshot
 import { type Address, type PublicClient, parseAbiItem } from "viem";
-import abi from "../../../cre/src/abi/SealedRankedShares.json";
+import abi from "../../../cre/src/abi/NoirRankedShares.json";
 import { isSealed, type Voter } from "@lib/entries";
 import { profileFor } from "./profile";
 

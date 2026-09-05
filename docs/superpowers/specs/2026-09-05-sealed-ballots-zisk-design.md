@@ -389,7 +389,7 @@ equals a direct `pbear` run.
 ### Z8. Testing
 
 Foundry (`test/zisk/` for `SealedPool` and the zisk pool, `test/cre/` for the cre pool;
-`test/sealed/` already belongs to the Noir pool), with a `SealedPoolHarness` that
+`test/noir/` already belongs to the Noir pool), with a `SealedPoolHarness` that
 exposes `_finalize`:
 
 - Ledger: `directWeight`, `seatWeight`, `totalSeatWeight`, `voters` order after

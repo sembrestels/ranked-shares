@@ -13,7 +13,7 @@ import { Prover } from "../src/core/prove";
 import { createServer, type ServiceOptions } from "../src/service";
 import { encodeCloseReport } from "@lib/report";
 import { startFixtureChain, deployUnclosedPool, deployVoterPool, replayFixturePool, workflowMetadata, FORWARDER, NO_WORKFLOW_CHECK, type FixtureChain } from "./helpers/anvil";
-import poolAbi from "../../cre/src/abi/SealedRankedShares.json";
+import poolAbi from "../../cre/src/abi/NoirRankedShares.json";
 
 const PORT = 8549;
 

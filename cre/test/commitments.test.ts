@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import defaultMain from "../../reference/vectors/fixture_default_main.json";
-import testMain from "../../reference/vectors/fixture_test_main.json";
-import testNosealed from "../../reference/vectors/fixture_test_nosealed.json";
-import testSmallm from "../../reference/vectors/fixture_test_smallm.json";
+import defaultMain from "../../reference/vectors/noir/fixture_default_main.json";
+import testMain from "../../reference/vectors/noir/fixture_test_main.json";
+import testNosealed from "../../reference/vectors/noir/fixture_test_nosealed.json";
+import testSmallm from "../../reference/vectors/noir/fixture_test_smallm.json";
 import { toBig } from "../src/lib/field";
 import * as cm from "../src/lib/commitments";
 import { publicEntries, sealedEntries, sealedVoters, type Voter } from "../src/lib/entries";

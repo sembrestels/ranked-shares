@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import v from "../../reference/vectors/sealed.json";
+import v from "../../reference/vectors/noir/sealed.json";
 import { decrypt, deriveSk, encrypt, pack, unpack, validate, effectiveRanks } from "../src/lib/sealed";
 import { pubkey } from "../src/lib/grumpkin";
 import { toBig } from "../src/lib/field";

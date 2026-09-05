@@ -1,4 +1,4 @@
-// prover/src/core/state.ts — the plan of proofs, as reference/tools/noir_inputs.py computes it
+// prover/src/core/state.ts — the plan of proofs, as reference/noir/tools/noir_inputs.py computes it
 import { toBig } from "@lib/field";
 import * as cm from "@lib/commitments";
 import { publicEntries, sealedEntries, sealedVoters, type Voter } from "@lib/entries";

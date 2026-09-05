@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { decodeAbiParameters } from "viem";
 // The CRE SDK types every `node:fs` export as `never` (WASM guardrail), so the
 // fixture comes in as a JSON import, like the other vector tests.
-import fixture from "../../reference/vectors/fixture_test_main.json";
+import fixture from "../../reference/vectors/noir/fixture_test_main.json";
 import { toBig } from "../src/lib/field";
 import { type PoolReads, processPool, validPools } from "../src/workflow";
 

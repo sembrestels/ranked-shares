@@ -1,4 +1,4 @@
-// cre/src/lib/commitments.ts — port of reference/commitments.py
+// cre/src/lib/commitments.ts — port of reference/noir/commitments.py
 import { NONE } from "./field";
 import { addressBytes, concatBytes, keccak, wordBE } from "./hash";
 import { cumulativeDeductions } from "./pbear";

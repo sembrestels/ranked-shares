@@ -78,11 +78,14 @@ calls.
 src/PBEAR.sol           abstract engine: projects, ballots, weights, step()
 src/RankedShares.sol    ERC-20 pool, sponsorships, NFT seats, phases, payouts
 src/SealedPool.sol      shared sealed-pool base for the cre and zisk variants
-src/SealedRankedShares.sol  the noir variant's pool: chained-proof transcript tally
+src/noir/               NoirRankedShares (chained-proof transcript tally), Poseidon2,
+                        Grumpkin and the generated Honk verifiers
 src/zisk/               ZiskRankedShares, the vendored ZisK PLONK verifier
 src/cre/                CreRankedShares, the DON-attested variant
 reference/pbear.py      Python reference implementation + brute-force IPSC checker
+reference/noir/         Poseidon2, Grumpkin, sealed ballots, commitments, profiles, fixture tools
 reference/zisk/         secp256k1, sealed ballots, commitments and fixtures of the zisk variant
+noir/                   Noir circuits, committed ACIR/verification keys and real proofs
 zisk/                   Rust workspace: PB-EAR, sealed-ballot guest logic, the ZisK guest, the tally-prover
 test/                   Foundry tests, including an ffi differential fuzz
 docs/superpowers/       design spec and implementation plan
@@ -101,7 +104,7 @@ Python, checks that both agree, and brute-forces the IPSC axiom on the result.
 
 ## Sealed pools
 
-`SealedRankedShares` is the pool of `docs/superpowers/specs/2026-09-05-sealed-ballots-noir-design.md`:
+`NoirRankedShares` is the pool of `docs/superpowers/specs/2026-09-05-sealed-ballots-noir-design.md`:
 direct ballots are public and final, seat holders vote with sealed ballots, the tally runs
 off-chain and is finalised by a chain of proofs.
 
@@ -143,7 +146,7 @@ indifferent ballot (packed zero) from no ballot at all — so the workflow and t
 rebuild it without one call per voter. `profileId()` is
 `keccak256(abi.encode(nSealedMax, mMax, batch))`.
 
-Deploy with `script/DeploySealed.s.sol`:
+Deploy with `script/DeployNoir.s.sol`:
 
 ```
 TOKEN=0x... OWNER=0x... VOTING_DEADLINE=<unix> FORWARDER=0x... COORDINATOR=0x... \
@@ -152,7 +155,7 @@ TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
 PROFILE=test|default MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
 PROOF_GRACE=86400 ABANDON_GRACE=604800 \
 [POSEIDON=0x...] [INGEST_VERIFIER=0x...] [TALLY_VERIFIER=0x...] \
-forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
+forge script script/DeployNoir.s.sol --rpc-url $RPC_URL --broadcast
 ```
 
 `WORKFLOW_OWNER` and `WORKFLOW_NAME` are what `onReport` authorises the DON's report
@@ -170,10 +173,10 @@ no metadata, and a pool deployed with it must never hold real funds.
 256 / 16 / 32); the verifiers are compiled for one profile, so the three are never chosen
 independently, and `profileId()` — `keccak256(abi.encode(nSealedMax, mMax, batch))` — lets
 a client refuse a pool its proving keys were not built for. The
-Poseidon2 hasher (`src/lib/Poseidon2.sol`) is generated from the reference constants by
-`python3 reference/tools/gen_poseidon2_sol.py`; the Honk verifiers come from the Noir
+Poseidon2 hasher (`src/noir/lib/Poseidon2.sol`) is generated from the reference constants by
+`python3 -m noir.tools.gen_poseidon2_sol` from `reference/`; the Honk verifiers come from the Noir
 circuits (`noir/README.md`) and are deployed once per chain with
-`script/DeployVerifiers.s.sol`.
+`script/DeployNoirVerifiers.s.sol`.
 
 Gas on the default fixture (70 voters, 65 sealed, 16 projects):
 
@@ -187,7 +190,7 @@ See `forge test --match-contract SealedGasTest -vv`.
 
 `advance` with real proofs (test profile, `RealProofsTest`, generated Honk verifiers and
 `bb`-made proofs from the fixtures) costs about 686k–930k gas per call, one ingest or
-tally group per proof. See `forge test --match-path "test/verifiers/RealProofs.t.sol" -vv`.
+tally group per proof. See `forge test --match-path "test/noir/verifiers/RealProofs.t.sol" -vv`.
 
 `advanceMany` verifies several of those proofs in one atomic transaction. Measured on
 anvil against the same verifiers, the whole `test_main` chain — 3 ingest batches and 3
@@ -341,12 +344,12 @@ crashing the run, but it still has to be edited for the workflow to do anything.
 
 ```
 cd cre
-bun test           # unit + differential tests: Poseidon2 vs reference/vectors/poseidon2.json,
+bun test           # unit + differential tests: Poseidon2 vs reference/vectors/noir/poseidon2.json,
                     # Grumpkin/sealed vectors, pbearTranscript vs reference/pbear.py --transcript,
                     # and the tampered-transcript audit checks
 bunx tsc --noEmit
 bun run compile     # compiles src/main.ts to dist/workflow.wasm with Javy (cre-compile)
-bun run sync-abi    # refreshes src/abi/SealedRankedShares.json from the forge build
+bun run sync-abi    # refreshes src/abi/NoirRankedShares.json from the forge build
 ```
 
 **Secrets and keys.** The tallier's master secret is a wallet signature, never a stored
@@ -370,7 +373,7 @@ cre secrets create workflows/sealed/secrets.yaml --target staging-settings
 (`node` also works in place of `bun` if it resolves `viem` from `cre/node_modules`; bun
 imports the `.ts` lib modules directly, so nothing needs building first.)
 
-The pool's `tallierPkX`/`tallierPkY` (`script/DeploySealed.s.sol`'s `TALLIER_PK_X`/
+The pool's `tallierPkX`/`tallierPkY` (`script/DeployNoir.s.sol`'s `TALLIER_PK_X`/
 `TALLIER_PK_Y` env vars) must be the public key for that same `(master, keySalt)` pair, so
 deployment and the workflow agree on who can decrypt by construction:
 
@@ -383,7 +386,7 @@ export KEY_SALT=0x<32 bytes>
 PK=$(PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs --print-pk --key-salt $KEY_SALT)
 export TALLIER_PK_X=$(printf '%s\n' "$PK" | sed -n 's/^pkX=//p')
 export TALLIER_PK_Y=$(printf '%s\n' "$PK" | sed -n 's/^pkY=//p')
-# then run script/DeploySealed.s.sol with those three exported
+# then run script/DeployNoir.s.sol with those three exported
 ```
 
 **Simulation.** `cre/project.yaml` and `workflows/sealed/workflow.yaml` follow the CLI's
@@ -406,8 +409,8 @@ Observed on 2026-09-05 with CRE CLI v1.32.0 and the shipped placeholder config: 
 the `arc-testnet` RPC and the secret load, the cron trigger is reported as requesting TEE
 execution (AWS Nitro), and the handler runs until its first `callContract` read, which
 returns `0x` for the zero address. A full run — the tally under QuickJS and the kind-1 report
-it writes — still needs a pool deployed on Arc testnet with `DeployVerifiers` +
-`DeploySealed --profile test` and its address in `config.staging.json`.
+it writes — still needs a pool deployed on Arc testnet with `DeployNoirVerifiers` +
+`DeployNoir --profile test` and its address in `config.staging.json`.
 
 ## Reference implementation
 
@@ -416,25 +419,31 @@ it writes — still needs a pool deployed on Arc testnet with `DeployVerifiers` 
 | Module | Defines |
 |---|---|
 | `pbear.py` | PB-EAR, the IPSC checker, and the transcript mode of the sealed design |
-| `poseidon2.py` | Poseidon2 over BN254 (t = 4), equal to Barretenberg's; vectors in `vectors/poseidon2.json` |
-| `grumpkin.py`, `sealed.py` | Grumpkin, ballot packing, ECDH ballot encryption; vectors in `vectors/sealed.json` |
-| `commitments.py`, `profiles.py` | on-chain commitments, transcript hash, circuit state and profiles |
-| `tools/make_fixture.py` | writes `vectors/fixture_<profile>_<scenario>.json`, consumed by the Solidity, Noir and TypeScript tests |
+| `noir/poseidon2.py` | Poseidon2 over BN254 (t = 4), equal to Barretenberg's; vectors in `vectors/noir/poseidon2.json` |
+| `noir/grumpkin.py`, `noir/sealed.py` | Grumpkin, ballot packing, ECDH ballot encryption; vectors in `vectors/noir/sealed.json` |
+| `noir/commitments.py`, `noir/profiles.py` | on-chain commitments, transcript hash, circuit state and profiles |
+| `noir/tools/make_fixture.py` | writes `vectors/noir/fixture_<profile>_<scenario>.json`, consumed by the Solidity, Noir and TypeScript tests |
 
-Run `python3 -m unittest discover reference`. Regenerate Poseidon2 constants and vectors with
-`python3 reference/tools/extract_poseidon2_params.py` and
-`node reference/tools/poseidon2_vectors.mjs > reference/vectors/poseidon2.json`
-(needs `npm install` in `reference/tools`). Regenerate the sealed-ballot vectors with
-`python3 test_sealed.py --write` from `reference/`.
+Shared modules (`pbear.py`, `ballots.py`, `keccak.py`) sit at the root; each variant's
+own code lives in its package, `noir/` or `zisk/`, and its vectors under
+`vectors/<variant>/`. Run `python3 -m unittest discover reference`. The variant packages
+are imported as `noir.*` / `zisk.*`, so their modules and tools run from `reference/`:
+
+```
+cd reference
+python3 -m noir.tools.extract_poseidon2_params
+node noir/tools/poseidon2_vectors.mjs > vectors/noir/poseidon2.json   # npm install in noir/tools first
+python3 -m noir.test_sealed --write                                   # sealed-ballot vectors
+```
 
 ### Fixtures
 
 ```
-python3 reference/tools/make_fixture.py --profile test|default [--out DIR]
+cd reference && python3 -m noir.tools.make_fixture --profile test|default [--out DIR]
 ```
 
 Writes every scenario of that profile as `fixture_<profile>_<scenario>.json`, into
-`reference/vectors/` unless `--out` names another directory. The `test` profile
+`reference/vectors/noir/` unless `--out` names another directory. The `test` profile
 (`N_SEALED_MAX 8, M_MAX 4, B 2, K 2`) gets all three scenarios, the `default` profile
 (`256, 16, 32, 8`) only `main`, because it takes about ten seconds:
 
@@ -447,7 +456,7 @@ Writes every scenario of that profile as `fixture_<profile>_<scenario>.json`, in
 Each file carries the profile, the scenario name, `m`, the keys, the roster, both
 commitment chains and their checkpoints, `inputsRoot`, the funded order, the transcript
 and its hash, and the public inputs of every ingest and tally proof. The key set is
-asserted against `FIXTURE_KEYS` before writing, and `reference/test_fixture.py`
+asserted against `FIXTURE_KEYS` before writing, and `reference/noir/test_fixture.py`
 regenerates all four files into a temporary directory and compares them byte for byte
 with the committed ones.
 
@@ -506,9 +515,9 @@ TOKEN=0x... OWNER=0x... VOTING_DEADLINE=1760000000 \
 forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
 ```
 
-The sealed pools have their own scripts — `script/DeploySealed.s.sol` (noir),
+The sealed pools have their own scripts — `script/DeployNoir.s.sol` (noir),
 `script/DeployZisk.s.sol` and `script/DeployCre.s.sol` — documented with the variant
-they deploy. Both CRE-reporting pools (`DeploySealed` and `DeployCre`) additionally take
+they deploy. Both CRE-reporting pools (`DeployNoir` and `DeployCre`) additionally take
 `WORKFLOW_OWNER` and `WORKFLOW_NAME`, which authorise `onReport` against the workflow
 allowed to report to that pool:
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import vectors from "../../reference/vectors/poseidon2.json";
-import sealedVectors from "../../reference/vectors/sealed.json";
+import vectors from "../../reference/vectors/noir/poseidon2.json";
+import sealedVectors from "../../reference/vectors/noir/sealed.json";
 import { sponge, spongeVar } from "../src/lib/poseidon2";
 import { G, isOnCurve, mul, pubkey } from "../src/lib/grumpkin";
 import { keccak, wordBE } from "../src/lib/hash";

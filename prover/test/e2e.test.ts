@@ -13,7 +13,7 @@ import { audit } from "../src/core/audit";
 import { replayFixturePool, startFixtureChain, type FixtureChain } from "./helpers/anvil";
 
 const PORT = 8547;
-const poolAbi = JSON.parse(readFileSync(new URL("../../cre/src/abi/SealedRankedShares.json", import.meta.url), "utf8"));
+const poolAbi = JSON.parse(readFileSync(new URL("../../cre/src/abi/NoirRankedShares.json", import.meta.url), "utf8"));
 
 let chain: FixtureChain;
 /** `gasUsed` of each `advance` receipt of the unbatched run, for the `advanceMany` comparison. */

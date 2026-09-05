@@ -17,7 +17,7 @@ if (typeof globalThis.fetch === "undefined") {
 }
 
 let chain: FixtureChain;
-const fixtureMaster = "0x4d885451f27e770ee4b6aad84a413591ed03109df0def6b88fd104818c323740"; // reference/vectors/fixture_test_main.json .master
+const fixtureMaster = "0x4d885451f27e770ee4b6aad84a413591ed03109df0def6b88fd104818c323740"; // reference/vectors/noir/fixture_test_main.json .master
 let ethereumCalls = 0;
 const ethereumRequests: { method: string; params?: unknown[] }[] = [];
 

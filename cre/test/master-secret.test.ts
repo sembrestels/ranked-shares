@@ -3,7 +3,7 @@
 import { describe, expect, test } from "bun:test";
 import { privateKeyToAccount } from "viem/accounts";
 import { keccak256, hexToBytes } from "viem";
-import fixture from "../../reference/vectors/fixture_test_main.json";
+import fixture from "../../reference/vectors/noir/fixture_test_main.json";
 import { MASTER_MESSAGE, deriveSk } from "../src/lib/sealed";
 import { pubkey } from "../src/lib/grumpkin";
 import { hex } from "../src/lib/field";

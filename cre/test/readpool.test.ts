@@ -9,8 +9,8 @@ import { cre } from "@chainlink/cre-sdk";
 import { erc20Abi, type Address } from "viem";
 // The CRE SDK types every `node:fs` export as `never` (WASM guardrail), so the fixture
 // comes in as a JSON import, like the other vector tests.
-import fixture from "../../reference/vectors/fixture_test_main.json";
-import poolAbi from "../src/abi/SealedRankedShares.json";
+import fixture from "../../reference/vectors/noir/fixture_test_main.json";
+import poolAbi from "../src/abi/NoirRankedShares.json";
 import { toBig } from "../src/lib/field";
 import { readPool } from "../src/workflow";
 

@@ -1,5 +1,11 @@
 # Sealed ballots, plan 2 of 4: contracts
 
+> **Historical.** The Noir variant's paths and its contract name were moved and renamed
+> on 2026-09-05: `SealedRankedShares` is now `NoirRankedShares`, its Solidity lives under
+> `src/noir/` and `test/noir/`, its Python under `reference/noir/` and its vectors under
+> `reference/vectors/noir/`. Paths below are as they were when the plan was written; see
+> the README's Layout section for the current ones.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship `SealedRankedShares`, the pool that takes public and sealed ballots, commits to them, accepts the DON's result and transcript, and finalises through a chain of Honk proofs, plus everything it needs on-chain: the `PoolBase` extraction, a Poseidon2 hasher contract, the Grumpkin check, mock verifiers and deploy scripts.
