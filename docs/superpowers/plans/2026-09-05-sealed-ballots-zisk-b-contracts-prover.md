@@ -818,6 +818,11 @@ abstract contract ZiskFixtureLoader is Test {
         return fxBytes32(".inputsHash");
     }
 
+    /// @dev `using stdJson` is not inherited, so derived tests read the key through this.
+    function fxPk() internal view returns (bytes memory) {
+        return json.readBytes(".pk");
+    }
+
     // ---- pool construction ----
 
     function newMocks() internal {
@@ -850,7 +855,7 @@ abstract contract ZiskFixtureLoader is Test {
         deployAt(
             "SealedPoolHarness.sol:SealedPoolHarness",
             abi.encode(
-                token, owner, DEADLINE, json.readBytes(".pk"), fxBytes32(".keySalt"), fxWord(".minDirectVote"), ABANDON_GRACE
+                token, owner, DEADLINE, fxPk(), fxBytes32(".keySalt"), fxWord(".minDirectVote"), ABANDON_GRACE
             )
         );
     }
@@ -965,14 +970,14 @@ contract SealedPoolLedgerTest is ZiskFixtureLoader {
 
     function test_kindAndConfig() public view {
         assertEq(pool.kind(), "harness");
-        assertEq(pool.tallierPk(), json.readBytes(".pk"));
+        assertEq(pool.tallierPk(), fxPk());
         assertEq(pool.keySalt(), fxBytes32(".keySalt"));
         assertEq(pool.minDirectVote(), fxWord(".minDirectVote"));
         assertEq(uint256(pool.phase()), uint256(SealedPool.Phase.Open));
     }
 
     function test_constructorRejectsBadConfig() public {
-        bytes memory pk = json.readBytes(".pk");
+        bytes memory pk = fxPk();
         vm.expectRevert(SealedPool.InvalidConfig.selector);
         new SealedPoolHarness(token, owner, DEADLINE, new bytes(32), bytes32(0), 0, 1 days);
         bytes memory badPrefix = pk;
@@ -1028,7 +1033,7 @@ contract SealedPoolLedgerTest is ZiskFixtureLoader {
         vm.expectRevert(SealedPool.WeightOverflow.selector);
         pool.contribute(type(uint64).max);
         // A fresh pool for the project limits: this one is already open.
-        SealedPoolHarness p = new SealedPoolHarness(token, owner, DEADLINE, json.readBytes(".pk"), bytes32(0), 0, 1 days);
+        SealedPoolHarness p = new SealedPoolHarness(token, owner, DEADLINE, fxPk(), bytes32(0), 0, 1 days);
         vm.startPrank(owner);
         vm.expectRevert(SealedPool.ZeroCost.selector);
         p.addProject(0, recipient);
@@ -1043,7 +1048,7 @@ contract SealedPoolLedgerTest is ZiskFixtureLoader {
     }
 
     function test_openVotingNeedsAProject() public {
-        SealedPoolHarness p = new SealedPoolHarness(token, owner, DEADLINE, json.readBytes(".pk"), bytes32(0), 0, 1 days);
+        SealedPoolHarness p = new SealedPoolHarness(token, owner, DEADLINE, fxPk(), bytes32(0), 0, 1 days);
         vm.prank(owner);
         vm.expectRevert(SealedPool.NoProjects.selector);
         p.openVoting();
@@ -1528,7 +1533,7 @@ contract ZiskFinalizeTest is ZiskFixtureLoader {
                 token,
                 owner,
                 DEADLINE,
-                json.readBytes(".pk"),
+                fxPk(),
                 fxBytes32(".keySalt"),
                 fxWord(".minDirectVote"),
                 ABANDON_GRACE,
@@ -1551,11 +1556,11 @@ contract ZiskFinalizeTest is ZiskFixtureLoader {
     function test_constructorNeedsAVerifierWithCode() public {
         vm.expectRevert(SealedPool.InvalidConfig.selector);
         new ZiskRankedShares(
-            token, owner, DEADLINE, json.readBytes(".pk"), bytes32(0), 0, 1 days, IZiskVerifier(makeAddr("eoa")), programVK, rootC
+            token, owner, DEADLINE, fxPk(), bytes32(0), 0, 1 days, IZiskVerifier(makeAddr("eoa")), programVK, rootC
         );
         vm.expectRevert(SealedPool.InvalidConfig.selector);
         new ZiskRankedShares(
-            token, owner, DEADLINE, json.readBytes(".pk"), bytes32(0), 0, 1 days, IZiskVerifier(address(mock)), bytes32(0), rootC
+            token, owner, DEADLINE, fxPk(), bytes32(0), 0, 1 days, IZiskVerifier(address(mock)), bytes32(0), rootC
         );
     }
 
@@ -1774,7 +1779,7 @@ contract CreReportTest is ZiskFixtureLoader {
         deployAt(
             "CreRankedShares.sol:CreRankedShares",
             abi.encode(
-                token, owner, DEADLINE, json.readBytes(".pk"), fxBytes32(".keySalt"), fxWord(".minDirectVote"), ABANDON_GRACE, forwarder
+                token, owner, DEADLINE, fxPk(), fxBytes32(".keySalt"), fxWord(".minDirectVote"), ABANDON_GRACE, forwarder
             )
         );
         cpool = CreRankedShares(address(pool));
@@ -1795,7 +1800,7 @@ contract CreReportTest is ZiskFixtureLoader {
 
     function test_constructorNeedsAForwarder() public {
         vm.expectRevert(SealedPool.InvalidConfig.selector);
-        new CreRankedShares(token, owner, DEADLINE, json.readBytes(".pk"), bytes32(0), 0, 1 days, address(0));
+        new CreRankedShares(token, owner, DEADLINE, fxPk(), bytes32(0), 0, 1 days, address(0));
     }
 
     function test_onlyForwarderAndKnownKinds() public {
