@@ -27,3 +27,8 @@ hex = "0.4"
 [features]
 default = ["tools"]
 tools = ["dep:serde_json", "dep:hex"]
+
+[[bin]]
+name = "fixture-input"
+path = "src/bin/fixture-input.rs"
+required-features = ["tools"]
