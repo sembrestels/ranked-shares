@@ -6,7 +6,7 @@ import { foundry } from "viem/chains";
 import { toBig } from "@lib/field";
 import { rebuildFromFixture } from "../src/core/state";
 import { createServer } from "../src/service";
-import { startFixtureChain, type FixtureChain } from "./helpers/anvil";
+import { startFixtureChain, deployUnclosedPool, type FixtureChain } from "./helpers/anvil";
 import poolAbi from "../../cre/src/abi/SealedRankedShares.json";
 
 const PORT = 8549;
@@ -55,6 +55,30 @@ describe("the prove service", () => {
   test("404 on an unknown job", async () => {
     const { status } = await getJSON("/jobs/does-not-exist");
     expect(status).toBe(404);
+  });
+
+  test("409 on a pool that hasn't closed yet", async () => {
+    const unclosedPool = await deployUnclosedPool(chain.rpc);
+    const { status, body } = await postJSON("/prove", { pool: unclosedPool });
+    expect(status).toBe(409);
+    expect(body.error).toMatch(/not closed/i);
+  });
+
+  test("413 (or a closed connection) on an oversized request body", async () => {
+    const big = JSON.stringify({ pool: chain.pool, junk: "x".repeat(8192) });
+    let status: number | undefined;
+    let closed = false;
+    try {
+      const r = await fetch(`${base}/prove`, { method: "POST", headers: { "content-type": "application/json" }, body: big });
+      status = r.status;
+    } catch {
+      closed = true;
+    }
+    expect(closed || status === 413, `expected 413 or a closed connection, got status ${status}`).toBe(true);
+
+    // the connection didn't wedge the server: it still answers normal requests.
+    const { status: healthStatus } = await getJSON("/health");
+    expect(healthStatus).toBe(200);
   });
 
   test(

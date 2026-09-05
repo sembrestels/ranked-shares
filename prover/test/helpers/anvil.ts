@@ -43,6 +43,61 @@ async function waitForRpc(pub: PublicClient): Promise<void> {
   }
 }
 
+/** Kill `anvil` and wait for it to actually exit (a no-op if it already has). */
+function killAndWait(anvil: ChildProcess): Promise<void> {
+  return new Promise((resolve) => {
+    if (anvil.exitCode !== null || anvil.signalCode !== null) {
+      resolve();
+      return;
+    }
+    anvil.once("exit", () => resolve());
+    anvil.kill();
+  });
+}
+
+/**
+ * Deploy a fresh SealedRankedShares pool — token, Poseidon2, both test verifiers, and
+ * the pool itself, configured from `fx` — without opening voting or closing it, so its
+ * `inputsRoot` is still the zero default. Assumes anvil is already up at `rpc`. Cheap: a
+ * handful of contract deployments, no voting, no proving.
+ */
+export async function deployUnclosedPool(rpc: string, fixture?: URL): Promise<Address> {
+  const fx = loadFixture(fixture ?? DEFAULT_FIXTURE);
+  const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
+  const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
+  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
+  const deploy = async (name: string, args: unknown[] = [], abi?: any): Promise<Address> => {
+    const a = artifact(name);
+    const hash = await deployerWallet.deployContract({ abi: abi ?? a.abi, bytecode: a.bytecode.object as Hex, args } as any);
+    const receipt = await pub.waitForTransactionReceipt({ hash });
+    return receipt.contractAddress!;
+  };
+  const token = await deploy("MockERC20");
+  const poseidon = await deploy("Poseidon2");
+  const ingestV = await deploy("IngestVerifierTest");
+  const tallyV = await deploy("TallyVerifierTest");
+  const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+  const cfg = {
+    forwarder: FORWARDER,
+    coordinator: COORDINATOR.address,
+    poseidon,
+    ingestVerifier: ingestV,
+    tallyVerifier: tallyV,
+    tallierPkX: toBig(fx.pk[0]),
+    tallierPkY: toBig(fx.pk[1]),
+    keySalt: fx.keySalt,
+    nSealedMax: BigInt(fx.profile.nSealedMax),
+    mMax: BigInt(fx.profile.mMax),
+    batch: BigInt(fx.profile.batch),
+    minDirectVote: toBig(fx.minDirectVote),
+    minSealedVote: 1n,
+    proofGrace: 86400n,
+    abandonGrace: 604800n,
+  };
+  return deploy("SealedRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
+}
+
 export type FixtureChain = {
   rpc: string;
   pool: Address;
@@ -71,6 +126,17 @@ export async function startFixtureChain(opts: { port: number; fixture?: URL }): 
   execFileSync("forge", ["build", "-q"], { cwd: repoRoot });
   const anvil: ChildProcess = spawn("anvil", ["--port", String(port), "--silent", "--code-size-limit", "100000"], { stdio: "ignore" });
 
+  try {
+    return await setUpFixtureChain(rpc, fx, DEPLOYER, COORDINATOR, anvil);
+  } catch (e) {
+    // Nothing after `spawn` succeeded (a deploy reverted, the replay produced the wrong
+    // inputsRoot, the close loop threw, ...): don't orphan the anvil child.
+    await killAndWait(anvil);
+    throw e;
+  }
+}
+
+async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDINATOR: Account, anvil: ChildProcess): Promise<FixtureChain> {
   const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
   const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(rpc) });
   const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
@@ -187,7 +253,7 @@ export async function startFixtureChain(opts: { port: number; fixture?: URL }): 
     pub,
     fx,
     async stop() {
-      anvil.kill();
+      await killAndWait(anvil);
     },
   };
 }

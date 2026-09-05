@@ -223,6 +223,21 @@ were verified):
 7. Prove and submit → proves and submits each remaining ingest batch and tally
    group, logging gas used per `advance`, ending in `Proven`.
 
+## Prove service
+
+```
+prover serve --rpc <url> [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit]
+```
+
+`serve` runs the same prover core as a long-running HTTP API for the operator's home
+box: `POST /prove {"pool":"0x…"}` queues a job (409 if the pool hasn't closed yet, since
+ingest needs the checkpoints `close()` writes), `GET /jobs/<id>` polls it for its log and
+proofs, and `GET /health` reports whether it submits. Without `--submit` it only proves
+and hands the proofs back for someone else to submit; with `--submit` it sends `advance`
+itself (`--private-key` must then be the pool's coordinator, for restarts). The job cache
+is in-memory, so restarting the service loses it — harmlessly, since proving a pool is
+deterministic and re-proving after a restart reproduces the same proofs.
+
 ## Reference implementation
 
 `reference/` is the oracle every port is tested against, in dependency-free Python:

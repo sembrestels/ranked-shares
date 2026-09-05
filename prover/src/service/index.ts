@@ -13,12 +13,15 @@ import { runChain } from "../core/submit";
 import { deriveSk } from "../core/key";
 
 const POOL_RE = /^0x[0-9a-fA-F]{40}$/;
+const ZERO_ROOT_RE = /^0x0+$/;
+const MAX_BODY_BYTES = 4096; // {"pool":"0x…"} needs a fraction of this
 
 type ProofRecord = { kind: "ingest" | "tally"; index: number; proof: `0x${string}`; publicInputs: `0x${string}`[] };
 type Status = "queued" | "running" | "done" | "failed";
 type Job = {
   id: string;
   pool: Address;
+  inputsRoot: `0x${string}`;
   status: Status;
   log: string[];
   proofs: ProofRecord[];
@@ -44,7 +47,12 @@ export function createServer(opts: ServiceOptions): http.Server {
   const wallet: WalletClient = createWalletClient({ account: opts.account, chain: opts.chain ?? undefined, transport: httpTransport(opts.rpc) }) as unknown as WalletClient;
 
   const jobs = new Map<string, Job>();
-  const jobByInputsRoot = new Map<string, string>();
+  // A pool with a job currently queued or running, keyed by lower-cased address: guards
+  // against two requests racing to read `inputsRoot` and both missing each other's job.
+  const jobsByPool = new Map<string, string>();
+  // Finished jobs, keyed by `${pool}|${inputsRoot}` so a pool already proven for a given
+  // (immutable, post-close) inputsRoot is never re-proven.
+  const doneJobsByKey = new Map<string, string>();
   const provers = new Map<string, Promise<Prover>>();
   const queue: string[] = [];
   let working = false;
@@ -82,12 +90,17 @@ export function createServer(opts: ServiceOptions): http.Server {
       let id: string | undefined;
       while ((id = queue.shift()) !== undefined) {
         const job = jobs.get(id)!;
+        const poolKey = job.pool.toLowerCase();
         try {
           await runJob(job);
           job.status = "done";
+          doneJobsByKey.set(`${poolKey}|${job.inputsRoot}`, id);
         } catch (e) {
           job.status = "failed";
           job.error = e instanceof Error ? e.message : String(e);
+          // don't cache a failure: let a later POST /prove retry it.
+        } finally {
+          if (jobsByPool.get(poolKey) === id) jobsByPool.delete(poolKey);
         }
       }
     } finally {
@@ -101,12 +114,33 @@ export function createServer(opts: ServiceOptions): http.Server {
     res.end(s);
   }
 
-  function readBody(req: http.IncomingMessage): Promise<string> {
-    return new Promise((resolve, reject) => {
-      let data = "";
-      req.on("data", (c) => (data += c));
-      req.on("end", () => resolve(data));
-      req.on("error", reject);
+  // Resolves the request body as a string, or `undefined` if it exceeded `maxBytes` — in
+  // which case a 413 has already been written to `res` and the caller must not respond
+  // again. Counts actual bytes received rather than trusting Content-Length.
+  function readBody(req: http.IncomingMessage, res: http.ServerResponse, maxBytes = MAX_BODY_BYTES): Promise<string | undefined> {
+    return new Promise((resolve) => {
+      const chunks: Buffer[] = [];
+      let bytes = 0;
+      let tooLarge = false;
+      req.on("data", (c: Buffer) => {
+        if (tooLarge) return;
+        bytes += c.length;
+        if (bytes > maxBytes) {
+          tooLarge = true;
+          const body = JSON.stringify({ error: "request body too large" });
+          res.writeHead(413, { "content-type": "application/json" });
+          res.end(body, () => req.destroy());
+          resolve(undefined);
+          return;
+        }
+        chunks.push(c);
+      });
+      req.on("end", () => {
+        if (!tooLarge) resolve(Buffer.concat(chunks).toString("utf8"));
+      });
+      req.on("error", () => {
+        if (!tooLarge) resolve("");
+      });
     });
   }
 
@@ -123,7 +157,8 @@ export function createServer(opts: ServiceOptions): http.Server {
     }
 
     if (req.method === "POST" && url.pathname === "/prove") {
-      const raw = await readBody(req);
+      const raw = await readBody(req, res);
+      if (raw === undefined) return; // 413 already sent
       let body: any;
       try {
         body = raw ? JSON.parse(raw) : {};
@@ -137,6 +172,7 @@ export function createServer(opts: ServiceOptions): http.Server {
         return;
       }
       const addr = pool as Address;
+      const poolKey = addr.toLowerCase();
       let inputsRoot: `0x${string}`;
       try {
         inputsRoot = await read<`0x${string}`>(client, addr, "inputsRoot");
@@ -144,15 +180,28 @@ export function createServer(opts: ServiceOptions): http.Server {
         send(res, 400, { error: `could not read pool: ${e instanceof Error ? e.message : String(e)}` });
         return;
       }
-      const cached = jobByInputsRoot.get(inputsRoot);
-      if (cached) {
-        send(res, 202, { job: cached });
+      if (ZERO_ROOT_RE.test(inputsRoot)) {
+        // Ingest needs the checkpoints `close()` writes, so an un-closed pool can't be
+        // proven yet — and every un-closed pool shares this same zero inputsRoot, so
+        // caching on it here would let two different pools collide.
+        send(res, 409, { error: "pool not closed yet" });
+        return;
+      }
+      const doneKey = `${poolKey}|${inputsRoot}`;
+      const done = doneJobsByKey.get(doneKey);
+      if (done) {
+        send(res, 202, { job: done });
+        return;
+      }
+      const inFlight = jobsByPool.get(poolKey);
+      if (inFlight) {
+        send(res, 202, { job: inFlight });
         return;
       }
       const id = randomUUID();
-      const job: Job = { id, pool: addr, status: "queued", log: [], proofs: [] };
+      const job: Job = { id, pool: addr, inputsRoot, status: "queued", log: [], proofs: [] };
       jobs.set(id, job);
-      jobByInputsRoot.set(inputsRoot, id);
+      jobsByPool.set(poolKey, id);
       queue.push(id);
       void worker();
       send(res, 202, { job: id });

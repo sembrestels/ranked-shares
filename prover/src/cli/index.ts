@@ -21,6 +21,22 @@ function arg(name: string, def?: string): string {
   return v;
 }
 
+/**
+ * The tallier master secret, from (in order) `--master`, `--sign` (signs
+ * `MASTER_MESSAGE` with `account`), or `RANKED_SHARES_MASTER` — shared by `prove` and
+ * `serve`. Never logged.
+ */
+async function resolveMaster(rpc: string, account?: ReturnType<typeof privateKeyToAccount>): Promise<Uint8Array> {
+  if (process.argv.includes("--master")) return hexToBytes(arg("master") as Hex);
+  if (process.argv.includes("--sign")) {
+    if (!account) throw new Error("--sign needs --private-key");
+    const wallet = createWalletClient({ account, transport: http(rpc) });
+    return masterFromSignatureHex(await wallet.signMessage({ account, message: MASTER_MESSAGE }));
+  }
+  if (process.env.RANKED_SHARES_MASTER) return hexToBytes(process.env.RANKED_SHARES_MASTER as Hex);
+  throw new Error("need a master secret: --master 0x…, --sign (with --private-key), or RANKED_SHARES_MASTER");
+}
+
 async function main() {
   const cmd = process.argv[2];
 
@@ -31,19 +47,7 @@ async function main() {
     const account = process.argv.includes("--private-key") ? privateKeyToAccount(arg("private-key") as Hex) : undefined;
     if (doSubmit && !account) throw new Error("--submit needs --private-key (the pool's coordinator key)");
 
-    let master: Uint8Array;
-    if (process.argv.includes("--master")) {
-      master = hexToBytes(arg("master") as Hex);
-    } else if (process.argv.includes("--sign")) {
-      if (!account) throw new Error("--sign needs --private-key");
-      const wallet = createWalletClient({ account, transport: http(rpc) });
-      master = masterFromSignatureHex(await wallet.signMessage({ account, message: MASTER_MESSAGE }));
-    } else if (process.env.RANKED_SHARES_MASTER) {
-      master = hexToBytes(process.env.RANKED_SHARES_MASTER as Hex);
-    } else {
-      throw new Error("serve needs a master secret: --master 0x…, --sign (with --private-key), or RANKED_SHARES_MASTER");
-    }
-
+    const master = await resolveMaster(rpc, account);
     const threads = Number(arg("threads", String(Math.max(1, os.availableParallelism() - 1))));
     const server = createServer({ rpc, master, submit: doSubmit, account, threads });
     server.listen(port, () => console.log(`prove service listening on :${port}${doSubmit ? " (submitting as coordinator)" : " (proofs only)"}`));
@@ -77,7 +81,7 @@ async function main() {
     const wallet = createWalletClient({ account, transport: http(arg("rpc")) });
     const s = await readPoolSnapshot(client, pool, fromBlock);
     if (s.coordinator.toLowerCase() !== account.address.toLowerCase()) console.warn("warning: this key is not the pool's coordinator; restarts would be rejected");
-    const master = process.argv.includes("--sign") ? masterFromSignatureHex(await wallet.signMessage({ account, message: MASTER_MESSAGE })) : hexToBytes(arg("master") as Hex);
+    const master = await resolveMaster(arg("rpc"), account);
     const sk = deriveSk(master, hexToBytes(s.keySalt));
     const plan = rebuild(s, sk);
     const prover = await Prover.create(plan.profile.name as "test" | "default", Number(arg("threads", "4")));
@@ -93,7 +97,7 @@ async function main() {
     [
       "usage: prover <audit|status|prove|serve> --rpc <url>",
       "  audit|status|prove: --pool <addr> [--from-block n]",
-      "  prove: --private-key 0x… (--master 0x… | --sign) [--threads n]",
+      "  prove: --private-key 0x… (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--threads n]",
       "  serve: [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit] [--threads n]",
     ].join("\n"),
   );
