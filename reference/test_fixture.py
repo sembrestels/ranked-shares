@@ -83,6 +83,17 @@ class FixtureTest(unittest.TestCase):
         self.assertEqual(fx["checkpoints"], [ZERO, ZERO])
         self.assertEqual(fx["tallyProofs"][-1]["done"], 1)
 
+    def test_every_fixture_matches_the_schema(self):
+        for profile, scenario in FIXTURES:
+            fx = load(profile, scenario)
+            self.assertEqual(tuple(fx), make_fixture.FIXTURE_KEYS)
+            self.assertEqual(fx["scenario"], scenario)
+            self.assertEqual(fx["profile"]["name"], profile)
+            for proof in fx["ingestProofs"]:
+                self.assertEqual(tuple(proof), make_fixture.INGEST_PROOF_KEYS)
+            for proof in fx["tallyProofs"]:
+                self.assertEqual(tuple(proof), make_fixture.TALLY_PROOF_KEYS)
+
     def test_every_fixture_declares_its_m(self):
         for profile, scenario in FIXTURES:
             fx = load(profile, scenario)

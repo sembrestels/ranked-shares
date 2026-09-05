@@ -6,6 +6,7 @@
   "batch": 2,
   "k": 2
  },
+ "scenario": "nosealed",
  "master": "0x4d885451f27e770ee4b6aad84a413591ed03109df0def6b88fd104818c323740",
  "keySalt": "0x9d879f0876f1524f4e66a2cf2c69d76a34e5d82bd817dc56b6819632b62a77bc",
  "sk": "0x0e14121f5adb6bbc5e3703cc4472aaba82791203e1a59678662e013a705b898d",

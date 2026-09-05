@@ -37,6 +37,18 @@ VECTORS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "vector
 # The default profile costs about ten seconds a scenario, so it only gets `main`.
 SCENARIOS = {"test": ("main", "smallm", "nosealed"), "default": ("main",)}
 
+# The fixture schema, in the order of plan 1's Task 6 Interfaces block plus the
+# top-level `scenario` and `m`. Asserted before a fixture is written, so a consumer in
+# Solidity, Noir or TypeScript can rely on the key set.
+FIXTURE_KEYS = (
+    "profile", "scenario", "master", "keySalt", "sk", "pk", "m", "costs", "totalWeight",
+    "minDirectVote", "voters", "publicEntries", "sealedEntries", "hPub", "hSealed",
+    "checkpoints", "sealedCount", "numBatches", "costsHash", "inputsRoot", "funded",
+    "transcript", "transcriptHash", "ingestProofs", "tallyProofs",
+)
+INGEST_PROOF_KEYS = ("k", "nSealed", "m", "budget", "pkX", "pkY", "hIn", "hOut", "stateIn", "stateOut")
+TALLY_PROOF_KEYS = ("costsHash", "stateIn", "stateOut", "done", "tHashOut", "fundedCount", "fundedOrderPacked")
+
 
 def hx(n):
     return "0x" + format(int(n), "064x")
@@ -171,11 +183,20 @@ def _tally_proofs(profile, state, costs, transcript, funded, costs_hash):
     return proofs
 
 
-def _encode(profile, m, costs, voters, total_weight, sk, pk, public_entries, sealed_entries,
+def _assert_schema(fx):
+    assert set(fx) == set(FIXTURE_KEYS), set(fx) ^ set(FIXTURE_KEYS)
+    for proof in fx["ingestProofs"]:
+        assert set(proof) == set(INGEST_PROOF_KEYS), set(proof) ^ set(INGEST_PROOF_KEYS)
+    for proof in fx["tallyProofs"]:
+        assert set(proof) == set(TALLY_PROOF_KEYS), set(proof) ^ set(TALLY_PROOF_KEYS)
+
+
+def _encode(profile, scenario, m, costs, voters, total_weight, sk, pk, public_entries, sealed_entries,
             h_pub, h_sealed, checkpoints, num_batches, costs_hash, inputs_root,
             funded, transcript, ingest_proofs, tally_proofs):
     return {
         "profile": {"name": profile.name, "nSealedMax": profile.n_sealed_max, "mMax": profile.m_max, "batch": profile.batch, "k": profile.k},
+        "scenario": scenario,
         "master": "0x" + MASTER.hex(), "keySalt": "0x" + SALT.hex(), "sk": hx(sk), "pk": [hx(pk[0]), hx(pk[1])],
         "m": m,
         "costs": [hx(c) for c in costs], "totalWeight": hx(total_weight), "minDirectVote": hx(MIN_DIRECT_VOTE),
@@ -226,9 +247,11 @@ def build(profile, scenario="main"):
         assert ingest_proofs[0]["hIn"] == ingest_proofs[0]["hOut"] == hx(0)
     tally_proofs = _tally_proofs(profile, state, costs, transcript, funded, costs_hash)
 
-    return _encode(profile, m, costs, voters, total_weight, sk, pk, public_entries, sealed_entries,
-                   h_pub, h_sealed, checkpoints, num_batches, costs_hash, inputs_root,
-                   funded, transcript, ingest_proofs, tally_proofs)
+    fx = _encode(profile, scenario, m, costs, voters, total_weight, sk, pk, public_entries, sealed_entries,
+                 h_pub, h_sealed, checkpoints, num_batches, costs_hash, inputs_root,
+                 funded, transcript, ingest_proofs, tally_proofs)
+    _assert_schema(fx)
+    return fx
 
 
 def write_fixture(fx, scenario, out_dir=VECTORS):
