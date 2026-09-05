@@ -10,6 +10,15 @@ export type Voter = {
   ciphertext: [bigint, bigint, bigint] | null;
 };
 
+/**
+ * Whether a `votersFrom` ciphertext is a real sealed ballot. `rx = 0` is the contract's
+ * "no sealed ballot" sentinel (`voteSealed` rejects a zero `rx`, and `decrypt` refuses
+ * it too), so one predicate decides it for every caller.
+ */
+export function isSealed(ct: readonly [bigint, bigint, bigint]): boolean {
+  return ct[0] !== 0n;
+}
+
 export function publicEntries(voters: Voter[], m: number): Entry[] {
   return voters.filter((v) => v.hasDirect).map((v) => ({ weight: v.directWeight, ballot: unpack(v.directPacked, m) }));
 }

@@ -58,9 +58,3 @@ export function decrypt(sk: bigint, voter: bigint, ct: [bigint, bigint, bigint],
   const s = mul(sk, { x: rx, y: ry });
   return unpack(mod(c - mask(s, voter)), m);
 }
-
-export function randomScalar(): bigint {
-  const b = new Uint8Array(32);
-  crypto.getRandomValues(b);
-  return (bytesToBig(b) % (Q - 1n)) + 1n;
-}

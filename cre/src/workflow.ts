@@ -11,7 +11,7 @@ import {
 import { type Address, decodeFunctionResult, encodeFunctionData, type Hex, hexToBytes, zeroAddress } from "viem";
 import abi from "./abi/SealedRankedShares.json";
 import * as cm from "./lib/commitments";
-import { publicEntries, sealedEntries, sealedVoters, type Voter } from "./lib/entries";
+import { isSealed, publicEntries, sealedEntries, sealedVoters, type Voter } from "./lib/entries";
 import { pbearTranscript } from "./lib/pbear";
 import { encodeCloseReport, encodeResultReport } from "./lib/report";
 import { deriveSk } from "./lib/sealed";
@@ -118,7 +118,7 @@ export function readPool(runtime: Runtime<Config>, evm: EVMClient, pool: Address
         seatWeight: seats[i],
         hasDirect: hasDirectFlags[i],
         directPacked: ballots[i],
-        ciphertext: ct[0] === 0n && ct[1] === 0n && ct[2] === 0n ? null : [ct[0], ct[1], ct[2]],
+        ciphertext: isSealed(ct) ? [ct[0], ct[1], ct[2]] : null,
       });
     });
   }
@@ -140,17 +140,23 @@ const onCronInTee = (runtime: TeeRuntime<Config>) => {
   const master = hexToBytes(secret.startsWith("0x") ? (secret as Hex) : `0x${secret}`);
   const summary: string[] = [];
   for (const pool of runtime.config.pools as Address[]) {
-    const reads = readPool(don, evm, pool, runtime.config.closeChunk);
-    const action = processPool(reads, master);
-    if (!action) {
-      summary.push(`${pool}: nothing to do (phase ${reads.phase})`);
-      continue;
+    // One unreadable or unreportable pool must not strand the others in the same run.
+    // Only the error's message is summarised, and no message here carries plaintext.
+    try {
+      const reads = readPool(don, evm, pool, runtime.config.closeChunk);
+      const action = processPool(reads, master);
+      if (!action) {
+        summary.push(`${pool}: nothing to do (phase ${reads.phase})`);
+        continue;
+      }
+      const report = runtime.reportFromDon(prepareReportRequest(action.report)).result();
+      const reply = evm
+        .writeReport(don, { receiver: pool, report, gasConfig: { gasLimit: runtime.config.gasLimit } })
+        .result();
+      summary.push(`${pool}: kind ${action.kind} report written, tx status ${reply.txStatus}`);
+    } catch (e) {
+      summary.push(`${pool}: error: ${e instanceof Error ? e.message : String(e)}`);
     }
-    const report = runtime.reportFromDon(prepareReportRequest(action.report)).result();
-    const reply = evm
-      .writeReport(don, { receiver: pool, report, gasConfig: { gasLimit: runtime.config.gasLimit } })
-      .result();
-    summary.push(`${pool}: kind ${action.kind} report written, tx status ${reply.txStatus}`);
   }
   const line = summary.join("; ");
   runtime.log(line);
