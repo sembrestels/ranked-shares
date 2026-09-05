@@ -4,7 +4,7 @@
 
 **Goal:** The off-chain half of the sealed-ballot design in TypeScript: one shared crypto and tally library that runs both under CRE's QuickJS and in a browser, the CRE confidential workflow that closes pools and reports the result and transcript, the coordinator's prover (CLI for CI and headless use, web page for the browser), and the `audit` command anyone can run.
 
-**Architecture:** `cre/src/lib/` holds pure-JavaScript ports of `reference/` (Poseidon2 through `@zkpassport/poseidon2`, Grumpkin through `noble-curves`, keccak through `noble-hashes`, PB-EAR transcript mode, commitments and the circuit state) tested against the same vectors and fixtures the Python, Solidity and Noir sides use. `cre/src/main.ts` is the workflow: a cron trigger, a TEE handler that reads chain state through the DON, decrypts with the Vault secret, tallies, and writes the kind-1 report; kind-2 `close` reports from the DON. `prover/` reuses the library to rebuild the sealed state, generate witnesses with `noir_js`, prove with `bb.js` (`verifierTarget: 'evm'`) and submit `advance`; the same core drives a Vite page and a Node CLI, and `audit` replays the public block against the on-chain transcript. An end-to-end test runs the whole thing against `anvil` with the plan-3 verifiers.
+**Architecture:** `cre/src/lib/` holds pure-JavaScript ports of `reference/` (Poseidon2 through `@zkpassport/poseidon2`, Grumpkin through `noble-curves`, keccak through `noble-hashes`, PB-EAR transcript mode, commitments and the circuit state) tested against the same vectors and fixtures the Python, Solidity and Noir sides use. `cre/src/main.ts` is the workflow: a cron trigger, a TEE handler that reads chain state through the DON, decrypts with the Vault secret, tallies, and writes the kind-1 report; kind-2 `close` reports from the DON. `prover/` reuses the library to rebuild the sealed state, generate witnesses with `noir_js`, prove with `bb.js` (`verifierTarget: 'evm'`) and submit `advance`; the same core drives a Node CLI, a long-running "prove this pool" HTTP service for the operator's home machine (the deployment the user chose), and a Vite page for proving from a browser session; `audit` replays the public block against the on-chain transcript. An end-to-end test runs the whole thing against `anvil` with the plan-3 verifiers.
 
 **Tech Stack:** Node 24 for `prover/` (vitest 5, Vite 8, viem 2.56, `@aztec/bb.js` 5.0.0, `@noir-lang/noir_js` 1.0.0-beta.26); bun for `cre/` (the CRE SDK compiles workflows with `bun x cre-compile`; `@chainlink/cre-sdk` 1.19.1, `@chainlink/cre-sdk/test`); `@zkpassport/poseidon2` 0.6.2, `@noble/curves` 2.4.0, `@noble/hashes` 2.4.0; Foundry's `anvil` and the forge artifacts of plans 2–3; Python only in tests (differential fuzz through `reference/pbear.py --transcript`).
 
@@ -2132,6 +2132,38 @@ Run: `cd prover && npm run build` — expected: `dist/` with the page and the bb
 git add prover/src/web prover/src/core/submit.ts
 git commit -m "Add the coordinator page: connect, sign, audit, prove and submit in the browser"
 ```
+
+---
+
+### Task 7b: The prove service (home-box deployment)
+
+The user decided on 2026-09-05 (in a parallel session, before choosing Noir) that the operator's home desktop runs the prover as a long-running, permissionless "prove this pool" API rather than relying on a browser session. The Noir prover core makes that cheap: the service holds the master secret (from `RANKED_SHARES_MASTER` or derived once from a private key with `--sign`), derives each pool's key from its `keySalt`, and runs `runChain` per job. Proof bytes and public inputs reveal nothing beyond the public inputs, and `advance` is permissionless except for `restart`, so the service can either submit itself (with the coordinator key) or hand proofs back to whoever asked.
+
+**Files:**
+- Create: `prover/src/service/index.ts`, `prover/test/service.test.ts`
+
+**Interfaces:**
+- `prover serve --rpc <url> --port 8787 [--private-key 0x…] [--master 0x… | --sign] [--submit]`: Node HTTP server (no framework; `node:http`).
+  - `POST /prove` body `{ "pool": "0x…" }` → `202 { "job": "<id>" }`; one job per pool at a time (a second request for a running pool returns its id); jobs cached by `inputsRoot` so a finished pool is not re-proven.
+  - `GET /jobs/<id>` → `{ status: "queued" | "running" | "done" | "failed", pool, log: string[], proofs?: { kind, index, proof: 0x…, publicInputs: 0x…[] }[], finality?, error? }`.
+  - `GET /health` → `{ ok: true, coordinator, submits: boolean }`.
+  - With `--submit` the service sends `advance` itself (its key must be the coordinator for restarts); without it, it only produces and returns the proofs and the caller submits them.
+- Internals: an in-memory queue (`Map<jobId, Job>`), one worker loop, `Prover.create(profile, threads = os.availableParallelism() - 1)` created once per profile and reused; a `runChain` variant that accepts an `onProof` callback instead of submitting, shared with the CLI.
+
+- [ ] **Step 1: Test**
+
+`prover/test/service.test.ts`: start the service in-process against the anvil chain of the e2e test (factor the e2e setup into a shared `prover/test/helpers/anvil.ts` that returns `{ pool, rpc, ... }` after replay, close and report), `POST /prove`, poll `GET /jobs/<id>` until `done`, assert the job carries `3 + 3` proofs whose `publicInputs` equal the fixture's `ingestProofs`/`tallyProofs` values, then submit them through `advance` from the test with the coordinator key and assert `Proven`. A second `POST /prove` for the same pool returns the cached job.
+
+- [ ] **Step 2: Implement** the server over `node:http` with JSON bodies, the queue, the cache and the `--submit` mode, and add `serve` to `prover/src/cli/index.ts`.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add prover/src/service prover/test/service.test.ts prover/test/helpers prover/src/cli/index.ts
+git commit -m "Add the prove service: a permissionless prove-this-pool API for the home box"
+```
+
+Deployment notes for the README (Task 8): run under a user systemd unit on the home machine, expose through a Cloudflare Tunnel or Tailscale Funnel rather than an open port, keep `/tmp` (a 16 GB tmpfs there) out of the proving path by setting `TMPDIR` to a disk directory, and size `--threads` to leave two cores free (the machine has 16 threads and 30 GiB).
 
 ---
 
