@@ -4,33 +4,9 @@ import grumpkin
 import poseidon2
 from keccak import keccak256
 
+from ballots import pack, unpack, validate  # noqa: F401  (re-exported for the Noir tests)
+
 DOMAIN = int.from_bytes(b"RankedShares/sealed/v2", "big")
-
-
-def pack(ranks):
-    return sum(r << (8 * c) for c, r in enumerate(ranks))
-
-
-def validate(ranks, m):
-    """True iff ranks is a competition ranking over m projects (PBEAR._setBallot rules)."""
-    if len(ranks) != m or any(r < 0 or r > m for r in ranks):
-        return False
-    counts = [0] * (m + 1)
-    for r in ranks:
-        counts[r] += 1
-    seen = 0
-    for r in range(1, m + 1):
-        if counts[r] and r != seen + 1:
-            return False
-        seen += counts[r]
-    return True
-
-
-def unpack(packed, m):
-    if packed < 0 or packed >= 1 << (8 * m):
-        return None
-    ranks = [(packed >> (8 * c)) & 0xFF for c in range(m)]
-    return ranks if validate(ranks, m) else None
 
 
 def derive_sk(master, key_salt):
