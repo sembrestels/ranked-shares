@@ -480,14 +480,19 @@ the end-to-end run.
    crate; if the host build of `ziskos` is too heavy for the reference tests, the
    `sealed` crate gets a `k256` fallback behind a feature.
 
-### Z11. Files touched outside `zisk/`, `src/zisk/`, `src/cre/`, `test/zisk/`, `test/cre/`
+### Z11. Files touched outside `zisk/`, `src/zisk/`, `test/zisk/`
 
-- `src/SealedPool.sol` (shared by cre and zisk).
-- `src/cre/IReceiver.sol`: the Chainlink receiver interface. Plan 2 of the Noir work
-  also creates one under `src/interfaces/`; whichever lands second imports the other.
-- `reference/ballots.py` (new), `reference/zisk/`, `reference/vectors/zisk/`.
+Written when the Noir variant still lived at the repo roots; updated after the
+2026-09-05 reorganisation (Noir under `src/noir/`, `test/noir/`, `reference/noir/`).
+
+- `src/SealedPool.sol` (shared by cre and zisk) and `src/PoolBase.sol` beneath it.
+- `src/interfaces/IReceiver.sol`: the Chainlink receiver interface, shared by the
+  cre, noir and zisk variants. `src/lib/CreMetadata.sol` (workflow owner/name
+  authorisation) is shared by `CreRankedShares` and `NoirRankedShares`; the zisk
+  pool does not import it.
+- `src/cre/CreRankedShares.sol`, `test/cre/`.
+- `reference/ballots.py` (shared), `reference/zisk/`, `reference/vectors/zisk/`.
 - `script/DeployZisk.s.sol`, `script/DeployZiskVerifier.s.sol`.
 - `README.md`: the variant table and the `zisk/` pointers.
 - `.gitignore`: `.claude/`.
-- Nothing under `src/lib/`, `src/interfaces/`, `test/sealed/*.t.sol` written by the
-  Noir session, or the Noir reference modules.
+- Nothing under `src/noir/`, `test/noir/` or `reference/noir/`.
