@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = ["crates/pbear"]
+# `cargo test` on the host builds only these; the guest is built by cargo-zisk (Task 10).
+default-members = ["crates/pbear"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
