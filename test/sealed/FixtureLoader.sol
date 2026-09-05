@@ -87,20 +87,28 @@ abstract contract FixtureLoader is Test {
 
     // ---- pool construction ----
 
+    /// @dev The verifiers the pool is built with. Mocks by default, so tests can accept or
+    ///      reject a proof at will; `RealProofs.t.sol` overrides this with the generated
+    ///      `test`-profile Honk verifiers.
+    function makeVerifiers() internal virtual returns (IHonkVerifier ingest, IHonkVerifier tally) {
+        ingestVerifier = new MockHonkVerifier();
+        tallyVerifier = new MockHonkVerifier();
+        return (IHonkVerifier(address(ingestVerifier)), IHonkVerifier(address(tallyVerifier)));
+    }
+
     function deployFromFixture() internal {
         vm.warp(1);
         token = new MockERC20();
         nft = new MockERC721();
         poseidon = new Poseidon2();
-        ingestVerifier = new MockHonkVerifier();
-        tallyVerifier = new MockHonkVerifier();
+        (IHonkVerifier iv, IHonkVerifier tv) = makeVerifiers();
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
             coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon)),
-            ingestVerifier: IHonkVerifier(address(ingestVerifier)),
-            tallyVerifier: IHonkVerifier(address(tallyVerifier)),
+            ingestVerifier: iv,
+            tallyVerifier: tv,
             tallierPkX: pk[0],
             tallierPkY: pk[1],
             keySalt: fxBytes32(".keySalt"),
