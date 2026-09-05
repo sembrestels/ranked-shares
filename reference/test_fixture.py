@@ -17,9 +17,11 @@ def load(name):
 
 class FixtureTest(unittest.TestCase):
     def test_generator_is_deterministic(self):
-        before = open(os.path.join(HERE, "vectors", "fixture_test.json")).read()
+        with open(os.path.join(HERE, "vectors", "fixture_test.json")) as f:
+            before = f.read()
         subprocess.run([sys.executable, os.path.join(HERE, "tools", "make_fixture.py"), "--profile", "test"], check=True, cwd=os.path.dirname(HERE))
-        after = open(os.path.join(HERE, "vectors", "fixture_test.json")).read()
+        with open(os.path.join(HERE, "vectors", "fixture_test.json")) as f:
+            after = f.read()
         self.assertEqual(before, after)
 
     def test_test_fixture_exercises_chains(self):
