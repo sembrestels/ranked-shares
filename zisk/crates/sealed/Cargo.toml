@@ -1,0 +1,29 @@
+[package]
+name = "sealed"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Sealed-ballot decryption, commitments and the whole tally of the zisk variant"
+
+[dependencies]
+pbear = { path = "../pbear" }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+bincode = { version = "2", default-features = false, features = ["alloc", "serde"] }
+# Host-side tools (fixture-input binary). The guest builds with default-features = false.
+serde_json = { version = "1", optional = true }
+hex = { version = "0.4", optional = true }
+
+[target.'cfg(target_os = "zkvm")'.dependencies]
+ziskos = { git = "https://github.com/0xPolygonHermez/zisk.git", tag = "v1.2.0-alpha" }
+
+[target.'cfg(not(target_os = "zkvm"))'.dependencies]
+k256 = { version = "0.13", default-features = false, features = ["arithmetic"] }
+tiny-keccak = { version = "2", features = ["keccak"] }
+
+[dev-dependencies]
+serde_json = "1"
+hex = "0.4"
+
+[features]
+default = ["tools"]
+tools = ["dep:serde_json", "dep:hex"]
