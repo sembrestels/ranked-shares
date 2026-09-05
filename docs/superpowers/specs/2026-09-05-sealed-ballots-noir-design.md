@@ -342,7 +342,10 @@ into an on-chain dispute is a follow-up (B11).
 
 Verifiers as in the previous revision: bb-generated, split in two contracts because of
 the 24 KB limit, deployed once per chain per profile by `script/DeployVerifiers.s.sol`,
-BN254 precompiles from Reth. Gas per proof in the low millions, unmeasured (B12.3).
+BN254 precompiles from Reth. **Measured (B12.3), local EVM against the generated
+verifiers, real `bb` proofs (`RealProofsTest`):** `advance` costs about 686k–930k gas
+per call, one ingest or tally group per proof (test profile fixtures) — not yet
+confirmed on Arc testnet.
 
 **B6.6 Grace paths, B6.7 Claims.** As A6.5 and A6.6, with two amendments. The clock
 for `acceptProvisional` starts when the kind-1 report is accepted (`reportedAt`,
@@ -488,8 +491,12 @@ Key and plaintext live in page memory only. bb.js fetches the reference string f
 Aztec's CDN on first use.
 
 Expected time per proof in a browser: tens of seconds to a couple of minutes at the
-default profile (B12.1). At most twelve proofs, a wallet confirmation each unless the
-page uses a session key.
+default profile (B12.1) — still an estimate; the browser half of B12.1 is plan 4's
+spike. The native half is measured (`noir/README.md`): `bb prove` on the default
+profile takes 1.13 s / 243 MB peak for `ingest` and 9.28 s / 1.73 GB peak for `tally`,
+well under the two-minute / four-gigabyte ceiling, so `K` stays 8 (decision 6
+unchanged). At most twelve proofs, a wallet confirmation each unless the page uses a
+session key.
 
 **Evidence for submission:** `Finalized(Proven, …)` on arcscan for a pool with sealed
 votes, a recording of the coordinator page producing the chain, and an `audit` run.
@@ -567,15 +574,25 @@ by anyone with `audit`. The README states this and states which path a pool took
 1. **Browser proving budget.** Compile `tally` at the default profile, prove with bb.js
    in Chrome and Firefox; record gates, time, peak memory. Above two minutes or four
    gigabytes, lower `K` or `N_SEALED_MAX`. Same for `ingest` with `B = 32`.
+   **Measured, native half (plan 3):** gates `ingest-default` 137,200, `tally-default`
+   1,034,184 — under the 1.2 M threshold, so `K` stays 8 (decision 6 unchanged). Native
+   `bb prove` (this machine): `ingest-default` 1.13 s / 243 MB peak, `tally-default`
+   9.28 s / 1.73 GB peak; `ingest-test` 0.27 s / 42 MB, `tally-test` 0.23 s / 45 MB. See
+   `noir/README.md`. The browser half (bb.js in Chrome/Firefox) is still open — plan 4.
 2. **Poseidon2 in Solidity.** Pick or write a Yul Poseidon2 (BN254, t = 4) matching
    Noir's sponge on checked-in vectors; measure `close` per sealed voter.
 3. **Honk verifier on Arc testnet.** Deploy for a toy circuit, verify a proof, record
    gas and code size, confirm the split deployment.
+   **Measured, real proofs against the generated verifiers (`RealProofsTest`, local
+   EVM, not yet Arc testnet):** `advance` costs about 686k–930k gas per call (one
+   ingest or tally group per proof, test profile fixtures). See `README.md`'s Sealed
+   pools section and `test/verifiers/RealProofs.t.sol`.
 4. **Report size and transcript hashing.** Deliver a kind-1 report with a full-size
    transcript through the Arc forwarder in simulation; measure `onReport` gas. Decide
    whether the chunked kind-3 fallback of B6.2 is needed.
 5. **Pure-TS crypto under QuickJS.** Run `sealed.ts` and `pbear.ts` in transcript mode
    inside `cre workflow simulate` with a TEE handler.
+   **Not yet run** — `cre/` is plan 4's scope; nothing to record here.
 6. **Version pin.** Fix `nargo` and `bb`, confirm the ZK verifier flavour and the
    public-input layout.
 7. **Arc gas price.** What a 2 M gas transaction costs in USDC, to size everything

@@ -1,0 +1,8 @@
+[package]
+name = "pbear"
+type = "lib"
+authors = [""]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+sealed = { path = "../sealed" }

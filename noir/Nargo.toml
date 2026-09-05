@@ -1,0 +1,3 @@
+[workspace]
+members = ["sealed", "pbear", "ingest-test", "ingest-default", "tally-test", "tally-default"]
+default-member = "ingest-test"

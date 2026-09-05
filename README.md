@@ -142,7 +142,8 @@ independently, and `profileId()` — `keccak256(abi.encode(nSealedMax, mMax, bat
 a client refuse a pool its proving keys were not built for. The
 Poseidon2 hasher (`src/lib/Poseidon2.sol`) is generated from the reference constants by
 `python3 reference/tools/gen_poseidon2_sol.py`; the Honk verifiers come from the Noir
-circuits (plan 3) and are replaced by accept-all mocks until then.
+circuits (`noir/README.md`) and are deployed once per chain with
+`script/DeployVerifiers.s.sol`.
 
 Gas on the default fixture (70 voters, 65 sealed, 16 projects):
 
@@ -153,6 +154,10 @@ Gas on the default fixture (70 voters, 65 sealed, 16 projects):
 | `voteSealed` (first / replacement) | 75,475 / 4,443 |
 
 See `forge test --match-contract SealedGasTest -vv`.
+
+`advance` with real proofs (test profile, `RealProofsTest`, generated Honk verifiers and
+`bb`-made proofs from the fixtures) costs about 686k–930k gas per call, one ingest or
+tally group per proof. See `forge test --match-path "test/verifiers/RealProofs.t.sol" -vv`.
 
 ## Reference implementation
 

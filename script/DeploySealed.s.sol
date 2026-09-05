@@ -25,7 +25,10 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 ///
 /// Unset POSEIDON deploys a fresh Poseidon2. Unset verifiers deploy MockHonkVerifiers
 /// that accept every proof: fine for a demo of the DON path, never for a pool whose
-/// `Proven` finality is meant to mean anything.
+/// `Proven` finality is meant to mean anything. The real ones are the generated
+/// `default`-profile Honk verifiers: deploy them once per chain with
+/// `script/DeployVerifiers.s.sol` and pass its two addresses as `INGEST_VERIFIER` and
+/// `TALLY_VERIFIER`.
 contract DeploySealed is Script {
     error UnknownProfile();
 

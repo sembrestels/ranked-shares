@@ -1,0 +1,9 @@
+[package]
+name = "ingest_test"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+sealed = { path = "../sealed" }
+pbear = { path = "../pbear" }

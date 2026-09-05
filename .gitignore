@@ -8,3 +8,5 @@ reference/tools/package-lock.json
 
 .claude/
 .superpowers/
+noir/**/target/
+noir/*/Prover.toml
