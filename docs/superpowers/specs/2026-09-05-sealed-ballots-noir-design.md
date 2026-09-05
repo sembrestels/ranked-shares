@@ -335,6 +335,21 @@ function of committed inputs and a key tied to `pk`, so it never needs restartin
 tally chain can go wrong only if the prover fed a transcript slice that does not match
 the DON's, which surfaces at step 4, and this lets an honest prover start over.
 
+**Amendment (2026-09-05): `advanceMany(bytes[] proofs, bytes32[][] publicInputs, bool
+restart)`** — the same `inPhase(Tally)` entry, verifying several proofs of the chain in
+one transaction so a coordinator confirms once in a wallet and pays one transaction
+instead of one per proof. `proofs.length == publicInputs.length` (`InputMismatch`), a
+non-empty batch (`EmptyBatch`), and then element `i` in order, routed exactly as
+`advance` routes it — ingest while `ingestCursor < numBatches`, tally afterwards — so
+every rule above applies unchanged to each element. Two things are the batch's own:
+`restart` is applied to the first *tally* element of the batch and never to an ingest one
+(a batch that still has ingest pending is a forward run of the whole chain), still only
+from `coordinator`; and an element after the finalising `done` proof reverts with
+`WrongPhase`, since `inPhase` only sees the phase the call started in. The batch is
+atomic — one rejected proof reverts all of it — which is what makes it safe to send a
+whole chain speculatively. `advance` keeps its exact behaviour; both it and the loop
+route through one internal helper.
+
 A transcript the sealed side cannot satisfy (the enclave lied or has a bug) produces no
 proof; then `acceptProvisional` after `proofGrace` applies the DON result on DON trust,
 as A6.5, and the coordinator's audit log is the evidence something is off. Turning that

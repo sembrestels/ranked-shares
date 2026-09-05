@@ -106,7 +106,7 @@ off-chain and is finalised by a chain of proofs.
 | Setup | owner | `addProject`, `openVoting` |
 | Open | anyone | deposits as above, `vote(ranks)` (needs `minDirectVote` of own contributed weight, one ballot, final), `voteSealed(rx, ry, c)` (needs `minSealedVote` of seat weight, replaceable) |
 | Closing (deadline passed) | anyone / DON | `close(maxVoters)` until `closed`; the CRE workflow may drive it with a kind-2 report |
-| Tally | DON, coordinator, anyone | `onReport` (kind 1: result + transcript), `advance(proof, publicInputs, restart)` for each ingest batch then each tally group — permissionless, except that `restart = true` rewinds the tally chain to the state the ingest chain ended at and only `coordinator` may ask for it; `acceptProvisional` after `proofGrace` since the report, `abandon` after `abandonGrace` since the deadline |
+| Tally | DON, coordinator, anyone | `onReport` (kind 1: result + transcript), `advance(proof, publicInputs, restart)` for each ingest batch then each tally group, or `advanceMany(proofs, publicInputs, restart)` for several of them in one atomic transaction — permissionless, except that `restart = true` rewinds the tally chain to the state the ingest chain ended at and only `coordinator` may ask for it (in a batch it reaches the first tally proof only); `acceptProvisional` after `proofGrace` since the report, `abandon` after `abandonGrace` since the deadline |
 | Done | anyone / owner | `claim`, `sweep`; `finality()` says which path ended the pool |
 
 `Proven` means the sealed half was proven against the committed ciphertexts and the
@@ -159,6 +159,17 @@ See `forge test --match-contract SealedGasTest -vv`.
 `bb`-made proofs from the fixtures) costs about 686k–930k gas per call, one ingest or
 tally group per proof. See `forge test --match-path "test/verifiers/RealProofs.t.sol" -vv`.
 
+`advanceMany` verifies several of those proofs in one atomic transaction. Measured on
+anvil against the same verifiers, the whole `test_main` chain — 3 ingest batches and 3
+tally groups — costs **5,121,035 gas as one `advanceMany`** against **5,323,635 gas as six
+`advance` transactions** (878,981 + 845,645 + 865,147 + 832,600 + 832,684 + 1,068,578):
+202,600 saved, which is the five transaction intrinsics the batch does not pay plus the
+account and storage warming the six proofs now share. The calldata is the same either way
+(50,564 bytes batched against 50,616 in six calls), so the saving is a fixed
+per-transaction one rather than a per-proof one — batching buys one signature and a few
+percent, not an order of magnitude. See `cd prover && npx vitest run test/e2e.test.ts
+--silent=false`, which logs both.
+
 ## Prover CLI
 
 `prover/src/cli/index.ts` (`cd prover && npx tsx src/cli/index.ts …`, or `npm run cli --`)
@@ -167,8 +178,8 @@ drives a sealed pool from the TypeScript prover of `prover/src/core/`:
 ```
 prover audit --rpc <url> --pool <addr> [--from-block n]
 prover status --rpc <url> --pool <addr> [--from-block n]
-prover prove --rpc <url> --pool <addr> --private-key <hex> ($RANKED_SHARES_MASTER | --sign | --master <hex>) [--threads n]
-prover serve --rpc <url> [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--threads n] [--job-timeout 1800]
+prover prove --rpc <url> --pool <addr> --private-key <hex> ($RANKED_SHARES_MASTER | --sign | --master <hex>) [--threads n] [--batch]
+prover serve --rpc <url> [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--batch] [--threads n] [--job-timeout 1800]
 ```
 
 `audit` replays the reported transcript against the public block read from chain and
@@ -178,6 +189,11 @@ tallier key. `status` prints phase, ingest progress and the current `stateCommit
 the proof chain from wherever it stands, and submits `advance` for each remaining ingest
 batch and tally group as `--private-key` (it exits 1 with "pool not closed yet" if the
 pool has no `inputsRoot` yet, since ingest needs the checkpoints `close()` writes).
+`--batch` sends the whole run as a single `advanceMany` instead: the same proofs in the
+same order with the same `restart` decision, but one transaction and one signature. It
+is off by default because a batch lands nothing until the last proof is ready and a
+single rejected proof reverts all of it, where one `advance` per proof banks each
+accepted proof as it goes.
 
 The master secret should come from `RANKED_SHARES_MASTER` in the environment, or from
 `--sign`, which signs `MASTER_MESSAGE` with `--private-key` and never puts the secret on
@@ -196,7 +212,9 @@ tallier key (signs `MASTER_MESSAGE`, deriving the master secret in memory only),
 Switch wallet to RPC chain (reads the chain id from the RPC URL and asks the wallet
 to switch, adding the chain with that RPC if the wallet doesn't know it), Refresh
 status, Audit, and Prove and submit (runs `runChain` in the browser with bb.js,
-logging each proof and `advance` transaction). Refresh and Audit work
+logging each proof, then sending them all as one `advanceMany` — the page batches by
+default, so the operator confirms once in the wallet after the last proof is ready
+rather than once per proof). Refresh and Audit work
 without a connected wallet; the page reads `?rpc=…&pool=…` from the URL query
 string to prefill the inputs. `bb.js`/`noir_js` are only imported (dynamically)
 inside the Prove handler, so the page's initial load doesn't pull in that WASM
@@ -235,8 +253,9 @@ were verified):
 6. Refresh status → confirm phase/ingestCursor/coordinator look right and
    `youAreCoordinator` is `true`.
 7. Audit → confirms the public block reproduces the reported transcript.
-8. Prove and submit → proves and submits each remaining ingest batch and tally
-   group, logging gas used per `advance`, ending in `Proven`.
+8. Prove and submit → proves each remaining ingest batch and tally group, then
+   sends them as one `advanceMany` (one wallet confirmation), logging its gas and
+   ending in `Proven`.
 
 ## Prove service
 
@@ -254,7 +273,8 @@ proofs back for someone else to submit, along with `resume` — `{ingestFrom, ta
 restart}`, where whoever submits should start and whether the first tally `advance` needs
 `restart = true` — since the un-submitted proofs are what would move the pool's state.
 With `--submit` it sends `advance` itself, signing locally with `--private-key` (which
-must then be the pool's coordinator, for restarts). A job that overruns `--job-timeout`
+must then be the pool's coordinator, for restarts); adding `--batch` sends each job's
+whole run as one `advanceMany`, with the trade-off described under the CLI above. A job that overruns `--job-timeout`
 seconds is marked failed and the worker moves on. The job cache is in-memory and bounded
 (the newest 200 jobs, 500 log lines each), so restarting the service loses it —
 harmlessly, since proving a pool is deterministic and re-proving after a restart
