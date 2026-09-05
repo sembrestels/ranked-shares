@@ -554,6 +554,12 @@ by anyone with `audit`. The README states this and states which path a pool took
 - **Recursive aggregation** of the proof chain into one proof, on any untrusted machine.
 - **MPC proving** of `ingest` with coNoir, splitting `sk`. Would remove the operator's
   ability to decrypt.
+- **Sealed slots recycled through NFT seats.** `claimSeat` moves a seat's weight to a new
+  holder while the old holder's ciphertext and `sealedCount` slot stay, so one seat's
+  capital can fill several sealed slots. Decrementing `sealedCount` and clearing the
+  ciphertext in `_onSeatRevoked` when the holder's seat weight reaches zero would close
+  it; it contradicts B7's "ballots are never zeroed after ingest" only for entries that
+  are removed before `close`, which the circuits never see.
 - **Larger profiles** and a profile registry.
 
 ### B12. Spikes before the implementation plan
