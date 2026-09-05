@@ -207,20 +207,20 @@ wallet-equipped browser in this environment, so this has not been run here —
 only `npm run build` and a header check via `curl` against `npm run preview`
 were verified):
 
-1. `anvil --port 8547` and deploy the pool the same way `prover/test/e2e.test.ts`
-   does (or point `--rpc`/`pool` at any pool on a live chain).
-2. Import the coordinator private key
-   `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`
-   (anvil's account 2) into the wallet, and add a network for chain id 31337 at
-   `http://127.0.0.1:8547`.
-3. `cd prover && npm run build && npm run preview`, open the page (optionally
-   with `?rpc=http://127.0.0.1:8547&pool=0x…` to prefill the inputs).
-4. Connect wallet → approve the connection to the coordinator account.
-5. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
-6. Refresh status → confirm phase/ingestCursor/coordinator look right and
+1. `cd prover && npm run dev:pool` (leave it running — it starts anvil, deploys
+   the fixture pool, replays its votes and reports the transcript, then prints
+   the RPC URL, pool address, coordinator private key and a ready-to-open page
+   URL), then `npm run preview` in another terminal and open the printed URL.
+2. Import the coordinator private key printed by `dev:pool`
+   (`0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`,
+   anvil's account 2) into the wallet, and add a network for chain id 31337 at
+   the printed RPC URL.
+3. Connect wallet → approve the connection to the coordinator account.
+4. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
+5. Refresh status → confirm phase/ingestCursor/coordinator look right and
    `youAreCoordinator` is `true`.
-7. Audit → confirms the public block reproduces the reported transcript.
-8. Prove and submit → proves and submits each remaining ingest batch and tally
+6. Audit → confirms the public block reproduces the reported transcript.
+7. Prove and submit → proves and submits each remaining ingest batch and tally
    group, logging gas used per `advance`, ending in `Proven`.
 
 ## Reference implementation

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "cli": "tsx src/cli/index.ts"
+    "cli": "tsx src/cli/index.ts",
+    "dev:pool": "tsx scripts/dev-pool.ts"
   },
   "dependencies": {
     "@aztec/bb.js": "5.0.0",

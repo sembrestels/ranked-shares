@@ -1,4 +1,5 @@
-// prover/src/cli/index.ts — audit / status / prove against a live pool
+// prover/src/cli/index.ts — audit / status / prove / serve against a live pool
+import * as os from "node:os";
 import { createPublicClient, createWalletClient, hexToBytes, http, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { readPoolSnapshot } from "../core/chain";
@@ -7,6 +8,7 @@ import { Prover } from "../core/prove";
 import { runChain } from "../core/submit";
 import { audit } from "../core/audit";
 import { deriveSk, masterFromSignatureHex, MASTER_MESSAGE } from "../core/key";
+import { createServer } from "../service";
 
 function arg(name: string, def?: string): string {
   const i = process.argv.indexOf(`--${name}`);
@@ -21,6 +23,33 @@ function arg(name: string, def?: string): string {
 
 async function main() {
   const cmd = process.argv[2];
+
+  if (cmd === "serve") {
+    const rpc = arg("rpc");
+    const port = Number(arg("port", "8787"));
+    const doSubmit = process.argv.includes("--submit");
+    const account = process.argv.includes("--private-key") ? privateKeyToAccount(arg("private-key") as Hex) : undefined;
+    if (doSubmit && !account) throw new Error("--submit needs --private-key (the pool's coordinator key)");
+
+    let master: Uint8Array;
+    if (process.argv.includes("--master")) {
+      master = hexToBytes(arg("master") as Hex);
+    } else if (process.argv.includes("--sign")) {
+      if (!account) throw new Error("--sign needs --private-key");
+      const wallet = createWalletClient({ account, transport: http(rpc) });
+      master = masterFromSignatureHex(await wallet.signMessage({ account, message: MASTER_MESSAGE }));
+    } else if (process.env.RANKED_SHARES_MASTER) {
+      master = hexToBytes(process.env.RANKED_SHARES_MASTER as Hex);
+    } else {
+      throw new Error("serve needs a master secret: --master 0x…, --sign (with --private-key), or RANKED_SHARES_MASTER");
+    }
+
+    const threads = Number(arg("threads", String(Math.max(1, os.availableParallelism() - 1))));
+    const server = createServer({ rpc, master, submit: doSubmit, account, threads });
+    server.listen(port, () => console.log(`prove service listening on :${port}${doSubmit ? " (submitting as coordinator)" : " (proofs only)"}`));
+    return;
+  }
+
   const client = createPublicClient({ transport: http(arg("rpc")) });
   const pool = arg("pool") as Address;
   const fromBlock = BigInt(arg("from-block", "0"));
@@ -60,7 +89,14 @@ async function main() {
     return;
   }
 
-  console.log("usage: prover <audit|status|prove> --rpc <url> --pool <addr> [--from-block n] [--private-key 0x… (--master 0x… | --sign)] [--threads n]");
+  console.log(
+    [
+      "usage: prover <audit|status|prove|serve> --rpc <url>",
+      "  audit|status|prove: --pool <addr> [--from-block n]",
+      "  prove: --private-key 0x… (--master 0x… | --sign) [--threads n]",
+      "  serve: [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit] [--threads n]",
+    ].join("\n"),
+  );
 }
 
 main().catch((e) => {

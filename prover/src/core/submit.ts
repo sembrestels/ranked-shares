@@ -29,6 +29,8 @@ export function planTally(onChain: bigint, plan: ProofPlan, opts?: { restart?: b
   return { g: restart ? 0 : found, restart };
 }
 
+export type OnProof = (p: { kind: "ingest" | "tally"; index: number; proof: Uint8Array; publicInputs: `0x${string}`[] }) => void | Promise<void>;
+
 export async function runChain(
   client: PublicClient,
   wallet: WalletClient,
@@ -36,9 +38,10 @@ export async function runChain(
   snapshot: Snapshot,
   prover: Prover,
   log: (s: string) => void,
-  opts?: { restart?: boolean; account?: Address; chain?: Chain | null },
+  opts?: { restart?: boolean; account?: Address; chain?: Chain | null; submit?: boolean; onProof?: OnProof },
 ): Promise<void> {
   const pool = snapshot.pool as Address;
+  const submit = opts?.submit ?? true;
   const account = opts?.account ?? wallet.account!;
   const chain = opts?.chain ?? wallet.chain;
   const advance = async (proof: Uint8Array, pi: `0x${string}`[], restart: boolean) => {
@@ -54,6 +57,11 @@ export async function runChain(
     if (receipt.status !== "success") throw new Error(`advance reverted: ${hash}`);
     return receipt;
   };
+  // Notify a caller that wants the raw proof (e.g. the prove service handing it back to
+  // whoever asked) whether or not this run also submits it itself.
+  const emit = async (kind: "ingest" | "tally", index: number, out: { proof: Uint8Array; publicInputs: `0x${string}`[] }) => {
+    if (opts?.onProof) await opts.onProof({ kind, index, proof: out.proof, publicInputs: out.publicInputs });
+  };
 
   const numBatches = plan.expected.ingest.length;
   if (snapshot.ingestCursor >= numBatches) {
@@ -62,8 +70,13 @@ export async function runChain(
     for (let k = snapshot.ingestCursor; k < numBatches; k++) {
       log(`proving ingest batch ${k}`);
       const out = await prover.prove("ingest", ingestInputs(plan, k));
-      const r = await advance(out.proof, out.publicInputs, false);
-      log(`ingest ${k} accepted, gas ${r.gasUsed}`);
+      await emit("ingest", k, out);
+      if (submit) {
+        const r = await advance(out.proof, out.publicInputs, false);
+        log(`ingest ${k} accepted, gas ${r.gasUsed}`);
+      } else {
+        log(`ingest ${k} proved`);
+      }
     }
   }
 
@@ -89,10 +102,19 @@ export async function runChain(
   for (; g < plan.tallyGroups.length; g++) {
     log(`proving tally group ${g}`);
     const out = await prover.prove("tally", tallyInputs(plan, g));
-    const r = await advance(out.proof, out.publicInputs, restart);
+    await emit("tally", g, out);
+    if (submit) {
+      const r = await advance(out.proof, out.publicInputs, restart);
+      log(`tally ${g} accepted, gas ${r.gasUsed}`);
+    } else {
+      log(`tally ${g} proved`);
+    }
     restart = false;
-    log(`tally ${g} accepted, gas ${r.gasUsed}`);
   }
-  const finality = Number(await read<bigint>(client, pool, "finality"));
-  log(finality === 1 ? "Proven" : `finality ${finality}`);
+  if (submit) {
+    const finality = Number(await read<bigint>(client, pool, "finality"));
+    log(finality === 1 ? "Proven" : `finality ${finality}`);
+  } else {
+    log("all tally groups proved");
+  }
 }
