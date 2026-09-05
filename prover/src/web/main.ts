@@ -1,5 +1,5 @@
 // prover/src/web/main.ts — the coordinator page: connect, sign, audit, prove and submit
-import { createPublicClient, createWalletClient, custom, http, hexToBytes, type Address, type Hex } from "viem";
+import { createPublicClient, createWalletClient, custom, defineChain, http, hexToBytes, type Address, type Hex } from "viem";
 import { deriveSk, MASTER_MESSAGE } from "@lib/sealed";
 import { pubkey } from "@lib/grumpkin";
 import { readPoolSnapshot } from "../core/chain";
@@ -155,8 +155,18 @@ $("prove").onclick = guard(async () => {
   // only refreshes status or audits.
   const { Prover } = await import("../core/prove");
   const prover = await Prover.create(plan.profile.name as "test" | "default", navigator.hardwareConcurrency ?? 4);
+  // An injected-wallet client has no chain bound; viem needs one on writeContract. Describe
+  // the chain the RPC URL serves (id from the node, the RPC as its default endpoint).
+  const chainId = await pub.getChainId();
+  const known = KNOWN_CHAINS[chainId] ?? { name: `Chain ${chainId}`, symbol: "ETH" };
+  const chain = defineChain({
+    id: chainId,
+    name: known.name,
+    nativeCurrency: { name: known.symbol, symbol: known.symbol, decimals: 18 },
+    rpcUrls: { default: { http: [($("rpc") as HTMLInputElement).value] } },
+  });
   try {
-    await runChain(pub, wallet, plan, s, prover, log, { account });
+    await runChain(pub, wallet, plan, s, prover, log, { account, chain });
   } finally {
     await prover.destroy();
   }
