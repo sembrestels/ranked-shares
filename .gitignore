@@ -7,3 +7,4 @@ reference/tools/node_modules/
 reference/tools/package-lock.json
 
 .claude/
+.superpowers/
