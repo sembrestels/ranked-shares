@@ -9,6 +9,7 @@ profiles.
     cd noir && nargo test --workspace         # library tests
     python3 reference/tools/noir_run.py --fixture test_main   # execute every proof of a fixture
     noir/scripts/build.sh test && noir/scripts/build.sh default  # ACIR, vk, Solidity verifiers
+    noir/scripts/build.sh --check test && noir/scripts/build.sh --check default  # vk vs ACIR
     noir/scripts/prove_fixture.sh test_main   # real proofs into noir/proofs/
 
 | Circuit | Gates | bb prove (native) | Peak memory |
@@ -25,3 +26,11 @@ native `bb` numbers on the machine that built this workspace; the browser provin
 
 A change to any circuit changes its verification key: rerun `build.sh`, commit the new
 verifiers, and deploy a new pool.
+
+`build.sh --check <profile>` recomputes the verification key from the committed
+`artifacts/<profile>/<kind>.json` and compares its `vk_hash` with the committed
+`artifacts/<profile>/<kind>.vk_hash`, writing nothing. Run it for both profiles whenever
+`noir/sealed` or `noir/pbear` changes — including refactors that look behaviour-preserving,
+since the ACIR optimiser is sensitive to how the code is factored. A mismatch means the
+committed verifiers under `src/verifiers/` and `test/verifiers/` and the proofs under
+`noir/proofs/` are stale and must be regenerated with `build.sh` and `prove_fixture.sh`.

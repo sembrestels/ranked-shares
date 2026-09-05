@@ -1,14 +1,38 @@
 #!/usr/bin/env bash
-# noir/scripts/build.sh [test|default]: ACIR, verification keys and Solidity verifiers.
+# noir/scripts/build.sh [--check] [test|default]
+#   without --check: ACIR, verification keys and Solidity verifiers.
+#   with --check: recompute each verification key from the *committed* ACIR in
+#     artifacts/<profile>/ and compare its vk_hash with the committed one; nothing is
+#     written. Run it whenever noir/sealed or noir/pbear change: a circuit change moves
+#     the vk, and then the verifiers and the proofs under noir/proofs/ are stale.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 . scripts/env.sh
+check=0
+if [ "${1:-}" = "--check" ]; then check=1; shift; fi
 profile="${1:-default}"
 case "$profile" in
   test) dest="../test/verifiers"; suffix="Test" ;;
   default) dest="../src/verifiers"; suffix="" ;;
   *) echo "profile must be test or default" >&2; exit 1 ;;
 esac
+
+if [ "$check" = 1 ]; then
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+  status=0
+  for kind in ingest tally; do
+    bb write_vk -b "artifacts/$profile/$kind.json" -o "$tmp/$kind" -t evm
+    if cmp -s "$tmp/$kind/vk_hash" "artifacts/$profile/$kind.vk_hash"; then
+      echo "ok   $profile/$kind: vk_hash matches artifacts/$profile/$kind.vk_hash"
+    else
+      echo "FAIL $profile/$kind: vk_hash differs from artifacts/$profile/$kind.vk_hash" >&2
+      status=1
+    fi
+  done
+  exit "$status"
+fi
+
 nargo compile --workspace
 mkdir -p "artifacts/$profile" "$dest"
 for kind in ingest tally; do
