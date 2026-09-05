@@ -300,9 +300,14 @@ history:
 
 ```
 cd cre
-PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs | \
-  (read s; RANKED_SHARES_MASTER=$s cre secrets create workflows/sealed/secrets.yaml --target staging-settings)
+export CRE_RANKED_SHARES_MASTER=$(PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs)
+cre secrets create workflows/sealed/secrets.yaml --target staging-settings
 ```
+
+`workflows/sealed/secrets.yaml` maps the secret id the workflow reads
+(`RANKED_SHARES_MASTER`) to the environment variable that supplies its value
+(`CRE_RANKED_SHARES_MASTER`); the CLI reads that variable from the shell or from `cre/.env`
+(see `cre/.env.example`, which also holds `CRE_ETH_PRIVATE_KEY` for registry writes).
 
 (`node` also works in place of `bun` if it resolves `viem` from `cre/node_modules`; bun
 imports the `.ts` lib modules directly, so nothing needs building first.)
@@ -323,20 +328,28 @@ export TALLIER_PK_Y=$(printf '%s\n' "$PK" | sed -n 's/^pkY=//p')
 # then run script/DeploySealed.s.sol with those three exported
 ```
 
-**Simulation.** With the CRE CLI installed, logged in, and a pool deployed on Arc testnet
-with `DeployVerifiers` + `DeploySealed --profile test`:
+**Simulation.** `cre/project.yaml` and `workflows/sealed/workflow.yaml` follow the CLI's
+target layout (`staging-settings`: chain `arc-testnet`, RPC `https://rpc.testnet.arc.network`,
+entry point `src/main.ts`, `config.staging.json`, `secrets.yaml`). With the CRE CLI installed
+(`curl -sSL https://app.chain.link/cre/install.sh | bash`) and logged in (`cre login`), run
+from the project root:
 
 ```
-cd cre/workflows/sealed
-cre workflow simulate --target staging-settings --config config.staging.json ../../src/main.ts
+cd cre
+export CRE_RANKED_SHARES_MASTER=$(PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs)
+cre workflow simulate workflows/sealed --target staging-settings --non-interactive --trigger-index 0
 ```
 
-against `pools: ["0x…"]` set in `config.staging.json` to that pool's address, with
-`RANKED_SHARES_MASTER` present in the simulation's secrets (`secrets.yaml` names it).
-**This was not run in this environment** — no CRE CLI login/account was available in this
-session — so whether the TEE handler ran under simulation's QuickJS, and what it wrote,
-is undocumented; the compiled artifact (`bun run compile` → `dist/workflow.wasm`, built
-with Javy) and the `bun test` suite are the only verification performed here.
+The simulator compiles `src/main.ts` itself (add `--wasm $PWD/dist/workflow.wasm` to reuse
+`bun run compile`'s output), does not send transactions unless `--broadcast` is given, and
+prints the TEE handler's logs for debugging only (in production they never leave the enclave).
+
+Observed on 2026-09-05 with CRE CLI v1.32.0 and the shipped placeholder config: the settings,
+the `arc-testnet` RPC and the secret load, the cron trigger is reported as requesting TEE
+execution (AWS Nitro), and the handler runs until its first `callContract` read, which
+returns `0x` for the zero address. A full run — the tally under QuickJS and the kind-1 report
+it writes — still needs a pool deployed on Arc testnet with `DeployVerifiers` +
+`DeploySealed --profile test` and its address in `config.staging.json`.
 
 ## Reference implementation
 
