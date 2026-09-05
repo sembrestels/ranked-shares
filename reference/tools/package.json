@@ -1,0 +1,6 @@
+{
+  "name": "reference-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@aztec/bb.js": "5.2.0" }
+}

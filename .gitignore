@@ -3,3 +3,5 @@ out/
 broadcast/
 .env
 __pycache__/
+reference/tools/node_modules/
+reference/tools/package-lock.json
