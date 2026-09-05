@@ -233,6 +233,46 @@ contract SealedRankedShares is PoolBase, IReceiver {
         return (ct[0], ct[1], ct[2]);
     }
 
+    /// @notice One page of the tally roster in registration order: up to `count` entries
+    ///         from `start`, fewer at the end and empty arrays past it. The workflow and
+    ///         the prover rebuild the whole roster this way instead of one `eth_call` per
+    ///         voter. `ballots[i]` is the packed direct ballot and is zero both for an
+    ///         indifferent ballot and for no ballot at all, so `hasDirectFlags[i]` is what
+    ///         tells the two apart; `cts[i]` is the ciphertext triple, zeros when none.
+    function votersFrom(uint256 start, uint256 count)
+        external
+        view
+        returns (
+            address[] memory who,
+            uint256[] memory direct,
+            uint256[] memory ballots,
+            uint256[] memory seats,
+            uint256[3][] memory cts,
+            bool[] memory hasDirectFlags
+        )
+    {
+        uint256 n = voters.length;
+        // `n - start > count` rather than `start + count > n`, which a huge `count` would
+        // overflow.
+        uint256 len = start >= n ? 0 : (n - start > count ? count : n - start);
+        who = new address[](len);
+        direct = new uint256[](len);
+        ballots = new uint256[](len);
+        seats = new uint256[](len);
+        cts = new uint256[3][](len);
+        hasDirectFlags = new bool[](len);
+        for (uint256 i = 0; i < len; i++) {
+            address a = voters[start + i];
+            who[i] = a;
+            direct[i] = directWeight[a];
+            seats[i] = seatWeight[a];
+            hasDirectFlags[i] = hasDirect[a];
+            ballots[i] = hasDirectFlags[i] ? _directBallot[a] : 0;
+            uint256[3] storage ct = _sealed[a];
+            cts[i] = [ct[0], ct[1], ct[2]];
+        }
+    }
+
     // --------------------------------------------------------------- ballots
 
     /// @notice Cast the caller's public ballot. One per address, never replaced. A
