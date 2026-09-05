@@ -8,6 +8,7 @@ pub mod commitments;
 pub mod curve;
 pub mod hash;
 pub mod io;
+pub mod keys;
 pub mod tally;
 pub mod types;
 

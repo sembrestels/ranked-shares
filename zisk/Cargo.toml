@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
-members = ["crates/pbear", "crates/sealed", "guest"]
+members = ["crates/pbear", "crates/sealed", "prover", "guest"]
 # `cargo test` on the host builds only these; the guest is built by cargo-zisk (Task 10).
-default-members = ["crates/pbear", "crates/sealed"]
+default-members = ["crates/pbear", "crates/sealed", "prover"]
 
 [workspace.package]
 version = "0.1.0"
