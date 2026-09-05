@@ -272,6 +272,13 @@ decrypts the sealed ballots, runs the same PB-EAR transcript as the reference an
 the result (kind-1) via `evm.writeReport`. Nothing but `(inputsRoot, funded, transcript)`
 ever leaves `processPool`, the pure function the handler wraps.
 
+**`config.staging.json` ships with `pools: ["0x0…0"]` as an obvious placeholder — replace
+it with your deployed pool's address before running the workflow for real.** The handler
+validates every entry at the start of each run (`validPools`) and skips anything that
+isn't a real, non-zero address with a `<pool>: skipped, not a pool address (edit
+config.staging.json)` summary line, so the shipped placeholder is inert rather than
+crashing the run, but it still has to be edited for the workflow to do anything.
+
 ```
 cd cre
 bun test           # unit + differential tests: Poseidon2 vs reference/vectors/poseidon2.json,
