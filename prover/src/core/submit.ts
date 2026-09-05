@@ -124,6 +124,13 @@ export async function runChain(
 
   const noTally = (): Resume | null => (submit ? null : { ingestFrom: snapshot.ingestCursor, tallyFrom: 0, restart: false });
 
+  if (plan.tallyError) {
+    // The reported transcript didn't replay (see `rebuild`); the ingest batches above are
+    // still valid and, if `submit`, already landed, so surface this without failing the run.
+    log(`tally plan unavailable: ${plan.tallyError}`);
+    return noTally();
+  }
+
   const resultReported = await read<boolean>(client, pool, "resultReported");
   if (!resultReported) {
     log("transcript not reported yet; stopping after ingest");

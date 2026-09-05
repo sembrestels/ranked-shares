@@ -100,6 +100,15 @@ export function createServer(opts: ServiceOptions): http.Server {
     }
   }
 
+  /**
+   * A pool whose reported transcript doesn't replay (`plan.tallyError`, see
+   * `state.ts`/`submit.ts`) is not a failure of this job: `runChain` proves/submits the
+   * ingest batches (which don't depend on the transcript) and logs `tally plan
+   * unavailable: …` instead of throwing, so the job below still lands as `done` — with
+   * that message in `job.log` and no tally proofs in `job.proofs` — rather than `failed`,
+   * because ingest genuinely landed and a caller polling only `status` shouldn't read this
+   * as "retry me"; the transcript problem is on chain, not something a retry fixes.
+   */
   async function runJob(job: Job): Promise<void> {
     job.status = "running";
     const snapshot = await readPoolSnapshot(client, job.pool, 0n);

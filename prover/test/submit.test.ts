@@ -129,4 +129,36 @@ describe("runChain submission", () => {
     expect(proved).toBe(0);
     expect(lines.join(" ")).toMatch(/already finalized/);
   });
+
+  test("a plan with tallyError still submits pending ingest, but sends no tally advance", async () => {
+    // As `rebuild` would return it for a malformed reported transcript: ingest untouched,
+    // the tally side empty.
+    const withTallyError = { ...plan, tallyGroups: [], expected: { ...plan.expected, tally: [] }, tallyError: "best" };
+    const { client, wallet, prover, writes } = stubs();
+    const lines: string[] = [];
+    await runChain(client, wallet, withTallyError, snapshotWith({ ingestCursor: 0 }), prover, (m) => lines.push(m), { account: privateKeyToAccount(KEY), chain: null });
+    expect(writes.length).toBe(numBatches);
+    expect(writes.every((w) => w.functionName === "advance")).toBe(true);
+    expect(lines.join(" ")).toMatch(/tally plan unavailable: best/);
+  });
+
+  test("submit: false with a tallyError plan proves the pending ingest and stops, sending nothing", async () => {
+    const withTallyError = { ...plan, tallyGroups: [], expected: { ...plan.expected, tally: [] }, tallyError: "best" };
+    const { client, wallet, prover, writes } = stubs();
+    let tallyProved = 0;
+    const counting = {
+      prove: async (kind: string, ...rest: unknown[]) => {
+        if (kind === "tally") tallyProved++;
+        return prover.prove(kind as any, ...(rest as [never]));
+      },
+    } as unknown as Prover;
+    const resume = await runChain(client, wallet, withTallyError, snapshotWith({ ingestCursor: 0 }), counting, () => {}, {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      submit: false,
+    });
+    expect(writes.length).toBe(0); // submit: false never calls advance
+    expect(tallyProved).toBe(0);
+    expect(resume).toEqual({ ingestFrom: 0, tallyFrom: 0, restart: false });
+  });
 });
