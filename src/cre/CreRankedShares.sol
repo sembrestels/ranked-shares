@@ -12,19 +12,34 @@ import {IReceiver} from "../interfaces/IReceiver.sol";
 ///         DON's report is the result: `onReport` kind 1 finalises the pool as `Attested`
 ///         once `inputsHash` matches, kind 2 drives `close` from the workflow. Same
 ///         ballots, commitment and encryption as the zisk pool (spec Z5).
-/// @dev DO NOT deploy a cre pool until the workflow owner/name in `onReport`'s `metadata`
-///      is checked against an immutable: the KeystoneForwarder is a per-chain singleton
-///      shared by every workflow, and `onReport` below currently ignores `metadata`, so
-///      any workflow owner could deliver a kind-1 report to this contract.
+/// @dev The KeystoneForwarder is a per-chain singleton shared by every workflow, so
+///      `onReport`'s `msg.sender == forwarder` check alone would let any workflow owner
+///      registered with it deliver a report to this pool. `onReport` additionally checks
+///      the forwarder's `metadata` — `abi.encodePacked(bytes32 workflowId, bytes10
+///      workflowName, address workflowOwner)`, optionally followed by a `bytes2
+///      reportId` — against the immutables `workflowOwner` and `workflowName` set at
+///      construction. If `workflowOwner_` is `address(0)` this check is disabled: such a
+///      pool accepts a report from any workflow that reaches the forwarder and must never
+///      hold real funds. It exists only so `cre workflow simulate`'s MockForwarder, which
+///      calls `onReport` with no metadata at all, can exercise a pool.
 contract CreRankedShares is SealedPool, IReceiver {
     error NotForwarder();
     error UnknownReport();
     error InputMismatch();
+    error WrongWorkflow();
+    error BadMetadata();
 
     uint8 internal constant KIND_RESULT = 1;
     uint8 internal constant KIND_CLOSE = 2;
 
     address public immutable forwarder;
+    /// @notice The workflow owner authorized to deliver reports, or `address(0)` to
+    ///         disable the check (simulation only; see the contract-level dev note above).
+    address public immutable workflowOwner;
+    /// @notice The workflow name authorized to deliver reports, or `bytes10(0)` to accept
+    ///         any name from `workflowOwner`. Derive it from a workflow's name string
+    ///         with `workflowNameOf`.
+    bytes10 public immutable workflowName;
 
     constructor(
         IERC20 token_,
@@ -34,10 +49,40 @@ contract CreRankedShares is SealedPool, IReceiver {
         bytes32 keySalt_,
         uint256 minDirectVote_,
         uint64 abandonGrace_,
-        address forwarder_
+        address forwarder_,
+        address workflowOwner_,
+        bytes10 workflowName_
     ) SealedPool(token_, owner_, votingDeadline_, tallierPk_, keySalt_, minDirectVote_, abandonGrace_) {
         if (forwarder_ == address(0)) revert InvalidConfig();
         forwarder = forwarder_;
+        workflowOwner = workflowOwner_;
+        workflowName = workflowName_;
+    }
+
+    /// @notice Derives the `bytes10 workflowName` CRE embeds in `onReport`'s `metadata`
+    ///         from a workflow's name string: SHA-256 the name, hex-encode the digest,
+    ///         take the first 10 hex characters, and return their ASCII bytes.
+    function workflowNameOf(string memory name) public pure returns (bytes10) {
+        bytes32 digest = sha256(bytes(name));
+        bytes memory hexAlphabet = "0123456789abcdef";
+        bytes memory out = new bytes(10);
+        for (uint256 i = 0; i < 5; i++) {
+            uint8 b = uint8(digest[i]);
+            out[2 * i] = hexAlphabet[b >> 4];
+            out[2 * i + 1] = hexAlphabet[b & 0x0f];
+        }
+        return bytes10(out);
+    }
+
+    /// @dev Checks `metadata` against `workflowOwner`/`workflowName` when the check is
+    ///      enabled (see the contract-level dev note above).
+    function _checkWorkflow(bytes calldata metadata) internal view {
+        if (workflowOwner == address(0)) return;
+        if (metadata.length < 62) revert BadMetadata();
+        if (address(bytes20(metadata[42:62])) != workflowOwner) revert WrongWorkflow();
+        if (workflowName != bytes10(0) && bytes10(metadata[32:42]) != workflowName) {
+            revert WrongWorkflow();
+        }
     }
 
     function kind() external pure override returns (string memory) {
@@ -49,13 +94,12 @@ contract CreRankedShares is SealedPool, IReceiver {
     }
 
     /// @notice Entry point for the CRE forwarder.
-    /// @dev `metadata` (the first argument) is ignored. The KeystoneForwarder is a
-    ///      per-chain singleton shared by every workflow, so until this checks
-    ///      `metadata`'s workflow owner/name against an immutable, any workflow owner
-    ///      registered with the forwarder can deliver a kind-1 report to this pool.
-    ///      DO NOT deploy a cre pool before that check exists.
-    function onReport(bytes calldata, bytes calldata report) external {
+    /// @dev `metadata` is checked against `workflowOwner`/`workflowName` before the
+    ///      report is decoded; see the contract-level dev note above for what that check
+    ///      is and when it is disabled.
+    function onReport(bytes calldata metadata, bytes calldata report) external {
         if (msg.sender != forwarder) revert NotForwarder();
+        _checkWorkflow(metadata);
         (uint8 reportKind, bytes memory payload) = abi.decode(report, (uint8, bytes));
         if (reportKind == KIND_CLOSE) {
             if (phase() != Phase.Closing) revert WrongPhase();

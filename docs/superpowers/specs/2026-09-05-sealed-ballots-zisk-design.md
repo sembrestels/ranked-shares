@@ -270,9 +270,9 @@ proofBytes)`** — `inPhase(Tally)`, anyone. Immutables: `IZiskVerifier verifier
 `programVK` changes with every guest build; `rootC` with every PLONK key version; the
 verifier contract is tied to the key version. A new guest means a new pool.
 
-**`CreRankedShares`** — immutable `forwarder`; `onReport(bytes metadata, bytes
-report)` only from it (`NotForwarder`); `supportsInterface` for `IReceiver`. Reports
-are `abi.encode(uint8 kind, bytes payload)`:
+**`CreRankedShares`** — immutable `forwarder`, `workflowOwner`, `workflowName`;
+`onReport(bytes metadata, bytes report)` only from `forwarder` (`NotForwarder`);
+`supportsInterface` for `IReceiver`. Reports are `abi.encode(uint8 kind, bytes payload)`:
 
 | kind | payload | effect |
 |---|---|---|
@@ -282,11 +282,21 @@ are `abi.encode(uint8 kind, bytes payload)`:
 The workflow that feeds it decrypts with the Z3 scheme and tallies in the Z4 order; it
 is specified with the cre variant, not here.
 
-**Open item.** `onReport` ignores `metadata` and checks only `msg.sender == forwarder`.
-The KeystoneForwarder is a per-chain singleton shared by every workflow registered with
-it, so as written any workflow owner can deliver a kind-1 or kind-2 report to a
-`CreRankedShares` pool. DO NOT deploy a cre pool until `metadata`'s workflow owner/name
-is checked against an immutable set at construction.
+**Workflow authorization.** The KeystoneForwarder is a per-chain singleton shared by
+every workflow registered with it, so `msg.sender == forwarder` alone would let any
+workflow owner deliver a report to a `CreRankedShares` pool. Before decoding `report`
+(both kinds), `onReport` checks the forwarder's `metadata` —
+`abi.encodePacked(bytes32 workflowId, bytes10 workflowName, address workflowOwner)`,
+optionally followed by a `bytes2 reportId` — against the constructor's
+`workflowOwner_`/`workflowName_`: `metadata.length >= 62` (else `BadMetadata`),
+`address(bytes20(metadata[42:62])) == workflowOwner` (else `WrongWorkflow`), and, when
+`workflowName != bytes10(0)`, `bytes10(metadata[32:42]) == workflowName` (else
+`WrongWorkflow`). `workflowNameOf(string name)` derives `bytes10 workflowName` from a
+workflow's name the way CRE does: SHA-256 the name, hex-encode, take the first 10 hex
+characters, and return their ASCII bytes. If `workflowOwner_` is `address(0)` the check
+is disabled — such a pool accepts a report from any workflow reaching the forwarder and
+must never hold real funds; it exists only so `cre workflow simulate`'s MockForwarder,
+which calls `onReport` with no metadata at all, can exercise a pool.
 
 **Liveness.** `abandon()` — anyone, in `Closing` or `Tally`, once
 `block.timestamp ≥ votingDeadline + abandonGrace` (`ResultPending` before that). Sets
