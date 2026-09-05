@@ -103,12 +103,64 @@ Python, checks that both agree, and brute-forces the IPSC axiom on the result.
 | `poseidon2.py` | Poseidon2 over BN254 (t = 4), equal to Barretenberg's; vectors in `vectors/poseidon2.json` |
 | `grumpkin.py`, `sealed.py` | Grumpkin, ballot packing, ECDH ballot encryption; vectors in `vectors/sealed.json` |
 | `commitments.py`, `profiles.py` | on-chain commitments, transcript hash, circuit state and profiles |
-| `tools/make_fixture.py` | writes `vectors/fixture_<profile>.json`, consumed by the Solidity, Noir and TypeScript tests |
+| `tools/make_fixture.py` | writes `vectors/fixture_<profile>_<scenario>.json`, consumed by the Solidity, Noir and TypeScript tests |
 
 Run `python3 -m unittest discover reference`. Regenerate Poseidon2 constants and vectors with
 `python3 reference/tools/extract_poseidon2_params.py` and
 `node reference/tools/poseidon2_vectors.mjs > reference/vectors/poseidon2.json`
-(needs `npm install` in `reference/tools`).
+(needs `npm install` in `reference/tools`). Regenerate the sealed-ballot vectors with
+`python3 test_sealed.py --write` from `reference/`.
+
+### Fixtures
+
+```
+python3 reference/tools/make_fixture.py --profile test|default [--out DIR]
+```
+
+Writes every scenario of that profile as `fixture_<profile>_<scenario>.json`, into
+`reference/vectors/` unless `--out` names another directory. The `test` profile
+(`N_SEALED_MAX 8, M_MAX 4, B 2, K 2`) gets all three scenarios, the `default` profile
+(`256, 16, 32, 8`) only `main`, because it takes about ten seconds:
+
+| Scenario | Exercises |
+|---|---|
+| `main` | the full roster: public-only voters, sealed voters spanning several batches, one address with both kinds of weight, a replayed ciphertext that decrypts to an absent ballot, a silent seat holder and a silent direct voter |
+| `smallm` | `m = mMax − 1`, so every consumer sees a pool with fewer projects than the profile allows, and a tally that ends with a terminal `NONE` step at `level ≥ m` instead of by exhaustion |
+| `nosealed` | no ciphertext anywhere: `sealedCount == 0`, `numBatches == 1` and a single ingest proof over an empty batch with `hIn == hOut == 0`, over a non-empty public block |
+
+Each file carries the profile, the scenario name, `m`, the keys, the roster, both
+commitment chains and their checkpoints, `inputsRoot`, the funded order, the transcript
+and its hash, and the public inputs of every ingest and tally proof. The key set is
+asserted against `FIXTURE_KEYS` before writing, and `reference/test_fixture.py`
+regenerates all four files into a temporary directory and compares them byte for byte
+with the committed ones.
+
+### Transcript mode
+
+`pbear.py` also runs the split tally of the sealed design, the mode the CRE enclave and
+the browser prover mirror:
+
+```
+python3 reference/pbear.py --transcript '{"costs": [30, 70],
+  "public": [[40, [1, 2]]], "sealed": [[60, [2, 1]]], "budget": 100}'
+```
+
+The input is one JSON object: `costs` per project, `public` and `sealed` as lists of
+`[weight, ranks]` entries (`ranks` may be `null` for an abstaining entry) in the tally
+order of spec B2, and `budget`, which must be at least the sum of all entry weights —
+the difference is the abstaining weight. The output is one JSON object:
+
+```
+{"funded": [0, 1], "transcript": [[1, 40, 0, 0, 40],
+                                  [1, 0, 0, 18446744073709551615, 0],
+                                  [2, 0, 10, 1, 70]]}
+```
+
+Each step is `[level, pubSupport[0..m), best, total]`, one per executed iteration as
+spec B6.3 defines it, with `best = 2^64 − 1` for a step that funded nothing and at most
+`2m` steps in all. The positional form,
+`python3 reference/pbear.py '{"costs": …, "voters": …}'`, is the single-list tally the
+Foundry differential fuzz calls and prints an ABI-encoded `uint256[]` instead.
 
 ## Gas and limits
 
