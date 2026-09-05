@@ -1,5 +1,5 @@
 // prover/src/core/submit.ts — resumes the proof chain and drives `advance` on the pool
-import { toHex, type Address, type Chain, type PublicClient, type WalletClient } from "viem";
+import { toHex, type Account, type Address, type Chain, type PublicClient, type WalletClient } from "viem";
 import abi from "../../../cre/src/abi/SealedRankedShares.json";
 import { stateCommit } from "@lib/commitments";
 import { read, type Snapshot } from "./chain";
@@ -29,8 +29,41 @@ export function planTally(onChain: bigint, plan: ProofPlan, opts?: { restart?: b
   return { g: restart ? 0 : found, restart };
 }
 
-export type OnProof = (p: { kind: "ingest" | "tally"; index: number; proof: Uint8Array; publicInputs: `0x${string}`[] }) => void | Promise<void>;
+/**
+ * Where someone else — the caller of a `submit: false` run — should start submitting the
+ * proofs this run produced, read off the pool's current state.
+ */
+export type Resume = { ingestFrom: number; tallyFrom: number; restart: boolean };
 
+/**
+ * The resume hint for a run that proves everything rather than submitting it. `restart`
+ * is true only when ingest is already complete on chain yet the on-chain `stateCommit`
+ * belongs to no group of this transcript (and is not the final `stateOut`) — the one case
+ * where the chain has to be reset to `ingestedState` before the tally proofs apply.
+ * Pure and chain-free, like `planTally`.
+ */
+export function resumeHint(onChain: bigint, plan: ProofPlan, snapshot: Pick<Snapshot, "ingestCursor">): Resume {
+  const ingestFrom = snapshot.ingestCursor;
+  const groups = plan.tallyGroups;
+  // Ingest still pending: submitting it lands the chain on group 0's stateIn by
+  // construction, so the tally starts at 0 with no restart whatever it reads now.
+  if (ingestFrom < plan.expected.ingest.length || groups.length === 0) return { ingestFrom, tallyFrom: 0, restart: false };
+  if (onChain === stateCommit(plan.profile, groups[groups.length - 1]!.stateOut)) return { ingestFrom, tallyFrom: groups.length, restart: false };
+  const found = groups.findIndex((grp) => stateCommit(plan.profile, grp.stateIn) === onChain);
+  return { ingestFrom, tallyFrom: found < 0 ? 0 : found, restart: found < 0 };
+}
+
+export type OnProof = (p: { kind: "ingest" | "tally"; index: number; proof: Uint8Array; publicInputs: `0x${string}`[]; restart: boolean }) => void | Promise<void>;
+
+/**
+ * Proves — and, with `submit` (the default), submits — everything the pool still needs.
+ *
+ * With `submit: false` nothing is sent, so nothing the chain would have to accept first
+ * can be assumed: every ingest batch from `ingestCursor` and every tally group from 0 is
+ * proved, and the returned `Resume` says where whoever submits them should start.
+ * With `submit: true` the run resumes the tally chain itself via `planTally` and returns
+ * null.
+ */
 export async function runChain(
   client: PublicClient,
   wallet: WalletClient,
@@ -38,12 +71,14 @@ export async function runChain(
   snapshot: Snapshot,
   prover: Prover,
   log: (s: string) => void,
-  opts?: { restart?: boolean; account?: Address; chain?: Chain | null; submit?: boolean; onProof?: OnProof },
-): Promise<void> {
+  opts?: { restart?: boolean; account?: Account | Address; chain?: Chain | null; submit?: boolean; onProof?: OnProof },
+): Promise<Resume | null> {
   const pool = snapshot.pool as Address;
   const submit = opts?.submit ?? true;
   const account = opts?.account ?? wallet.account!;
   const chain = opts?.chain ?? wallet.chain;
+  /** True once the pool is Proven or Attested: `advance` is closed and nothing may be sent. */
+  const isDone = async () => Number(await read<bigint>(client, pool, "finality")) !== 0;
   const advance = async (proof: Uint8Array, pi: `0x${string}`[], restart: boolean) => {
     const hash = await wallet.writeContract({
       address: pool,
@@ -59,9 +94,16 @@ export async function runChain(
   };
   // Notify a caller that wants the raw proof (e.g. the prove service handing it back to
   // whoever asked) whether or not this run also submits it itself.
-  const emit = async (kind: "ingest" | "tally", index: number, out: { proof: Uint8Array; publicInputs: `0x${string}`[] }) => {
-    if (opts?.onProof) await opts.onProof({ kind, index, proof: out.proof, publicInputs: out.publicInputs });
+  const emit = async (kind: "ingest" | "tally", index: number, out: { proof: Uint8Array; publicInputs: `0x${string}`[] }, restart = false) => {
+    if (opts?.onProof) await opts.onProof({ kind, index, proof: out.proof, publicInputs: out.publicInputs, restart });
   };
+
+  // The pool may have been finalized (Attested after `proofGrace`, or Proven by someone
+  // else) between the snapshot and now; `advance` would revert, so don't send anything.
+  if (await isDone()) {
+    log("pool already finalized; nothing to advance");
+    return submit ? null : { ingestFrom: snapshot.ingestCursor, tallyFrom: 0, restart: false };
+  }
 
   const numBatches = plan.expected.ingest.length;
   if (snapshot.ingestCursor >= numBatches) {
@@ -80,30 +122,46 @@ export async function runChain(
     }
   }
 
+  const noTally = (): Resume | null => (submit ? null : { ingestFrom: snapshot.ingestCursor, tallyFrom: 0, restart: false });
+
   const resultReported = await read<boolean>(client, pool, "resultReported");
   if (!resultReported) {
     log("transcript not reported yet; stopping after ingest");
-    return;
+    return noTally();
   }
 
   if (plan.tallyGroups.length === 0) {
     log("no tally groups to prove");
-    return;
+    return noTally();
   }
 
   const onChain = await read<bigint>(client, pool, "stateCommit");
-  const decision = planTally(onChain, plan, opts);
-  if (decision === "proven") {
-    log("already Proven");
-    return;
+  let g = 0;
+  let restart = false;
+  let resume: Resume | null = null;
+  if (submit) {
+    const decision = planTally(onChain, plan, opts);
+    if (decision === "proven") {
+      log("already Proven");
+      return null;
+    }
+    ({ g, restart } = decision);
+    if (restart) log("restarting the tally chain from group 0");
+  } else {
+    resume = resumeHint(onChain, plan, snapshot);
+    log(`resume hint: ingest from ${resume.ingestFrom}, tally from ${resume.tallyFrom}, restart ${resume.restart}`);
   }
-  let { g, restart } = decision;
-  if (restart) log("restarting the tally chain from group 0");
   for (; g < plan.tallyGroups.length; g++) {
     log(`proving tally group ${g}`);
     const out = await prover.prove("tally", tallyInputs(plan, g));
-    await emit("tally", g, out);
+    await emit("tally", g, out, resume ? g === resume.tallyFrom && resume.restart : restart);
     if (submit) {
+      // Between proving and sending, someone may have accepted the provisional result or
+      // proven the pool themselves; either way `advance` is closed.
+      if (await isDone()) {
+        log("pool finalized while proving; nothing submitted");
+        return null;
+      }
       const r = await advance(out.proof, out.publicInputs, restart);
       log(`tally ${g} accepted, gas ${r.gasUsed}`);
     } else {
@@ -117,4 +175,5 @@ export async function runChain(
   } else {
     log("all tally groups proved");
   }
+  return resume;
 }
