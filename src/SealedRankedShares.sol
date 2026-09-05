@@ -45,6 +45,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     error ResultMismatch();
     error ProofPending();
     error ResultPending();
+    error EmptyBatch();
 
     // ---------------------------------------------------------------- events
 
@@ -506,10 +507,45 @@ contract SealedRankedShares is PoolBase, IReceiver {
         external
         inPhase(Phase.Tally)
     {
+        _advanceOne(proof, publicInputs, restart);
+    }
+
+    /// @notice Verify several proofs of the chain in one transaction, in order. Each element
+    ///         is subject to exactly the rules `advance` applies to it, so a batch is only a
+    ///         cheaper way to send what would otherwise be one transaction each: the ingest
+    ///         batches still land in order and the tally groups still chain through
+    ///         `stateCommit`. `restart` is applied to the first *tally* proof of the batch and
+    ///         never to an ingest proof — a batch that starts with pending ingest is a forward
+    ///         run of the whole chain, where a rewind to `ingestedState` would be a no-op at
+    ///         best — and, as in `advance`, only the `coordinator` may ask for it.
+    ///
+    ///         The batch is atomic: one rejected proof reverts the whole call, so a caller
+    ///         either lands every proof it sent or none of them.
+    function advanceMany(bytes[] calldata proofs, bytes32[][] calldata publicInputs, bool restart)
+        external
+        inPhase(Phase.Tally)
+    {
+        if (proofs.length != publicInputs.length) revert InputMismatch();
+        if (proofs.length == 0) revert EmptyBatch();
+        // `inPhase` only sees the phase this call started in. The finalising `done` proof
+        // moves the pool to `Done` mid-loop, and everything after it would be an `advance`
+        // on a finished pool: refuse the batch rather than silently ignoring its tail.
+        bool restartUsed;
+        for (uint256 i = 0; i < proofs.length; i++) {
+            if (i > 0 && finality != Finality.None) revert WrongPhase();
+            bool r = restart && !restartUsed && ingestCursor == numBatches;
+            if (r) restartUsed = true;
+            _advanceOne(proofs[i], publicInputs[i], r);
+        }
+    }
+
+    /// @dev The routing `advance` and every element of `advanceMany` share: ingest batches
+    ///      first, then tally groups.
+    function _advanceOne(bytes calldata proof, bytes32[] calldata pi, bool restart) internal {
         if (ingestCursor < numBatches) {
-            _advanceIngest(proof, publicInputs);
+            _advanceIngest(proof, pi);
         } else {
-            _advanceTally(proof, publicInputs, restart);
+            _advanceTally(proof, pi, restart);
         }
     }
 

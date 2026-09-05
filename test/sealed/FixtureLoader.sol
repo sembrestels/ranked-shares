@@ -181,4 +181,52 @@ abstract contract FixtureLoader is Test {
         vm.warp(DEADLINE);
         while (!pool.closed()) pool.close(chunk);
     }
+
+    // ---- the DON's report and the fixture's proof public inputs ----
+
+    /// @dev The kind-1 report the workflow would deliver: the fixture's result and the flat
+    ///      transcript, from the forwarder.
+    function report() internal {
+        uint256 steps = fxCount(".transcript");
+        uint256 width = fxUint(".m") + 3;
+        uint256[] memory flat = new uint256[](steps * width);
+        for (uint256 s = 0; s < steps; s++) {
+            uint256[] memory step = fxUintArray(string.concat(".transcript[", vm.toString(s), "]"));
+            for (uint256 w = 0; w < width; w++) {
+                flat[s * width + w] = step[w];
+            }
+        }
+        vm.prank(forwarder);
+        pool.onReport("", abi.encode(uint8(1), abi.encode(fxBytes32(".inputsRoot"), fxUintArray(".funded"), flat)));
+    }
+
+    /// @dev Batch `k`'s public inputs as the fixture records them, in circuit order. Paired
+    ///      with a mock verifier this is a proof the pool accepts without any proving.
+    function ingestInputs(uint256 k) internal view returns (bytes32[] memory out) {
+        string memory p = string.concat(".ingestProofs[", vm.toString(k), "].");
+        out = new bytes32[](10);
+        out[0] = bytes32(fxUint(string.concat(p, "k")));
+        out[1] = bytes32(fxUint(string.concat(p, "nSealed")));
+        out[2] = bytes32(fxUint(string.concat(p, "m")));
+        out[3] = fxBytes32(string.concat(p, "budget"));
+        out[4] = fxBytes32(string.concat(p, "pkX"));
+        out[5] = fxBytes32(string.concat(p, "pkY"));
+        out[6] = fxBytes32(string.concat(p, "hIn"));
+        out[7] = fxBytes32(string.concat(p, "hOut"));
+        out[8] = fxBytes32(string.concat(p, "stateIn"));
+        out[9] = fxBytes32(string.concat(p, "stateOut"));
+    }
+
+    /// @dev Tally group `g`'s public inputs, as `ingestInputs` does for a batch.
+    function tallyInputs(uint256 g) internal view returns (bytes32[] memory out) {
+        string memory p = string.concat(".tallyProofs[", vm.toString(g), "].");
+        out = new bytes32[](7);
+        out[0] = fxBytes32(string.concat(p, "costsHash"));
+        out[1] = fxBytes32(string.concat(p, "stateIn"));
+        out[2] = fxBytes32(string.concat(p, "stateOut"));
+        out[3] = bytes32(fxUint(string.concat(p, "done")));
+        out[4] = fxBytes32(string.concat(p, "tHashOut"));
+        out[5] = bytes32(fxUint(string.concat(p, "fundedCount")));
+        out[6] = fxBytes32(string.concat(p, "fundedOrderPacked"));
+    }
 }
