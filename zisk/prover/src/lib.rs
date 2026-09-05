@@ -4,5 +4,6 @@
 pub mod chain;
 pub mod keys;
 pub mod native;
+pub mod pipeline;
 
 pub use eyre::{eyre, Result};
