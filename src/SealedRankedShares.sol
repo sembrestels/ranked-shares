@@ -2,9 +2,11 @@
 pragma solidity ^0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {PoolBase, WrongPhase} from "./PoolBase.sol";
 import {IPoseidon2} from "./interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "./interfaces/IHonkVerifier.sol";
+import {IReceiver} from "./interfaces/IReceiver.sol";
 import {Grumpkin} from "./lib/Grumpkin.sol";
 
 /// @title SealedRankedShares
@@ -13,7 +15,7 @@ import {Grumpkin} from "./lib/Grumpkin.sol";
 ///         and replaceable. The tally runs off-chain: the CRE workflow reports a result
 ///         and a transcript, and a chain of Noir proofs over the sealed block makes it
 ///         final. See docs/superpowers/specs/2026-09-05-sealed-ballots-noir-design.md.
-contract SealedRankedShares is PoolBase {
+contract SealedRankedShares is PoolBase, IReceiver {
     // ---------------------------------------------------------------- errors
 
     error InvalidConfig();
@@ -28,12 +30,20 @@ contract SealedRankedShares is PoolBase {
     error NoSeatWeight();
     error InvalidCiphertext();
     error TooManySealedVoters();
+    error NotForwarder();
+    error UnknownReport();
+    error ResultAlreadyReported();
+    error InputMismatch();
+    error InvalidResult();
+    error InvalidTranscript();
 
     // ---------------------------------------------------------------- events
 
     event Voted(address indexed voter);
     event SealedVote(address indexed voter);
     event Closed(bytes32 inputsRoot, uint256 sealedCount);
+    event ProvisionalResult(uint256[] fundedOrder);
+    event Transcript(uint256[] transcript);
 
     // ----------------------------------------------------------------- types
 
@@ -118,6 +128,11 @@ contract SealedRankedShares is PoolBase {
     uint256 public costsHash;
     bytes32 public inputsRoot;
     uint256 public numBatches;
+
+    // report (spec B6.2)
+    bool public resultReported;
+    uint256[] internal _provisional;
+    uint256 public transcriptHash;
 
     // ----------------------------------------------------------- constructor
 
@@ -292,6 +307,80 @@ contract SealedRankedShares is PoolBase {
             closed = true;
             emit Closed(inputsRoot, sc);
         }
+    }
+
+    // ---------------------------------------------------------------- reports
+
+    function provisionalResult() external view returns (uint256[] memory) {
+        return _provisional;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
+        return interfaceId == type(IReceiver).interfaceId || interfaceId == type(IERC165).interfaceId;
+    }
+
+    /// @notice Entry point for the CRE forwarder: kind 1 delivers the provisional result
+    ///         and the transcript, kind 2 drives `close` from the workflow.
+    function onReport(bytes calldata, bytes calldata report) external {
+        if (msg.sender != forwarder) revert NotForwarder();
+        (uint8 kind, bytes memory payload) = abi.decode(report, (uint8, bytes));
+        if (kind == 2) {
+            if (phase() != Phase.Closing) revert WrongPhase();
+            _close(abi.decode(payload, (uint256)));
+            return;
+        }
+        if (kind != 1) revert UnknownReport();
+        if (phase() != Phase.Tally) revert WrongPhase();
+        if (resultReported) revert ResultAlreadyReported();
+        (bytes32 root, uint256[] memory order, uint256[] memory transcript) =
+            abi.decode(payload, (bytes32, uint256[], uint256[]));
+        if (root != inputsRoot) revert InputMismatch();
+        _validateResult(order);
+        transcriptHash = _hashTranscript(transcript, order);
+        _provisional = order;
+        resultReported = true;
+        emit ProvisionalResult(order);
+        emit Transcript(transcript);
+    }
+
+    /// @dev Distinct valid project ids whose costs fit the budget (spec A6.2).
+    function _validateResult(uint256[] memory order) internal view {
+        uint256 m = _costs.length;
+        bool[] memory seen = new bool[](m);
+        uint256 sum;
+        for (uint256 i = 0; i < order.length; i++) {
+            uint256 id = order[i];
+            if (id >= m || seen[id]) revert InvalidResult();
+            seen[id] = true;
+            sum += _costs[id];
+        }
+        if (sum > totalWeight) revert InvalidResult();
+    }
+
+    /// @dev Parses the transcript of spec B6.3 and returns its Poseidon2 chain hash.
+    function _hashTranscript(uint256[] memory transcript, uint256[] memory order) internal view returns (uint256 h) {
+        uint256 m = _costs.length;
+        uint256 width = m + 3;
+        if (transcript.length % width != 0) revert InvalidTranscript();
+        uint256 steps = transcript.length / width;
+        if (steps > 2 * m) revert InvalidTranscript();
+        uint256[] memory elems = new uint256[](m + 4);
+        uint256 fundedSeen;
+        for (uint256 s = 0; s < steps; s++) {
+            uint256 best = transcript[s * width + m + 1];
+            if (best != NONE) {
+                if (best >= m || fundedSeen >= order.length || order[fundedSeen] != best) revert InvalidTranscript();
+                fundedSeen++;
+            }
+            elems[0] = h;
+            for (uint256 w = 0; w < width; w++) {
+                uint256 x = transcript[s * width + w];
+                if (x >= FIELD) revert InvalidTranscript();
+                elems[w + 1] = x;
+            }
+            h = poseidon.hash(elems);
+        }
+        if (fundedSeen != order.length) revert InvalidTranscript();
     }
 
     // ----------------------------------------------------------------- hooks
