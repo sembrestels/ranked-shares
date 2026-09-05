@@ -107,6 +107,10 @@ export type FixtureChain = {
   deployer: Account;
   pub: PublicClient;
   fx: any;
+  /** Gas used by the forwarder's `onReport` call that reports the fixture's transcript. */
+  reportGas: bigint;
+  /** Byte length of the ABI-encoded report passed to `onReport`. */
+  reportBytes: number;
   stop(): Promise<void>;
 };
 
@@ -238,7 +242,7 @@ async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDI
   await testClient.impersonateAccount({ address: FORWARDER });
   await testClient.setBalance({ address: FORWARDER, value: 10n ** 18n });
   const report = encodeResultReport(fx.inputsRoot, fx.funded, fx.transcript.map((s: (number | string)[]) => s.map((x) => BigInt(x))));
-  await send(() => write(w(FORWARDER), { address: pool, abi: poolAbi, functionName: "onReport", args: ["0x", report] }));
+  const reportReceipt = await send(() => write(w(FORWARDER), { address: pool, abi: poolAbi, functionName: "onReport", args: ["0x", report] }));
 
   // fund the coordinator so it can pay for `advance`
   await testClient.setBalance({ address: COORDINATOR.address, value: 10n ** 18n });
@@ -252,6 +256,8 @@ async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDI
     deployer: DEPLOYER,
     pub,
     fx,
+    reportGas: reportReceipt.gasUsed,
+    reportBytes: (report.length - 2) / 2,
     async stop() {
       await killAndWait(anvil);
     },

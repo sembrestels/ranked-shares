@@ -10,6 +10,25 @@ describe("pbear transcript", () => {
     expect(transcript).toEqual([[1n, 40n, 0n, 0n, 40n], [1n, 0n, 0n, NONE, 0n], [2n, 0n, 10n, 1n, 70n]]);
     expect(replayPublic([30n, 70n], [{ weight: 40n, ballot: [1, 2] }], transcript, 100n)).toBe(true);
   });
+  test("audit rejects a tampered transcript (spec B13)", () => {
+    const costs = [30n, 70n];
+    const pub = [{ weight: 40n, ballot: [1, 2] }];
+    const budget = 100n;
+    const valid: bigint[][] = [
+      [1n, 40n, 0n, 0n, 40n],
+      [1n, 0n, 0n, NONE, 0n],
+      [2n, 0n, 10n, 1n, 70n],
+    ];
+    expect(replayPublic(costs, pub, valid, budget)).toBe(true);
+
+    const tamperedSupport = valid.map((row) => [...row]);
+    tamperedSupport[0][1] = 41n; // pubSupport[0] no longer matches what the public ballots support
+    expect(replayPublic(costs, pub, tamperedSupport, budget)).toBe(false);
+
+    const tamperedBest = valid.map((row) => [...row]);
+    tamperedBest[0][3] = 1n; // best funded project doesn't match the recorded total
+    expect(replayPublic(costs, pub, tamperedBest, budget)).toBe(false);
+  });
   test("deductions sum to the threshold", () => {
     const d = cumulativeDeductions([7n, 5n, 9n], 10n);
     expect(d.reduce((a, b) => a + b, 0n)).toBe(10n);

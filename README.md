@@ -168,6 +168,7 @@ drives a sealed pool from the TypeScript prover of `prover/src/core/`:
 prover audit --rpc <url> --pool <addr> [--from-block n]
 prover status --rpc <url> --pool <addr> [--from-block n]
 prover prove --rpc <url> --pool <addr> --private-key <hex> (--master <hex> | --sign) [--threads n]
+prover serve --rpc <url> [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit]
 ```
 
 `audit` replays the reported transcript against the public block read from chain and
@@ -237,6 +238,77 @@ and hands the proofs back for someone else to submit; with `--submit` it sends `
 itself (`--private-key` must then be the pool's coordinator, for restarts). The job cache
 is in-memory, so restarting the service loses it — harmlessly, since proving a pool is
 deterministic and re-proving after a restart reproduces the same proofs.
+
+Deployment: run it under a user systemd unit on the operator's machine and expose it
+through a Cloudflare Tunnel or Tailscale Funnel rather than an open port. Point `TMPDIR`
+at a disk directory — on the reference home box `/tmp` is a 16 GB tmpfs, which proving
+should not compete with — and size `--threads` to leave a couple of cores free (that box
+has 16 threads and 30 GiB, so 14 is a reasonable default rather than
+`os.availableParallelism()`).
+
+## Off-chain: CRE workflow and secrets
+
+`cre/` is a bun project holding the shared TypeScript port of the reference (Poseidon2,
+Grumpkin, sealed-ballot packing/encryption, the PB-EAR transcript and its public replay —
+`cre/src/lib/`) and the Chainlink CRE workflow built on it (`cre/src/workflow.ts` +
+`cre/src/main.ts`). Every couple of hours (`workflows/sealed/config.staging.json`'s
+`schedule`) it reads each configured pool, and inside the DON's TEE handler
+(`onCronInTee`, `{ tee: "nitro" }`) either drives `close` (kind-2 report) while the pool
+is closing, or — once `phase` is `Tally` and no result has been reported yet — derives the
+tallier's secret key from the `RANKED_SHARES_MASTER` secret and the pool's `keySalt`,
+decrypts the sealed ballots, runs the same PB-EAR transcript as the reference and reports
+the result (kind-1) via `evm.writeReport`. Nothing but `(inputsRoot, funded, transcript)`
+ever leaves `processPool`, the pure function the handler wraps.
+
+```
+cd cre
+bun test           # unit + differential tests: Poseidon2 vs reference/vectors/poseidon2.json,
+                    # Grumpkin/sealed vectors, pbearTranscript vs reference/pbear.py --transcript,
+                    # and the tampered-transcript audit checks
+bunx tsc --noEmit
+bun run compile     # compiles src/main.ts to dist/workflow.wasm with Javy (cre-compile)
+bun run sync-abi    # refreshes src/abi/SealedRankedShares.json from the forge build
+```
+
+**Secrets and keys.** The tallier's master secret is a wallet signature, never a stored
+file: `cre/scripts/make-master-secret.mjs` signs `MASTER_MESSAGE` with `PRIVATE_KEY` and
+prints `keccak256(signature)` — the exact value the coordinator page derives in the
+browser via "Sign for tallier key", and the same value `prover prove --sign` derives from
+the CLI. Feed it to the CLI's secrets store without ever putting it in a file or shell
+history:
+
+```
+cd cre
+PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs | \
+  (read s; RANKED_SHARES_MASTER=$s cre secrets create workflows/sealed/secrets.yaml --target staging-settings)
+```
+
+(`node` also works in place of `bun` if it resolves `viem` from `cre/node_modules`; bun
+imports the `.ts` lib modules directly, so nothing needs building first.)
+
+The pool's `tallierPkX`/`tallierPkY` (`script/DeploySealed.s.sol`'s `TALLIER_PK_X`/
+`TALLIER_PK_Y` env vars) must be the public key for that same `(master, keySalt)` pair, so
+deployment and the workflow agree on who can decrypt by construction:
+
+```
+PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs --print-pk --key-salt 0x<32 bytes>
+# -> pkX=0x… / pkY=0x…, feed straight into TALLIER_PK_X / TALLIER_PK_Y
+```
+
+**Simulation.** With the CRE CLI installed, logged in, and a pool deployed on Arc testnet
+with `DeployVerifiers` + `DeploySealed --profile test`:
+
+```
+cd cre/workflows/sealed
+cre workflow simulate --target staging-settings --config config.staging.json ../../src/main.ts
+```
+
+against `pools: ["0x…"]` set in `config.staging.json` to that pool's address, with
+`RANKED_SHARES_MASTER` present in the simulation's secrets (`secrets.yaml` names it).
+**This was not run in this environment** — no CRE CLI login/account was available in this
+session — so whether the TEE handler ran under simulation's QuickJS, and what it wrote,
+is undocumented; the compiled artifact (`bun run compile` → `dist/workflow.wasm`, built
+with Javy) and the `bun test` suite are the only verification performed here.
 
 ## Reference implementation
 

@@ -579,6 +579,19 @@ by anyone with `audit`. The README states this and states which path a pool took
    `bb prove` (this machine): `ingest-default` 1.13 s / 243 MB peak, `tally-default`
    9.28 s / 1.73 GB peak; `ingest-test` 0.27 s / 42 MB, `tally-test` 0.23 s / 45 MB. See
    `noir/README.md`. The browser half (bb.js in Chrome/Firefox) is still open — plan 4.
+   **Measured (plan 4):** the browser half was **not measured** — no wallet-equipped
+   browser was available in this environment. The coordinator page that would carry
+   out that walkthrough is built (`prover/src/web`, a Vite app served with the
+   COOP/COEP headers bb.js's worker pool needs), and the manual steps are recorded in
+   `README.md`'s Coordinator page section. In its place, Node bb.js numbers at the
+   test profile: real UltraHonk proofs for one ingest batch and one tally group
+   together take about 3.9 s wall (`prover/test/prove.test.ts`, including
+   `Prover.create`'s one-time Barretenberg backend init for both circuits), and each
+   individual `advance` against the real verifiers on anvil costs 879,052 / 845,668 /
+   865,062 gas (ingest batches 0-2) and 832,635 / 832,611 / 1,068,481 gas (tally
+   groups 0-2, the last one finalising) — see
+   `.superpowers/sdd/2026-09-05-sealed-ballots-4-typescript/task-5-report.md` and
+   `task-6-report.md`.
 2. **Poseidon2 in Solidity.** Pick or write a Yul Poseidon2 (BN254, t = 4) matching
    Noir's sponge on checked-in vectors; measure `close` per sealed voter.
 3. **Honk verifier on Arc testnet.** Deploy for a toy circuit, verify a proof, record
@@ -590,9 +603,36 @@ by anyone with `audit`. The README states this and states which path a pool took
 4. **Report size and transcript hashing.** Deliver a kind-1 report with a full-size
    transcript through the Arc forwarder in simulation; measure `onReport` gas. Decide
    whether the chunked kind-3 fallback of B6.2 is needed.
+   **Measured (plan 4):** on anvil, replaying the `test` profile's `fixture_test_main`
+   (m = 4, a 5-step transcript funding all 4 projects) and reporting it as the
+   forwarder (`onReport`, kind 1) costs **1,017,391 gas** for a **1,504-byte** ABI-
+   encoded report (`prover/test/helpers/anvil.ts`'s `reportGas`/`reportBytes`, logged
+   by `prover/test/e2e.test.ts`; not yet Arc testnet, and no simulation was run to
+   measure it through the forwarder end to end). A kind-2 close report is trivially
+   small by comparison: 128 bytes, one `uint256`. That is about 200k gas per
+   transcript step here, well under the 400k gas/step this spec's plan-2 estimate
+   assumed for hashing — but the transcript scales as `2m` steps of `(m + 3)` words,
+   so the default profile's worst case (`m` = 16, up to 32 steps of 19 words each,
+   versus this measurement's 5 steps of 7 words) is roughly 17x more transcript data,
+   not a fixed increment. Naively scaling the measured per-step cost puts a worst-
+   case default-profile `onReport` in the single-digit-to-low-teens millions of gas —
+   comparable to, or above, `workflows/sealed/config.staging.json`'s configured
+   `gasLimit` (12,000,000) — which this one data point (`m` = 4) cannot rule out
+   either way. That keeps the chunked kind-3 fallback a live option for the default
+   profile rather than something this measurement retires; a default-profile
+   measurement (plan 5+) would settle it.
 5. **Pure-TS crypto under QuickJS.** Run `sealed.ts` and `pbear.ts` in transcript mode
    inside `cre workflow simulate` with a TEE handler.
-   **Not yet run** — `cre/` is plan 4's scope; nothing to record here.
+   **Measured (plan 4):** the pure-TS crypto is validated under bun, not yet under
+   QuickJS: `bun test` in `cre/` runs Poseidon2 against `reference/vectors/
+   poseidon2.json`, the Grumpkin/sealed vectors, and `pbearTranscript`/`replayPublic`
+   differentially against `reference/pbear.py --transcript` on random instances (plus
+   the tampered-transcript audit checks of B13). The workflow also compiles cleanly
+   to WASM with Javy (`bun run compile` → `dist/workflow.wasm`), which is the form
+   `cre workflow simulate` would run under QuickJS. That simulate run itself was
+   **not performed** — no CRE CLI login/account was available in this environment —
+   so whether the TEE handler executes under QuickJS as it does under bun, and what
+   it writes, remains open.
 6. **Version pin.** Fix `nargo` and `bb`, confirm the ZK verifier flavour and the
    public-input layout.
 7. **Arc gas price.** What a 2 M gas transaction costs in USDC, to size everything

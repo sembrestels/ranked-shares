@@ -30,6 +30,7 @@ describe("end to end on anvil with real verifiers", () => {
     "replay test_main, report, prove, Proven, audit",
     async () => {
       const { pool, pub, fx } = chain;
+      console.log(`onReport gas: ${chain.reportGas}, report bytes: ${chain.reportBytes}`);
 
       // audit before proving
       expect((await audit(pub, pool, 0n)).ok).toBe(true);
