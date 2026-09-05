@@ -78,6 +78,8 @@ calls.
 src/PBEAR.sol           abstract engine: projects, ballots, weights, step()
 src/RankedShares.sol    ERC-20 pool, sponsorships, NFT seats, phases, payouts
 reference/pbear.py      Python reference implementation + brute-force IPSC checker
+reference/zisk/         secp256k1, sealed ballots, commitments and fixtures of the zisk variant
+zisk/                   Rust workspace: PB-EAR, sealed-ballot guest logic, the ZisK guest
 test/                   Foundry tests, including an ffi differential fuzz
 docs/superpowers/       design spec and implementation plan
 ```
@@ -220,6 +222,13 @@ spec B6.3 defines it, with `best = 2^64 − 1` for a step that funded nothing an
 `2m` steps in all. The positional form,
 `python3 reference/pbear.py '{"costs": …, "voters": …}'`, is the single-list tally the
 Foundry differential fuzz calls and prints an ABI-encoded `uint256[]` instead.
+
+### zisk variant
+
+`reference/zisk/` holds the secp256k1 + keccak scheme of the zisk (and cre) variant and
+its fixtures; `python3 -m zisk.make_fixture` from `reference/` regenerates them, and
+`zisk/README.md` describes the Rust side. Spec:
+`docs/superpowers/specs/2026-09-05-sealed-ballots-zisk-design.md`.
 
 ## Gas and limits
 
