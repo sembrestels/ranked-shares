@@ -18,6 +18,18 @@ pub enum Error {
     WeightsExceedBudget,
 }
 
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Error::InvalidKey => write!(f, "the operator secret key is zero or not below the secp256k1 group order"),
+            Error::BadCosts => write!(f, "the cost list is empty or has more than 31 projects"),
+            Error::WeightsExceedBudget => write!(f, "the counted voting weight exceeds total_weight; the input does not come from close"),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
 pub fn run(input: &TallyInput) -> Result<TallyOutput, Error> {
     let m = input.costs.len();
     if m == 0 || m > 31 {
@@ -32,6 +44,11 @@ pub fn run(input: &TallyInput) -> Result<TallyOutput, Error> {
     let mut voting: u128 = 0;
     // Public block: every voter with a direct ballot, registration order.
     for v in &input.voters {
+        // The Python reference (`reference/zisk/make_fixture.py`) never re-validates a
+        // direct ballot here because `vote()` validates at write time. This guard exists
+        // so `pbear::tally` never sees an invalid ballot; it also means `addProject` must
+        // stay Setup-only, since a ballot cast against an older `m` would otherwise pass
+        // Python's validation but fail this one and become an abstention in the guest.
         if !v.direct_ballot.is_empty() && validate(&v.direct_ballot, m) {
             entries.push(Entry { weight: v.direct_weight, ranks: Some(v.direct_ballot.clone()) });
             voting += v.direct_weight as u128;

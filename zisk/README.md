@@ -49,22 +49,42 @@ below `minDirectVote`, or `main`'s "silent seat holder", counts as neither). `ma
 `python3 -m zisk.make_fixture --scenario big --out <dir>` and is not committed.
 
 Steps per sealed ballot ≈ (nodirect − nosealed) / 5 = (44,337 − 16,415) / 5 ≈ 5,584.
-Steps per direct voter ≈ nosealed / 3 = 16,415 / 3 ≈ 5,472. (`main` isn't used for
-either estimate: its sealed set mixes valid, corrupt and revoked ballots at different
-costs.) Extrapolating both rates to `big` predicts ≈ 2000·5,472 + 200·5,584 ≈
-12.06M steps against an observed 15.64M — `big` runs `m = 16` versus `m = 4` for the
-other three fixtures, and PB-EAR's iterative funding rounds scale with the project
-count too, so a per-voter rate measured at `m = 4` under-predicts a larger `m`.
+This is a genuine marginal rate: `nodirect` and `nosealed` share `m = 4` and differ
+only in their sealed voters, so subtracting cancels the fixed cost (program start,
+witness decode, the `pk = sk·G` multiplication, the tally loop) and leaves the
+per-ballot cost of decryption alone. `nosealed / 3 ≈ 5,472` is not that kind of
+number: `nosealed` has no sealed voters to subtract against, so this is a per-voter
+*average that still carries the fixed cost inside it*, and is therefore an upper
+bound on a direct voter's marginal cost rather than a marginal rate itself. (`main`
+isn't used for either estimate: its sealed set mixes valid, corrupt and revoked
+ballots at different costs.)
 
 `cargo-zisk run -e target/elf/riscv64ima-zisk-zkvm-elf/release/tally-guest -i <main.bin> -p summary`
-attributes 93.6% of `main`'s weighted cost to plain instruction execution ("Base"),
-with precompiles only 3.3%. Among individual functions, `secp256k1::scalar_mul_secp256k1`
-(the ECDH point multiplication run once per sealed ballot to derive its keystream) is
-the single largest named contributor (3.4%), ahead of `keccak256` (1.8%); the tally
-logic itself (`pbear::validate`) is negligible (0.1%). Sealed-ballot decryption, not
-the PB-EAR arithmetic, dominates the guest's cost.
+attributes 93.6% of `main`'s weighted cost to plain instruction execution ("Base").
+Among individually named functions, `secp256k1::scalar_mul_secp256k1` (the ECDH
+point multiplication run once per sealed ballot to derive its keystream) is the
+largest at 3.4%, ahead of `keccak256` at 1.8%; the tally logic itself
+(`pbear::validate`) is negligible (0.1%). So: among attributable named costs,
+decryption leads — but the generic "Base" bucket, which is 93.6% of the total, holds
+the witness decode, the ballot handling and the PB-EAR loop itself, and the summary
+does not break that bucket down further.
+
+Extrapolating the two per-voter rates above to `big`'s 2000 direct and 200 sealed
+voters predicts ≈ 2000·5,472 + 200·5,584 ≈ 12.06M steps; the emulator measured
+15.64M. `big` runs `m = 16` against `m = 4` for the other three fixtures, and the
+gap is far too large for decryption's share alone to explain: 200 sealed ballots at
+≈5,584 steps each is only ≈1.1M steps, a small fraction of the 3.6M-step shortfall.
+PB-EAR's tally loop is `O(entries × m × steps-per-round)`, so at `m = 16` over 2,200
+voters it is the tally loop, not sealed-ballot decryption, that accounts for most of
+the gap between the linear extrapolation and the observed count.
 
 ### Proof
+
+Only `main` (92,660 steps) has been proven end to end. `big` (15,638,535 steps, about
+170× `main`) has not been attempted on this 30 GB machine. ZisK proving time grows with
+the step count, so the voter ceiling spec Z9 expects a documented answer for is still
+open; establishing it — on this box or a larger one — is the first thing plan B's
+measurement work needs to do.
 
 Proving `main` on this machine (CPU, 30 GB RAM plus swap): STARK 16 min (25.8 GiB peak
 RSS, `Proof verified successfully`), PLONK wrap 11 min (25.2 GiB peak RSS, heavy swap).

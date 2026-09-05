@@ -119,7 +119,7 @@ def _roster(scenario):
             r.add(base + i, direct=(10 + i % 50) * USDC, direct_ranks=ballot(m, rot(i % m), kept=1 + i % 5))
         for i in range(200):
             r.add(base + 0x1000 + i, seat=40 * USDC, sealed_ranks=ballot(m, rot(i % m), kept=1 + i % 7), k_label=f"b{i}")
-    else:
+    elif scenario == "main":
         # three public-only voters
         for i in range(3):
             r.add(base + i, direct=40 * USDC * (i + 1), direct_ranks=ballot(m, rot(i), kept=3))
@@ -139,6 +139,8 @@ def _roster(scenario):
         r.add(base + 0x505, seat=30 * USDC)
         r.add(base + 0x506, direct=5 * USDC)
         r.add(base + 0x507, seat=0, sealed_ranks=ballot(m, rot(0), kept=1), k_label="revoked")
+    else:
+        raise SystemExit(f"unknown scenario {scenario!r}")
 
     total_weight = sum(v["directWeight"] + v["seatWeight"] for v in r.voters) + dust
     return m, costs, r, total_weight

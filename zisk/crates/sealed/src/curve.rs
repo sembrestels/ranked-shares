@@ -74,6 +74,12 @@ mod imp {
         if !lt(&x, &P) {
             return None;
         }
+        // zisklib's `lift_x_secp256k1` ends with `assert_eq!(parity, y_is_odd, ...)`, which
+        // can only fire when `y == p - y`, i.e. `y = 0`, i.e. `x^3 + 7 = 0 (mod p)`. secp256k1
+        // has odd prime order and no 2-torsion (equivalently, -7 is not a cubic residue mod
+        // p), so no voter-chosen `x` reaches that assert; every other failure path returns
+        // `None`. This is what keeps spec Z4's no-panic rule intact here; re-check it if the
+        // zisklib dependency is ever bumped.
         let p = lift_x_secp256k1(&x, point[0] == 3).ok()?;
         let k = scalar(s)?;
         scalar_mul_secp256k1(&k, &p).map(|q| from_limbs(&q[..4]))

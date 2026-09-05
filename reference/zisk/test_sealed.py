@@ -1,3 +1,12 @@
+"""Differential tests for the zisk variant's sealed-ballot decryption against
+reference/vectors/zisk/sealed.json.
+
+Run, from `reference/` (the module form is required so `reference/` is on `sys.path`):
+
+    cd reference && python3 -m unittest zisk.test_sealed
+    cd reference && python3 -m zisk.test_sealed --write
+"""
+
 import json
 import os
 import sys
