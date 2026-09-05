@@ -1,5 +1,5 @@
 // prover/src/core/submit.ts — resumes the proof chain and drives `advance` on the pool
-import { toHex, type Address, type PublicClient, type WalletClient } from "viem";
+import { toHex, type Address, type Chain, type PublicClient, type WalletClient } from "viem";
 import abi from "../../../cre/src/abi/SealedRankedShares.json";
 import { stateCommit } from "@lib/commitments";
 import { read, type Snapshot } from "./chain";
@@ -36,17 +36,19 @@ export async function runChain(
   snapshot: Snapshot,
   prover: Prover,
   log: (s: string) => void,
-  opts?: { restart?: boolean },
+  opts?: { restart?: boolean; account?: Address; chain?: Chain | null },
 ): Promise<void> {
   const pool = snapshot.pool as Address;
+  const account = opts?.account ?? wallet.account!;
+  const chain = opts?.chain ?? wallet.chain;
   const advance = async (proof: Uint8Array, pi: `0x${string}`[], restart: boolean) => {
     const hash = await wallet.writeContract({
       address: pool,
       abi,
       functionName: "advance",
       args: [toHex(proof), pi, restart],
-      account: wallet.account!,
-      chain: wallet.chain,
+      account,
+      chain,
     } as any);
     const receipt = await client.waitForTransactionReceipt({ hash });
     if (receipt.status !== "success") throw new Error(`advance reverted: ${hash}`);

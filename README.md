@@ -181,6 +181,48 @@ batch and tally group as `--private-key`. The master secret comes either directl
 is the flow to use when the coordinator key is the same wallet that should hold the
 tallier secret; `--master` is for a secret managed separately from that key.
 
+## Coordinator page
+
+`prover/src/web/` is a single Vite page that drives the same `prover/src/core/`
+against an injected wallet, so the coordinator never has to hold a raw master
+secret or run the CLI: RPC URL and pool address inputs, Connect wallet, Sign for
+tallier key (signs `MASTER_MESSAGE`, deriving the master secret in memory only),
+Refresh status, Audit, and Prove and submit (runs `runChain` in the browser with
+bb.js, logging each proof and `advance` transaction). Refresh and Audit work
+without a connected wallet; the page reads `?rpc=…&pool=…` from the URL query
+string to prefill the inputs.
+
+```
+cd prover
+npm run build      # -> dist/, inlines the bb.js/noir_js WASM and the compiled circuits
+npm run preview    # serves dist/ with the COOP/COEP headers bb.js needs for its worker pool
+```
+
+`npm run dev` serves the page from source for local development (same headers).
+Building needs `noir/artifacts/default/*.json` to exist (`cd noir && ...` per its
+README) since `prover/src/core/artifacts.ts` imports them statically.
+
+Manual walkthrough against the e2e fixture's anvil chain (there is no
+wallet-equipped browser in this environment, so this has not been run here —
+only `npm run build` and a header check via `curl` against `npm run preview`
+were verified):
+
+1. `anvil --port 8547` and deploy the pool the same way `prover/test/e2e.test.ts`
+   does (or point `--rpc`/`pool` at any pool on a live chain).
+2. Import the coordinator private key
+   `0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`
+   (anvil's account 2) into the wallet, and add a network for chain id 31337 at
+   `http://127.0.0.1:8547`.
+3. `cd prover && npm run build && npm run preview`, open the page (optionally
+   with `?rpc=http://127.0.0.1:8547&pool=0x…` to prefill the inputs).
+4. Connect wallet → approve the connection to the coordinator account.
+5. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
+6. Refresh status → confirm phase/ingestCursor/coordinator look right and
+   `youAreCoordinator` is `true`.
+7. Audit → confirms the public block reproduces the reported transcript.
+8. Prove and submit → proves and submits each remaining ingest batch and tally
+   group, logging gas used per `advance`, ending in `Proven`.
+
 ## Reference implementation
 
 `reference/` is the oracle every port is tested against, in dependency-free Python:

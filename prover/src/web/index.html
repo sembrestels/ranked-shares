@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RankedShares coordinator</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>RankedShares coordinator</h1>
+      <p class="hint">
+        Connects an injected wallet (MetaMask etc.), derives the tallier key by signing, and runs the
+        prover in your browser to submit <code>advance</code> transactions.
+      </p>
+      <label>RPC URL <input id="rpc" placeholder="Arc testnet RPC URL (chain id 5042002)" /></label>
+      <label>Pool <input id="pool" placeholder="0x…" /></label>
+      <div class="row">
+        <button id="connect">Connect wallet</button>
+        <button id="sign" disabled>Sign for tallier key</button>
+        <button id="refresh">Refresh status</button>
+        <button id="audit">Audit</button>
+        <button id="prove" disabled>Prove and submit</button>
+      </div>
+      <h2>Status</h2>
+      <pre id="status"></pre>
+      <h2>Log</h2>
+      <pre id="log"></pre>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
