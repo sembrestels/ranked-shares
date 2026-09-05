@@ -4557,7 +4557,6 @@ dependencies = [
  "clap",
  "eyre",
  "hex",
- "pbear",
  "rand 0.8.8",
  "sealed",
  "serde",

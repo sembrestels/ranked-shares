@@ -61,8 +61,9 @@ The Arc deployment itself needs a funded key: see
 ## Contracts
 
 `src/SealedPool.sol` (shared by cre and zisk), `src/zisk/ZiskRankedShares.sol`,
-`src/cre/CreRankedShares.sol`, the vendored `src/zisk/ZiskVerifier.sol` (AGPL-3.0, from
-the ZisK v1.2.0-alpha PLONK key). `verifySnarkProof` alone costs 515,230 gas
+`src/cre/CreRankedShares.sol`, the vendored `src/zisk/ZiskVerifier.sol` and
+`src/zisk/IZiskVerifier.sol` (AGPL-3.0) and `src/zisk/PlonkVerifier.sol` (GPL-3.0), all
+from the ZisK v1.2.0-alpha PLONK key. `verifySnarkProof` alone costs 515,230 gas
 (`test/zisk/ZiskVerifier.t.sol`); `finalize` with the real verifier costs about 666,683
 gas (`test/zisk/ZiskFinalize.t.sol`). `ZiskVerifier`'s runtime bytecode is 7,183 bytes.
 
@@ -89,6 +90,13 @@ below `minDirectVote`, or `main`'s "silent seat holder", counts as neither). `ma
 
 `big` (2,200 voters, 16 projects) is generated on demand from `reference/` with
 `python3 -m zisk.make_fixture --scenario big --out <dir>` and is not committed.
+
+The roster is uncapped today: `sponsor(1, [N addresses])` registers `N` zero-weight
+voters for one token unit each. None of them can cast a ballot, but every one still
+costs `close` gas and guest steps once registered, so a large enough sponsorship can
+push a pool past what this machine can prove. `maxVoters`, a cap derived from the
+measured provable bound below, is deferred until `big` is proven; `abandon` is the
+floor if a pool becomes unprovable in the meantime.
 
 Steps per sealed ballot ≈ (nodirect − nosealed) / 5 = (44,337 − 16,415) / 5 ≈ 5,584.
 This is a genuine marginal rate: `nodirect` and `nosealed` share `m = 4` and differ

@@ -109,7 +109,9 @@ Limits, all reverting at write time:
 
 **Direct ballot.** `vote(bytes ranks)` — `inPhase(Open)`, `beforeDeadline`. Reverts
 `BallotAlreadyCast` if one exists, `BelowMinimumVote` if
-`directWeight[msg.sender] < minDirectVote`. Validation is the competition-ranking check
+`directWeight[msg.sender] < minDirectVote`; a zero `directWeight` is refused the same
+way regardless of `minDirectVote`, so `vote` cannot be used to enlarge the roster for
+free even when the minimum itself is zero. Validation is the competition-ranking check
 of `PBEAR._setBallot` (length `m`, every byte `≤ m`, no gaps), copied as a private
 function since `SealedPool` does not inherit `PBEAR`. Stores the bytes, registers the
 voter, emits `Voted(address indexed voter)`.
@@ -237,8 +239,8 @@ inputsHash = keccak256(abi.encodePacked(
 closed = true; emit Closed(inputsHash, voters.length);
 ```
 
-About 6k gas per voter (two keccaks and five cold reads); the frontend or the prover
-calls it with `maxVoters` sized to Arc's block gas limit. `closeCursor` and
+About 15k gas per voter (three keccaks and seven cold slots); the frontend or the
+prover calls it with `maxVoters` sized to Arc's block gas limit. `closeCursor` and
 `voterChain` are public so a caller can see progress.
 
 **Result validation, shared.** `_finalize(uint256[] fundedOrder, Finality f)`: every id
@@ -279,6 +281,12 @@ are `abi.encode(uint8 kind, bytes payload)`:
 
 The workflow that feeds it decrypts with the Z3 scheme and tallies in the Z4 order; it
 is specified with the cre variant, not here.
+
+**Open item.** `onReport` ignores `metadata` and checks only `msg.sender == forwarder`.
+The KeystoneForwarder is a per-chain singleton shared by every workflow registered with
+it, so as written any workflow owner can deliver a kind-1 or kind-2 report to a
+`CreRankedShares` pool. DO NOT deploy a cre pool until `metadata`'s workflow owner/name
+is checked against an immutable set at construction.
 
 **Liveness.** `abandon()` — anyone, in `Closing` or `Tally`, once
 `block.timestamp ≥ votingDeadline + abandonGrace` (`ResultPending` before that). Sets
@@ -418,7 +426,12 @@ testnet, one sponsor with three members voting sealed, two direct voters, `close
 
 - `vote`: one slot for the ballot plus registration, about 45k the first time.
 - `voteSealed`: two slots, about 66k the first time, 10k for a replacement.
-- `close`: about 6k per voter, chunked.
+- `close`: about 15k per voter (three keccaks and seven cold slots), chunked.
+- `sponsor(1, [N addresses])` registers `N` zero-weight voters for one token unit; none
+  of them can vote, but each still costs `close` gas and guest steps once registered.
+  There is no cap on the roster today: `maxVoters` from the measured provable bound
+  (Z10.2) is deferred until `big` is proven, and `abandon` is the floor if a pool
+  becomes unprovable because its roster grew too large.
 - `finalize`: about 360k for the verifier plus `m` `funded` writes.
 - Voter count is bounded by proving cost, not gas. Spike Z10.2 fixes the documented
   limit; the expectation is that a few hundred sealed and a few thousand direct voters

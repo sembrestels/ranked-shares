@@ -123,6 +123,7 @@ async fn main() -> Result<()> {
             let input = chain::fetch(&rpc, pool.parse()?, &master).await?;
             native::write_input(&out, &input)?;
             println!("wrote {} ({} voters, {} projects)", out.display(), input.voters.len(), input.costs.len());
+            println!("warning: {} contains the pool's decryption key; keep it off shared storage", out.display());
         }
         Cmd::Check { input, rpc, pool } => {
             let report = native::check(&input)?;
@@ -172,7 +173,14 @@ async fn main() -> Result<()> {
             println!("finalized in {tx}");
         }
         Cmd::Run { rpc, pool, workdir, key_env, skip_prove } => {
-            std::fs::create_dir_all(&workdir)?;
+            // The workdir holds `input.bin`, which carries the pool's private key, while
+            // proving is in progress; keep it off shared storage.
+            use std::os::unix::fs::{DirBuilderExt, PermissionsExt};
+            if workdir.exists() {
+                std::fs::set_permissions(&workdir, std::fs::Permissions::from_mode(0o700))?;
+            } else {
+                std::fs::DirBuilder::new().recursive(true).mode(0o700).create(&workdir)?;
+            }
             let tools = pipeline::Tools::from_env();
             let master = keys::master_from_env()?;
             let pool_addr = pool.parse()?;
@@ -181,8 +189,24 @@ async fn main() -> Result<()> {
             let report = native::check(&input)?;
             report.print();
             let st = chain::state(&rpc, pool_addr).await?;
-            if !st.closed || st.inputs_hash != report.inputs_hash {
-                return Err(tally_prover::eyre!("pool not closed or inputsHash mismatch; refusing to prove"));
+            if !st.closed {
+                return Err(tally_prover::eyre!("pool is not closed yet; run close() first"));
+            }
+            if st.inputs_hash != report.inputs_hash {
+                return Err(tally_prover::eyre!(
+                    "inputsHash mismatch: chain 0x{} vs input 0x{}",
+                    hex::encode(st.inputs_hash),
+                    hex::encode(report.inputs_hash)
+                ));
+            }
+            if st.tallier_pk != report.pk {
+                return Err(tally_prover::eyre!("the pool's tallierPk is not the key derived from TALLIER_MASTER"));
+            }
+            if st.finality != 0 {
+                return Err(tally_prover::eyre!(
+                    "pool already finalised (finality {}); nothing to prove",
+                    st.finality
+                ));
             }
             let calldata = workdir.join("calldata.json");
             if !(skip_prove && calldata.exists()) {
@@ -201,6 +225,8 @@ async fn main() -> Result<()> {
             let order = if cd.funded_order.is_empty() { report.funded_order.clone() } else { cd.funded_order.clone() };
             let tx = chain::finalize(&rpc, pool_addr, &key, &order, &pv, &hex::decode(cd.proof_bytes.trim_start_matches("0x"))?).await?;
             println!("finalized in {tx}");
+            std::fs::remove_file(&input)?;
+            println!("deleted {} (kept {})", input.display(), calldata.display());
         }
     }
     Ok(())

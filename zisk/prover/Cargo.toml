@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [dependencies]
 sealed = { path = "../crates/sealed" }
-pbear = { path = "../crates/pbear" }
 alloy = { version = "2.4", features = ["full"] }
 clap = { version = "4.5", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

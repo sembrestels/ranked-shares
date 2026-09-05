@@ -28,8 +28,12 @@ pub fn read_input(path: &Path) -> Result<TallyInput> {
     io::decode_input(&framed[8..8 + len]).map_err(|e| eyre!("cannot decode input: {e}"))
 }
 
+/// Writes the framed input file mode 0600: `TallyInput` carries the pool's private key.
 pub fn write_input(path: &Path, input: &TallyInput) -> Result<()> {
-    std::fs::write(path, io::frame(&io::encode_input(input)))?;
+    use std::io::Write;
+    use std::os::unix::fs::OpenOptionsExt;
+    let mut file = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(path)?;
+    file.write_all(&io::frame(&io::encode_input(input)))?;
     Ok(())
 }
 

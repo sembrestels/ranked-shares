@@ -12,6 +12,10 @@ import {IReceiver} from "../interfaces/IReceiver.sol";
 ///         DON's report is the result: `onReport` kind 1 finalises the pool as `Attested`
 ///         once `inputsHash` matches, kind 2 drives `close` from the workflow. Same
 ///         ballots, commitment and encryption as the zisk pool (spec Z5).
+/// @dev DO NOT deploy a cre pool until the workflow owner/name in `onReport`'s `metadata`
+///      is checked against an immutable: the KeystoneForwarder is a per-chain singleton
+///      shared by every workflow, and `onReport` below currently ignores `metadata`, so
+///      any workflow owner could deliver a kind-1 report to this contract.
 contract CreRankedShares is SealedPool, IReceiver {
     error NotForwarder();
     error UnknownReport();
@@ -45,6 +49,11 @@ contract CreRankedShares is SealedPool, IReceiver {
     }
 
     /// @notice Entry point for the CRE forwarder.
+    /// @dev `metadata` (the first argument) is ignored. The KeystoneForwarder is a
+    ///      per-chain singleton shared by every workflow, so until this checks
+    ///      `metadata`'s workflow owner/name against an immutable, any workflow owner
+    ///      registered with the forwarder can deliver a kind-1 report to this pool.
+    ///      DO NOT deploy a cre pool before that check exists.
     function onReport(bytes calldata, bytes calldata report) external {
         if (msg.sender != forwarder) revert NotForwarder();
         (uint8 reportKind, bytes memory payload) = abi.decode(report, (uint8, bytes));

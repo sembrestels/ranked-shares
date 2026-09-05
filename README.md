@@ -78,6 +78,7 @@ calls.
 src/PBEAR.sol           abstract engine: projects, ballots, weights, step()
 src/RankedShares.sol    ERC-20 pool, sponsorships, NFT seats, phases, payouts
 src/SealedPool.sol      shared sealed-pool base for the cre and zisk variants
+src/SealedRankedShares.sol  the noir variant's pool: chained-proof transcript tally
 src/zisk/               ZiskRankedShares, the vendored ZisK PLONK verifier
 src/cre/                CreRankedShares, the DON-attested variant
 reference/pbear.py      Python reference implementation + brute-force IPSC checker
