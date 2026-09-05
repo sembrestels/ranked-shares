@@ -1,3 +1,3 @@
 [workspace]
-members = ["sealed"]
+members = ["sealed", "pbear"]
 default-member = "sealed"
