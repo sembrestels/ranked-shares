@@ -28,6 +28,16 @@
             "internalType": "address"
           },
           {
+            "name": "workflowOwner",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "workflowName",
+            "type": "bytes10",
+            "internalType": "bytes10"
+          },
+          {
             "name": "coordinator",
             "type": "address",
             "internalType": "address"
@@ -693,7 +703,7 @@
     "name": "onReport",
     "inputs": [
       {
-        "name": "",
+        "name": "metadata",
         "type": "bytes",
         "internalType": "bytes"
       },
@@ -1370,6 +1380,51 @@
     "stateMutability": "view"
   },
   {
+    "type": "function",
+    "name": "workflowName",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes10",
+        "internalType": "bytes10"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "workflowNameOf",
+    "inputs": [
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes10",
+        "internalType": "bytes10"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "workflowOwner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
     "type": "event",
     "name": "Advanced",
     "inputs": [],
@@ -1677,6 +1732,11 @@
   },
   {
     "type": "error",
+    "name": "BadMetadata",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "BalanceBelowTotalWeight",
     "inputs": []
   },
@@ -1886,6 +1946,11 @@
   {
     "type": "error",
     "name": "WrongPhase",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "WrongWorkflow",
     "inputs": []
   },
   {

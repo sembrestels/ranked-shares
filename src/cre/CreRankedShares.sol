@@ -6,23 +6,7 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {SealedPool} from "../SealedPool.sol";
 import {WrongPhase} from "../PoolBase.sol";
 import {IReceiver} from "../interfaces/IReceiver.sol";
-
-/// @notice Derives the `bytes10 workflowName` CRE embeds in `onReport`'s `metadata`
-///         from a workflow's name string: SHA-256 the name, hex-encode the digest, take
-///         the first 10 hex characters, and return their ASCII bytes. A file-scope
-///         function so `script/DeployCre.s.sol` can compute the same value without a
-///         chicken-and-egg on the deployed pool.
-function deriveWorkflowName(string memory name) pure returns (bytes10) {
-    bytes32 digest = sha256(bytes(name));
-    bytes memory hexAlphabet = "0123456789abcdef";
-    bytes memory out = new bytes(10);
-    for (uint256 i = 0; i < 5; i++) {
-        uint8 b = uint8(digest[i]);
-        out[2 * i] = hexAlphabet[b >> 4];
-        out[2 * i + 1] = hexAlphabet[b & 0x0f];
-    }
-    return bytes10(out);
-}
+import {checkWorkflow, deriveWorkflowName} from "../lib/CreMetadata.sol";
 
 /// @title CreRankedShares
 /// @notice A sealed-ballot pool tallied inside a Chainlink CRE confidential workflow. The
@@ -46,8 +30,6 @@ contract CreRankedShares is SealedPool, IReceiver {
     error NotForwarder();
     error UnknownReport();
     error InputMismatch();
-    error WrongWorkflow();
-    error BadMetadata();
 
     uint8 internal constant KIND_RESULT = 1;
     uint8 internal constant KIND_CLOSE = 2;
@@ -85,17 +67,6 @@ contract CreRankedShares is SealedPool, IReceiver {
         return deriveWorkflowName(name);
     }
 
-    /// @dev Checks `metadata` against `workflowOwner`/`workflowName` when the check is
-    ///      enabled (see the contract-level dev note above).
-    function _checkWorkflow(bytes calldata metadata) internal view {
-        if (workflowOwner == address(0)) return;
-        if (metadata.length < 62) revert BadMetadata();
-        if (address(bytes20(metadata[42:62])) != workflowOwner) revert WrongWorkflow();
-        if (workflowName != bytes10(0) && bytes10(metadata[32:42]) != workflowName) {
-            revert WrongWorkflow();
-        }
-    }
-
     function kind() external pure override returns (string memory) {
         return "cre";
     }
@@ -110,7 +81,7 @@ contract CreRankedShares is SealedPool, IReceiver {
     ///      is and when it is disabled.
     function onReport(bytes calldata metadata, bytes calldata report) external {
         if (msg.sender != forwarder) revert NotForwarder();
-        _checkWorkflow(metadata);
+        checkWorkflow(metadata, workflowOwner, workflowName);
         (uint8 reportKind, bytes memory payload) = abi.decode(report, (uint8, bytes));
         if (reportKind == KIND_CLOSE) {
             if (phase() != Phase.Closing) revert WrongPhase();

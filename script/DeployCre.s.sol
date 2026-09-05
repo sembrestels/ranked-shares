@@ -3,7 +3,8 @@ pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {CreRankedShares, deriveWorkflowName} from "../src/cre/CreRankedShares.sol";
+import {CreRankedShares} from "../src/cre/CreRankedShares.sol";
+import {deriveWorkflowName} from "../src/lib/CreMetadata.sol";
 
 /// @notice Deploys a CreRankedShares pool.
 ///

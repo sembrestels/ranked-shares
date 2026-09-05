@@ -27,6 +27,10 @@ abstract contract FixtureLoader is Test {
 
     address internal owner = makeAddr("owner");
     address internal forwarder = makeAddr("forwarder");
+    address internal workflowAuthor = makeAddr("workflowAuthor");
+    // python3 -c "import hashlib;h=hashlib.sha256(b'ranked-shares-tally').hexdigest()[:10];print(h, h.encode().hex())"
+    // -> 3f9c6bb3be 33663963366262336265
+    bytes10 internal constant WORKFLOW_NAME = bytes10(0x33663963366262336265);
     address internal coordinator = makeAddr("coordinator");
     address internal org = makeAddr("org");
     address internal recipient = makeAddr("recipient");
@@ -96,6 +100,14 @@ abstract contract FixtureLoader is Test {
         return (IHonkVerifier(address(ingestVerifier)), IHonkVerifier(address(tallyVerifier)));
     }
 
+    /// @dev The workflow `onReport` authorizes on the pool `deployFromFixture` builds.
+    ///      `address(0)` disables the check, so every fixture test can keep reporting with
+    ///      the empty metadata `cre workflow simulate`'s MockForwarder sends;
+    ///      `SealedWorkflowAuth.t.sol` overrides it with `workflowAuthor`/`WORKFLOW_NAME`.
+    function workflowConfig() internal view virtual returns (address, bytes10) {
+        return (address(0), bytes10(0));
+    }
+
     function deployFromFixture() internal {
         vm.warp(1);
         token = new MockERC20();
@@ -103,8 +115,11 @@ abstract contract FixtureLoader is Test {
         poseidon = new Poseidon2();
         (IHonkVerifier iv, IHonkVerifier tv) = makeVerifiers();
         uint256[] memory pk = fxWords(".pk");
+        (address wfOwner, bytes10 wfName) = workflowConfig();
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            workflowOwner: wfOwner,
+            workflowName: wfName,
             coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon)),
             ingestVerifier: iv,

@@ -4,7 +4,8 @@ pragma solidity ^0.8.28;
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {WrongPhase} from "../../src/PoolBase.sol";
 import {SealedPool} from "../../src/SealedPool.sol";
-import {CreRankedShares, deriveWorkflowName} from "../../src/cre/CreRankedShares.sol";
+import {CreRankedShares} from "../../src/cre/CreRankedShares.sol";
+import {BadMetadata, WrongWorkflow, deriveWorkflowName} from "../../src/lib/CreMetadata.sol";
 import {IReceiver} from "../../src/interfaces/IReceiver.sol";
 import {ZiskFixtureLoader} from "../zisk/ZiskFixtureLoader.sol";
 
@@ -149,7 +150,7 @@ contract CreReportTest is ZiskFixtureLoader {
     function test_wrongOwnerReverts() public {
         vm.warp(DEADLINE);
         vm.prank(forwarder);
-        vm.expectRevert(CreRankedShares.WrongWorkflow.selector);
+        vm.expectRevert(WrongWorkflow.selector);
         cpool.onReport(metadata(makeAddr("someoneElse"), WORKFLOW_NAME), abi.encode(uint8(2), abi.encode(uint256(5))));
     }
 
@@ -157,11 +158,11 @@ contract CreReportTest is ZiskFixtureLoader {
         vm.warp(DEADLINE);
         bytes10 wrongName = cpool.workflowNameOf("some-other-workflow");
         vm.prank(forwarder);
-        vm.expectRevert(CreRankedShares.WrongWorkflow.selector);
+        vm.expectRevert(WrongWorkflow.selector);
         cpool.onReport(metadata(workflowAuthor, wrongName), abi.encode(uint8(2), abi.encode(uint256(5))));
     }
 
-    /// @dev Builds the 62-byte metadata by hand at the absolute offsets `_checkWorkflow`
+    /// @dev Builds the 62-byte metadata by hand at the absolute offsets `checkWorkflow`
     ///      reads — `workflowName` at 32..42, `workflowOwner` at 42..62 — rather than
     ///      through the `metadata` helper, so the test pins those offsets independently.
     function test_wrongOwnerRevertsAtThePinnedOffsets() public {
@@ -176,7 +177,7 @@ contract CreReportTest is ZiskFixtureLoader {
         }
         assertEq(md.length, 62);
         vm.prank(forwarder);
-        vm.expectRevert(CreRankedShares.WrongWorkflow.selector);
+        vm.expectRevert(WrongWorkflow.selector);
         cpool.onReport(md, abi.encode(uint8(2), abi.encode(uint256(5))));
     }
 
@@ -193,7 +194,7 @@ contract CreReportTest is ZiskFixtureLoader {
         vm.warp(DEADLINE);
         bytes memory md = new bytes(61);
         vm.prank(forwarder);
-        vm.expectRevert(CreRankedShares.BadMetadata.selector);
+        vm.expectRevert(BadMetadata.selector);
         cpool.onReport(md, abi.encode(uint8(2), abi.encode(uint256(5))));
     }
 

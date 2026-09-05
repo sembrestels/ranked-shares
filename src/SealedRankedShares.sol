@@ -8,6 +8,7 @@ import {IPoseidon2} from "./interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "./interfaces/IHonkVerifier.sol";
 import {IReceiver} from "./interfaces/IReceiver.sol";
 import {Grumpkin} from "./lib/Grumpkin.sol";
+import {checkWorkflow, deriveWorkflowName} from "./lib/CreMetadata.sol";
 
 /// @title SealedRankedShares
 /// @notice A RankedShares pool whose seat holders vote with sealed ballots. Direct
@@ -15,6 +16,16 @@ import {Grumpkin} from "./lib/Grumpkin.sol";
 ///         and replaceable. The tally runs off-chain: the CRE workflow reports a result
 ///         and a transcript, and a chain of Noir proofs over the sealed block makes it
 ///         final. See docs/superpowers/specs/2026-09-05-sealed-ballots-noir-design.md.
+/// @dev The KeystoneForwarder is a per-chain singleton shared by every workflow, so
+///      `onReport`'s `msg.sender == forwarder` check alone would let any workflow owner
+///      registered with it deliver a report to this pool — writing `_provisional` and
+///      `transcriptHash`, starting the `proofGrace` clock and, once it elapses, letting
+///      `acceptProvisional` finalise a forged result. `onReport` therefore also checks
+///      the forwarder's `metadata` — `abi.encodePacked(bytes32 workflowId, bytes10
+///      workflowName, address workflowOwner)`, optionally followed by a `bytes2
+///      reportId` — against the immutables `workflowOwner` and `workflowName` set from
+///      `Config`; see `checkWorkflow` in `lib/CreMetadata.sol` for the layout, the
+///      `address(0)` opt-out and what the check does and does not bind.
 contract SealedRankedShares is PoolBase, IReceiver {
     // ---------------------------------------------------------------- errors
 
@@ -78,6 +89,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
 
     struct Config {
         address forwarder;
+        /// @notice The workflow owner authorized to deliver reports, or `address(0)` to
+        ///         disable the check (simulation only; see the contract-level dev note
+        ///         above). Such a pool must never hold real funds.
+        address workflowOwner;
+        /// @notice The workflow name authorized to deliver reports, or `bytes10(0)` to
+        ///         accept any name from `workflowOwner`. Derive it from a workflow's
+        ///         name string with `workflowNameOf`.
+        bytes10 workflowName;
         address coordinator;
         IPoseidon2 poseidon;
         IHonkVerifier ingestVerifier;
@@ -107,6 +126,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
     // ------------------------------------------------------------ immutables
 
     address public immutable forwarder;
+    /// @notice The workflow owner authorized to deliver reports, or `address(0)` to
+    ///         disable the check (simulation only; see the contract-level dev note
+    ///         above). Such a pool must never hold real funds.
+    address public immutable workflowOwner;
+    /// @notice The workflow name authorized to deliver reports, or `bytes10(0)` to accept
+    ///         any name from `workflowOwner`. Derive it from a workflow's name string
+    ///         with `workflowNameOf`.
+    bytes10 public immutable workflowName;
     /// @notice The only address allowed to restart the tally chain (spec B6.5).
     address public immutable coordinator;
     IPoseidon2 public immutable poseidon;
@@ -184,6 +211,8 @@ contract SealedRankedShares is PoolBase, IReceiver {
                 || !Grumpkin.isOnCurve(cfg.tallierPkX, cfg.tallierPkY)
         ) revert InvalidConfig();
         forwarder = cfg.forwarder;
+        workflowOwner = cfg.workflowOwner;
+        workflowName = cfg.workflowName;
         coordinator = cfg.coordinator;
         poseidon = cfg.poseidon;
         ingestVerifier = cfg.ingestVerifier;
@@ -198,6 +227,12 @@ contract SealedRankedShares is PoolBase, IReceiver {
         minSealedVote = cfg.minSealedVote;
         proofGrace = cfg.proofGrace;
         abandonGrace = cfg.abandonGrace;
+    }
+
+    /// @notice Derives the `bytes10 workflowName` CRE embeds in `onReport`'s `metadata`
+    ///         from a workflow's name string; see `deriveWorkflowName`.
+    function workflowNameOf(string memory name) public pure returns (bytes10) {
+        return deriveWorkflowName(name);
     }
 
     // ------------------------------------------------------------- modifiers
@@ -429,8 +464,12 @@ contract SealedRankedShares is PoolBase, IReceiver {
 
     /// @notice Entry point for the CRE forwarder: kind 1 delivers the provisional result
     ///         and the transcript, kind 2 drives `close` from the workflow.
-    function onReport(bytes calldata, bytes calldata report) external {
+    /// @dev `metadata` is checked against `workflowOwner`/`workflowName` before the report
+    ///      is decoded; see the contract-level dev note above for what that check is and
+    ///      when it is disabled.
+    function onReport(bytes calldata metadata, bytes calldata report) external {
         if (msg.sender != forwarder) revert NotForwarder();
+        checkWorkflow(metadata, workflowOwner, workflowName);
         (uint8 kind, bytes memory payload) = abi.decode(report, (uint8, bytes));
         if (kind == 2) {
             if (phase() != Phase.Closing) revert WrongPhase();

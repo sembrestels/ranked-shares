@@ -39,6 +39,8 @@ contract SealedLedgerTest is Test {
     function config() internal view returns (SealedRankedShares.Config memory) {
         return SealedRankedShares.Config({
             forwarder: forwarder,
+            workflowOwner: address(0),
+            workflowName: bytes10(0),
             coordinator: coordinator,
             poseidon: IPoseidon2(address(poseidon)),
             ingestVerifier: IHonkVerifier(address(ingestVerifier)),

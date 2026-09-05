@@ -248,6 +248,8 @@ contract SealedAdvanceTest is FixtureLoader {
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            workflowOwner: address(0),
+            workflowName: bytes10(0),
             coordinator: coordinator,
             poseidon: IPoseidon2(address(new Poseidon2())),
             ingestVerifier: IHonkVerifier(ingest),
@@ -320,6 +322,8 @@ contract SealedAdvanceTest is FixtureLoader {
         uint256[] memory pk = fxWords(".pk");
         SealedRankedShares.Config memory cfg = SealedRankedShares.Config({
             forwarder: forwarder,
+            workflowOwner: address(0),
+            workflowName: bytes10(0),
             coordinator: coordinator,
             poseidon: IPoseidon2(address(pos2)),
             ingestVerifier: IHonkVerifier(address(iv2)),
