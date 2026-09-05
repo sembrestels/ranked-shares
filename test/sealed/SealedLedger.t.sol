@@ -98,18 +98,55 @@ contract SealedLedgerTest is Test {
         assertEq(uint256(pool.finality()), uint256(SealedRankedShares.Finality.None));
     }
 
+    /// @dev Every branch of the constructor's `InvalidConfig` check, one per block.
     function test_constructorRejectsBadConfig() public {
+        address eoa = makeAddr("eoa");
         SealedRankedShares.Config memory cfg = config();
-        cfg.abandonGrace = cfg.proofGrace;
-        vm.expectRevert(SealedRankedShares.InvalidConfig.selector);
-        new SealedRankedShares(token, owner, DEADLINE, cfg);
+        cfg.forwarder = address(0);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.coordinator = address(0);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.poseidon = IPoseidon2(eoa);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.ingestVerifier = IHonkVerifier(eoa);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.tallyVerifier = IHonkVerifier(eoa);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.nSealedMax = 0;
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.mMax = 0;
+        expectBadConfig(cfg);
         cfg = config();
         cfg.mMax = 32;
-        vm.expectRevert(SealedRankedShares.InvalidConfig.selector);
-        new SealedRankedShares(token, owner, DEADLINE, cfg);
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.batch = 0;
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.abandonGrace = cfg.proofGrace;
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.proofGrace = 365 days + 1;
+        cfg.abandonGrace = 365 days + 2;
+        expectBadConfig(cfg);
+        cfg = config();
+        cfg.abandonGrace = 365 days + 1;
+        expectBadConfig(cfg);
         cfg = config();
         cfg.tallierPkX = 1;
         cfg.tallierPkY = 1;
+        expectBadConfig(cfg);
+        // The unmodified config still deploys, so each revert above is the change's doing.
+        new SealedRankedShares(token, owner, DEADLINE, config());
+    }
+
+    function expectBadConfig(SealedRankedShares.Config memory cfg) internal {
         vm.expectRevert(SealedRankedShares.InvalidConfig.selector);
         new SealedRankedShares(token, owner, DEADLINE, cfg);
     }

@@ -331,6 +331,7 @@ contract SealedAdvanceTest is FixtureLoader {
         assertEq(uint256(pool.finality()), uint256(SealedRankedShares.Finality.Proven));
     }
 
+    /// @dev The graces are capped at 365 days; this is that ceiling end to end.
     function test_abandonGraceArithmeticDoesNotOverflow() public {
         uint64 laterDeadline = uint64(block.timestamp) + 1000;
         MockERC20 tok2 = new MockERC20();
@@ -352,8 +353,8 @@ contract SealedAdvanceTest is FixtureLoader {
             batch: fxUint(".profile.batch"),
             minDirectVote: fxWord(".minDirectVote"),
             minSealedVote: 1,
-            proofGrace: type(uint64).max - 1,
-            abandonGrace: type(uint64).max
+            proofGrace: 365 days - 1,
+            abandonGrace: 365 days
         });
         SealedRankedShares p2 = new SealedRankedShares(tok2, owner, laterDeadline, cfg);
         vm.startPrank(owner);
@@ -362,9 +363,14 @@ contract SealedAdvanceTest is FixtureLoader {
         vm.stopPrank();
         vm.warp(laterDeadline);
         p2.close(100);
-        vm.warp(laterDeadline + 365 days);
+        // `votingDeadline + abandonGrace` is computed in 256 bits from two uint64s, so the
+        // largest grace the constructor allows must compare, not panic.
+        vm.warp(uint256(laterDeadline) + 365 days - 1);
         vm.expectRevert(SealedRankedShares.ResultPending.selector);
         p2.abandon();
+        vm.warp(uint256(laterDeadline) + 365 days);
+        p2.abandon();
+        assertEq(uint256(p2.finality()), uint256(SealedRankedShares.Finality.Abandoned));
     }
 
     function test_abandonFromClosingWithoutClose() public {

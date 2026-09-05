@@ -99,6 +99,9 @@ contract SealedRankedShares is PoolBase, IReceiver {
     uint256 internal constant MAX_WEIGHT = type(uint64).max;
     uint256 public constant NONE = type(uint64).max;
     uint256 internal constant MAX_PROJECTS = 31; // one byte per project must pack into one field element
+    /// @dev Ceiling on both graces. They are `uint64` seconds, so a fat-fingered value is
+    ///      not an overflow but a pool nobody can ever end.
+    uint64 internal constant MAX_GRACE = 365 days;
 
     // ------------------------------------------------------------ immutables
 
@@ -168,11 +171,16 @@ contract SealedRankedShares is PoolBase, IReceiver {
     constructor(IERC20 token_, address owner_, uint64 votingDeadline_, Config memory cfg)
         PoolBase(token_, owner_, votingDeadline_)
     {
+        // The three collaborators are checked for code, not merely for a non-zero address:
+        // a call to an address with no code returns success with empty returndata, so an
+        // EOA poseidon would silently hash everything to zero and an EOA verifier would
+        // fail `_verify`'s decode rather than reading as a rejected proof.
         if (
-            cfg.forwarder == address(0) || cfg.coordinator == address(0) || address(cfg.poseidon) == address(0)
-                || address(cfg.ingestVerifier) == address(0) || address(cfg.tallyVerifier) == address(0)
+            cfg.forwarder == address(0) || cfg.coordinator == address(0) || address(cfg.poseidon).code.length == 0
+                || address(cfg.ingestVerifier).code.length == 0 || address(cfg.tallyVerifier).code.length == 0
                 || cfg.nSealedMax == 0 || cfg.mMax == 0 || cfg.mMax > MAX_PROJECTS || cfg.batch == 0
-                || cfg.abandonGrace <= cfg.proofGrace || !Grumpkin.isOnCurve(cfg.tallierPkX, cfg.tallierPkY)
+                || cfg.abandonGrace <= cfg.proofGrace || cfg.proofGrace > MAX_GRACE || cfg.abandonGrace > MAX_GRACE
+                || !Grumpkin.isOnCurve(cfg.tallierPkX, cfg.tallierPkY)
         ) revert InvalidConfig();
         forwarder = cfg.forwarder;
         coordinator = cfg.coordinator;
