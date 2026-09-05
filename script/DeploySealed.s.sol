@@ -13,15 +13,30 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 ///
 ///   TOKEN=0x… OWNER=0x… VOTING_DEADLINE=<unix> FORWARDER=0x… COORDINATOR=0x… \
 ///   TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
-///   N_SEALED_MAX=256 M_MAX=16 BATCH=32 MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
+///   PROFILE=test|default MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
 ///   PROOF_GRACE=86400 ABANDON_GRACE=604800 \
 ///   [POSEIDON=0x…] [INGEST_VERIFIER=0x…] [TALLY_VERIFIER=0x…] \
 ///   forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
+///
+/// `PROFILE` fixes `nSealedMax`, `mMax` and `batch` together — `test` is 8 / 4 / 2 and
+/// `default` 256 / 16 / 32 — because the verifiers are compiled for one profile and the
+/// three are never chosen independently. The script logs the profile and the pool's
+/// `profileId()`, which is what a client checks its proving keys against.
 ///
 /// Unset POSEIDON deploys a fresh Poseidon2. Unset verifiers deploy MockHonkVerifiers
 /// that accept every proof: fine for a demo of the DON path, never for a pool whose
 /// `Proven` finality is meant to mean anything.
 contract DeploySealed is Script {
+    error UnknownProfile();
+
+    uint256 constant TEST_N_SEALED_MAX = 8;
+    uint256 constant TEST_M_MAX = 4;
+    uint256 constant TEST_BATCH = 2;
+
+    uint256 constant DEFAULT_N_SEALED_MAX = 256;
+    uint256 constant DEFAULT_M_MAX = 16;
+    uint256 constant DEFAULT_BATCH = 32;
+
     function run() external returns (SealedRankedShares pool) {
         SealedRankedShares.Config memory cfg;
         cfg.forwarder = vm.envAddress("FORWARDER");
@@ -29,13 +44,26 @@ contract DeploySealed is Script {
         cfg.tallierPkX = vm.envUint("TALLIER_PK_X");
         cfg.tallierPkY = vm.envUint("TALLIER_PK_Y");
         cfg.keySalt = vm.envBytes32("KEY_SALT");
-        cfg.nSealedMax = vm.envUint("N_SEALED_MAX");
-        cfg.mMax = vm.envUint("M_MAX");
-        cfg.batch = vm.envUint("BATCH");
         cfg.minDirectVote = vm.envUint("MIN_DIRECT_VOTE");
         cfg.minSealedVote = vm.envUint("MIN_SEALED_VOTE");
         cfg.proofGrace = uint64(vm.envUint("PROOF_GRACE"));
         cfg.abandonGrace = uint64(vm.envUint("ABANDON_GRACE"));
+
+        string memory profile = vm.envString("PROFILE");
+        bytes32 which = keccak256(bytes(profile));
+        if (which == keccak256("test")) {
+            cfg.nSealedMax = TEST_N_SEALED_MAX;
+            cfg.mMax = TEST_M_MAX;
+            cfg.batch = TEST_BATCH;
+        } else if (which == keccak256("default")) {
+            cfg.nSealedMax = DEFAULT_N_SEALED_MAX;
+            cfg.mMax = DEFAULT_M_MAX;
+            cfg.batch = DEFAULT_BATCH;
+        } else {
+            revert UnknownProfile();
+        }
+        console.log("Profile:", profile);
+        console.log("  nSealedMax / mMax / batch:", cfg.nSealedMax, cfg.mMax, cfg.batch);
 
         vm.startBroadcast();
         address poseidon = vm.envOr("POSEIDON", address(0));
@@ -59,5 +87,7 @@ contract DeploySealed is Script {
         vm.stopBroadcast();
 
         console.log("SealedRankedShares deployed at", address(pool));
+        console.log("profileId:");
+        console.logBytes32(pool.profileId());
     }
 }

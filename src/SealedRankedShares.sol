@@ -208,6 +208,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
         return Phase.Setup;
     }
 
+    /// @notice The circuit profile this pool was built for. The verifiers are compiled for
+    ///         one `(nSealedMax, mMax, batch)`, so a client that knows which profile its
+    ///         proving keys belong to can refuse a pool whose profile is not that one
+    ///         (spec B1).
+    function profileId() public view returns (bytes32) {
+        return keccak256(abi.encode(nSealedMax, mMax, batch));
+    }
+
     function projectCount() public view returns (uint256) {
         return _costs.length;
     }

@@ -111,7 +111,21 @@ off-chain and is finalised by a chain of proofs.
 public half was attested by the DON and can be replayed by anyone from chain data
 (`python3 reference/pbear.py --transcript …` and, later, `prover/cli audit`).
 
-Deploy with `script/DeploySealed.s.sol` (see its header for the environment). The
+Deploy with `script/DeploySealed.s.sol`:
+
+```
+TOKEN=0x... OWNER=0x... VOTING_DEADLINE=<unix> FORWARDER=0x... COORDINATOR=0x... \
+TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
+PROFILE=test|default MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
+PROOF_GRACE=86400 ABANDON_GRACE=604800 \
+[POSEIDON=0x...] [INGEST_VERIFIER=0x...] [TALLY_VERIFIER=0x...] \
+forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
+```
+
+`PROFILE` sets `nSealedMax`, `mMax` and `batch` together (`test` is 8 / 4 / 2, `default`
+256 / 16 / 32); the verifiers are compiled for one profile, so the three are never chosen
+independently, and `profileId()` — `keccak256(abi.encode(nSealedMax, mMax, batch))` — lets
+a client refuse a pool its proving keys were not built for. The
 Poseidon2 hasher (`src/lib/Poseidon2.sol`) is generated from the reference constants by
 `python3 reference/tools/gen_poseidon2_sol.py`; the Honk verifiers come from the Noir
 circuits (plan 3) and are replaced by accept-all mocks until then.

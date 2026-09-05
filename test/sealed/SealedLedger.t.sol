@@ -94,6 +94,7 @@ contract SealedLedgerTest is Test {
         assertEq(pool.minDirectVote(), 10 * USDC);
         assertEq(pool.minSealedVote(), 10 * USDC);
         assertEq(pool.coordinator(), coordinator);
+        assertEq(pool.profileId(), keccak256(abi.encode(uint256(8), uint256(4), uint256(2))));
         assertEq(uint256(pool.finality()), uint256(SealedRankedShares.Finality.None));
     }
 
