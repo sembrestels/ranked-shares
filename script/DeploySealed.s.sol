@@ -13,7 +13,7 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 ///
 ///   TOKEN=0x… OWNER=0x… VOTING_DEADLINE=<unix> FORWARDER=0x… COORDINATOR=0x… \
 ///   TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
-///   N_SEALED_MAX=256 M_MAX=16 BATCH=32 MIN_DIRECT_VOTE=10000000 \
+///   N_SEALED_MAX=256 M_MAX=16 BATCH=32 MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
 ///   PROOF_GRACE=86400 ABANDON_GRACE=604800 \
 ///   [POSEIDON=0x…] [INGEST_VERIFIER=0x…] [TALLY_VERIFIER=0x…] \
 ///   forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
@@ -33,6 +33,7 @@ contract DeploySealed is Script {
         cfg.mMax = vm.envUint("M_MAX");
         cfg.batch = vm.envUint("BATCH");
         cfg.minDirectVote = vm.envUint("MIN_DIRECT_VOTE");
+        cfg.minSealedVote = vm.envUint("MIN_SEALED_VOTE");
         cfg.proofGrace = uint64(vm.envUint("PROOF_GRACE"));
         cfg.abandonGrace = uint64(vm.envUint("ABANDON_GRACE"));
 

@@ -50,6 +50,7 @@ contract SealedLedgerTest is Test {
             mMax: 4,
             batch: 2,
             minDirectVote: 10 * USDC,
+            minSealedVote: 10 * USDC,
             proofGrace: 1 days,
             abandonGrace: 7 days
         });
@@ -91,6 +92,8 @@ contract SealedLedgerTest is Test {
         assertEq(pool.tallierPkX(), GX);
         assertEq(pool.nSealedMax(), 8);
         assertEq(pool.minDirectVote(), 10 * USDC);
+        assertEq(pool.minSealedVote(), 10 * USDC);
+        assertEq(pool.coordinator(), coordinator);
         assertEq(uint256(pool.finality()), uint256(SealedRankedShares.Finality.None));
     }
 
@@ -238,6 +241,41 @@ contract SealedLedgerTest is Test {
         assertEq(pool.sealedCount(), 1);
     }
 
+    function test_sealedVoteRequiresMinimumSeatWeight() public {
+        openWithProjects();
+        vm.prank(org);
+        pool.sponsor(9 * USDC, one(bob));
+        vm.prank(bob);
+        vm.expectRevert(SealedRankedShares.NoSeatWeight.selector);
+        pool.voteSealed(GX, GY, 5);
+        vm.prank(org);
+        pool.sponsor(1 * USDC, one(bob)); // exactly at the minimum
+        assertEq(pool.seatWeight(bob), 10 * USDC);
+        vm.prank(bob);
+        pool.voteSealed(GX, GY, 5);
+        assertEq(pool.sealedCount(), 1);
+    }
+
+    /// @dev The `!= 0` clause of both minimums, which a zero minimum must not switch off:
+    ///      a weightless ballot only enlarges `voters` and the work close and tally pay for.
+    function test_zeroWeightCannotVoteWithMinimumsOff() public {
+        SealedRankedShares.Config memory cfg = config();
+        cfg.minDirectVote = 0;
+        cfg.minSealedVote = 0;
+        SealedRankedShares p = new SealedRankedShares(token, owner, DEADLINE, cfg);
+        vm.startPrank(owner);
+        p.addProject(50 * USDC, recipientA);
+        p.openVoting();
+        vm.stopPrank();
+        vm.prank(alice);
+        vm.expectRevert(SealedRankedShares.BelowMinimumVote.selector);
+        p.vote(hex"01");
+        vm.prank(alice);
+        vm.expectRevert(SealedRankedShares.NoSeatWeight.selector);
+        p.voteSealed(GX, GY, 5);
+        assertEq(p.voterCount(), 0);
+    }
+
     function test_sealedVoteReplacementDoesNotCountTwice() public {
         openWithProjects();
         vm.prank(org);
@@ -251,6 +289,7 @@ contract SealedLedgerTest is Test {
         assertEq(pool.sealedCount(), 1);
     }
 
+    /// @dev Each seat is 10 USDC, exactly `minSealedVote`, so the cap is what bites.
     function test_sealedVoterCap() public {
         openWithProjects();
         address[] memory members = new address[](9);

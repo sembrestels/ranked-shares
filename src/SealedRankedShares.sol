@@ -87,6 +87,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
         uint256 mMax;
         uint256 batch;
         uint256 minDirectVote;
+        uint256 minSealedVote;
         uint64 proofGrace;
         uint64 abandonGrace;
     }
@@ -113,6 +114,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     uint256 public immutable mMax;
     uint256 public immutable batch;
     uint256 public immutable minDirectVote;
+    uint256 public immutable minSealedVote;
     uint64 public immutable proofGrace;
     uint64 public immutable abandonGrace;
 
@@ -183,6 +185,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
         mMax = cfg.mMax;
         batch = cfg.batch;
         minDirectVote = cfg.minDirectVote;
+        minSealedVote = cfg.minSealedVote;
         proofGrace = cfg.proofGrace;
         abandonGrace = cfg.abandonGrace;
     }
@@ -231,10 +234,13 @@ contract SealedRankedShares is PoolBase, IReceiver {
 
     // --------------------------------------------------------------- ballots
 
-    /// @notice Cast the caller's public ballot. One per address, never replaced.
+    /// @notice Cast the caller's public ballot. One per address, never replaced. A
+    ///         zero-weight ballot is refused whatever `minDirectVote` is: it would only
+    ///         enlarge `voters` and the work every close and tally pays for (spec B2).
     function vote(bytes calldata ranks) external inPhase(Phase.Open) beforeDeadline {
         if (hasDirect[msg.sender]) revert BallotAlreadyCast();
-        if (directWeight[msg.sender] < minDirectVote) revert BelowMinimumVote();
+        uint256 w = directWeight[msg.sender];
+        if (w == 0 || w < minDirectVote) revert BelowMinimumVote();
         _directBallot[msg.sender] = _validateAndPack(ranks);
         hasDirect[msg.sender] = true;
         _register(msg.sender);
@@ -242,9 +248,12 @@ contract SealedRankedShares is PoolBase, IReceiver {
     }
 
     /// @notice Cast or replace the caller's sealed ballot: a Grumpkin point R and a
-    ///         masked field element c (spec B4).
+    ///         masked field element c (spec B4). Filling one of the `nSealedMax` slots
+    ///         costs `minSealedVote` of seat weight, as `minDirectVote` does on the public
+    ///         side; a zero-weight sealed ballot is refused whatever the minimum is.
     function voteSealed(uint256 rx, uint256 ry, uint256 c) external inPhase(Phase.Open) beforeDeadline {
-        if (seatWeight[msg.sender] == 0) revert NoSeatWeight();
+        uint256 w = seatWeight[msg.sender];
+        if (w == 0 || w < minSealedVote) revert NoSeatWeight();
         if (rx == 0 || c >= FIELD || !Grumpkin.isOnCurve(rx, ry)) revert InvalidCiphertext();
         uint256[3] storage ct = _sealed[msg.sender];
         if (ct[0] == 0) {

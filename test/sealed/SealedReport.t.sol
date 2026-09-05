@@ -137,6 +137,7 @@ contract SealedReportTest is FixtureLoader {
             mMax: 2,
             batch: 1,
             minDirectVote: 0,
+            minSealedVote: 0,
             proofGrace: 1 days,
             abandonGrace: 7 days
         });

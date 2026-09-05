@@ -108,6 +108,7 @@ abstract contract FixtureLoader is Test {
             mMax: fxUint(".profile.mMax"),
             batch: fxUint(".profile.batch"),
             minDirectVote: fxWord(".minDirectVote"),
+            minSealedVote: 1,
             proofGrace: 1 days,
             abandonGrace: 7 days
         });

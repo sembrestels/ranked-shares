@@ -280,6 +280,7 @@ contract SealedAdvanceTest is FixtureLoader {
             mMax: fxUint(".profile.mMax"),
             batch: fxUint(".profile.batch"),
             minDirectVote: fxWord(".minDirectVote"),
+            minSealedVote: 1,
             proofGrace: 1 days,
             abandonGrace: 7 days
         });
@@ -350,6 +351,7 @@ contract SealedAdvanceTest is FixtureLoader {
             mMax: fxUint(".profile.mMax"),
             batch: fxUint(".profile.batch"),
             minDirectVote: fxWord(".minDirectVote"),
+            minSealedVote: 1,
             proofGrace: type(uint64).max - 1,
             abandonGrace: type(uint64).max
         });
