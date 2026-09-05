@@ -264,10 +264,12 @@ npm run preview    # serves dist/ with the COOP/COEP headers bb.js needs for its
 Building needs `noir/artifacts/default/*.json` to exist (`cd noir && ...` per its
 README) since `prover/src/core/artifacts.ts` imports them statically.
 
-Manual walkthrough against the e2e fixture's anvil chain (there is no
-wallet-equipped browser in this environment, so this has not been run here —
-only `npm run build` and a header check via `curl` against `npm run preview`
-were verified):
+Manual walkthrough against the e2e fixture's anvil chain. Run on 2026-09-05 in a
+desktop browser with a wallet: all six test-profile proofs were produced in the
+browser and submitted as one `advanceMany`, ending in `Proven`; the first tally
+group took about 12–30 s (including bb.js start-up). The default profile is about
+40× heavier per proof (see the spec's B12.1), so for real pools use the prove
+service and keep the page for small pools and audits.
 
 1. `cd prover && npm run dev:pool` (leave it running — it starts anvil, deploys
    the fixture pool, replays its votes and reports the transcript, then prints

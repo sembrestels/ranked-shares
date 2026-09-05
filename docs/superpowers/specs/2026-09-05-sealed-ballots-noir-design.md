@@ -614,11 +614,17 @@ by anyone with `audit`. The README states this and states which path a pool took
    `bb prove` (this machine): `ingest-default` 1.13 s / 243 MB peak, `tally-default`
    9.28 s / 1.73 GB peak; `ingest-test` 0.27 s / 42 MB, `tally-test` 0.23 s / 45 MB. See
    `noir/README.md`. The browser half (bb.js in Chrome/Firefox) is still open — plan 4.
-   **Measured (plan 4):** the browser half was **not measured** — no wallet-equipped
-   browser was available in this environment. The coordinator page that would carry
-   out that walkthrough is built (`prover/src/web`, a Vite app served with the
-   COOP/COEP headers bb.js's worker pool needs), and the manual steps are recorded in
-   `README.md`'s Coordinator page section. In its place, Node bb.js numbers at the
+   **Measured, browser half (2026-09-05, test profile):** the operator ran the
+   coordinator page (`prover/src/web`, Vite dev server with the COOP/COEP headers,
+   desktop browser with a wallet) against the `dev:pool` anvil chain: the six proofs
+   were made in the browser and landed as one `advanceMany`, ending in `Proven`. The
+   first tally group took **about 12–30 s** in the browser (that first proof also pays
+   bb.js's WASM start-up and SRS load), against 0.23 s for native `bb`. The default
+   profile was not run in a browser; scaling the native ratio (`tally-default` 9.28 s is
+   40× `tally-test`) puts a default tally group at several minutes per proof in the
+   browser — over this spike's two-minute budget — which is why the default profile is
+   proven by the prove service on the operator's machine (README, "Prove service") and
+   the page is the path for small pools and for auditing. Node bb.js numbers at the
    test profile: real UltraHonk proofs for one ingest batch and one tally group
    together take about 3.9 s wall (`prover/test/prove.test.ts`, including
    `Prover.create`'s one-time Barretenberg backend init for both circuits), and each
