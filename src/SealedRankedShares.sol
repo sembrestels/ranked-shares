@@ -33,6 +33,7 @@ contract SealedRankedShares is PoolBase {
 
     event Voted(address indexed voter);
     event SealedVote(address indexed voter);
+    event Closed(bytes32 inputsRoot, uint256 sealedCount);
 
     // ----------------------------------------------------------------- types
 
@@ -106,6 +107,17 @@ contract SealedRankedShares is PoolBase {
     uint256 public sealedCount;
 
     Finality public finality;
+
+    // closing (spec B6.1)
+    bool public closed;
+    uint256 public closeCursor;
+    uint256 public sealedCursor;
+    bytes32 public hPub;
+    uint256 public hSealed;
+    mapping(uint256 => uint256) public checkpoint;
+    uint256 public costsHash;
+    bytes32 public inputsRoot;
+    uint256 public numBatches;
 
     // ----------------------------------------------------------- constructor
 
@@ -230,9 +242,56 @@ contract SealedRankedShares is PoolBase {
         }
     }
 
-    /// @dev Set by Task 4 once `close` completes; false until then.
-    function _closed() internal view virtual returns (bool) {
-        return false;
+    function _closed() internal view returns (bool) {
+        return closed;
+    }
+
+    // --------------------------------------------------------------- closing
+
+    /// @notice Walk the voters and commit to every input, at most `maxVoters` per call.
+    function close(uint256 maxVoters) external inPhase(Phase.Closing) {
+        _close(maxVoters);
+    }
+
+    function _close(uint256 maxVoters) internal {
+        if (closeCursor == 0) _requireBalanceCoversBudget();
+        uint256 n = voters.length;
+        uint256 end = closeCursor + maxVoters;
+        if (end > n) end = n;
+        bytes32 hp = hPub;
+        uint256 hs = hSealed;
+        uint256 j = sealedCursor;
+        uint256 sc = sealedCount;
+        for (uint256 i = closeCursor; i < end; i++) {
+            address a = voters[i];
+            if (hasDirect[a]) {
+                hp = keccak256(abi.encodePacked(hp, a, directWeight[a], _directBallot[a]));
+            }
+            uint256[3] storage ct = _sealed[a];
+            if (ct[0] != 0) {
+                uint256[] memory in6 = new uint256[](6);
+                in6[0] = hs;
+                in6[1] = uint256(uint160(a));
+                in6[2] = seatWeight[a];
+                in6[3] = ct[0];
+                in6[4] = ct[1];
+                in6[5] = ct[2];
+                hs = poseidon.hash(in6);
+                j++;
+                if (j % batch == 0 || j == sc) checkpoint[(j + batch - 1) / batch] = hs;
+            }
+        }
+        closeCursor = end;
+        hPub = hp;
+        hSealed = hs;
+        sealedCursor = j;
+        if (end == n) {
+            costsHash = poseidon.hash(_costs);
+            inputsRoot = keccak256(abi.encodePacked(hp, hs, sc, costsHash, totalWeight));
+            numBatches = sc == 0 ? 1 : (sc + batch - 1) / batch;
+            closed = true;
+            emit Closed(inputsRoot, sc);
+        }
     }
 
     // ----------------------------------------------------------------- hooks
