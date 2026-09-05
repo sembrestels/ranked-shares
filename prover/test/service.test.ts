@@ -11,7 +11,8 @@ import { rebuild, rebuildFromFixture } from "../src/core/state";
 import { runChain } from "../src/core/submit";
 import { Prover } from "../src/core/prove";
 import { createServer, type ServiceOptions } from "../src/service";
-import { startFixtureChain, deployUnclosedPool, deployVoterPool, replayFixturePool, type FixtureChain } from "./helpers/anvil";
+import { encodeCloseReport } from "@lib/report";
+import { startFixtureChain, deployUnclosedPool, deployVoterPool, replayFixturePool, workflowMetadata, FORWARDER, NO_WORKFLOW_CHECK, type FixtureChain } from "./helpers/anvil";
 import poolAbi from "../../cre/src/abi/SealedRankedShares.json";
 
 const PORT = 8549;
@@ -91,6 +92,48 @@ describe("the prove service", () => {
     expect(status).toBe(409);
     expect(body.error).toMatch(/not closed/i);
   });
+
+  // The KeystoneForwarder is a per-chain singleton shared by every workflow, so a pool
+  // that only checked `msg.sender == forwarder` would take a kind-1 report — and its
+  // `proofGrace` clock — from any workflow owner registered with it. This is that check
+  // seen from the client side, against a real chain rather than forge's cheatcodes.
+  test("onReport needs the forwarder metadata to name the pool's workflow owner", async () => {
+    const owner = chain.coordinator.address;
+    const pool = await deployUnclosedPool(chain.rpc, undefined, { workflowOwner: owner, workflowName: NO_WORKFLOW_CHECK.workflowName });
+    expect((await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "workflowOwner" })) as string).toBe(owner);
+
+    // one project, voting open, and the clock past the deadline, so a kind-2 report has
+    // somewhere to land: the pool is then in Closing with no voters to walk.
+    const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(chain.rpc) });
+    const deployerWallet = createWalletClient({ account: chain.deployer, chain: foundry, transport: http(chain.rpc) });
+    const send = async (hash: `0x${string}`) => {
+      const receipt = await chain.pub.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error(`tx reverted: ${hash}`);
+    };
+    const asDeployer = { address: pool, abi: poolAbi, account: chain.deployer, chain: foundry } as const;
+    await send(await deployerWallet.writeContract({ ...asDeployer, functionName: "addProject", args: [1n, chain.deployer.address] } as any));
+    await send(await deployerWallet.writeContract({ ...asDeployer, functionName: "openVoting" } as any));
+    const deadline = (await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "votingDeadline" })) as bigint;
+    await testClient.setNextBlockTimestamp({ timestamp: deadline });
+    await testClient.mine({ blocks: 1 });
+
+    await testClient.impersonateAccount({ address: FORWARDER });
+    await testClient.setBalance({ address: FORWARDER, value: 10n ** 18n });
+    const report = encodeCloseReport(100);
+    const call = (metadata: `0x${string}`) => chain.pub.simulateContract({ address: pool, abi: poolAbi, functionName: "onReport", args: [metadata, report], account: FORWARDER });
+
+    // the MockForwarder's empty metadata is no longer enough
+    await expect(call("0x")).rejects.toThrow(/BadMetadata/);
+    // nor is well-formed metadata naming somebody else's workflow
+    await expect(call(workflowMetadata(chain.deployer.address))).rejects.toThrow(/WrongWorkflow/);
+
+    // the real 62-byte metadata carrying this pool's workflow owner is accepted
+    const metadata = workflowMetadata(owner);
+    expect((metadata.length - 2) / 2).toBe(62);
+    const forwarderWallet = createWalletClient({ account: FORWARDER, chain: foundry, transport: http(chain.rpc) });
+    await send(await forwarderWallet.writeContract({ address: pool, abi: poolAbi, functionName: "onReport", args: [metadata, report], account: FORWARDER, chain: foundry } as any));
+    expect(await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "closed" })).toBe(true);
+  }, 120_000);
 
   test("413 (or a closed connection) on an oversized request body", async () => {
     const big = JSON.stringify({ pool: chain.pool, junk: "x".repeat(8192) });

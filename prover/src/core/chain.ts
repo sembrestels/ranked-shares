@@ -27,6 +27,10 @@ export type Snapshot = {
   pkX: bigint;
   pkY: bigint;
   coordinator: Address;
+  /** The workflow owner `onReport` authorizes, or the zero address when the check is off. */
+  workflowOwner: Address;
+  /** The workflow name `onReport` authorizes, or ten zero bytes to accept any name. */
+  workflowName: `0x${string}`;
   sealedCount: number;
   numBatches: number;
   checkpoints: bigint[];
@@ -76,6 +80,8 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     pkX,
     pkY,
     coordinator,
+    workflowOwner,
+    workflowName,
     sealedCount,
     numBatches,
     costsHash,
@@ -98,6 +104,8 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     read<bigint>(client, pool, "tallierPkX"),
     read<bigint>(client, pool, "tallierPkY"),
     read<Address>(client, pool, "coordinator"),
+    read<Address>(client, pool, "workflowOwner"),
+    read<`0x${string}`>(client, pool, "workflowName"),
     read<bigint>(client, pool, "sealedCount"),
     read<bigint>(client, pool, "numBatches"),
     read<bigint>(client, pool, "costsHash"),
@@ -162,6 +170,8 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     pkX,
     pkY,
     coordinator,
+    workflowOwner,
+    workflowName,
     sealedCount: Number(sealedCount),
     numBatches: Number(numBatches),
     checkpoints,

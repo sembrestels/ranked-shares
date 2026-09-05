@@ -1,5 +1,5 @@
 // prover/src/web/main.ts — the coordinator page: connect, sign, audit, prove and submit
-import { createPublicClient, createWalletClient, custom, defineChain, http, hexToBytes, type Address, type Hex } from "viem";
+import { createPublicClient, createWalletClient, custom, defineChain, http, hexToBytes, zeroAddress, type Address, type Hex } from "viem";
 import { deriveSk, MASTER_MESSAGE } from "@lib/sealed";
 import { pubkey } from "@lib/grumpkin";
 import { readPoolSnapshot } from "../core/chain";
@@ -126,6 +126,12 @@ $("refresh").onclick = guard(async () => {
       numBatches: s.numBatches,
       coordinator: s.coordinator,
       youAreCoordinator: account ? account.toLowerCase() === s.coordinator.toLowerCase() : "not connected",
+      workflowOwner: s.workflowOwner,
+      workflowName: s.workflowName,
+      // A pool with no workflow owner accepts a report from any workflow that reaches the
+      // shared KeystoneForwarder, so its provisional result is worth nothing: the
+      // coordinator should see that at a glance rather than dig for it.
+      reportAuthorization: s.workflowOwner === zeroAddress ? "OFF — any workflow reaching the forwarder can report" : "on",
     },
     null,
     2,

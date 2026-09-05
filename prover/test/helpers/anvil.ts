@@ -3,7 +3,7 @@
 // service.test.ts and scripts/dev-pool.ts.
 import { execFileSync, spawn, type ChildProcess } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { createPublicClient, createTestClient, createWalletClient, http, parseAbi, toHex, type Account, type Address, type Hex, type PublicClient } from "viem";
+import { createPublicClient, createTestClient, createWalletClient, encodePacked, http, parseAbi, toHex, zeroAddress, type Account, type Address, type Hex, type PublicClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { foundry } from "viem/chains";
 import { toBig } from "@lib/field";
@@ -26,6 +26,25 @@ const DEPLOYER_KEY: Hex = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae7
 export const FORWARDER: Address = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"; // anvil account 1
 export const COORDINATOR_KEY: Hex = "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a"; // anvil account 2
 const ORG: Address = "0x90F79bf6EB2c4f870365E785982E1f101E93b906"; // anvil account 3
+
+/** The pool `Config` fields for a workflow. */
+export type WorkflowConfig = { workflowOwner: Address; workflowName: Hex };
+/**
+ * `onReport`'s workflow check turned off: the zero owner accepts a report from any
+ * workflow reaching the forwarder, which is what these helpers need — they report from
+ * the `FORWARDER` account directly, with no KeystoneForwarder metadata to present. A
+ * pool deployed this way must never hold real funds.
+ */
+export const NO_WORKFLOW_CHECK: WorkflowConfig = { workflowOwner: zeroAddress, workflowName: `0x${"00".repeat(10)}` };
+
+/**
+ * The metadata a KeystoneForwarder prepends to a verified report: `bytes32 workflowId ‖
+ * bytes10 workflowName ‖ address workflowOwner`, 62 bytes, at the offsets
+ * `checkWorkflow` (src/lib/CreMetadata.sol) reads.
+ */
+export function workflowMetadata(owner: Address, name: Hex = NO_WORKFLOW_CHECK.workflowName, workflowId: Hex = `0x${"00".repeat(31)}01`): Hex {
+  return encodePacked(["bytes32", "bytes10", "address"], [workflowId, name, owner]);
+}
 
 // The fixture's `transcript` field stores the NONE sentinel (2^64 - 1) as a bare JSON
 // number, which plain JSON.parse rounds to a double and corrupts; quote any run of 16+
@@ -66,9 +85,10 @@ function killAndWait(anvil: ChildProcess): Promise<void> {
  * Deploy a fresh SealedRankedShares pool — token, Poseidon2, both test verifiers, and
  * the pool itself, configured from `fx` — without opening voting or closing it, so its
  * `inputsRoot` is still the zero default. Assumes anvil is already up at `rpc`. Cheap: a
- * handful of contract deployments, no voting, no proving.
+ * handful of contract deployments, no voting, no proving. `workflow` is the workflow
+ * `onReport` authorizes; the default turns that check off.
  */
-export async function deployUnclosedPool(rpc: string, fixture?: URL): Promise<Address> {
+export async function deployUnclosedPool(rpc: string, fixture?: URL, workflow: WorkflowConfig = NO_WORKFLOW_CHECK): Promise<Address> {
   const fx = loadFixture(fixture ?? DEFAULT_FIXTURE);
   const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
   const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
@@ -87,6 +107,7 @@ export async function deployUnclosedPool(rpc: string, fixture?: URL): Promise<Ad
   const deadline = (await pub.getBlock()).timestamp + 3600n;
   const cfg = {
     forwarder: FORWARDER,
+    ...workflow,
     coordinator: COORDINATOR.address,
     poseidon,
     ingestVerifier: ingestV,
@@ -142,6 +163,7 @@ export async function deployVoterPool(rpc: string, n: number, fixture?: URL): Pr
       deadline,
       {
         forwarder: FORWARDER,
+        ...NO_WORKFLOW_CHECK,
         coordinator: COORDINATOR.address,
         poseidon,
         ingestVerifier: ingestV,
@@ -280,6 +302,7 @@ export async function replayFixturePool(rpc: string, fx: any): Promise<ReplayedP
   const deadline = (await pub.getBlock()).timestamp + 3600n;
   const cfg = {
     forwarder: FORWARDER,
+    ...NO_WORKFLOW_CHECK,
     coordinator: COORDINATOR.address,
     poseidon,
     ingestVerifier: ingestV,

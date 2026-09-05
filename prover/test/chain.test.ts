@@ -34,6 +34,8 @@ const base: Record<string, unknown> = {
   tallierPkX: 1n,
   tallierPkY: 2n,
   coordinator: POOL,
+  workflowOwner: "0x0000000000000000000000000000000000000000",
+  workflowName: "0x00000000000000000000",
   sealedCount: 4n,
   numBatches: 2n,
   costsHash: 7n,
