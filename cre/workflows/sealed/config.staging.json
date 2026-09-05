@@ -1,0 +1,7 @@
+{
+  "schedule": "0 */2 * * * *",
+  "chainSelectorName": "arc-testnet",
+  "pools": ["0x0000000000000000000000000000000000000000"],
+  "closeChunk": 25,
+  "gasLimit": "12000000"
+}

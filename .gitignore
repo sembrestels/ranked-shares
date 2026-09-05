@@ -10,3 +10,8 @@ reference/tools/package-lock.json
 .superpowers/
 noir/**/target/
 noir/*/Prover.toml
+
+cre/node_modules/
+cre/dist/
+prover/node_modules/
+prover/dist/
