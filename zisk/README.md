@@ -94,3 +94,10 @@ this machine's memory. The `wrap` step needs a `cargo-zisk` carrying the fix of 
 PR #1299: the v1.2.0-alpha release binary wraps a saved plain vadcop_final proof against
 the program VK instead of the vadcop_final verkey and aborts after 39 s with
 `Failed assert in template/function VerifyPoW`.
+
+`~/.zisk/bin/cargo-zisk` and `~/.zisk/bin/cargo-zisk-dev` on this machine were therefore
+rebuilt from branch `fix/wrap-plain-vadcop-final-verkey` of `~/.zisk/src/zisk-upstream`
+(commit `f869e705`, `cargo build --release -p cargo-zisk`, 2m43s) and installed over the
+originals, which are kept beside them as `cargo-zisk.pre-pr1299.bak` and
+`cargo-zisk-dev.pre-pr1299.bak`. Any `ziskup` run or ZisK reinstall silently puts the
+broken wrap back, so re-apply the rebuild before proving until the fix is released.
