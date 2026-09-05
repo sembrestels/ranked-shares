@@ -40,7 +40,7 @@ contract SealedFixtureTest is FixtureLoader {
             pi[7] = fxBytes32(string.concat(p, "hOut"));
             pi[8] = fxBytes32(string.concat(p, "stateIn"));
             pi[9] = fxBytes32(string.concat(p, "stateOut"));
-            pool.advance("", pi);
+            pool.advance("", pi, false);
         }
         uint256 nT = fxCount(".tallyProofs");
         for (uint256 g = 0; g < nT; g++) {
@@ -53,7 +53,7 @@ contract SealedFixtureTest is FixtureLoader {
             pi[4] = fxBytes32(string.concat(p, "tHashOut"));
             pi[5] = bytes32(fxUint(string.concat(p, "fundedCount")));
             pi[6] = fxBytes32(string.concat(p, "fundedOrderPacked"));
-            pool.advance("", pi);
+            pool.advance("", pi, false);
         }
         assertEq(uint256(pool.finality()), uint256(SealedRankedShares.Finality.Proven), "Proven");
         uint256[] memory order = fxUintArray(".funded");

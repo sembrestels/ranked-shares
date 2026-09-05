@@ -41,7 +41,6 @@ contract SealedRankedShares is PoolBase, IReceiver {
     error TranscriptPending();
     error TranscriptMismatch();
     error ResultMismatch();
-    error IngestPending();
     error ProofPending();
     error ResultPending();
 
@@ -145,6 +144,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     bool public resultReported;
     uint256[] internal _provisional;
     uint256 public transcriptHash;
+    uint64 public reportedAt;
 
     // proofs (spec B6.5)
     uint256 public ingestCursor;
@@ -361,6 +361,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
         transcriptHash = _hashTranscript(transcript, order);
         _provisional = order;
         resultReported = true;
+        reportedAt = uint64(block.timestamp);
         emit ProvisionalResult(order);
         emit Transcript(transcript);
     }
@@ -412,11 +413,17 @@ contract SealedRankedShares is PoolBase, IReceiver {
     // ---------------------------------------------------------------- proofs
 
     /// @notice Verify the next proof of the chain: ingest batches first, then tally groups.
-    function advance(bytes calldata proof, bytes32[] calldata publicInputs) external inPhase(Phase.Tally) {
+    ///         `restart` is honoured in the tally branch only: a valid proof from the
+    ///         ingested state may replace a wrong tally group, but only by carrying its
+    ///         own proof, so nobody can reset the chain for free (spec B6.5).
+    function advance(bytes calldata proof, bytes32[] calldata publicInputs, bool restart)
+        external
+        inPhase(Phase.Tally)
+    {
         if (ingestCursor < numBatches) {
             _advanceIngest(proof, publicInputs);
         } else {
-            _advanceTally(proof, publicInputs);
+            _advanceTally(proof, publicInputs, restart);
         }
     }
 
@@ -436,13 +443,15 @@ contract SealedRankedShares is PoolBase, IReceiver {
         emit Ingested(k);
     }
 
-    function _advanceTally(bytes calldata proof, bytes32[] calldata pi) internal {
+    function _advanceTally(bytes calldata proof, bytes32[] calldata pi, bool restart) internal {
         if (!resultReported) revert TranscriptPending();
         if (pi.length != 7) revert InputMismatch();
+        if (restart) stateCommit = ingestedState;
         if (uint256(pi[0]) != costsHash || uint256(pi[1]) != stateCommit) revert InputMismatch();
         if (!tallyVerifier.verify(proof, pi)) revert InvalidProof();
         stateCommit = uint256(pi[2]);
         emit Advanced();
+        if (restart) emit TallyRestarted();
         if (uint256(pi[3]) == 1) {
             if (uint256(pi[4]) != transcriptHash) revert TranscriptMismatch();
             uint256[] memory order = _unpackFunded(uint256(pi[5]), uint256(pi[6]));
@@ -451,20 +460,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
         }
     }
 
-    /// @notice Reset the tally chain to the state after ingest, for a prover that fed a
-    ///         transcript slice the DON did not publish.
-    function restartTally() external inPhase(Phase.Tally) {
-        if (ingestCursor != numBatches) revert IngestPending();
-        stateCommit = ingestedState;
-        emit TallyRestarted();
-    }
-
     // ----------------------------------------------------------------- grace
 
-    /// @notice Apply the DON's provisional result once `proofGrace` has elapsed with no proof.
+    /// @notice Apply the DON's provisional result once `proofGrace` has elapsed since the
+    ///         report, so the prover always gets the full window however late `close` or
+    ///         the report were (spec B6.6).
     function acceptProvisional() external inPhase(Phase.Tally) {
         if (!resultReported) revert ResultPending();
-        if (block.timestamp < votingDeadline + proofGrace) revert ProofPending();
+        if (block.timestamp < uint256(reportedAt) + proofGrace) revert ProofPending();
         _finalize(_provisional, Finality.Attested);
     }
 
@@ -473,7 +476,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
         Phase p = phase();
         if (p != Phase.Tally && p != Phase.Closing) revert WrongPhase();
         if (resultReported) revert ResultAlreadyReported();
-        if (block.timestamp < votingDeadline + abandonGrace) revert ResultPending();
+        if (block.timestamp < uint256(votingDeadline) + abandonGrace) revert ResultPending();
         _finalize(new uint256[](0), Finality.Abandoned);
     }
 
@@ -488,6 +491,7 @@ contract SealedRankedShares is PoolBase, IReceiver {
     }
 
     function _finalize(uint256[] memory order, Finality how) internal {
+        if (finality != Finality.None) revert WrongPhase();
         uint256 total;
         for (uint256 i = 0; i < order.length; i++) {
             funded[order[i]] = true;
