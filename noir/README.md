@@ -3,7 +3,9 @@
 `sealed` and `pbear` are libraries mirroring `reference/sealed.py` and
 `reference/commitments.py`; `ingest-<profile>` and `tally-<profile>` are the circuits of
 spec B7 for the `test` (E 8, M 4, B 2, K 2) and `default` (E 256, M 16, B 32, K 8)
-profiles.
+profiles. The two profiles of a kind share one body — `pbear::ingest_main` and
+`pbear::tally_main` — so a profile crate holds nothing but its E/M/B/K globals and the
+`main` signature that declares which inputs are public.
 
     . noir/scripts/env.sh                     # nargo 1.0.0-beta.26, bb 5.0.0 (see VERSIONS)
     cd noir && nargo test --workspace         # library tests
@@ -14,9 +16,9 @@ profiles.
 
 | Circuit | Gates | bb prove (native) | Peak memory |
 |---|---|---|---|
-| ingest-test | 8,947 | 0.27 s | 42 MB |
+| ingest-test | 8,945 | 0.27 s | 42 MB |
 | tally-test | 11,855 | 0.23 s | 45 MB |
-| ingest-default | 137,200 | 1.13 s | 243 MB |
+| ingest-default | 137,168 | 1.13 s | 243 MB |
 | tally-default | 1,034,184 | 9.28 s | 1.73 GB |
 
 `tally-default` is under spec B12.1's 1.2 M-gate threshold, so the default profile keeps

@@ -48,12 +48,7 @@ pub fn sponge_var<let N: u32>(inputs: [Field; N], len: u32) -> Field {
 /// projects: `packed < 256^m`, every rank `<= m`, and a rank `r` is used only if
 /// exactly `r - 1` projects carry a smaller non-zero rank (`PBEAR._setBallot`).
 pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M]) {
-    // No `assert(m <= M)` here, unlike `effective_ranks`: it would add a constraint to
-    // the ingest circuit (which calls this with the state's `m`) and so move its
-    // verification key, invalidating the committed verifiers and proofs. It would be
-    // redundant anyway: `main` asserts `m <= M` on the public `m`, batch 0 builds the
-    // state from it, no later batch touches `state.m`, and `SealedRankedShares`
-    // chains the batches and rechecks `m == _costs.length` on every one of them.
+    assert(m <= M);
     let bytes: [u8; 32] = packed.to_le_bytes();
     let mut ranks: [u8; M] = [0; M];
     let mut ok = true;

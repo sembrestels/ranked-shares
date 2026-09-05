@@ -311,6 +311,85 @@ pub fn check_key(sk: EmbeddedCurveScalar, pk_x: Field, pk_y: Field) {
     assert(pk_matches(sk, pk_x, pk_y));
 }
 
+/// Body of the `ingest-<profile>` circuits: the profile crates only fix E, M, B and say
+/// which arguments are public. See `SealedRankedShares._advanceIngest`.
+///
+/// `sk_lo`/`sk_hi` are deliberately not range-checked. That is safe because the secret
+/// key is consumed only by `pk_matches` and `shared_point`, which are the same
+/// embedded-curve black box reading the same (lo, hi) limb pair the same way: whatever
+/// scalar a witness's limbs denote, `sk * G == pk` pins it to the key the pool committed
+/// to on chain, and `sk * R` is then formed from that very scalar, so an out-of-range
+/// encoding cannot make the two uses disagree.
+pub fn ingest_main<let E: u32, let M: u32, let B: u32>(
+    k: u32,
+    n_sealed: u32,
+    m: u32,
+    budget: u64,
+    pk_x: Field,
+    pk_y: Field,
+    h_in: Field,
+    h_out: Field,
+    state_in: Field,
+    state_out: Field,
+    sk_lo: Field,
+    sk_hi: Field,
+    state: State<E, M>,
+    entries: [Entry; B],
+) {
+    let sk = EmbeddedCurveScalar { lo: sk_lo, hi: sk_hi };
+    assert(m <= M);
+    assert(n_sealed <= E);
+    check_key(sk, pk_x, pk_y);
+    let first = k == 0;
+    assert((!first) | (state_in == 0));
+    assert(first | (commit(state) == state_in));
+    let start: State<E, M> = if first {
+        empty_state::<E, M>(m, budget)
+    } else {
+        state
+    };
+    let (end, h) = ingest_batch::<E, M, B>(start, sk, k, n_sealed, h_in, entries);
+    assert(h == h_out);
+    assert(commit(end) == state_out);
+}
+
+/// Body of the `tally-<profile>` circuits: the profile crates only fix E, M, K and say
+/// which arguments are public. See `SealedRankedShares._advanceTally`.
+pub fn tally_main<let E: u32, let M: u32, let K: u32>(
+    costs_hash: Field,
+    state_in: Field,
+    state_out: Field,
+    done: Field,
+    t_hash_out: Field,
+    funded_count: Field,
+    funded_order_packed_out: Field,
+    costs: [u64; M],
+    state: State<E, M>,
+    steps: [Step<M>; K],
+) {
+    let m = state.m as u32;
+    assert(m <= M);
+    for c in 0..M {
+        assert((c < m) | (costs[c] == 0));
+    }
+    let mut cost_fields: [Field; M] = [0; M];
+    for c in 0..M {
+        cost_fields[c] = costs[c] as Field;
+    }
+    assert(sponge_var(cost_fields, m) == costs_hash);
+    assert(commit(state) == state_in);
+    let ranks = ranks_of(state);
+    let mut s = state;
+    for i in 0..K {
+        s = tally_step(s, costs, steps[i], ranks);
+    }
+    assert(commit(s) == state_out);
+    assert((if s.done { 1 } else { 0 }) == done);
+    assert(s.t_hash == t_hash_out);
+    assert((s.funded_count as Field) == funded_count);
+    assert(funded_order_packed(s) == funded_order_packed_out);
+}
+
 mod tests {
     use super::{
         commit, empty_state, funded_bits, funded_order_packed, ranks_of, State, Step, tally_step,
