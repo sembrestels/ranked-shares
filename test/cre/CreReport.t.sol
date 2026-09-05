@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {WrongPhase} from "../../src/PoolBase.sol";
 import {SealedPool} from "../../src/SealedPool.sol";
-import {CreRankedShares} from "../../src/cre/CreRankedShares.sol";
+import {CreRankedShares, deriveWorkflowName} from "../../src/cre/CreRankedShares.sol";
 import {IReceiver} from "../../src/interfaces/IReceiver.sol";
 import {ZiskFixtureLoader} from "../zisk/ZiskFixtureLoader.sol";
 
@@ -66,6 +66,10 @@ contract CreReportTest is ZiskFixtureLoader {
 
     function test_workflowNameOfMatchesTheDerivation() public view {
         assertEq(cpool.workflowNameOf("ranked-shares-tally"), WORKFLOW_NAME);
+    }
+
+    function test_workflowNameOfMatchesTheScriptsDerivation() public view {
+        assertEq(deriveWorkflowName("ranked-shares-tally"), cpool.workflowNameOf("ranked-shares-tally"));
     }
 
     function test_constructorNeedsAForwarder() public {
@@ -151,9 +155,29 @@ contract CreReportTest is ZiskFixtureLoader {
 
     function test_wrongNameReverts() public {
         vm.warp(DEADLINE);
+        bytes10 wrongName = cpool.workflowNameOf("some-other-workflow");
         vm.prank(forwarder);
         vm.expectRevert(CreRankedShares.WrongWorkflow.selector);
-        cpool.onReport(metadata(workflowAuthor, bytes10(uint80(1))), abi.encode(uint8(2), abi.encode(uint256(5))));
+        cpool.onReport(metadata(workflowAuthor, wrongName), abi.encode(uint8(2), abi.encode(uint256(5))));
+    }
+
+    /// @dev Builds the 62-byte metadata by hand at the absolute offsets `_checkWorkflow`
+    ///      reads — `workflowName` at 32..42, `workflowOwner` at 42..62 — rather than
+    ///      through the `metadata` helper, so the test pins those offsets independently.
+    function test_wrongOwnerRevertsAtThePinnedOffsets() public {
+        vm.warp(DEADLINE);
+        bytes memory md = new bytes(62);
+        for (uint256 i = 0; i < 10; i++) {
+            md[32 + i] = WORKFLOW_NAME[i];
+        }
+        bytes20 wrongOwner = bytes20(makeAddr("someoneElse"));
+        for (uint256 i = 0; i < 20; i++) {
+            md[42 + i] = wrongOwner[i];
+        }
+        assertEq(md.length, 62);
+        vm.prank(forwarder);
+        vm.expectRevert(CreRankedShares.WrongWorkflow.selector);
+        cpool.onReport(md, abi.encode(uint8(2), abi.encode(uint256(5))));
     }
 
     function test_62ByteMetadataAcceptedWithoutReportId() public {

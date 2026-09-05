@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 import {Script, console} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {CreRankedShares} from "../src/cre/CreRankedShares.sol";
+import {CreRankedShares, deriveWorkflowName} from "../src/cre/CreRankedShares.sol";
 
 /// @notice Deploys a CreRankedShares pool.
 ///
@@ -17,15 +17,25 @@ import {CreRankedShares} from "../src/cre/CreRankedShares.sol";
 /// WORKFLOW_OWNER and WORKFLOW_NAME authorize `onReport`'s `metadata` against the
 /// workflow that is allowed to deliver reports; the KeystoneForwarder is a per-chain
 /// singleton shared by every workflow, so leaving WORKFLOW_OWNER unset (address(0))
-/// disables that check and must never be used for a pool holding real funds.
+/// disables that check and must never be used for a pool holding real funds. Doing so
+/// requires explicitly opting in with ALLOW_ANY_WORKFLOW=1 (see `WorkflowOwnerRequired`).
 /// WORKFLOW_NAME may be left empty to accept any name from WORKFLOW_OWNER.
 contract DeployCre is Script {
+    /// @notice WORKFLOW_OWNER is unset or zero, which disables `onReport`'s workflow
+    ///         check and lets any workflow reaching the forwarder report to this pool.
+    ///         To deploy such a pool anyway (simulation only; it must never hold real
+    ///         funds), set ALLOW_ANY_WORKFLOW=1.
+    error WorkflowOwnerRequired();
+
     function run() external returns (CreRankedShares pool) {
         address workflowOwner = vm.envOr("WORKFLOW_OWNER", address(0));
         string memory workflowNameStr = vm.envOr("WORKFLOW_NAME", string(""));
-        bytes10 workflowName = bytes(workflowNameStr).length == 0 ? bytes10(0) : _workflowNameOf(workflowNameStr);
+        bytes10 workflowName = bytes(workflowNameStr).length == 0 ? bytes10(0) : deriveWorkflowName(workflowNameStr);
 
         if (workflowOwner == address(0)) {
+            if (!vm.envOr("ALLOW_ANY_WORKFLOW", false)) {
+                revert WorkflowOwnerRequired();
+            }
             console.log(
                 "WARNING: WORKFLOW_OWNER unset; onReport accepts a report from any workflow reaching the forwarder. Do not deploy this pool for real funds."
             );
@@ -46,19 +56,7 @@ contract DeployCre is Script {
         );
         vm.stopBroadcast();
         console.log("CreRankedShares deployed at", address(pool));
-    }
-
-    /// @dev Mirrors `CreRankedShares.workflowNameOf`; computed here (rather than called
-    ///      on the deployed pool) to avoid a chicken-and-egg with the constructor.
-    function _workflowNameOf(string memory name) internal pure returns (bytes10) {
-        bytes32 digest = sha256(bytes(name));
-        bytes memory hexAlphabet = "0123456789abcdef";
-        bytes memory out = new bytes(10);
-        for (uint256 i = 0; i < 5; i++) {
-            uint8 b = uint8(digest[i]);
-            out[2 * i] = hexAlphabet[b >> 4];
-            out[2 * i + 1] = hexAlphabet[b & 0x0f];
-        }
-        return bytes10(out);
+        console.log("workflowOwner", workflowOwner);
+        console.logBytes10(workflowName);
     }
 }

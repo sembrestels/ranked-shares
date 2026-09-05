@@ -296,7 +296,10 @@ workflow's name the way CRE does: SHA-256 the name, hex-encode, take the first 1
 characters, and return their ASCII bytes. If `workflowOwner_` is `address(0)` the check
 is disabled — such a pool accepts a report from any workflow reaching the forwarder and
 must never hold real funds; it exists only so `cre workflow simulate`'s MockForwarder,
-which calls `onReport` with no metadata at all, can exercise a pool.
+which calls `onReport` with no metadata at all, can exercise a pool. This check binds
+the report to a workflow owner (and optionally a name), not to a specific workflow
+build: `workflowId` is not checked, so the owner can redeploy different workflow code
+under the same name and still report; that is the trust boundary.
 
 **Liveness.** `abandon()` — anyone, in `Closing` or `Tally`, once
 `block.timestamp ≥ votingDeadline + abandonGrace` (`ResultPending` before that). Sets
