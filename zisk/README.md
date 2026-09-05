@@ -63,3 +63,34 @@ with precompiles only 3.3%. Among individual functions, `secp256k1::scalar_mul_s
 the single largest named contributor (3.4%), ahead of `keccak256` (1.8%); the tally
 logic itself (`pbear::validate`) is negligible (0.1%). Sealed-ballot decryption, not
 the PB-EAR arithmetic, dominates the guest's cost.
+
+### Proof
+
+Proving `main` on this machine (CPU, 30 GB RAM plus swap): STARK 16 min (25.8 GiB peak
+RSS, `Proof verified successfully`), PLONK wrap 11 min (25.2 GiB peak RSS, heavy swap).
+`programVK` `0x7d0bd8b882832ec6121439dd210a142169a0e8dc2cbc8c1c0a29633911c1394b`,
+`rootCVadcopFinal` `0x564c2b1bcbd5932c81cfad1fa786a98372eb3d6495257c2d944544334f84382f`
+(ZisK v1.2.0-alpha PLONK key; it equals `getRootCVadcopFinal()` of
+`provingKeySnark/final/ZiskVerifier.sol`). `fixtures/main-calldata.json` is the exported
+calldata; plan B verifies it against `ZiskVerifier.sol` in Foundry.
+
+`scripts/check_publics.py <calldata.json> <outputHash>` pins the layout: `publicValues`
+is 512 bytes, slot `i` (8 bytes) is `hash[4i..4i+4]` followed by four zero bytes for
+`i < 8` and zero beyond — confirmed against the fixture's
+`outputHash 0x21adc302526226471eb4b66bb8aed716aab9503a8df9a1364b6d616960dcdd3a`.
+`proofBytes` is 768 bytes (the `uint256[24]` PLONK proof).
+
+    HWLOC_COMPONENTS=-gl GLIBC_TUNABLES=glibc.rtld.execstack=2 \
+      cargo-zisk prove -e <elf> -i <main.bin> -k ~/.zisk/provingKey \
+        -o proofs/main-stark.bin -y
+    ... cargo-zisk wrap -p proofs/main-stark.bin -k ~/.zisk/provingKey \
+      -w ~/.zisk/provingKeySnark --plonk -o proofs/main-plonk.bin
+    cargo-zisk-dev export-solidity-calldata -p proofs/main-plonk.bin \
+      -o fixtures/main-calldata.json
+    python3 scripts/check_publics.py fixtures/main-calldata.json <outputHash>
+
+Run `prove` and `wrap` as two processes; `prove --plonk` in one process does not fit in
+this machine's memory. The `wrap` step needs a `cargo-zisk` carrying the fix of ZisK
+PR #1299: the v1.2.0-alpha release binary wraps a saved plain vadcop_final proof against
+the program VK instead of the vadcop_final verkey and aborts after 39 s with
+`Failed assert in template/function VerifyPoW`.
