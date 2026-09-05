@@ -29,11 +29,14 @@ pub fn read_input(path: &Path) -> Result<TallyInput> {
 }
 
 /// Writes the framed input file mode 0600: `TallyInput` carries the pool's private key.
+/// `.mode(0o600)` only sets the mode at creation time, so a pre-existing file (a reused
+/// workdir, or a caller-supplied `--out` path) is forced to 0600 after writing too.
 pub fn write_input(path: &Path, input: &TallyInput) -> Result<()> {
     use std::io::Write;
-    use std::os::unix::fs::OpenOptionsExt;
+    use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
     let mut file = std::fs::OpenOptions::new().write(true).create(true).truncate(true).mode(0o600).open(path)?;
     file.write_all(&io::frame(&io::encode_input(input)))?;
+    file.set_permissions(std::fs::Permissions::from_mode(0o600))?;
     Ok(())
 }
 

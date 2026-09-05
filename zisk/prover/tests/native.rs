@@ -1,4 +1,5 @@
 use sealed::fixture::{hex_arr, hex_bytes, input_of, load_json};
+use std::os::unix::fs::PermissionsExt;
 use tally_prover::{keys, native};
 
 #[test]
@@ -24,5 +25,25 @@ fn check_reproduces_the_fixture_and_keys_match() {
     let ranks = vec![1u8, 2, 3, 0];
     let ct = sealed::ballot::encrypt(&pk, &voter, &ranks, &keys::random_scalar()).unwrap();
     assert_eq!(sealed::ballot::decrypt(&input.sk, &voter, &ct, 4), Some(ranks));
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn write_input_forces_0600_even_on_an_existing_file() {
+    let fx = load_json("fixture_main.json");
+    let input = input_of(&fx);
+    let dir = std::env::temp_dir().join(format!("tally-prover-perm-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("input.bin");
+
+    // Pre-create the target with a permissive mode, as a reused workdir or a
+    // caller-supplied `--out` path might leave it.
+    std::fs::write(&path, b"stale").unwrap();
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644)).unwrap();
+
+    native::write_input(&path, &input).unwrap();
+
+    let mode = std::fs::metadata(&path).unwrap().permissions().mode();
+    assert_eq!(mode & 0o777, 0o600);
     std::fs::remove_dir_all(dir).unwrap();
 }
