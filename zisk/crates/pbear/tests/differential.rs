@@ -66,13 +66,18 @@ fn matches_python_reference_on_random_instances() {
         let scale: u64 = if huge { 1 << 58 } else { 1 };
         let costs: Vec<u64> = (0..m).map(|_| (1 + rng.below(60)) * scale).collect();
         let n = rng.below(9) as usize;
+        // Keep huge rounds within the u64 budget bound (weights, costs and the total
+        // budget all fit u64): with up to 8 entries, sum of weights + abstaining <= 32 *
+        // 2^58 = 2^63.
+        let weight_bound: u64 = if huge { 4 } else { 50 };
+        let abstaining_bound: u64 = if huge { 8 } else { 40 };
         let entries: Vec<Entry> = (0..n)
             .map(|_| Entry {
-                weight: rng.below(50) * scale,
+                weight: rng.below(weight_bound) * scale,
                 ranks: if rng.below(8) == 0 { None } else { Some(random_ranks(&mut rng, m)) },
             })
             .collect();
-        let abstaining = rng.below(40) * scale;
+        let abstaining = rng.below(abstaining_bound) * scale;
         assert_eq!(tally(&costs, &entries, abstaining), oracle(&costs, &entries, abstaining), "round {round}: costs {costs:?} entries {entries:?} abstaining {abstaining}");
     }
 }

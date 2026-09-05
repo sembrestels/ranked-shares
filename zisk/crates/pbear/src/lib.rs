@@ -4,6 +4,10 @@
 //! then lowest id), same cumulative rounding in voter order, same termination. The
 //! Solidity engine is the definition; `reference/pbear.py` is the executable oracle the
 //! differential test in `tests/differential.rs` runs against.
+//!
+//! Precondition: every weight, every cost and the whole budget (the sum of all weights
+//! plus `abstaining`) fit in `u64` — the pool contract enforces this — which is what
+//! keeps every `u128` product of two such values (and their cumulative sums) exact.
 
 /// One tally entry: a weight and, unless the entry abstains, a competition ranking.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -31,45 +35,6 @@ pub fn validate(ranks: &[u8], m: usize) -> bool {
     true
 }
 
-/// `floor(a * b / denominator)`, exact even when `a * b` overflows `u128`.
-///
-/// `PBEAR.sol` uses OpenZeppelin's `Math.mulDiv` (full 512-bit precision over `uint256`)
-/// for this same division; Rust has no native `u256`, so this widens the product into a
-/// 256-bit (hi, lo) pair by hand and long-divides it back down. `denominator` and the
-/// quotient are assumed to fit in `u128`, which always holds here (`total` is a sum of
-/// `u64` weights, and the result is a share of a `u64` cost).
-fn mul_div(a: u128, b: u128, denominator: u128) -> u128 {
-    assert!(denominator != 0, "mul_div: division by zero");
-    const MASK: u128 = u64::MAX as u128;
-    let (a_lo, a_hi) = (a & MASK, a >> 64);
-    let (b_lo, b_hi) = (b & MASK, b >> 64);
-
-    let ll = a_lo * b_lo;
-    let lh = a_lo * b_hi;
-    let hl = a_hi * b_lo;
-    let hh = a_hi * b_hi;
-
-    let mid = (ll >> 64) + (lh & MASK) + (hl & MASK);
-    let lo = (mid << 64) | (ll & MASK);
-    let hi = hh + (lh >> 64) + (hl >> 64) + (mid >> 64);
-
-    if hi == 0 {
-        return lo / denominator;
-    }
-    let mut remainder: u128 = 0;
-    let mut quotient: u128 = 0;
-    for i in (0..256).rev() {
-        let bit = if i >= 128 { (hi >> (i - 128)) & 1 } else { (lo >> i) & 1 };
-        remainder = (remainder << 1) | bit;
-        if remainder >= denominator {
-            remainder -= denominator;
-            assert!(i < 128, "mul_div: quotient overflows u128");
-            quotient |= 1 << i;
-        }
-    }
-    quotient
-}
-
 /// Unranked projects (`0`) form the last tier: `1 +` the number of ranked projects.
 pub fn effective_ranks(ranks: &[u8]) -> Vec<u16> {
     let default = 1 + ranks.iter().filter(|&&r| r != 0).count() as u16;
@@ -93,6 +58,7 @@ pub fn tally(costs: &[u64], entries: &[Entry], abstaining: u64) -> Vec<u8> {
         })
         .collect();
     let budget: u128 = weights.iter().map(|&w| w as u128).sum::<u128>() + abstaining as u128;
+    assert!(budget <= u64::MAX as u128, "PB-EAR budget must fit u64: weights, costs and budget are bounded by the pool");
 
     let mut funded: Vec<u8> = Vec::new();
     let mut is_funded = vec![false; m];
@@ -142,7 +108,7 @@ pub fn tally(costs: &[u64], entries: &[Entry], abstaining: u64) -> Vec<u8> {
         let mut cum: u128 = 0;
         for &i in &supporters {
             let new_cum = cum + weights[i] as u128;
-            let d = mul_div(new_cum, cost, total) - mul_div(cum, cost, total);
+            let d = new_cum * cost / total - cum * cost / total;
             weights[i] -= d as u64;
             cum = new_cum;
         }
