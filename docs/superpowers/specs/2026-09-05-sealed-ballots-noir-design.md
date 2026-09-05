@@ -631,10 +631,14 @@ by anyone with `audit`. The README states this and states which path a pool took
    differentially against `reference/pbear.py --transcript` on random instances (plus
    the tampered-transcript audit checks of B13). The workflow also compiles cleanly
    to WASM with Javy (`bun run compile` → `dist/workflow.wasm`), which is the form
-   `cre workflow simulate` would run under QuickJS. That simulate run itself was
-   **not performed** — no CRE CLI login/account was available in this environment —
-   so whether the TEE handler executes under QuickJS as it does under bun, and what
-   it writes, remains open.
+   `cre workflow simulate` runs under QuickJS. **Simulated (2026-09-05, CRE CLI
+   v1.32.0, `--target staging-settings`, chain `arc-testnet`):** the simulator loads
+   the WASM, resolves the `RANKED_SHARES_MASTER` secret from `CRE_RANKED_SHARES_MASTER`,
+   reports the cron trigger as requesting TEE execution (AWS Nitro) and runs the
+   handler, which reaches the first `callContract` read over the Arc testnet RPC. With
+   the placeholder pool address of `config.staging.json` that read returns `0x`, so
+   the run stops there; a run against a deployed pool (the tally itself under QuickJS,
+   and the report it writes) is still open and needs the testnet deployment of B12.3.
 6. **Version pin.** Fix `nargo` and `bb`, confirm the ZK verifier flavour and the
    public-input layout.
 7. **Arc gas price.** What a 2 M gas transaction costs in USDC, to size everything
