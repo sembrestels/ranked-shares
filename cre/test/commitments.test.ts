@@ -1,13 +1,23 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import defaultMain from "../../reference/vectors/fixture_default_main.json";
+import testMain from "../../reference/vectors/fixture_test_main.json";
+import testNosealed from "../../reference/vectors/fixture_test_nosealed.json";
+import testSmallm from "../../reference/vectors/fixture_test_smallm.json";
 import { toBig } from "../src/lib/field";
 import * as cm from "../src/lib/commitments";
 import { publicEntries, sealedEntries, sealedVoters, type Voter } from "../src/lib/entries";
 import { pbearTranscript } from "../src/lib/pbear";
 import { pack } from "../src/lib/sealed";
 
-const FIXTURES = ["test_main", "test_smallm", "test_nosealed", "default_main"];
-const load = (name: string) => JSON.parse(readFileSync(new URL(`../../reference/vectors/fixture_${name}.json`, import.meta.url), "utf8"));
+// The CRE SDK types every `node:fs` export as `never` (WASM guardrail), so the
+// fixtures come in as JSON imports, like the other vector tests.
+const FIXTURES: Record<string, any> = {
+  test_main: testMain,
+  test_smallm: testSmallm,
+  test_nosealed: testNosealed,
+  default_main: defaultMain,
+};
+const load = (name: string) => FIXTURES[name];
 
 function voters(fx: any): Voter[] {
   return fx.voters.map((v: any) => ({
@@ -21,7 +31,7 @@ function voters(fx: any): Voter[] {
 }
 
 describe("commitments against the fixtures", () => {
-  for (const name of FIXTURES) {
+  for (const name of Object.keys(FIXTURES)) {
     test(name, () => {
       const fx = load(name);
       const profile = cm.PROFILES[fx.profile.name as keyof typeof cm.PROFILES];
