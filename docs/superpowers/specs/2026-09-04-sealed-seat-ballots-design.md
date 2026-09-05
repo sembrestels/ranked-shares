@@ -1,7 +1,10 @@
 # Sealed seat ballots: confidential tally in CRE, ZisK proof of the result
 
-Status: rewritten 2026-09-05. Supersedes the 2026-09-04 version, which revealed
-shuffled per-seat ballots on-chain and ran the tally in the contract.
+Status: superseded 2026-09-05 by `2026-09-05-sealed-ballots-zisk-design.md` (zisk
+variant, no CRE tally) and `2026-09-05-sealed-ballots-noir-design.md` (noir variant).
+Kept because both cite its sections A1, A3, A5, A6.5 and A6.6. Previously: rewritten
+2026-09-05, superseding the 2026-09-04 version that revealed shuffled per-seat ballots
+on-chain and ran the tally in the contract.
 
 ## Context
 
