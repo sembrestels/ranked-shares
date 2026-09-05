@@ -227,7 +227,8 @@ abi.encode(bytes32 inputsRoot, uint256[] fundedOrder, uint256[] transcript)
 must parse (`InvalidTranscript`): a whole number of steps, `m + 3` words each, at most
 `2m` steps, `best` either a project id or `NONE = 2^64 − 1`, and the projects with a
 non-`NONE` `best` in order must equal `fundedOrder`. The contract computes
-`transcriptHash` as the Poseidon2 chain of B6.3 and stores it, stores `provisional`,
+`transcriptHash` as the Poseidon2 chain of B6.3 and stores it, stores `provisional`, sets
+`resultReported = true`,
 emits `ProvisionalResult(fundedOrder)` and `Transcript(uint256[] transcript)`.
 
 Hashing the transcript on-chain costs one Poseidon2 sponge of `m + 3` elements per
@@ -294,7 +295,10 @@ Ingest branch, while `ingestCursor < numBatches`:
 4. `stateCommit = publicInputs[9]; ingestCursor++`; on the last batch
    `ingestedState = stateCommit`. Emit `Ingested(k)`.
 
-Tally branch, otherwise; requires `transcriptHash != 0` (`TranscriptPending`):
+Tally branch, otherwise; requires that a kind-1 report has been accepted
+(`resultReported`, a boolean set in B6.2; `TranscriptPending` otherwise). The flag exists
+because `transcriptHash` is legitimately zero for a pool exhausted before its first step,
+whose honest transcript is empty:
 
 1. Require `publicInputs[0] == costsHash`, `publicInputs[1] == stateCommit`.
 2. `TallyVerifier.verify(proof, publicInputs)` must return true.
@@ -336,7 +340,7 @@ noir/tests/    fixtures shared with Foundry, vitest and the Python reference
 
 ```
 State {
-  weights: [u64; E], ballots: [Field; E],          // packed; ballot is 0 when weight is 0
+  weights: [u64; E], ballots: [Field; E],          // packed; 0 only when ingest found no valid ballot
   funded: [bool; M_MAX], funded_order: [u8; M_MAX], funded_count: u8,
   level: u8, spent: u64, done: bool, m: u8, budget: u64, t_hash: Field
 }
@@ -345,7 +349,10 @@ State {
 `commit(state) = Poseidon2` over the flat array `[weights…, ballots…, fundedBits,
 fundedOrderPacked, funded_count, level, spent, done, m, budget, t_hash]`. The empty
 state has all weights zero, `level = 1`, `done = false`, `t_hash = 0`, `m` and `budget`
-from the public inputs.
+from the public inputs. A weight can reach zero by deduction, or be zero because a seat
+was transferred away after the ballot was cast, while the ballot stays in place; entries
+with weight zero never influence a step, and nothing ever zeroes a ballot after ingest,
+so the commitment stays reproducible by the reference.
 
 **`ingest(k)`.** Private: `sk` limbs, `state_in` in full, the `B` sealed entries of the
 batch (`addr, seatWeight, rx, ry, c`), all-zero past `nSealed`. Mask-based, no early
@@ -400,7 +407,12 @@ else
 ```
 
 `rank(ballot, c)` unpacks byte `c` and applies the default rank `1 + number of
-non-zero ranks`, as `_setBallot` does. `mulDiv` is the unconstrained-hint pattern:
+non-zero ranks`, as `_setBallot` does. Two things the circuit must do that the
+reference gets for free from Python integers: range-check every `pubSupport[c]` and
+`total` of a step to 64 bits before using them (a `Field` carries no such bound and the
+`mulDiv` hint relies on it), and absorb exactly `m + 4` elements into the transcript
+hash, never `M_MAX + 4`, because Poseidon2's capacity encodes the input length and the
+contract hashes `m` support entries. `mulDiv` is the unconstrained-hint pattern:
 the product of two `u64` fits the field, the hint returns `(q, r)`, the circuit asserts
 `q·d + r == a·b` and `r < d`. The asserts on `best` and `total` are what turn the DON's
 transcript into a claim the proof checks; the asserts on `level` and the hash chain
