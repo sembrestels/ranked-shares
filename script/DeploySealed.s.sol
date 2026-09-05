@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {Script, console} from "forge-std/Script.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SealedRankedShares} from "../src/SealedRankedShares.sol";
+import {deriveWorkflowName} from "../src/lib/CreMetadata.sol";
 import {IPoseidon2} from "../src/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../src/interfaces/IHonkVerifier.sol";
 import {Poseidon2} from "../src/lib/Poseidon2.sol";
@@ -12,11 +13,20 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 /// @notice Deploys a SealedRankedShares pool.
 ///
 ///   TOKEN=0x… OWNER=0x… VOTING_DEADLINE=<unix> FORWARDER=0x… COORDINATOR=0x… \
+///   WORKFLOW_OWNER=0x… WORKFLOW_NAME=ranked-shares-sealed-staging \
 ///   TALLIER_PK_X=<uint> TALLIER_PK_Y=<uint> KEY_SALT=0x<32 bytes> \
 ///   PROFILE=test|default MIN_DIRECT_VOTE=10000000 MIN_SEALED_VOTE=10000000 \
 ///   PROOF_GRACE=86400 ABANDON_GRACE=604800 \
 ///   [POSEIDON=0x…] [INGEST_VERIFIER=0x…] [TALLY_VERIFIER=0x…] \
 ///   forge script script/DeploySealed.s.sol --rpc-url $RPC_URL --broadcast
+///
+/// WORKFLOW_OWNER and WORKFLOW_NAME authorize `onReport`'s `metadata` against the
+/// workflow that is allowed to deliver reports; the KeystoneForwarder is a per-chain
+/// singleton shared by every workflow, so leaving WORKFLOW_OWNER unset (address(0))
+/// disables that check and must never be used for a pool holding real funds. Doing so
+/// requires explicitly opting in with ALLOW_ANY_WORKFLOW=1 (see `WorkflowOwnerRequired`).
+/// WORKFLOW_NAME is the `workflow-name` from `cre/workflows/sealed/workflow.yaml` for the
+/// target being deployed, and may be left empty to accept any name from WORKFLOW_OWNER.
 ///
 /// `PROFILE` fixes `nSealedMax`, `mMax` and `batch` together — `test` is 8 / 4 / 2 and
 /// `default` 256 / 16 / 32 — because the verifiers are compiled for one profile and the
@@ -31,6 +41,11 @@ import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 /// `TALLY_VERIFIER`.
 contract DeploySealed is Script {
     error UnknownProfile();
+    /// @notice WORKFLOW_OWNER is unset or zero, which disables `onReport`'s workflow
+    ///         check and lets any workflow reaching the forwarder report to this pool.
+    ///         To deploy such a pool anyway (simulation only; it must never hold real
+    ///         funds), set ALLOW_ANY_WORKFLOW=1.
+    error WorkflowOwnerRequired();
 
     uint256 constant TEST_N_SEALED_MAX = 8;
     uint256 constant TEST_M_MAX = 4;
@@ -44,6 +59,20 @@ contract DeploySealed is Script {
         SealedRankedShares.Config memory cfg;
         cfg.forwarder = vm.envAddress("FORWARDER");
         cfg.coordinator = vm.envAddress("COORDINATOR");
+        cfg.workflowOwner = vm.envOr("WORKFLOW_OWNER", address(0));
+        string memory workflowNameStr = vm.envOr("WORKFLOW_NAME", string(""));
+        cfg.workflowName = bytes(workflowNameStr).length == 0 ? bytes10(0) : deriveWorkflowName(workflowNameStr);
+        if (cfg.workflowOwner == address(0)) {
+            if (!vm.envOr("ALLOW_ANY_WORKFLOW", false)) {
+                revert WorkflowOwnerRequired();
+            }
+            console.log(
+                "WARNING: WORKFLOW_OWNER unset; onReport accepts a report from any workflow reaching the forwarder. Do not deploy this pool for real funds."
+            );
+        }
+        console.log("workflowOwner", cfg.workflowOwner);
+        console.log("workflowName:", workflowNameStr);
+        console.logBytes10(cfg.workflowName);
         cfg.tallierPkX = vm.envUint("TALLIER_PK_X");
         cfg.tallierPkY = vm.envUint("TALLIER_PK_Y");
         cfg.keySalt = vm.envBytes32("KEY_SALT");
