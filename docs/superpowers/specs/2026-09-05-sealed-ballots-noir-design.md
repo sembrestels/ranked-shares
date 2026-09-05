@@ -614,11 +614,13 @@ by anyone with `audit`. The README states this and states which path a pool took
    assumed for hashing — but the transcript scales as `2m` steps of `(m + 3)` words,
    so the default profile's worst case (`m` = 16, up to 32 steps of 19 words each,
    versus this measurement's 5 steps of 7 words) is roughly 17x more transcript data,
-   not a fixed increment. Naively scaling the measured per-step cost puts a worst-
-   case default-profile `onReport` in the single-digit-to-low-teens millions of gas —
-   comparable to, or above, `workflows/sealed/config.staging.json`'s configured
-   `gasLimit` (12,000,000) — which this one data point (`m` = 4) cannot rule out
-   either way. That keeps the chunked kind-3 fallback a live option for the default
+   not a fixed increment. Naively scaling the measurement puts a worst-case
+   default-profile `onReport` between **≈6.5 M gas** (scaling the ≈203k gas per
+   step, 32 steps) and **≈17.7 M gas** (scaling the ≈29k gas per transcript word,
+   32 × 19 = 608 words against this measurement's 5 × 7 = 35) — that upper bound
+   above, and the lower bound uncomfortably close to,
+   `workflows/sealed/config.staging.json`'s configured `gasLimit` (12,000,000),
+   which this one data point (`m` = 4) cannot rule out either way. That keeps the chunked kind-3 fallback a live option for the default
    profile rather than something this measurement retires; a default-profile
    measurement (plan 5+) would settle it.
 5. **Pure-TS crypto under QuickJS.** Run `sealed.ts` and `pbear.ts` in transcript mode

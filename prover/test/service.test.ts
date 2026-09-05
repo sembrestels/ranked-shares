@@ -1,12 +1,17 @@
 // prover/test/service.test.ts — the prove service, in-process, against its own anvil
 // chain (a different port than e2e.test.ts so both files can run in one `vitest run`).
+import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { createWalletClient, hexToBytes, http, type Address } from "viem";
+import { bytesToHex, createTestClient, createWalletClient, hexToBytes, http, type WalletClient } from "viem";
 import { foundry } from "viem/chains";
 import { toBig } from "@lib/field";
-import { rebuildFromFixture } from "../src/core/state";
-import { createServer } from "../src/service";
-import { startFixtureChain, deployUnclosedPool, type FixtureChain } from "./helpers/anvil";
+import * as cm from "@lib/commitments";
+import { readPoolSnapshot } from "../src/core/chain";
+import { rebuild, rebuildFromFixture } from "../src/core/state";
+import { runChain } from "../src/core/submit";
+import { Prover } from "../src/core/prove";
+import { createServer, type ServiceOptions } from "../src/service";
+import { startFixtureChain, deployUnclosedPool, deployVoterPool, replayFixturePool, type FixtureChain } from "./helpers/anvil";
 import poolAbi from "../../cre/src/abi/SealedRankedShares.json";
 
 const PORT = 8549;
@@ -14,21 +19,44 @@ const PORT = 8549;
 let chain: FixtureChain;
 let server: import("node:http").Server;
 let base: string;
+const servers: import("node:http").Server[] = [];
 
-async function postJSON(path: string, body: unknown): Promise<{ status: number; body: any }> {
-  const r = await fetch(`${base}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+/** A second (third, …) service on an ephemeral port, closed by `afterAll`. */
+async function startServer(opts: ServiceOptions): Promise<string> {
+  const s = createServer(opts);
+  servers.push(s);
+  await new Promise<void>((resolve) => s.listen(0, resolve));
+  const addr = s.address();
+  if (!addr || typeof addr === "string") throw new Error("expected a TCP address");
+  return `http://127.0.0.1:${addr.port}`;
+}
+
+async function postJSON(path: string, body: unknown, at = base): Promise<{ status: number; body: any }> {
+  const r = await fetch(`${at}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   return { status: r.status, body: await r.json() };
 }
 
-async function getJSON(path: string): Promise<{ status: number; body: any }> {
-  const r = await fetch(`${base}${path}`);
+async function getJSON(path: string, at = base): Promise<{ status: number; body: any }> {
+  const r = await fetch(`${at}${path}`);
   return { status: r.status, body: await r.json() };
+}
+
+/** Poll a job to a terminal state. */
+async function pollJob(id: string, at = base, timeoutMs = 590_000): Promise<any> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    const { body } = await getJSON(`/jobs/${id}`, at);
+    if (body.status === "done" || body.status === "failed") return body;
+    if (Date.now() > deadline) throw new Error("job did not finish in time");
+    await new Promise((r) => setTimeout(r, 500));
+  }
 }
 
 describe("the prove service", () => {
   beforeAll(async () => {
     chain = await startFixtureChain({ port: PORT });
     server = createServer({ rpc: chain.rpc, master: hexToBytes(chain.fx.master) });
+    servers.push(server);
     await new Promise<void>((resolve) => server.listen(0, resolve));
     const addr = server.address();
     if (!addr || typeof addr === "string") throw new Error("expected a TCP address");
@@ -36,7 +64,7 @@ describe("the prove service", () => {
   }, 60_000);
 
   afterAll(async () => {
-    server?.close();
+    for (const s of servers) s.close();
     await chain?.stop();
   });
 
@@ -81,22 +109,20 @@ describe("the prove service", () => {
     expect(healthStatus).toBe(200);
   });
 
+  test("readPoolSnapshot rejects when no Transcript log falls in the requested range", async () => {
+    const after = (await chain.pub.getBlockNumber()) + 1n;
+    await expect(readPoolSnapshot(chain.pub, chain.pool, after)).rejects.toThrow(`no Transcript event for ${chain.pool} at or after block ${after}`);
+  });
+
   test(
-    "POST /prove, poll to done, proofs match the fixture, submit to Proven, cached on retry",
+    "POST /prove, poll to done, proofs match the fixture, submit with the resume hint to Proven, cached on retry",
     async () => {
       const { status, body } = await postJSON("/prove", { pool: chain.pool });
       expect(status).toBe(202);
       const jobId = body.job as string;
       expect(typeof jobId).toBe("string");
 
-      let job: any;
-      const deadline = Date.now() + 590_000;
-      for (;;) {
-        ({ body: job } = await getJSON(`/jobs/${jobId}`));
-        if (job.status === "done" || job.status === "failed") break;
-        if (Date.now() > deadline) throw new Error("job did not finish in time");
-        await new Promise((r) => setTimeout(r, 500));
-      }
+      const job = await pollJob(jobId);
       expect(job.status, `job failed: ${job.error}`).toBe("done");
       expect(job.pool.toLowerCase()).toBe(chain.pool.toLowerCase());
 
@@ -108,20 +134,20 @@ describe("the prove service", () => {
       ingestProofs.forEach((p: any, k: number) => expect(p.publicInputs.map(toBig)).toEqual(plan.expected.ingest[k]));
       tallyProofs.forEach((p: any, g: number) => expect(p.publicInputs.map(toBig)).toEqual(plan.expected.tally[g]));
 
-      // the service didn't submit (no --submit): do it ourselves, as the coordinator.
+      // a fresh, un-ingested pool: prove everything, submit from the start, no restart.
+      expect(job.resume).toEqual({ ingestFrom: 0, tallyFrom: 0, restart: false });
+      expect(tallyProofs.map((p: any) => p.restart)).toEqual([false, false, false]);
+
+      // the service didn't submit (no --submit): do it ourselves, as the coordinator,
+      // following the job's resume hint rather than assuming where the chain stands.
       const wallet = createWalletClient({ account: chain.coordinator, chain: foundry, transport: http(chain.rpc) });
       const submitAdvance = async (proof: `0x${string}`, publicInputs: `0x${string}`[], restart: boolean) => {
         const hash = await wallet.writeContract({ address: chain.pool, abi: poolAbi, functionName: "advance", args: [proof, publicInputs, restart], account: chain.coordinator, chain: foundry } as any);
         const receipt = await chain.pub.waitForTransactionReceipt({ hash });
         if (receipt.status !== "success") throw new Error(`advance reverted: ${hash}`);
       };
-      for (const p of ingestProofs) await submitAdvance(p.proof, p.publicInputs, false);
-      // fresh pool: the on-chain tally state already matches tallyGroups[0].stateIn.
-      let restart = false;
-      for (const p of tallyProofs) {
-        await submitAdvance(p.proof, p.publicInputs, restart);
-        restart = false;
-      }
+      for (const p of ingestProofs.filter((p: any) => p.index >= job.resume.ingestFrom)) await submitAdvance(p.proof, p.publicInputs, false);
+      for (const p of tallyProofs.filter((p: any) => p.index >= job.resume.tallyFrom)) await submitAdvance(p.proof, p.publicInputs, p.restart);
       const finality = Number(await chain.pub.readContract({ address: chain.pool, abi: poolAbi, functionName: "finality" }));
       expect(finality).toBe(1); // Proven
 
@@ -132,4 +158,97 @@ describe("the prove service", () => {
     },
     600_000,
   );
+
+  test(
+    "with --submit the service signs locally and drives a second pool to Proven",
+    async () => {
+      const { pool } = await replayFixturePool(chain.rpc, chain.fx);
+      // No `chain` option: the account is a local one, so viem must sign it itself,
+      // resolving the chain id from the RPC rather than falling back to
+      // eth_sendTransaction (which only anvil's unlocked accounts would accept).
+      const at = await startServer({ rpc: chain.rpc, master: hexToBytes(chain.fx.master), submit: true, account: chain.coordinator });
+      expect((await getJSON("/health", at)).body).toEqual({ ok: true, coordinator: chain.coordinator.address, submits: true });
+
+      const { status, body } = await postJSON("/prove", { pool }, at);
+      expect(status).toBe(202);
+      const job = await pollJob(body.job as string, at);
+      expect(job.status, `job failed: ${job.error}`).toBe("done");
+      expect(job.finality).toBe(1); // Proven, submitted by the service itself
+      expect(Number(await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "finality" }))).toBe(1);
+    },
+    600_000,
+  );
+
+  test("a deterministically failing pool is not re-run within the cooldown", async () => {
+    // A service holding the wrong master derives the wrong tallier key: every job for
+    // every pool fails in `rebuild`, immediately and identically.
+    const at = await startServer({ rpc: chain.rpc, master: new Uint8Array(randomBytes(32)) });
+    const first = await postJSON("/prove", { pool: chain.pool }, at);
+    expect(first.status).toBe(202);
+    const failed = await pollJob(first.body.job as string, at, 60_000);
+    expect(failed.status).toBe("failed");
+    expect(failed.error).toMatch(/tallier key mismatch/);
+
+    const second = await postJSON("/prove", { pool: chain.pool }, at);
+    expect(second.body.job).toBe(first.body.job);
+    expect(second.status).toBe(409);
+    expect((await getJSON(`/jobs/${second.body.job}`, at)).body.status).toBe("failed");
+  });
+
+  test("readPoolSnapshot pages a roster larger than one votersFrom page", async () => {
+    const n = 51; // one page of 50 plus one
+    const { pool, voters } = await deployVoterPool(chain.rpc, n);
+    const s = await readPoolSnapshot(chain.pub, pool, 0n);
+    expect(s.voters.length).toBe(n);
+    expect(s.voters.map((v) => `0x${v.addr.toString(16).padStart(40, "0")}`)).toEqual(voters.map((a) => a.toLowerCase()));
+    expect(s.voters.every((v) => v.hasDirect && v.directWeight === 1n && v.ciphertext === null)).toBe(true);
+    // the pages reassemble into exactly the roster the pool committed to at `close`
+    const root = cm.inputsRoot(cm.publicChain(s.voters), cm.sealedChain(s.voters, s.batch).h, s.sealedCount, cm.costsHash(s.costs), s.totalWeight);
+    expect(bytesToHex(root)).toBe(s.inputsRoot.toLowerCase());
+  }, 120_000);
+
+  test("a job over its wall-clock budget is failed and the worker moves on", async () => {
+    // 1 ms is shorter than the first chain read, so the job cannot get anywhere; the
+    // wrong master keeps whatever it started from running long after the timeout.
+    const at = await startServer({ rpc: chain.rpc, master: new Uint8Array(randomBytes(32)), jobTimeout: 0.001 });
+    const { body } = await postJSON("/prove", { pool: chain.pool }, at);
+    const job = await pollJob(body.job as string, at, 60_000);
+    expect(job.status).toBe("failed");
+    expect(job.error).toMatch(/timed out/);
+    // the worker didn't wedge: the service still answers.
+    expect((await getJSON("/health", at)).status).toBe(200);
+  });
+
+  test("runChain sends nothing once the pool has been finalized", async () => {
+    // A third pool, taken to Attested by anyone after `proofGrace` elapses.
+    const { pool } = await replayFixturePool(chain.rpc, chain.fx);
+    const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(chain.rpc) });
+    const reportedAt = (await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "reportedAt" })) as bigint;
+    const proofGrace = (await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "proofGrace" })) as bigint;
+    await testClient.setNextBlockTimestamp({ timestamp: reportedAt + proofGrace + 1n });
+    await testClient.mine({ blocks: 1 });
+    const anyone = createWalletClient({ account: chain.deployer, chain: foundry, transport: http(chain.rpc) });
+    const acceptHash = await anyone.writeContract({ address: pool, abi: poolAbi, functionName: "acceptProvisional", args: [], account: chain.deployer, chain: foundry } as any);
+    expect((await chain.pub.waitForTransactionReceipt({ hash: acceptHash })).status).toBe("success");
+    expect(Number(await chain.pub.readContract({ address: pool, abi: poolAbi, functionName: "finality" }))).toBe(2); // Attested
+
+    // runChain against it must not prove or send anything.
+    const snapshot = await readPoolSnapshot(chain.pub, pool, 0n);
+    const plan = rebuild(snapshot, toBig(chain.fx.sk));
+    let writes = 0;
+    const counting = {
+      ...anyone,
+      writeContract: async (args: unknown) => {
+        writes++;
+        return anyone.writeContract(args as never);
+      },
+    } as unknown as WalletClient;
+    const nonceBefore = await chain.pub.getTransactionCount({ address: chain.coordinator.address });
+    const never = { prove: async () => { throw new Error("must not prove a finalized pool"); } } as unknown as Prover;
+    const lines: string[] = [];
+    await runChain(chain.pub, counting, plan, snapshot, never, (m) => lines.push(m), { account: chain.coordinator, chain: foundry });
+    expect(writes).toBe(0);
+    expect(await chain.pub.getTransactionCount({ address: chain.coordinator.address })).toBe(nonceBefore);
+    expect(lines.join(" ")).toMatch(/already finalized/);
+  }, 120_000);
 });

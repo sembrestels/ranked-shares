@@ -167,8 +167,8 @@ drives a sealed pool from the TypeScript prover of `prover/src/core/`:
 ```
 prover audit --rpc <url> --pool <addr> [--from-block n]
 prover status --rpc <url> --pool <addr> [--from-block n]
-prover prove --rpc <url> --pool <addr> --private-key <hex> (--master <hex> | --sign) [--threads n]
-prover serve --rpc <url> [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit]
+prover prove --rpc <url> --pool <addr> --private-key <hex> ($RANKED_SHARES_MASTER | --sign | --master <hex>) [--threads n]
+prover serve --rpc <url> [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--threads n] [--job-timeout 1800]
 ```
 
 `audit` replays the reported transcript against the public block read from chain and
@@ -176,11 +176,16 @@ exits non-zero if it does not reproduce it — the same check anyone can run wit
 tallier key. `status` prints phase, ingest progress and the current `stateCommit`.
 `prove` derives the tallier secret from a master secret and the pool's `keySalt`, resumes
 the proof chain from wherever it stands, and submits `advance` for each remaining ingest
-batch and tally group as `--private-key`. The master secret comes either directly
-(`--master`, a raw 32-byte hex secret) or by signing `MASTER_MESSAGE` with the given key
-(`--sign`) — the latter is how the browser prover will derive it from a wallet, so `--sign`
-is the flow to use when the coordinator key is the same wallet that should hold the
-tallier secret; `--master` is for a secret managed separately from that key.
+batch and tally group as `--private-key` (it exits 1 with "pool not closed yet" if the
+pool has no `inputsRoot` yet, since ingest needs the checkpoints `close()` writes).
+
+The master secret should come from `RANKED_SHARES_MASTER` in the environment, or from
+`--sign`, which signs `MASTER_MESSAGE` with `--private-key` and never puts the secret on
+a command line at all — `--sign` is also how the browser prover derives it from a wallet,
+so it is the flow to use when the coordinator key is the same wallet that should hold the
+tallier secret. `--master <hex>` passes the raw 32-byte secret directly; it is a
+development convenience only, since a command line is visible to every process on the box
+(`ps`) and lands in shell history.
 
 ## Coordinator page
 
@@ -227,17 +232,24 @@ were verified):
 ## Prove service
 
 ```
-prover serve --rpc <url> [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit]
+prover serve --rpc <url> [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--threads n] [--job-timeout 1800]
 ```
 
 `serve` runs the same prover core as a long-running HTTP API for the operator's home
 box: `POST /prove {"pool":"0x…"}` queues a job (409 if the pool hasn't closed yet, since
-ingest needs the checkpoints `close()` writes), `GET /jobs/<id>` polls it for its log and
-proofs, and `GET /health` reports whether it submits. Without `--submit` it only proves
-and hands the proofs back for someone else to submit; with `--submit` it sends `advance`
-itself (`--private-key` must then be the pool's coordinator, for restarts). The job cache
-is in-memory, so restarting the service loses it — harmlessly, since proving a pool is
-deterministic and re-proving after a restart reproduces the same proofs.
+ingest needs the checkpoints `close()` writes, and 409 with the previous job if that pool
+failed within the last minute — proving is deterministic, so an immediate retry would
+fail the same way), `GET /jobs/<id>` polls it for its log, proofs and `resume` hint, and
+`GET /health` reports whether it submits. Without `--submit` it only proves and hands the
+proofs back for someone else to submit, along with `resume` — `{ingestFrom, tallyFrom,
+restart}`, where whoever submits should start and whether the first tally `advance` needs
+`restart = true` — since the un-submitted proofs are what would move the pool's state.
+With `--submit` it sends `advance` itself, signing locally with `--private-key` (which
+must then be the pool's coordinator, for restarts). A job that overruns `--job-timeout`
+seconds is marked failed and the worker moves on. The job cache is in-memory and bounded
+(the newest 200 jobs, 500 log lines each), so restarting the service loses it —
+harmlessly, since proving a pool is deterministic and re-proving after a restart
+reproduces the same proofs.
 
 Deployment: run it under a user systemd unit on the operator's machine and expose it
 through a Cloudflare Tunnel or Tailscale Funnel rather than an open port. Point `TMPDIR`
@@ -291,8 +303,15 @@ The pool's `tallierPkX`/`tallierPkY` (`script/DeploySealed.s.sol`'s `TALLIER_PK_
 deployment and the workflow agree on who can decrypt by construction:
 
 ```
+cd cre
 PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs --print-pk --key-salt 0x<32 bytes>
-# -> pkX=0x… / pkY=0x…, feed straight into TALLIER_PK_X / TALLIER_PK_Y
+# -> pkX=0x… / pkY=0x…, feed straight into TALLIER_PK_X / TALLIER_PK_Y:
+
+export KEY_SALT=0x<32 bytes>
+PK=$(PRIVATE_KEY=0x… bun scripts/make-master-secret.mjs --print-pk --key-salt $KEY_SALT)
+export TALLIER_PK_X=$(printf '%s\n' "$PK" | sed -n 's/^pkX=//p')
+export TALLIER_PK_Y=$(printf '%s\n' "$PK" | sed -n 's/^pkY=//p')
+# then run script/DeploySealed.s.sol with those three exported
 ```
 
 **Simulation.** With the CRE CLI installed, logged in, and a pool deployed on Arc testnet

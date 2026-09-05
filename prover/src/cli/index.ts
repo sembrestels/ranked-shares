@@ -49,7 +49,12 @@ async function main() {
 
     const master = await resolveMaster(rpc, account);
     const threads = Number(arg("threads", String(Math.max(1, os.availableParallelism() - 1))));
-    const server = createServer({ rpc, master, submit: doSubmit, account, threads });
+    const jobTimeout = Number(arg("job-timeout", "1800"));
+    const server = createServer({ rpc, master, submit: doSubmit, account, threads, jobTimeout });
+    server.on("error", (e: NodeJS.ErrnoException) => {
+      console.error(e.code === "EADDRINUSE" ? `port ${port} is already in use: stop the other prove service or pass --port` : `server error: ${e.message}`);
+      process.exit(1);
+    });
     server.listen(port, () => console.log(`prove service listening on :${port}${doSubmit ? " (submitting as coordinator)" : " (proofs only)"}`));
     return;
   }
@@ -80,6 +85,11 @@ async function main() {
     const account = privateKeyToAccount(arg("private-key") as Hex);
     const wallet = createWalletClient({ account, transport: http(arg("rpc")) });
     const s = await readPoolSnapshot(client, pool, fromBlock);
+    if (/^0x0+$/.test(s.inputsRoot)) {
+      // `close()` writes the checkpoints and the inputsRoot every proof commits to.
+      console.error("pool not closed yet");
+      process.exit(1);
+    }
     if (s.coordinator.toLowerCase() !== account.address.toLowerCase()) console.warn("warning: this key is not the pool's coordinator; restarts would be rejected");
     const master = await resolveMaster(arg("rpc"), account);
     const sk = deriveSk(master, hexToBytes(s.keySalt));
@@ -97,8 +107,8 @@ async function main() {
     [
       "usage: prover <audit|status|prove|serve> --rpc <url>",
       "  audit|status|prove: --pool <addr> [--from-block n]",
-      "  prove: --private-key 0x… (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--threads n]",
-      "  serve: [--port 8787] [--private-key 0x…] (--master 0x… | --sign | $RANKED_SHARES_MASTER) [--submit] [--threads n]",
+      "  prove: --private-key 0x… ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--threads n]",
+      "  serve: [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--threads n] [--job-timeout 1800]",
     ].join("\n"),
   );
 }

@@ -1,7 +1,18 @@
 // prover/src/core/chain.ts — reads the pool's on-chain state into a Snapshot
 import { type Address, type PublicClient, parseAbiItem } from "viem";
 import abi from "../../../cre/src/abi/SealedRankedShares.json";
-import type { Voter } from "@lib/entries";
+import { isSealed, type Voter } from "@lib/entries";
+import { profileFor } from "./profile";
+
+/**
+ * The most voters a snapshot will page through. A pool's roster is bounded only by
+ * `minDirectVote` on chain, so a bad or hostile RPC answer (or a genuinely enormous
+ * pool) must not turn `readPoolSnapshot` into an unbounded read loop.
+ */
+export const MAX_VOTERS = 100_000;
+const VOTER_PAGE = 50;
+/** `getLogs` window, small enough for RPC providers that cap the range. */
+const LOG_CHUNK = 10_000n;
 
 export type Snapshot = {
   pool: Address;
@@ -33,6 +44,21 @@ export type Snapshot = {
 
 export async function read<T>(client: PublicClient, pool: Address, functionName: string, args: unknown[] = []): Promise<T> {
   return (await client.readContract({ address: pool, abi, functionName, args } as any)) as T;
+}
+
+/**
+ * Every `Transcript` log from `fromBlock` to the latest block, fetched in windows of at
+ * most `LOG_CHUNK` blocks so providers that cap `eth_getLogs` ranges still answer.
+ */
+async function transcriptLogs(client: PublicClient, pool: Address, fromBlock: bigint): Promise<{ args: { transcript?: readonly bigint[] } }[]> {
+  const event = parseAbiItem("event Transcript(uint256[] transcript)");
+  const latest = await client.getBlockNumber();
+  const out: { args: { transcript?: readonly bigint[] } }[] = [];
+  for (let from = fromBlock; from <= latest; from += LOG_CHUNK) {
+    const to = from + LOG_CHUNK - 1n > latest ? latest : from + LOG_CHUNK - 1n;
+    out.push(...(await client.getLogs({ address: pool, event, fromBlock: from, toBlock: to })));
+  }
+  return out;
 }
 
 export async function readPoolSnapshot(client: PublicClient, pool: Address, fromBlock = 0n): Promise<Snapshot> {
@@ -81,11 +107,25 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     read<bigint[]>(client, pool, "provisionalResult"),
     read<bigint>(client, pool, "voterCount"),
   ]);
+  // Bound both loops below before running them: the profile fixes how many ingest
+  // batches can exist, and MAX_VOTERS caps the roster paging.
+  const profile = profileFor(Number(nSealedMax), Number(mMax), Number(batch));
+  const maxBatches = Math.ceil(profile.nSealedMax / profile.batch);
+  if (Number(numBatches) > maxBatches) {
+    throw new Error(`pool ${pool} reports numBatches=${numBatches}, above the ${profile.name} profile's maximum of ${maxBatches}`);
+  }
+  const voterCount = Number(n);
+  if (voterCount > MAX_VOTERS) {
+    throw new Error(`pool ${pool} reports voterCount=${n}, above MAX_VOTERS=${MAX_VOTERS}`);
+  }
   const checkpoints: bigint[] = [];
   for (let k = 0; k <= Number(numBatches); k++) checkpoints.push(await read<bigint>(client, pool, "checkpoint", [BigInt(k)]));
   const voters: Voter[] = [];
-  for (let start = 0; start < Number(n); start += 50) {
-    const [who, direct, ballots, seats, cts, flags] = await read<[Address[], bigint[], bigint[], bigint[], [bigint, bigint, bigint][], boolean[]]>(client, pool, "votersFrom", [BigInt(start), 50n]);
+  for (let start = 0; start < voterCount; start += VOTER_PAGE) {
+    const [who, direct, ballots, seats, cts, flags] = await read<[Address[], bigint[], bigint[], bigint[], [bigint, bigint, bigint][], boolean[]]>(client, pool, "votersFrom", [
+      BigInt(start),
+      BigInt(VOTER_PAGE),
+    ]);
     who.forEach((a, i) =>
       voters.push({
         addr: BigInt(a),
@@ -93,14 +133,15 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
         seatWeight: seats[i]!,
         hasDirect: flags[i]!,
         directPacked: ballots[i]!,
-        ciphertext: cts[i]![0] === 0n ? null : [cts[i]![0], cts[i]![1], cts[i]![2]],
+        ciphertext: isSealed(cts[i]!) ? [cts[i]![0], cts[i]![1], cts[i]![2]] : null,
       }),
     );
   }
   let transcript: bigint[][] | null = null;
   if (resultReported) {
-    const logs = await client.getLogs({ address: pool, event: parseAbiItem("event Transcript(uint256[] transcript)"), fromBlock, toBlock: "latest" });
-    const flat = (logs[logs.length - 1]!.args as any).transcript as bigint[];
+    const logs = await transcriptLogs(client, pool, fromBlock);
+    if (logs.length === 0) throw new Error(`no Transcript event for ${pool} at or after block ${fromBlock}`);
+    const flat = [...(logs[logs.length - 1]!.args.transcript ?? [])];
     const width = costs.length + 3;
     transcript = [];
     for (let i = 0; i < flat.length; i += width) transcript.push(flat.slice(i, i + width));

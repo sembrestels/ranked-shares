@@ -6,6 +6,9 @@ import { pubkey } from "@lib/grumpkin";
 import { pbearTranscript } from "@lib/pbear";
 import { pack } from "@lib/sealed";
 import type { Snapshot } from "./chain";
+import { profileFor } from "./profile";
+
+export { profileFor };
 
 export type ProofPlan = {
   profile: cm.Profile;
@@ -18,12 +21,6 @@ export type ProofPlan = {
   tallyGroups: { stateIn: cm.State; steps: bigint[][]; stateOut: cm.State }[];
   expected: { ingest: bigint[][]; tally: bigint[][] };
 };
-
-export function profileFor(nSealedMax: number, mMax: number, batch: number): cm.Profile {
-  const p = Object.values(cm.PROFILES).find((x) => x.nSealedMax === nSealedMax && x.mMax === mMax && x.batch === batch);
-  if (!p) throw new Error(`no circuit profile for E=${nSealedMax} M=${mMax} B=${batch}`);
-  return p;
-}
 
 export function rebuild(
   s: ProofPlan["snapshot"] & { nSealedMax: number; mMax: number; batch: number; transcript?: bigint[][] | null },

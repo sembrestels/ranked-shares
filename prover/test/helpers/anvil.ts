@@ -77,7 +77,7 @@ export async function deployUnclosedPool(rpc: string, fixture?: URL): Promise<Ad
   const poseidon = await deploy("Poseidon2");
   const ingestV = await deploy("IngestVerifierTest");
   const tallyV = await deploy("TallyVerifierTest");
-  const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+  const deadline = (await pub.getBlock()).timestamp + 3600n;
   const cfg = {
     forwarder: FORWARDER,
     coordinator: COORDINATOR.address,
@@ -96,6 +96,87 @@ export async function deployUnclosedPool(rpc: string, fixture?: URL): Promise<Ad
     abandonGrace: 604800n,
   };
   return deploy("SealedRankedShares", [token, DEPLOYER.address, deadline, cfg], poolAbi);
+}
+
+/**
+ * A closed pool with `n` public voters, one weight unit and one ballot each, and no
+ * sealed ballots — enough to make `votersFrom` need more than one page. Assumes anvil is
+ * already up at `rpc`. Returns the pool and the voter addresses in registration order.
+ */
+export async function deployVoterPool(rpc: string, n: number, fixture?: URL): Promise<{ pool: Address; voters: Address[] }> {
+  const fx = loadFixture(fixture ?? DEFAULT_FIXTURE);
+  const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
+  const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
+  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(rpc) });
+  const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
+  const write = (client: any, params: unknown): Promise<Hex> => client.writeContract(params);
+  const send = async (fn: () => Promise<Hex>) => {
+    const receipt = await pub.waitForTransactionReceipt({ hash: await fn() });
+    if (receipt.status !== "success") throw new Error(`tx reverted: ${receipt.transactionHash}`);
+    return receipt;
+  };
+  const deploy = async (name: string, args: unknown[] = [], abi?: any): Promise<Address> => {
+    const a = artifact(name);
+    const hash = await deployerWallet.deployContract({ abi: abi ?? a.abi, bytecode: a.bytecode.object as Hex, args } as any);
+    return (await pub.waitForTransactionReceipt({ hash })).contractAddress!;
+  };
+
+  const token = await deploy("MockERC20");
+  const poseidon = await deploy("Poseidon2");
+  const ingestV = await deploy("IngestVerifierTest");
+  const tallyV = await deploy("TallyVerifierTest");
+  const deadline = (await pub.getBlock()).timestamp + 3600n;
+  const pool = await deploy(
+    "SealedRankedShares",
+    [
+      token,
+      DEPLOYER.address,
+      deadline,
+      {
+        forwarder: FORWARDER,
+        coordinator: COORDINATOR.address,
+        poseidon,
+        ingestVerifier: ingestV,
+        tallyVerifier: tallyV,
+        tallierPkX: toBig(fx.pk[0]),
+        tallierPkY: toBig(fx.pk[1]),
+        keySalt: fx.keySalt,
+        nSealedMax: BigInt(fx.profile.nSealedMax),
+        mMax: BigInt(fx.profile.mMax),
+        batch: BigInt(fx.profile.batch),
+        minDirectVote: 1n,
+        minSealedVote: 1n,
+        proofGrace: 86400n,
+        abandonGrace: 604800n,
+      },
+    ],
+    poolAbi,
+  );
+
+  const erc20 = parseAbi(["function mint(address,uint256)", "function approve(address,uint256) returns (bool)"]);
+  const w = (account: any) => createWalletClient({ account, chain: foundry, transport: http(rpc) });
+  await send(() => write(deployerWallet, { address: pool, abi: poolAbi, functionName: "addProject", args: [2n, DEPLOYER.address] }));
+  await send(() => write(deployerWallet, { address: pool, abi: poolAbi, functionName: "openVoting" }));
+
+  const voters: Address[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = `0x${(BigInt("0x1000000000000000000000000000000000000000") + BigInt(i)).toString(16).padStart(40, "0")}` as Address;
+    voters.push(a);
+    await testClient.impersonateAccount({ address: a });
+    await testClient.setBalance({ address: a, value: 10n ** 18n });
+    await send(() => write(deployerWallet, { address: token, abi: erc20, functionName: "mint", args: [a, 1n] }));
+    await send(() => write(w(a), { address: token, abi: erc20, functionName: "approve", args: [pool, 1n] }));
+    await send(() => write(w(a), { address: pool, abi: poolAbi, functionName: "contribute", args: [1n] }));
+    await send(() => write(w(a), { address: pool, abi: poolAbi, functionName: "vote", args: [toHex(Uint8Array.from([1]))] }));
+  }
+
+  await testClient.setNextBlockTimestamp({ timestamp: deadline });
+  await testClient.mine({ blocks: 1 });
+  while (!(await pub.readContract({ address: pool, abi: poolAbi, functionName: "closed" }))) {
+    await send(() => write(deployerWallet, { address: pool, abi: poolAbi, functionName: "close", args: [25n] }));
+  }
+  return { pool, voters };
 }
 
 export type FixtureChain = {
@@ -142,10 +223,39 @@ export async function startFixtureChain(opts: { port: number; fixture?: URL }): 
 
 async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDINATOR: Account, anvil: ChildProcess): Promise<FixtureChain> {
   const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  await waitForRpc(pub);
+  const { pool, token, reportGas, reportBytes } = await replayFixturePool(rpc, fx);
+  return {
+    rpc,
+    pool,
+    token,
+    coordinator: COORDINATOR,
+    forwarder: FORWARDER,
+    deployer: DEPLOYER,
+    pub,
+    fx,
+    reportGas,
+    reportBytes,
+    async stop() {
+      await killAndWait(anvil);
+    },
+  };
+}
+
+export type ReplayedPool = { pool: Address; token: Address; reportGas: bigint; reportBytes: number };
+
+/**
+ * Deploy and drive one pool from `fx` on an anvil that is already up: verifiers, the
+ * pool, the fixture's projects/voters/sealed ballots, `close`, and the forwarder's
+ * kind-1 report. Called once by `startFixtureChain`, and again by tests that need a
+ * second, independent pool on the same chain.
+ */
+export async function replayFixturePool(rpc: string, fx: any): Promise<ReplayedPool> {
+  const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
+  const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
+  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
   const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(rpc) });
   const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
-
-  await waitForRpc(pub);
 
   const deploy = async (name: string, args: unknown[] = [], abi?: any): Promise<Address> => {
     const a = artifact(name);
@@ -158,7 +268,9 @@ async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDI
   const poseidon = await deploy("Poseidon2");
   const ingestV = await deploy("IngestVerifierTest");
   const tallyV = await deploy("TallyVerifierTest");
-  const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+  // From the chain's clock, not the wall clock: a second pool replayed on the same anvil
+  // starts from a block timestamp the first replay has already warped past the deadline.
+  const deadline = (await pub.getBlock()).timestamp + 3600n;
   const cfg = {
     forwarder: FORWARDER,
     coordinator: COORDINATOR.address,
@@ -247,19 +359,5 @@ async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDI
   // fund the coordinator so it can pay for `advance`
   await testClient.setBalance({ address: COORDINATOR.address, value: 10n ** 18n });
 
-  return {
-    rpc,
-    pool,
-    token,
-    coordinator: COORDINATOR,
-    forwarder: FORWARDER,
-    deployer: DEPLOYER,
-    pub,
-    fx,
-    reportGas: reportReceipt.gasUsed,
-    reportBytes: (report.length - 2) / 2,
-    async stop() {
-      await killAndWait(anvil);
-    },
-  };
+  return { pool, token, reportGas: reportReceipt.gasUsed, reportBytes: (report.length - 2) / 2 };
 }

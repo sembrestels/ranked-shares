@@ -9,14 +9,18 @@ import { createPublicClient, createWalletClient, hexToBytes, http as httpTranspo
 import { readPoolSnapshot, read } from "../core/chain";
 import { rebuild } from "../core/state";
 import { Prover } from "../core/prove";
-import { runChain } from "../core/submit";
+import { runChain, type Resume } from "../core/submit";
 import { deriveSk } from "../core/key";
 
 const POOL_RE = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_ROOT_RE = /^0x0+$/;
 const MAX_BODY_BYTES = 4096; // {"pool":"0x…"} needs a fraction of this
+const MAX_JOBS = 200; // finished jobs beyond this are evicted oldest-first
+const MAX_LOG_LINES = 500; // per job
+const DEFAULT_JOB_TIMEOUT_SEC = 1800;
+const FAILURE_COOLDOWN_MS = 60_000; // don't re-run a pool that just failed deterministically
 
-type ProofRecord = { kind: "ingest" | "tally"; index: number; proof: `0x${string}`; publicInputs: `0x${string}`[] };
+type ProofRecord = { kind: "ingest" | "tally"; index: number; proof: `0x${string}`; publicInputs: `0x${string}`[]; restart: boolean };
 type Status = "queued" | "running" | "done" | "failed";
 type Job = {
   id: string;
@@ -25,6 +29,8 @@ type Job = {
   status: Status;
   log: string[];
   proofs: ProofRecord[];
+  /** Where to start submitting these proofs (proofs-only runs); see `runChain`. */
+  resume?: Resume;
   finality?: number;
   error?: string;
 };
@@ -38,11 +44,14 @@ export type ServiceOptions = {
   account?: Account;
   chain?: Chain | null;
   threads?: number;
+  /** Wall-clock budget for one job, in seconds. Default 1800. */
+  jobTimeout?: number;
 };
 
 export function createServer(opts: ServiceOptions): http.Server {
   const submit = opts.submit ?? false;
   const threads = opts.threads ?? Math.max(1, os.availableParallelism() - 1);
+  const jobTimeoutMs = (opts.jobTimeout ?? DEFAULT_JOB_TIMEOUT_SEC) * 1000;
   const client: PublicClient = createPublicClient({ transport: httpTransport(opts.rpc) });
   const wallet: WalletClient = createWalletClient({ account: opts.account, chain: opts.chain ?? undefined, transport: httpTransport(opts.rpc) }) as unknown as WalletClient;
 
@@ -53,6 +62,9 @@ export function createServer(opts: ServiceOptions): http.Server {
   // Finished jobs, keyed by `${pool}|${inputsRoot}` so a pool already proven for a given
   // (immutable, post-close) inputsRoot is never re-proven.
   const doneJobsByKey = new Map<string, string>();
+  // The last failed job per pool, so a deterministically failing pool (a key mismatch, a
+  // pool this service can't read) isn't re-proven on every POST for a while.
+  const failedByPool = new Map<string, { id: string; at: number }>();
   const provers = new Map<string, Promise<Prover>>();
   const queue: string[] = [];
   let working = false;
@@ -60,10 +72,32 @@ export function createServer(opts: ServiceOptions): http.Server {
   function proverFor(profile: "test" | "default"): Promise<Prover> {
     let p = provers.get(profile);
     if (!p) {
-      p = Prover.create(profile, threads);
+      // Memoize the promise, but not a rejected one: a failed `Prover.create` (a bad
+      // artifact read, a transient OOM) must not poison every later job.
+      p = Prover.create(profile, threads).catch((e) => {
+        provers.delete(profile);
+        throw e;
+      });
       provers.set(profile, p);
     }
     return p;
+  }
+
+  function pushLog(job: Job, line: string): void {
+    if (job.log.length < MAX_LOG_LINES) job.log.push(line);
+    else job.log[MAX_LOG_LINES - 1] = `… log truncated at ${MAX_LOG_LINES} lines`;
+  }
+
+  /** Keep the job map bounded: drop finished jobs, oldest first, and their cache entries. */
+  function evictOldJobs(): void {
+    for (const [id, job] of jobs) {
+      if (jobs.size <= MAX_JOBS) return;
+      if (job.status !== "done" && job.status !== "failed") continue;
+      jobs.delete(id);
+      const poolKey = job.pool.toLowerCase();
+      if (doneJobsByKey.get(`${poolKey}|${job.inputsRoot}`) === id) doneJobsByKey.delete(`${poolKey}|${job.inputsRoot}`);
+      if (failedByPool.get(poolKey)?.id === id) failedByPool.delete(poolKey);
+    }
   }
 
   async function runJob(job: Job): Promise<void> {
@@ -72,15 +106,39 @@ export function createServer(opts: ServiceOptions): http.Server {
     const sk = deriveSk(opts.master, hexToBytes(snapshot.keySalt));
     const plan = rebuild(snapshot, sk);
     const prover = await proverFor(plan.profile.name as "test" | "default");
-    await runChain(client, wallet, plan, snapshot, prover, (m) => job.log.push(m), {
+    const resume = await runChain(client, wallet, plan, snapshot, prover, (m) => pushLog(job, m), {
       submit,
-      account: opts.account?.address,
+      // The `Account` itself, not its address: viem signs locally with an account object
+      // and would fall back to `eth_sendTransaction` (anvil only) with a bare address.
+      account: opts.account,
       chain: opts.chain,
       onProof: (p) => {
-        job.proofs.push({ kind: p.kind, index: p.index, proof: toHex(p.proof), publicInputs: p.publicInputs });
+        job.proofs.push({ kind: p.kind, index: p.index, proof: toHex(p.proof), publicInputs: p.publicInputs, restart: p.restart });
       },
     });
+    if (resume) job.resume = resume;
     if (submit) job.finality = Number(await read<bigint>(client, job.pool, "finality"));
+  }
+
+  /**
+   * `runJob` with a wall-clock budget. A job that overruns is failed and the worker moves
+   * on; the underlying promise may still settle later and its result is ignored.
+   */
+  async function runJobWithTimeout(job: Job): Promise<void> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const running = runJob(job);
+    running.catch(() => {}); // a rejection after the timeout won't crash the process
+    try {
+      await Promise.race([
+        running,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error(`job timed out after ${jobTimeoutMs / 1000}s`)), jobTimeoutMs);
+          timer.unref?.();
+        }),
+      ]);
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 
   async function worker(): Promise<void> {
@@ -92,15 +150,18 @@ export function createServer(opts: ServiceOptions): http.Server {
         const job = jobs.get(id)!;
         const poolKey = job.pool.toLowerCase();
         try {
-          await runJob(job);
+          await runJobWithTimeout(job);
           job.status = "done";
           doneJobsByKey.set(`${poolKey}|${job.inputsRoot}`, id);
         } catch (e) {
           job.status = "failed";
           job.error = e instanceof Error ? e.message : String(e);
-          // don't cache a failure: let a later POST /prove retry it.
+          // Not cached like a success — a later POST retries — but held for a cooldown so
+          // a pool that fails every time isn't re-proven once per request.
+          failedByPool.set(poolKey, { id, at: Date.now() });
         } finally {
           if (jobsByPool.get(poolKey) === id) jobsByPool.delete(poolKey);
+          evictOldJobs();
         }
       }
     } finally {
@@ -198,9 +259,17 @@ export function createServer(opts: ServiceOptions): http.Server {
         send(res, 202, { job: inFlight });
         return;
       }
+      const failed = failedByPool.get(poolKey);
+      if (failed && Date.now() - failed.at < FAILURE_COOLDOWN_MS && jobs.has(failed.id)) {
+        // Proving is deterministic: a pool that just failed will fail again. Hand back the
+        // failed job (with its error) instead of burning the box on it once per request.
+        send(res, 409, { job: failed.id, error: jobs.get(failed.id)!.error, retryAfterMs: FAILURE_COOLDOWN_MS - (Date.now() - failed.at) });
+        return;
+      }
       const id = randomUUID();
       const job: Job = { id, pool: addr, inputsRoot, status: "queued", log: [], proofs: [] };
       jobs.set(id, job);
+      evictOldJobs();
       jobsByPool.set(poolKey, id);
       queue.push(id);
       void worker();
@@ -215,7 +284,7 @@ export function createServer(opts: ServiceOptions): http.Server {
         send(res, 404, { error: "unknown job" });
         return;
       }
-      send(res, 200, { status: job.status, pool: job.pool, log: job.log, proofs: job.proofs, finality: job.finality, error: job.error });
+      send(res, 200, { status: job.status, pool: job.pool, log: job.log, proofs: job.proofs, resume: job.resume, finality: job.finality, error: job.error });
       return;
     }
 
