@@ -280,7 +280,7 @@ alone exceeded a cost in a `NONE` step. What only the sealed proof can verify: t
 
 `fundedOrderPacked = Σ fundedOrder[j] · 256^j` over the first `fundedCount` entries.
 
-**B6.5 `advance(bytes proof, bytes32[] publicInputs)`** — `inPhase(Tally)`,
+**B6.5 `advance(bytes proof, bytes32[] publicInputs, bool restart)`** — `inPhase(Tally)`,
 `finality == None`, anyone. Storage: `ingestCursor`, `stateCommit` (zero until the
 first proof), `ingestedState` (the commitment after the last ingest batch).
 
@@ -308,11 +308,15 @@ whose honest transcript is empty:
    (`ResultMismatch`; the transcript determines it, so a difference is a bug), set
    `funded[id]`, `spent`, `finality = Proven`, emit `Finalized(Proven, fundedOrder)`.
 
-`restartTally()` — `inPhase(Tally)`, anyone, requires `ingestCursor == numBatches`:
-sets `stateCommit = ingestedState`. The ingest chain is a deterministic function of
-committed inputs and a key tied to `pk`, so it never needs restarting; the tally chain
-can go wrong only if the prover fed a transcript slice that does not match the DON's,
-which surfaces at step 4, and this lets an honest prover start over.
+`restart` is honoured in the tally branch only: when true, `stateCommit` is reset to
+`ingestedState` before step 1, and `TallyRestarted()` is emitted once the proof has been
+accepted. A restart therefore always travels with a valid proof from the ingested state,
+so nobody can reset the chain without producing one; a separate permissionless
+`restartTally()` would let anyone invalidate every submitted tally group for the price
+of one transaction and censor an honest `Proven`. The ingest chain is a deterministic
+function of committed inputs and a key tied to `pk`, so it never needs restarting; the
+tally chain can go wrong only if the prover fed a transcript slice that does not match
+the DON's, which surfaces at step 4, and this lets an honest prover start over.
 
 A transcript the sealed side cannot satisfy (the enclave lied or has a bug) produces no
 proof; then `acceptProvisional` after `proofGrace` applies the DON result on DON trust,
@@ -323,7 +327,14 @@ Verifiers as in the previous revision: bb-generated, split in two contracts beca
 the 24 KB limit, deployed once per chain per profile by `script/DeployVerifiers.s.sol`,
 BN254 precompiles from Reth. Gas per proof in the low millions, unmeasured (B12.3).
 
-**B6.6 Grace paths, B6.7 Claims.** Unchanged (A6.5, A6.6).
+**B6.6 Grace paths, B6.7 Claims.** As A6.5 and A6.6, with two amendments. The clock
+for `acceptProvisional` starts when the kind-1 report is accepted (`reportedAt`,
+recorded in B6.2), not at the deadline: `acceptProvisional` requires
+`block.timestamp >= reportedAt + proofGrace`, so the prover always gets the full grace
+window after the transcript exists, however late `close` or the report were. `abandon`
+keeps the deadline anchor (`votingDeadline + abandonGrace`), since it is the path for a
+DON that never reported. Both sums are computed in 256-bit arithmetic; the grace values
+are `uint64` and must never overflow the comparison.
 
 ### B7. Circuits (`noir/`)
 
@@ -557,7 +568,8 @@ Solidity (Foundry):
 - `advance`: out-of-order batch, wrong checkpoint, wrong `stateIn`, wrong `costsHash`,
   tally before transcript, verifier reject, `done` with wrong `tHashOut`, `done` with a
   funded order that differs from the provisional, success sets state and finality;
-  `restartTally` before and after ingest completes.
+  `advance` with `restart` before ingest completes (rejected) and after (state reset, then
+  the chain finalises).
 - Fork test on Arc testnet with the real verifiers and one fixture proof per circuit.
 
 Noir (`nargo test`):
