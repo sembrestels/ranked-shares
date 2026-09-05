@@ -513,6 +513,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
         }
     }
 
+    /// @dev One ingest batch (spec B6.5). Every public input is pinned to storage before
+    ///      the proof is even looked at: the batch index to `ingestCursor`, so batches
+    ///      land in order; the roster size, project count, budget and key to the closed
+    ///      pool; `hIn`/`hOut` to `checkpoint[k]` and `checkpoint[k + 1]`, so each batch
+    ///      is checked against the sealed chain the moment it arrives; and `stateIn` to
+    ///      the running `stateCommit`. `restart` has no meaning here: the ingest chain is
+    ///      a deterministic function of committed inputs and a key tied to `pk`, so it
+    ///      cannot go wrong in a way starting over would fix.
     function _advanceIngest(bytes calldata proof, bytes32[] calldata pi) internal {
         uint256 k = ingestCursor;
         if (pi.length != 10) revert InputMismatch();
@@ -529,6 +537,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
         emit Ingested(k);
     }
 
+    /// @dev One group of transcript steps (spec B6.5). Needs the kind-1 report, because
+    ///      `transcriptHash` is legitimately zero for a pool exhausted before its first
+    ///      step; `resultReported` is what distinguishes that from no report at all.
+    ///      `restart` rewinds `stateCommit` to the state the ingest chain ended at, and
+    ///      only the coordinator may ask for it. The last proof of the chain (`done`)
+    ///      must carry the reported transcript's hash and unpack to the reported result:
+    ///      the transcript determines the result, so a difference is a bug on one side,
+    ///      not a disagreement to resolve, and it reverts rather than finalising.
     function _advanceTally(bytes calldata proof, bytes32[] calldata pi, bool restart) internal {
         if (restart && msg.sender != coordinator) revert NotCoordinator();
         if (!resultReported) revert TranscriptPending();
@@ -579,6 +595,13 @@ contract SealedRankedShares is PoolBase, IReceiver {
 
     // ------------------------------------------------------------- internals
 
+    /// @dev Unpacks `fundedOrderPacked`, one project id per byte, little-endian. It does
+    ///      not validate the ids: a byte can be any project id or garbage. Its safety
+    ///      rests entirely on the caller comparing the result with `_provisional`, which
+    ///      `_validateResult` already checked for distinct in-range ids within budget —
+    ///      so a byte that decodes to nonsense cannot match and the call reverts before
+    ///      the ids reach `funded` or `_costs`. `count` is bounded here only to keep a
+    ///      huge count from allocating; the equality does the real work.
     function _unpackFunded(uint256 count, uint256 packed) internal view returns (uint256[] memory order) {
         if (count > _costs.length) revert ResultMismatch();
         order = new uint256[](count);
@@ -587,6 +610,12 @@ contract SealedRankedShares is PoolBase, IReceiver {
         }
     }
 
+    /// @dev The one way the pool ends, from all three paths (proof, grace, abandon). It
+    ///      is what moves the pool to `Done`, so it refuses to run twice; `order` must
+    ///      already have been validated (`_validateResult`, or an equality with something
+    ///      that was), since it is indexed straight into `_costs` and written to `funded`.
+    ///      `spent` is the sum of the funded costs and is what `sweep` leaves behind for
+    ///      the claims.
     function _finalize(uint256[] memory order, Finality how) internal {
         if (finality != Finality.None) revert WrongPhase();
         uint256 total;

@@ -178,15 +178,14 @@ contract SealedReportTest is FixtureLoader {
         vm.expectRevert(SealedRankedShares.InvalidTranscript.selector);
         pool.onReport("", resultReport(fxBytes32(".inputsRoot"), order, cut));
         // funded order disagrees with the transcript
+        assertGt(order.length, 1, "reversing the order needs at least two funded projects");
         uint256[] memory swapped = new uint256[](order.length);
         for (uint256 i = 0; i < order.length; i++) {
             swapped[i] = order[order.length - 1 - i];
         }
-        if (order.length > 1) {
-            vm.prank(forwarder);
-            vm.expectRevert(SealedRankedShares.InvalidTranscript.selector);
-            pool.onReport("", resultReport(fxBytes32(".inputsRoot"), swapped, transcript));
-        }
+        vm.prank(forwarder);
+        vm.expectRevert(SealedRankedShares.InvalidTranscript.selector);
+        pool.onReport("", resultReport(fxBytes32(".inputsRoot"), swapped, transcript));
         // best out of range
         uint256[] memory bad = transcript;
         bad[width - 2] = fxUint(".m") + 1;
@@ -202,6 +201,36 @@ contract SealedReportTest is FixtureLoader {
         vm.prank(forwarder);
         vm.expectRevert(SealedRankedShares.InvalidTranscript.selector);
         pool.onReport("", resultReport(fxBytes32(".inputsRoot"), none, long_));
+    }
+
+    /// @dev The end check of `_hashTranscript`: the bests are a valid prefix of the funded
+    ///      order all the way through, but the transcript stops funding before the order
+    ///      does, so the two only agree if the last entries are dropped from the result.
+    function test_resultRejectsTranscriptThatFundsOnlyAPrefix() public {
+        closeAll(100);
+        uint256[] memory order = fxUintArray(".funded");
+        uint256[] memory transcript = fixtureTranscript();
+        uint256 width = fxUint(".m") + 3;
+        uint256 steps = transcript.length / width;
+        // Turn the last funding step into a `NONE` step, which no funded order can end at.
+        uint256 last = type(uint256).max;
+        for (uint256 s = 0; s < steps; s++) {
+            if (transcript[s * width + width - 2] != pool.NONE()) last = s;
+        }
+        assertLt(last, steps, "the fixture must fund something");
+        transcript[last * width + width - 2] = pool.NONE();
+        transcript[last * width + width - 1] = 0;
+        vm.prank(forwarder);
+        vm.expectRevert(SealedRankedShares.InvalidTranscript.selector);
+        pool.onReport("", resultReport(fxBytes32(".inputsRoot"), order, transcript));
+        // The same transcript with the order shortened to what it funds is accepted.
+        uint256[] memory shorter = new uint256[](order.length - 1);
+        for (uint256 i = 0; i < shorter.length; i++) {
+            shorter[i] = order[i];
+        }
+        vm.prank(forwarder);
+        pool.onReport("", resultReport(fxBytes32(".inputsRoot"), shorter, transcript));
+        assertTrue(pool.resultReported());
     }
 
     function test_resultRejectsTranscriptWordOutsideField() public {

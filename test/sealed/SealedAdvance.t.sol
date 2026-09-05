@@ -113,6 +113,26 @@ contract SealedAdvanceTest is FixtureLoader {
         pool.advance("", short_, false);
     }
 
+    /// @dev `restart` belongs to the tally branch; the ingest branch never reads it, so it
+    ///      is neither honoured nor gated here — a stranger's `true` is a plain ingest.
+    function test_restartIsIgnoredInTheIngestBranch() public {
+        address stranger = makeAddr("stranger");
+        vm.prank(stranger);
+        pool.advance("", ingestInputs(0), true);
+        assertEq(pool.ingestCursor(), 1);
+        assertEq(pool.stateCommit(), uint256(ingestInputs(0)[9]));
+        assertEq(pool.ingestedState(), 0);
+    }
+
+    /// @dev Pins what reaches the verifier: the caller's proof bytes and the same public
+    ///      inputs the pool just checked against its storage, neither re-encoded nor cut.
+    function test_ingestPassesTheProofAndInputsToTheVerifier() public {
+        bytes memory proof = hex"c0ffee";
+        bytes32[] memory pi = ingestInputs(0);
+        vm.expectCall(address(ingestVerifier), abi.encodeCall(IHonkVerifier.verify, (proof, pi)));
+        pool.advance(proof, pi, false);
+    }
+
     function test_ingestRejectsWhenVerifierRejects() public {
         ingestVerifier.setAccept(false);
         vm.expectRevert(SealedRankedShares.InvalidProof.selector);
@@ -417,20 +437,30 @@ contract SealedAdvanceTest is FixtureLoader {
         assertEq(token.balanceOf(recipient) - before, pool.cost(order[0]));
         vm.expectRevert(AlreadyClaimed.selector);
         pool.claim(order[0]);
-        uint256 unfunded;
-        for (uint256 id = 0; id < pool.projectCount(); id++) {
-            if (!pool.funded(id)) {
-                unfunded = id;
-                break;
-            }
-        }
-        if (order.length < pool.projectCount()) {
-            vm.expectRevert(NotFunded.selector);
-            pool.claim(unfunded);
-        }
+        // Every project is funded here, so `claim` refusing an unfunded one is a separate
+        // test on a fixture that leaves one unfunded.
+        assertEq(order.length, pool.projectCount(), "the main fixture funds every project");
         address treasury = makeAddr("treasury");
         vm.prank(owner);
         pool.sweep(treasury);
         assertEq(token.balanceOf(address(pool)), pool.spent() - pool.claimedTotal());
+    }
+
+    /// @dev `smallm` funds one project of three, so the refusal is actually reached.
+    function test_claimRefusedForAnUnfundedProject() public {
+        loadFixture("test_smallm");
+        deployFromFixture();
+        replayVoters();
+        closeAll(100);
+        ingestAll();
+        report();
+        tallyAll();
+        uint256[] memory order = fxUintArray(".funded");
+        assertLt(order.length, pool.projectCount(), "the fixture must leave a project unfunded");
+        for (uint256 id = 0; id < pool.projectCount(); id++) {
+            if (pool.funded(id)) continue;
+            vm.expectRevert(NotFunded.selector);
+            pool.claim(id);
+        }
     }
 }

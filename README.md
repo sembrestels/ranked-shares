@@ -102,14 +102,26 @@ off-chain and is finalised by a chain of proofs.
 | Phase | Who | Calls |
 |---|---|---|
 | Setup | owner | `addProject`, `openVoting` |
-| Open | anyone | deposits as above, `vote(ranks)` (needs `minDirectVote` of own weight, one ballot, final), `voteSealed(rx, ry, c)` (seat holders, replaceable) |
+| Open | anyone | deposits as above, `vote(ranks)` (needs `minDirectVote` of own contributed weight, one ballot, final), `voteSealed(rx, ry, c)` (needs `minSealedVote` of seat weight, replaceable) |
 | Closing (deadline passed) | anyone / DON | `close(maxVoters)` until `closed`; the CRE workflow may drive it with a kind-2 report |
-| Tally | DON, coordinator, anyone | `onReport` (kind 1: result + transcript), `advance(proof, publicInputs, restart)` for each ingest batch then each tally group (`restart = true` restarts the tally chain from the ingested state instead of `restartTally`, which no longer exists), `acceptProvisional` after `proofGrace` since the report, `abandon` after `abandonGrace` since the deadline |
+| Tally | DON, coordinator, anyone | `onReport` (kind 1: result + transcript), `advance(proof, publicInputs, restart)` for each ingest batch then each tally group — permissionless, except that `restart = true` rewinds the tally chain to the state the ingest chain ended at and only `coordinator` may ask for it; `acceptProvisional` after `proofGrace` since the report, `abandon` after `abandonGrace` since the deadline |
 | Done | anyone / owner | `claim`, `sweep`; `finality()` says which path ended the pool |
 
 `Proven` means the sealed half was proven against the committed ciphertexts and the
 public half was attested by the DON and can be replayed by anyone from chain data
 (`python3 reference/pbear.py --transcript …` and, later, `prover/cli audit`).
+
+A restart still needs its own valid proof, so `coordinator` cannot rewrite the result —
+but a proof is public once submitted, so without the restriction anyone could replay the
+first tally group with `restart = true` and rewind the chain at will, holding off an
+honest `Proven` until the grace path applies. The two minimums (`minDirectVote`,
+`minSealedVote`) are what a ballot costs: both also refuse a zero-weight ballot when the
+minimum itself is zero, since such a ballot only enlarges the roster every close and
+tally pay for. `votersFrom(start, count)` returns a page of that roster — address,
+direct weight, packed ballot, seat weight, ciphertext, and the flag that tells an
+indifferent ballot (packed zero) from no ballot at all — so the workflow and the prover
+rebuild it without one call per voter. `profileId()` is
+`keccak256(abi.encode(nSealedMax, mMax, batch))`.
 
 Deploy with `script/DeploySealed.s.sol`:
 
