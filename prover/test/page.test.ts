@@ -40,12 +40,13 @@ beforeAll(async () => {
     },
   };
 
-  (document.getElementById("rpc") as HTMLInputElement).value = chain.rpc;
-  (document.getElementById("pool") as HTMLInputElement).value = chain.pool;
+  // Hand the chain to the page the way dev-pool's printed URL does: through the query
+  // string, so the prefill path in main.ts is what fills the inputs, not this test.
+  window.history.replaceState(null, "", `/?rpc=${encodeURIComponent(chain.rpc)}&pool=${chain.pool}`);
 
-  // Binds the button handlers against the DOM just built; must run after the markup and
-  // the inputs are in place, since main.ts reads `?rpc=&pool=` and looks up elements by id
-  // at module-evaluation time.
+  // Binds the button handlers against the DOM just built; must run after the markup is in
+  // place and the query string is set, since main.ts reads `?rpc=&pool=` and looks up
+  // elements by id at module-evaluation time.
   await import("../src/web/main.ts");
 }, 60_000);
 
@@ -66,6 +67,11 @@ async function waitForText(id: string, predicate: (text: string) => boolean, tim
 }
 
 describe("the coordinator page", () => {
+  test("prefills the RPC URL and pool address from the query string", () => {
+    expect((document.getElementById("rpc") as HTMLInputElement).value).toBe(chain.rpc);
+    expect((document.getElementById("pool") as HTMLInputElement).value).toBe(chain.pool);
+  });
+
   test(
     "Refresh reports resultReported and the pool's coordinator; Audit says ok; window.ethereum is never touched",
     async () => {
