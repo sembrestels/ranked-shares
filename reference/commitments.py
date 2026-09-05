@@ -1,10 +1,10 @@
 """Commitments of spec B6.1, B6.3 and the circuit state of B7, in Python."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import poseidon2
 from keccak import keccak256
-from pbear import NONE, cumulative_deductions, effective_ranks
+from pbear import NONE, effective_ranks
 from sealed import unpack
 
 
@@ -128,7 +128,11 @@ def _entry_ranks(state, e):
 
 
 def tally_step(profile, state, costs, step):
-    """One step of the `tally` circuit (spec B7), driven by a transcript step."""
+    """One step of the `tally` circuit (spec B7), driven by a transcript step.
+
+    `profile` is accepted for API symmetry with `state_commit`, which needs it to check
+    the array lengths; this function reads only `state`, so it is not read here.
+    """
     m = state.m
     if state.done:
         return
