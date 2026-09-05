@@ -31,7 +31,7 @@ export type Snapshot = {
   voters: Voter[];
 };
 
-async function read<T>(client: PublicClient, pool: Address, functionName: string, args: unknown[] = []): Promise<T> {
+export async function read<T>(client: PublicClient, pool: Address, functionName: string, args: unknown[] = []): Promise<T> {
   return (await client.readContract({ address: pool, abi, functionName, args } as any)) as T;
 }
 

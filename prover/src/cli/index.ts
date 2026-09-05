@@ -14,7 +14,9 @@ function arg(name: string, def?: string): string {
     if (def !== undefined) return def;
     throw new Error(`missing --${name}`);
   }
-  return process.argv[i + 1]!;
+  const v = process.argv[i + 1];
+  if (v === undefined) throw new Error(`--${name} needs a value`);
+  return v;
 }
 
 async function main() {
