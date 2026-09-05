@@ -78,6 +78,24 @@ class FixtureTest(unittest.TestCase):
         self.assertFalse(any(v["ciphertext"] for v in load("nosealed")["voters"]))
         self.assertFalse(any(v["directBallot"] for v in load("nodirect")["voters"]))
 
+    def test_pool_is_anvil_nonce_3(self):
+        for scenario in COMMITTED:
+            self.assertEqual(load(scenario)["pool"], "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9")
+
+    def test_main_takeover_is_replayable(self):
+        fx = load("main")
+        t = fx["nftTakeover"]
+        by_addr = {v["addr"]: v for v in fx["voters"]}
+        frm, to = by_addr[t["from"]], by_addr[t["to"]]
+        self.assertEqual(int(frm["seatWeight"], 16), 0)
+        self.assertTrue(frm["ciphertext"])
+        self.assertGreater(int(to["seatWeight"], 16), int(t["sponsorshipAmount"], 16))
+        self.assertEqual(t["tokenId"], 1)
+        order = [v["addr"] for v in fx["voters"]]
+        self.assertLess(order.index(t["from"]), order.index(t["to"]))
+        self.assertIsNone(load("nosealed")["nftTakeover"])
+        self.assertIsNone(load("nodirect")["nftTakeover"])
+
     def test_big_builds(self):
         fx = make_fixture.build("big")
         self.assertEqual(fx["m"], 16)

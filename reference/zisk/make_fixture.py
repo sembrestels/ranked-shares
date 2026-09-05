@@ -20,7 +20,11 @@ from zisk import sealed
 MASTER = keccak256(b"zisk fixture master secret")
 SALT = keccak256(b"zisk fixture key salt")
 CHAIN_ID = 31337
-POOL = int.from_bytes(keccak256(b"zisk fixture pool")[12:], "big")
+# anvil's first account (0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266) deploys the mock
+# token at nonce 0, the mock NFT at nonce 1, the ZisK verifier at nonce 2 and the pool at
+# nonce 3, so the committed proof of this fixture verifies both in the Foundry tests
+# (`deployCodeTo` at this address) and on a fresh anvil (scripts/e2e-anvil.sh).
+POOL = 0xCF7ED3ACCA5A467E9E704C703E8D87F634FB0FC9
 MIN_DIRECT_VOTE = 10_000_000  # 10 USDC at 6 decimals
 USDC = 1_000_000
 
@@ -28,8 +32,8 @@ VECTORS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 COMMITTED = ("main", "nosealed", "nodirect")
 
 FIXTURE_KEYS = (
-    "scenario", "chainId", "pool", "m", "costs", "totalWeight", "minDirectVote", "master",
-    "keySalt", "sk", "pk", "voters", "voterChain", "inputsHash", "funded", "outputHash",
+    "scenario", "chainId", "pool", "m", "costs", "totalWeight", "minDirectVote", "nftTakeover",
+    "master", "keySalt", "sk", "pk", "voters", "voterChain", "inputsHash", "funded", "outputHash",
 )
 VOTER_KEYS = ("addr", "directWeight", "seatWeight", "directBallot", "ciphertext", "directRanks", "sealedRanks", "k")
 
@@ -134,16 +138,23 @@ def _roster(scenario):
         r.add(base + 0x502, seat=30 * USDC, raw_ciphertext=b"\x02" + _bad_x() + bytes(m))  # x off the curve
         r.add(base + 0x503, seat=30 * USDC, raw_ciphertext=b"\x02" + ec.P.to_bytes(32, "big") + bytes(m))  # x >= p
         r.add(base + 0x504, seat=30 * USDC, raw_ciphertext=b"\x04" + first["ciphertext"][1:])  # bad prefix
-        r.add(base + 0x508, seat=30 * USDC, sealed_ranks=[m] * m, k_label="invalid")  # decrypts to an invalid ranking
-        # silent seat holder, silent direct voter below the minimum, revoked seat with a ballot
+        # silent seat holder, silent direct voter below the minimum
         r.add(base + 0x505, seat=30 * USDC)
         r.add(base + 0x506, direct=5 * USDC)
+        # a revoked NFT seat that still carries a ballot: 0x507 claimed the one-seat NFT
+        # sponsorship (30 USDC), voted sealed, and 0x508 took the seat over afterwards, so
+        # 0x508 holds its own 30 USDC list seat plus the 30 USDC NFT seat.
         r.add(base + 0x507, seat=0, sealed_ranks=ballot(m, rot(0), kept=1), k_label="revoked")
+        r.add(base + 0x508, seat=60 * USDC, sealed_ranks=[m] * m, k_label="invalid")  # decrypts to an invalid ranking
     else:
         raise SystemExit(f"unknown scenario {scenario!r}")
 
+    takeover = None
+    if scenario == "main":
+        takeover = {"from": addr_hex(base + 0x507), "to": addr_hex(base + 0x508),
+                    "sponsorshipAmount": hx(30 * USDC), "tokenId": 1}
     total_weight = sum(v["directWeight"] + v["seatWeight"] for v in r.voters) + dust
-    return m, costs, r, total_weight
+    return m, costs, r, total_weight, takeover
 
 
 def entries(voters):
@@ -153,7 +164,7 @@ def entries(voters):
 
 
 def build(scenario="main"):
-    m, costs, roster, total_weight = _roster(scenario)
+    m, costs, roster, total_weight, takeover = _roster(scenario)
     voters = roster.voters
     ents = entries(voters)
     abstaining = total_weight - sum(w for w, _ in ents)
@@ -170,6 +181,7 @@ def build(scenario="main"):
         "costs": [hx(c) for c in costs],
         "totalWeight": hx(total_weight),
         "minDirectVote": hx(MIN_DIRECT_VOTE),
+        "nftTakeover": takeover,
         "master": "0x" + MASTER.hex(),
         "keySalt": "0x" + SALT.hex(),
         "sk": hx(roster.sk),
