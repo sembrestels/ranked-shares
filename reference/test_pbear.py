@@ -251,6 +251,15 @@ class TranscriptTest(unittest.TestCase):
             self.assertEqual(funded, expected)
             self.assertEqual([s[m + 1] for s in transcript if s[m + 1] != NONE], funded)
 
+    def test_transcript_never_exceeds_two_m_steps(self):
+        # Spec B6.2: the contract rejects a transcript with more than 2m steps.
+        rng = random.Random(23)
+        for _ in range(300):
+            m = rng.randint(1, 5)
+            costs, public, sealed, budget = random_instance(rng, rng.randint(0, 4), rng.randint(0, 4), m)
+            _, transcript = pbear_transcript(costs, public, sealed, budget)
+            self.assertLessEqual(len(transcript), 2 * m, (costs, public, sealed, budget))
+
     def test_step_shape_and_levels(self):
         costs = [30, 70]
         public = [(40, [1, 2])]

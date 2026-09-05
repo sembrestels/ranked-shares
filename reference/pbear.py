@@ -187,6 +187,9 @@ def pbear_transcript(costs, public, sealed, budget):
         is_funded[best] = True
         funded.append(best)
         spent += costs[best]
+    # At most one funding step per project and at most one NONE step per level, and
+    # levels run from 1 to m: spec B6.2 lets the contract reject a longer transcript.
+    assert len(transcript) <= 2 * m
     return funded, transcript
 
 
