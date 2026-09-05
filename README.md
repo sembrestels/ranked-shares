@@ -227,7 +227,11 @@ were verified):
 3. Switch wallet to RPC chain → the wallet asks to add "Anvil (local)" (chain id
    31337, the printed RPC URL) and to switch to it; approve both.
 4. Connect wallet → approve the connection to the coordinator account.
-5. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
+5. Use master secret → paste the `MASTER` value printed by `dev:pool` (the
+   fixture's fixed tallier secret; the page keeps it in memory only). On a real
+   pool, whose `tallierPkX/Y` came from `make-master-secret.mjs` with the
+   coordinator's key, use Sign for tallier key instead: it signs the
+   `MASTER_MESSAGE` prompt and derives the same value.
 6. Refresh status → confirm phase/ingestCursor/coordinator look right and
    `youAreCoordinator` is `true`.
 7. Audit → confirms the public block reproduces the reported transcript.

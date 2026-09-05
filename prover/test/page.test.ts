@@ -17,6 +17,7 @@ if (typeof globalThis.fetch === "undefined") {
 }
 
 let chain: FixtureChain;
+const fixtureMaster = "0x4d885451f27e770ee4b6aad84a413591ed03109df0def6b88fd104818c323740"; // reference/vectors/fixture_test_main.json .master
 let ethereumCalls = 0;
 const ethereumRequests: { method: string; params?: unknown[] }[] = [];
 
@@ -107,6 +108,25 @@ describe("the coordinator page", () => {
     expect(add.chainId).toBe("0x7a69");
     expect(add.rpcUrls).toEqual([chain.rpc]);
     expect(add.chainName).toBe("Anvil (local)");
+  }, 30_000);
+
+  test("Use master secret loads a pasted hex master, clears the input and enables Prove", async () => {
+    const input = document.getElementById("master") as HTMLInputElement;
+    const prove = document.getElementById("prove") as HTMLButtonElement;
+    const logEl = document.getElementById("log")!;
+    expect(prove.disabled).toBe(true);
+
+    input.value = "0x1234";
+    document.getElementById("use-master")!.dispatchEvent(new MouseEvent("click"));
+    await waitForText("log", (t) => t.includes("error: master secret must be 0x followed by 64 hex characters"));
+    expect(prove.disabled).toBe(true);
+
+    input.value = fixtureMaster;
+    document.getElementById("use-master")!.dispatchEvent(new MouseEvent("click"));
+    await waitForText("log", (t) => t.includes("master secret loaded from the input"));
+    expect(input.value).toBe("");
+    expect(prove.disabled).toBe(false);
+    expect(logEl.textContent).not.toContain(fixtureMaster.slice(2, 12));
   }, 30_000);
 
   test("Audit with a bad RPC URL writes an error line to #log via the guard path", async () => {

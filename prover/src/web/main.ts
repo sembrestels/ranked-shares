@@ -102,6 +102,19 @@ $("sign").onclick = guard(async () => {
   ($("prove") as HTMLButtonElement).disabled = false;
 });
 
+// Dev pools (npm run dev:pool) are deployed with the fixture's fixed master secret, which no
+// wallet signature reproduces; this loads a master secret pasted as hex instead. Same
+// handling as the signed one: memory only, never logged, input cleared once read.
+$("use-master").onclick = guard(async () => {
+  const input = $("master") as HTMLInputElement;
+  const value = input.value.trim();
+  if (!/^0x[0-9a-fA-F]{64}$/.test(value)) throw new Error("master secret must be 0x followed by 64 hex characters");
+  master = hexToBytes(value as Hex);
+  input.value = "";
+  log("master secret loaded from the input (kept in memory only)");
+  ($("prove") as HTMLButtonElement).disabled = false;
+});
+
 $("refresh").onclick = guard(async () => {
   const { pub } = clients();
   const s = await readPoolSnapshot(pub, poolAddress());
