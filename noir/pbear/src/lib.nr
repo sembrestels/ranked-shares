@@ -312,7 +312,9 @@ pub fn check_key(sk: EmbeddedCurveScalar, pk_x: Field, pk_y: Field) {
 }
 
 mod tests {
-    use super::{commit, empty_state, ranks_of, State, Step, tally_step};
+    use super::{
+        commit, empty_state, funded_bits, funded_order_packed, ranks_of, State, Step, tally_step,
+    };
     use sealed::NONE;
 
     // test profile: E = 8, M = 4
@@ -321,6 +323,19 @@ mod tests {
         s.weights[0] = 60;
         s.ballots[0] = 0x0102; // [2, 1]
         s
+    }
+
+    // The two packings the contract decodes (`_unpackFunded`): `funded` is a little-endian
+    // bitmask over all M columns, `funded_order` a little-endian byte string truncated to
+    // `funded_count`, so the trailing 5 below must not reach the packing.
+    #[test]
+    fn packs_funded_bits_and_order() {
+        let mut s = empty_state::<8, 4>(4, 100);
+        s.funded = [false, true, true, true];
+        s.funded_order = [3, 1, 2, 5];
+        s.funded_count = 3;
+        assert(funded_bits(s) == 14); // 0b1110
+        assert(funded_order_packed(s) == 3 + 256 + 2 * 65536); // 0x020103
     }
 
     #[test]
@@ -497,6 +512,35 @@ mod tests {
         assert(after.spent == 100);
         assert(after.done);
         assert(commit(after) == 0x2123ca21305cd79302f61097c869ee7611b9c4dab632499835a06454171a83f6);
+    }
+
+    // The transcript hash covers the whole `pub_support` vector, not just the winner: two
+    // steps that pick the same project with the same total but report different public
+    // support are different transcripts, and the on-chain `transcriptHash` separates them.
+    #[test]
+    fn a_changed_pub_support_changes_the_transcript_hash() {
+        let costs = [30, 70, 0, 0];
+        let s = example_state();
+        let ranks = ranks_of(s);
+        let a = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [40, 0, 0, 0], best: 0, total: 40 },
+            ranks,
+        );
+        // 5 more support for project 1 leaves it short of its cost of 70, so the step is
+        // still valid and picks project 0 with the same total
+        let b = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [40, 5, 0, 0], best: 0, total: 40 },
+            ranks,
+        );
+        assert(a.weights == b.weights);
+        assert(a.funded == b.funded);
+        assert(a.spent == b.spent);
+        assert(a.t_hash != b.t_hash);
+        assert(commit(a) != commit(b));
     }
 
     #[test(should_fail)]

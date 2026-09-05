@@ -48,6 +48,12 @@ pub fn sponge_var<let N: u32>(inputs: [Field; N], len: u32) -> Field {
 /// projects: `packed < 256^m`, every rank `<= m`, and a rank `r` is used only if
 /// exactly `r - 1` projects carry a smaller non-zero rank (`PBEAR._setBallot`).
 pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M]) {
+    // No `assert(m <= M)` here, unlike `effective_ranks`: it would add a constraint to
+    // the ingest circuit (which calls this with the state's `m`) and so move its
+    // verification key, invalidating the committed verifiers and proofs. It would be
+    // redundant anyway: `main` asserts `m <= M` on the public `m`, batch 0 builds the
+    // state from it, no later batch touches `state.m`, and `SealedRankedShares`
+    // chains the batches and rechecks `m == _costs.length` on every one of them.
     let bytes: [u8; 32] = packed.to_le_bytes();
     let mut ranks: [u8; M] = [0; M];
     let mut ok = true;
@@ -81,6 +87,7 @@ pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M])
 /// The rank used by the tally: the stored rank, or `1 + number of ranked projects`
 /// for an unranked one (`PBEAR._defaultRank`).
 pub fn effective_ranks<let M: u32>(ranks: [u8; M], m: u32) -> [u8; M] {
+    assert(m <= M);
     let mut nonzero: u32 = 0;
     for c in 0..M {
         nonzero += if (c < m) & (ranks[c] != 0) { 1 } else { 0 };
@@ -134,7 +141,6 @@ mod sponge_tests {
 
     #[test]
     fn matches_reference_vectors() {
-        // paste the "// sponge" block printed by reference/tools/noir_vectors.py here
         assert(sponge([1]) == 0x168758332d5b3e2d13be8048c8011b454590e06c44bce7f702f09103eef5a373);
         assert(
             sponge([1, 2, 3]) == 0x23864adb160dddf590f1d3303683ebcb914f828e2635f6e85a32f0a1aecd3dd8,

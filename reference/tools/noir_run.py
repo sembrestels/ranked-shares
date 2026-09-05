@@ -26,10 +26,15 @@ def package(fx, kind):
 def run_one(name, fx, kind, index):
     c = crate(fx, kind)
     prover = os.path.join(ROOT, "noir", c, "Prover.toml")
-    subprocess.run(
-        [sys.executable, os.path.join(HERE, "noir_inputs.py"), "--fixture", name, f"--{kind}", str(index), "--out", prover],
-        check=True, capture_output=True,
-    )
+    try:
+        subprocess.run(
+            [sys.executable, os.path.join(HERE, "noir_inputs.py"), "--fixture", name, f"--{kind}", str(index), "--out", prover],
+            check=True, capture_output=True,
+        )
+    except subprocess.CalledProcessError as e:
+        print(f"FAIL {name} {kind} {index}: noir_inputs.py exited {e.returncode}")
+        print(e.stderr.decode(errors="replace") if isinstance(e.stderr, bytes) else e.stderr)
+        return False
     witness = f"{name}-{kind}-{index}"
     r = subprocess.run(
         ["nargo", "execute", "--package", package(fx, kind), witness],

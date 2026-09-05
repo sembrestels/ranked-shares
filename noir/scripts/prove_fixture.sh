@@ -4,11 +4,16 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 . noir/scripts/env.sh
 fixture="$1"
-profile="${fixture%%_*}"      # test_main -> test
+json="reference/vectors/fixture_$fixture.json"
+# the fixture names its own profile; the file name prefix only happens to agree
+profile="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['profile']['name'])" "$json")"
 out="noir/proofs/$fixture"
 mkdir -p "$out"
+# bb writes into $out/tmp and the moves below empty it again; a failed or interrupted
+# run would otherwise leave a stray proof there for the next run to trip over.
+trap 'rm -rf "$out/tmp"' EXIT
 python3 reference/tools/noir_run.py --fixture "$fixture"
-count() { python3 -c "import json,sys; print(len(json.load(open('reference/vectors/fixture_$fixture.json'))['$1']))"; }
+count() { python3 -c "import json,sys; print(len(json.load(open(sys.argv[1]))['$1']))" "$json"; }
 for kind in ingest tally; do
   key="${kind}Proofs"
   n=$(count "$key")

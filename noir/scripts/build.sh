@@ -37,7 +37,9 @@ nargo compile --workspace
 mkdir -p "artifacts/$profile" "$dest"
 for kind in ingest tally; do
   pkg="${kind}_${profile}"
-  cp "target/$pkg.json" "artifacts/$profile/$kind.json"
+  # strip the debug symbols and the file map: they are large, they move with every
+  # unrelated source edit, and neither bb nor the contracts read them.
+  jq 'del(.debug_symbols, .file_map)' "target/$pkg.json" > "artifacts/$profile/$kind.json"
   bb write_vk -b "artifacts/$profile/$kind.json" -o "artifacts/$profile/$kind" -t evm
   # bb writes <out>/vk and <out>/vk_hash when -o is a directory
   mv "artifacts/$profile/$kind/vk" "artifacts/$profile/$kind.vk"
