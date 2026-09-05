@@ -1,44 +1,94 @@
 import json
 import os
-import subprocess
 import sys
+import tempfile
 import unittest
 
-from pbear import replay_public
+from pbear import NONE, replay_public
 from profiles import PROFILES
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "tools"))
 
+import make_fixture  # noqa: E402
 
+# Every fixture committed under reference/vectors/, as (profile, scenario).
 FIXTURES = (("test", "main"), ("test", "smallm"), ("test", "nosealed"), ("default", "main"))
+ZERO = "0x" + "0" * 64
+
+
+def path_of(profile, scenario, directory=None):
+    return os.path.join(directory or os.path.join(HERE, "vectors"), f"fixture_{profile}_{scenario}.json")
 
 
 def load(profile, scenario):
-    with open(os.path.join(HERE, "vectors", f"fixture_{profile}_{scenario}.json")) as f:
+    with open(path_of(profile, scenario)) as f:
         return json.load(f)
 
 
-class FixtureTest(unittest.TestCase):
+class GeneratorTest(unittest.TestCase):
     def test_generator_is_deterministic(self):
-        with open(os.path.join(HERE, "vectors", "fixture_test_main.json")) as f:
-            before = f.read()
-        subprocess.run([sys.executable, os.path.join(HERE, "tools", "make_fixture.py"), "--profile", "test"], check=True, cwd=os.path.dirname(HERE))
-        with open(os.path.join(HERE, "vectors", "fixture_test_main.json")) as f:
-            after = f.read()
-        self.assertEqual(before, after)
+        """Every committed fixture is exactly what `build` produces today.
 
+        Generated into a temporary directory, so the test never touches the working
+        tree, and this is also the only check that the `default` fixture still matches
+        the code that made it.
+        """
+        with tempfile.TemporaryDirectory() as out_dir:
+            for profile, scenario in FIXTURES:
+                fx = make_fixture.build(PROFILES[profile], scenario)
+                produced = make_fixture.write_fixture(fx, scenario, out_dir)
+                with open(produced, "rb") as f:
+                    fresh = f.read()
+                with open(path_of(profile, scenario), "rb") as f:
+                    committed = f.read()
+                self.assertEqual(fresh, committed, f"fixture_{profile}_{scenario}.json is stale")
+
+
+class FixtureTest(unittest.TestCase):
     def test_test_fixture_exercises_chains(self):
         fx = load("test", "main")
         p = PROFILES["test"]
         self.assertGreater(fx["numBatches"], 1)
         self.assertGreater(len(fx["tallyProofs"]), 1)
         self.assertEqual(len(fx["ingestProofs"]), fx["numBatches"])
-        self.assertEqual(fx["ingestProofs"][0]["stateIn"], "0x" + "0" * 64)
+        self.assertEqual(fx["ingestProofs"][0]["stateIn"], ZERO)
         self.assertEqual(fx["ingestProofs"][-1]["hOut"], fx["checkpoints"][-1])
         self.assertEqual(fx["tallyProofs"][-1]["done"], 1)
         self.assertEqual(fx["tallyProofs"][-1]["tHashOut"], fx["transcriptHash"])
         self.assertLessEqual(fx["sealedCount"], p.n_sealed_max)
         self.assertTrue(any(v["ciphertext"] is not None and v["sealedRanks"] is None for v in fx["voters"]), "an invalid ciphertext")
+
+    def test_smallm_fixture_has_fewer_projects_and_a_terminal_none(self):
+        fx = load("test", "smallm")
+        m = fx["m"]
+        self.assertEqual(m, len(fx["costs"]))
+        self.assertLess(m, fx["profile"]["mMax"])
+        self.assertTrue(fx["transcript"])
+        last = fx["transcript"][-1]
+        self.assertEqual(last[m + 1], NONE)
+        self.assertGreaterEqual(last[0], m)
+        self.assertEqual(fx["tallyProofs"][-1]["done"], 1)
+
+    def test_nosealed_fixture_has_one_empty_ingest_batch(self):
+        fx = load("test", "nosealed")
+        self.assertEqual(fx["sealedCount"], 0)
+        self.assertEqual(fx["numBatches"], 1)
+        self.assertEqual(fx["sealedEntries"], [])
+        self.assertTrue(fx["publicEntries"])
+        self.assertEqual(len(fx["ingestProofs"]), 1)
+        self.assertEqual(fx["ingestProofs"][0]["hIn"], ZERO)
+        self.assertEqual(fx["ingestProofs"][0]["hOut"], ZERO)
+        self.assertEqual(fx["ingestProofs"][0]["stateIn"], ZERO)
+        self.assertEqual(fx["checkpoints"], [ZERO, ZERO])
+        self.assertEqual(fx["tallyProofs"][-1]["done"], 1)
+
+    def test_every_fixture_declares_its_m(self):
+        for profile, scenario in FIXTURES:
+            fx = load(profile, scenario)
+            self.assertIsInstance(fx["m"], int)
+            self.assertEqual(fx["m"], len(fx["costs"]))
+            self.assertLessEqual(fx["m"], fx["profile"]["mMax"])
 
     def test_chain_of_states(self):
         for profile, scenario in FIXTURES:

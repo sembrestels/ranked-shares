@@ -1,7 +1,7 @@
 """Write reference/vectors/fixture_<profile>_<scenario>.json (plan 1, Task 6, for the shape).
 
-Usage: python3 reference/tools/make_fixture.py --profile test|default
-Run from the repository root.
+Usage: python3 reference/tools/make_fixture.py --profile test|default [--out DIR]
+Run from the repository root; `--out` defaults to `reference/vectors/`.
 
 Scenarios, one file each:
 
@@ -177,6 +177,7 @@ def _encode(profile, m, costs, voters, total_weight, sk, pk, public_entries, sea
     return {
         "profile": {"name": profile.name, "nSealedMax": profile.n_sealed_max, "mMax": profile.m_max, "batch": profile.batch, "k": profile.k},
         "master": "0x" + MASTER.hex(), "keySalt": "0x" + SALT.hex(), "sk": hx(sk), "pk": [hx(pk[0]), hx(pk[1])],
+        "m": m,
         "costs": [hx(c) for c in costs], "totalWeight": hx(total_weight), "minDirectVote": hx(MIN_DIRECT_VOTE),
         "voters": [{"addr": addr_hex(v["addr"]), "directWeight": hx(v["directWeight"]), "seatWeight": hx(v["seatWeight"]),
                     "hasDirect": v["hasDirect"], "directRanks": v["directRanks"],
@@ -241,10 +242,11 @@ def write_fixture(fx, scenario, out_dir=VECTORS):
 
 def main(argv):
     name = argv[argv.index("--profile") + 1] if "--profile" in argv else "test"
+    out_dir = argv[argv.index("--out") + 1] if "--out" in argv else VECTORS
     profile = PROFILES[name]
     for scenario in SCENARIOS[name]:
         fx = build(profile, scenario)
-        path = write_fixture(fx, scenario)
+        path = write_fixture(fx, scenario, out_dir)
         print(path, "voters", len(fx["voters"]), "sealed", fx["sealedCount"],
               "steps", len(fx["transcript"]), "proofs", len(fx["ingestProofs"]) + len(fx["tallyProofs"]))
 
