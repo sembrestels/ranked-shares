@@ -1,0 +1,9 @@
+[package]
+name = "tally-guest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+ziskos = { git = "https://github.com/0xPolygonHermez/zisk.git", tag = "v1.2.0-alpha" }
+sealed = { path = "../crates/sealed", default-features = false }

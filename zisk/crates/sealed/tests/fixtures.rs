@@ -77,3 +77,14 @@ fn voter_garbage_never_panics() {
     let out = tally::run(&input).unwrap();
     assert!(out.funded_order.is_empty());
 }
+
+/// Runs the real guest in ziskemu. `cargo test -- --ignored` on a machine with ZisK.
+#[test]
+#[ignore]
+fn guest_commits_the_fixture_hash_in_the_emulator() {
+    let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    for s in SCENARIOS {
+        let status = std::process::Command::new(root.join("scripts/emu-check.sh")).arg(s).status().expect("script runs");
+        assert!(status.success(), "{s}");
+    }
+}
