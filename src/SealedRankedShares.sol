@@ -36,6 +36,14 @@ contract SealedRankedShares is PoolBase, IReceiver {
     error InputMismatch();
     error InvalidResult();
     error InvalidTranscript();
+    error ProofOutOfOrder();
+    error InvalidProof();
+    error TranscriptPending();
+    error TranscriptMismatch();
+    error ResultMismatch();
+    error IngestPending();
+    error ProofPending();
+    error ResultPending();
 
     // ---------------------------------------------------------------- events
 
@@ -44,6 +52,10 @@ contract SealedRankedShares is PoolBase, IReceiver {
     event Closed(bytes32 inputsRoot, uint256 sealedCount);
     event ProvisionalResult(uint256[] fundedOrder);
     event Transcript(uint256[] transcript);
+    event Ingested(uint256 k);
+    event Advanced();
+    event TallyRestarted();
+    event Finalized(Finality finality, uint256[] fundedOrder);
 
     // ----------------------------------------------------------------- types
 
@@ -133,6 +145,16 @@ contract SealedRankedShares is PoolBase, IReceiver {
     bool public resultReported;
     uint256[] internal _provisional;
     uint256 public transcriptHash;
+
+    // proofs (spec B6.5)
+    uint256 public ingestCursor;
+    uint256 public stateCommit;
+    uint256 public ingestedState;
+
+    // result
+    mapping(uint256 => bool) public funded;
+    uint256[] internal _fundedOrder;
+    uint256 public spent;
 
     // ----------------------------------------------------------- constructor
 
@@ -383,6 +405,100 @@ contract SealedRankedShares is PoolBase, IReceiver {
         if (fundedSeen != order.length) revert InvalidTranscript();
     }
 
+    function fundedProjects() external view returns (uint256[] memory) {
+        return _fundedOrder;
+    }
+
+    // ---------------------------------------------------------------- proofs
+
+    /// @notice Verify the next proof of the chain: ingest batches first, then tally groups.
+    function advance(bytes calldata proof, bytes32[] calldata publicInputs) external inPhase(Phase.Tally) {
+        if (ingestCursor < numBatches) {
+            _advanceIngest(proof, publicInputs);
+        } else {
+            _advanceTally(proof, publicInputs);
+        }
+    }
+
+    function _advanceIngest(bytes calldata proof, bytes32[] calldata pi) internal {
+        uint256 k = ingestCursor;
+        if (pi.length != 10) revert InputMismatch();
+        if (uint256(pi[0]) != k) revert ProofOutOfOrder();
+        if (
+            uint256(pi[1]) != sealedCount || uint256(pi[2]) != _costs.length || uint256(pi[3]) != totalWeight
+                || uint256(pi[4]) != tallierPkX || uint256(pi[5]) != tallierPkY || uint256(pi[6]) != checkpoint[k]
+                || uint256(pi[7]) != checkpoint[k + 1] || uint256(pi[8]) != stateCommit
+        ) revert InputMismatch();
+        if (!ingestVerifier.verify(proof, pi)) revert InvalidProof();
+        stateCommit = uint256(pi[9]);
+        ingestCursor = k + 1;
+        if (k + 1 == numBatches) ingestedState = stateCommit;
+        emit Ingested(k);
+    }
+
+    function _advanceTally(bytes calldata proof, bytes32[] calldata pi) internal {
+        if (!resultReported) revert TranscriptPending();
+        if (pi.length != 7) revert InputMismatch();
+        if (uint256(pi[0]) != costsHash || uint256(pi[1]) != stateCommit) revert InputMismatch();
+        if (!tallyVerifier.verify(proof, pi)) revert InvalidProof();
+        stateCommit = uint256(pi[2]);
+        emit Advanced();
+        if (uint256(pi[3]) == 1) {
+            if (uint256(pi[4]) != transcriptHash) revert TranscriptMismatch();
+            uint256[] memory order = _unpackFunded(uint256(pi[5]), uint256(pi[6]));
+            if (keccak256(abi.encode(order)) != keccak256(abi.encode(_provisional))) revert ResultMismatch();
+            _finalize(order, Finality.Proven);
+        }
+    }
+
+    /// @notice Reset the tally chain to the state after ingest, for a prover that fed a
+    ///         transcript slice the DON did not publish.
+    function restartTally() external inPhase(Phase.Tally) {
+        if (ingestCursor != numBatches) revert IngestPending();
+        stateCommit = ingestedState;
+        emit TallyRestarted();
+    }
+
+    // ----------------------------------------------------------------- grace
+
+    /// @notice Apply the DON's provisional result once `proofGrace` has elapsed with no proof.
+    function acceptProvisional() external inPhase(Phase.Tally) {
+        if (!resultReported) revert ResultPending();
+        if (block.timestamp < votingDeadline + proofGrace) revert ProofPending();
+        _finalize(_provisional, Finality.Attested);
+    }
+
+    /// @notice End the pool with nothing funded once `abandonGrace` has elapsed with no result.
+    function abandon() external {
+        Phase p = phase();
+        if (p != Phase.Tally && p != Phase.Closing) revert WrongPhase();
+        if (resultReported) revert ResultAlreadyReported();
+        if (block.timestamp < votingDeadline + abandonGrace) revert ResultPending();
+        _finalize(new uint256[](0), Finality.Abandoned);
+    }
+
+    // ------------------------------------------------------------- internals
+
+    function _unpackFunded(uint256 count, uint256 packed) internal view returns (uint256[] memory order) {
+        if (count > _costs.length) revert ResultMismatch();
+        order = new uint256[](count);
+        for (uint256 j = 0; j < count; j++) {
+            order[j] = (packed >> (8 * j)) & 0xff;
+        }
+    }
+
+    function _finalize(uint256[] memory order, Finality how) internal {
+        uint256 total;
+        for (uint256 i = 0; i < order.length; i++) {
+            funded[order[i]] = true;
+            total += _costs[order[i]];
+        }
+        _fundedOrder = order;
+        spent = total;
+        finality = how;
+        emit Finalized(how, order);
+    }
+
     // ----------------------------------------------------------------- hooks
 
     function _isSetup() internal view override returns (bool) {
@@ -434,15 +550,15 @@ contract SealedRankedShares is PoolBase, IReceiver {
         totalSeatWeight -= perSeat;
     }
 
-    function _isFunded(uint256) internal view virtual override returns (bool) {
-        return false;
+    function _isFunded(uint256 projectId) internal view override returns (bool) {
+        return funded[projectId];
     }
 
     function _costOf(uint256 projectId) internal view override returns (uint256) {
         return _costs[projectId];
     }
 
-    function _spent() internal view virtual override returns (uint256) {
-        return 0;
+    function _spent() internal view override returns (uint256) {
+        return spent;
     }
 }
