@@ -161,14 +161,15 @@ tally group per proof. See `forge test --match-path "test/verifiers/RealProofs.t
 
 `advanceMany` verifies several of those proofs in one atomic transaction. Measured on
 anvil against the same verifiers, the whole `test_main` chain — 3 ingest batches and 3
-tally groups — costs **5,121,035 gas as one `advanceMany`** against **5,323,635 gas as six
+tally groups — costs **about 5.12 M gas as one `advanceMany`** against **about 5.32 M gas as six
 `advance` transactions** (878,981 + 845,645 + 865,147 + 832,600 + 832,684 + 1,068,578):
-202,600 saved, which is the five transaction intrinsics the batch does not pay plus the
+about 200k saved (one sample run; receipts move by a few hundred gas between runs), which
+is the five transaction intrinsics the batch does not pay plus the
 account and storage warming the six proofs now share. The calldata is the same either way
 (50,564 bytes batched against 50,616 in six calls), so the saving is a fixed
 per-transaction one rather than a per-proof one — batching buys one signature and a few
 percent, not an order of magnitude. See `cd prover && npx vitest run test/e2e.test.ts
---silent=false`, which logs both.
+--reporter=verbose`, which logs both.
 
 ## Prover CLI
 
