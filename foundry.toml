@@ -7,7 +7,7 @@ optimizer = true
 optimizer_runs = 200
 ffi = true
 fs_permissions = [{ access = "read", path = "./reference" }]
-gas_reports = ["PBEAR", "RankedShares"]
+gas_reports = ["PBEAR", "RankedShares", "SealedRankedShares", "Poseidon2"]
 gas_limit = "18446744073709551615"
 remappings = [
     "@openzeppelin/=lib/openzeppelin-contracts/",

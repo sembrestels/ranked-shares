@@ -93,6 +93,39 @@ FOUNDRY_FUZZ_RUNS=500 forge test --match-contract Differential
 The differential test builds random small instances, tallies them on-chain and in
 Python, checks that both agree, and brute-forces the IPSC axiom on the result.
 
+## Sealed pools
+
+`SealedRankedShares` is the pool of `docs/superpowers/specs/2026-09-05-sealed-ballots-noir-design.md`:
+direct ballots are public and final, seat holders vote with sealed ballots, the tally runs
+off-chain and is finalised by a chain of proofs.
+
+| Phase | Who | Calls |
+|---|---|---|
+| Setup | owner | `addProject`, `openVoting` |
+| Open | anyone | deposits as above, `vote(ranks)` (needs `minDirectVote` of own weight, one ballot, final), `voteSealed(rx, ry, c)` (seat holders, replaceable) |
+| Closing (deadline passed) | anyone / DON | `close(maxVoters)` until `closed`; the CRE workflow may drive it with a kind-2 report |
+| Tally | DON, coordinator, anyone | `onReport` (kind 1: result + transcript), `advance(proof, publicInputs, restart)` for each ingest batch then each tally group (`restart = true` restarts the tally chain from the ingested state instead of `restartTally`, which no longer exists), `acceptProvisional` after `proofGrace` since the report, `abandon` after `abandonGrace` since the deadline |
+| Done | anyone / owner | `claim`, `sweep`; `finality()` says which path ended the pool |
+
+`Proven` means the sealed half was proven against the committed ciphertexts and the
+public half was attested by the DON and can be replayed by anyone from chain data
+(`python3 reference/pbear.py --transcript …` and, later, `prover/cli audit`).
+
+Deploy with `script/DeploySealed.s.sol` (see its header for the environment). The
+Poseidon2 hasher (`src/lib/Poseidon2.sol`) is generated from the reference constants by
+`python3 reference/tools/gen_poseidon2_sol.py`; the Honk verifiers come from the Noir
+circuits (plan 3) and are replaced by accept-all mocks until then.
+
+Gas on the default fixture (70 voters, 65 sealed, 16 projects):
+
+| Call | Gas |
+|---|---|
+| `close(1000)`, full closing pass (total / per sealed voter) | 8,959,010 / 137,830 |
+| `onReport` (kind 1, 23 transcript steps) | 9,698,054 |
+| `voteSealed` (first / replacement) | 75,442 / 4,410 |
+
+See `forge test --match-contract SealedGasTest -vv`.
+
 ## Reference implementation
 
 `reference/` is the oracle every port is tested against, in dependency-free Python:
