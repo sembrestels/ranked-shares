@@ -18,6 +18,7 @@ if (typeof globalThis.fetch === "undefined") {
 
 let chain: FixtureChain;
 let ethereumCalls = 0;
+const ethereumRequests: { method: string; params?: unknown[] }[] = [];
 
 beforeAll(async () => {
   chain = await startFixtureChain({ port: PORT });
@@ -34,8 +35,14 @@ beforeAll(async () => {
 
   // A minimal injected-wallet stub. Refresh and Audit must never call it — asserted below.
   (window as any).ethereum = {
-    request: async () => {
+    request: async (req: { method: string; params?: unknown[] }) => {
       ethereumCalls++;
+      ethereumRequests.push(req);
+      // Behave like a wallet that does not know the chain yet: refuse the first switch with
+      // EIP-3085's 4902, accept the add, then accept the switch.
+      if (req.method === "wallet_switchEthereumChain" && !ethereumRequests.some((r) => r.method === "wallet_addEthereumChain")) {
+        throw Object.assign(new Error("Unrecognized chain ID"), { code: 4902 });
+      }
       return [];
     },
   };
@@ -89,6 +96,18 @@ describe("the coordinator page", () => {
     },
     60_000,
   );
+
+  test("Switch wallet to RPC chain adds the chain on 4902 and reports it", async () => {
+    const before = ethereumRequests.length;
+    document.getElementById("switch-chain")!.dispatchEvent(new MouseEvent("click"));
+    await waitForText("log", (t) => t.includes("wallet on chain 31337 (Anvil (local))"));
+    const calls = ethereumRequests.slice(before).map((r) => r.method);
+    expect(calls).toEqual(["wallet_switchEthereumChain", "wallet_addEthereumChain"]);
+    const add = ethereumRequests.slice(before)[1]!.params![0] as { chainId: string; rpcUrls: string[]; chainName: string };
+    expect(add.chainId).toBe("0x7a69");
+    expect(add.rpcUrls).toEqual([chain.rpc]);
+    expect(add.chainName).toBe("Anvil (local)");
+  }, 30_000);
 
   test("Audit with a bad RPC URL writes an error line to #log via the guard path", async () => {
     const rpcInput = document.getElementById("rpc") as HTMLInputElement;

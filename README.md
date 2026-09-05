@@ -193,8 +193,10 @@ development convenience only, since a command line is visible to every process o
 against an injected wallet, so the coordinator never has to hold a raw master
 secret or run the CLI: RPC URL and pool address inputs, Connect wallet, Sign for
 tallier key (signs `MASTER_MESSAGE`, deriving the master secret in memory only),
-Refresh status, Audit, and Prove and submit (runs `runChain` in the browser with
-bb.js, logging each proof and `advance` transaction). Refresh and Audit work
+Switch wallet to RPC chain (reads the chain id from the RPC URL and asks the wallet
+to switch, adding the chain with that RPC if the wallet doesn't know it), Refresh
+status, Audit, and Prove and submit (runs `runChain` in the browser with bb.js,
+logging each proof and `advance` transaction). Refresh and Audit work
 without a connected wallet; the page reads `?rpc=…&pool=…` from the URL query
 string to prefill the inputs. `bb.js`/`noir_js` are only imported (dynamically)
 inside the Prove handler, so the page's initial load doesn't pull in that WASM
@@ -221,14 +223,15 @@ were verified):
    URL), then `npm run preview` in another terminal and open the printed URL.
 2. Import the coordinator private key printed by `dev:pool`
    (`0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a`,
-   anvil's account 2) into the wallet, and add a network for chain id 31337 at
-   the printed RPC URL.
-3. Connect wallet → approve the connection to the coordinator account.
-4. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
-5. Refresh status → confirm phase/ingestCursor/coordinator look right and
+   anvil's account 2) into the wallet.
+3. Switch wallet to RPC chain → the wallet asks to add "Anvil (local)" (chain id
+   31337, the printed RPC URL) and to switch to it; approve both.
+4. Connect wallet → approve the connection to the coordinator account.
+5. Sign for tallier key → sign the `MASTER_MESSAGE` prompt.
+6. Refresh status → confirm phase/ingestCursor/coordinator look right and
    `youAreCoordinator` is `true`.
-6. Audit → confirms the public block reproduces the reported transcript.
-7. Prove and submit → proves and submits each remaining ingest batch and tally
+7. Audit → confirms the public block reproduces the reported transcript.
+8. Prove and submit → proves and submits each remaining ingest batch and tally
    group, logging gas used per `advance`, ending in `Proven`.
 
 ## Prove service

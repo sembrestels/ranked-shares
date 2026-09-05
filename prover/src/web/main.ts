@@ -58,6 +58,41 @@ $("connect").onclick = guard(async () => {
   ($("sign") as HTMLButtonElement).disabled = false;
 });
 
+// Names and gas tokens for the chains this page is expected to meet; anything else is
+// added under a generic name with ETH as the gas token (the wallet lets the user edit it).
+const KNOWN_CHAINS: Record<number, { name: string; symbol: string }> = {
+  31337: { name: "Anvil (local)", symbol: "ETH" },
+  5042002: { name: "Arc Testnet", symbol: "USDC" },
+};
+
+// EIP-1193 chain switch: ask the wallet for the chain the RPC URL serves; if the wallet does
+// not know it (error 4902), add it with that RPC URL and switch again.
+$("switch-chain").onclick = guard(async () => {
+  const eth = (window as any).ethereum;
+  if (!eth) return log("no injected wallet found (window.ethereum is undefined)");
+  const { pub } = clients();
+  const chainId = await pub.getChainId();
+  const hexId = `0x${chainId.toString(16)}`;
+  try {
+    await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hexId }] });
+  } catch (err) {
+    if ((err as { code?: number })?.code !== 4902) throw err;
+    const known = KNOWN_CHAINS[chainId] ?? { name: `Chain ${chainId}`, symbol: "ETH" };
+    await eth.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: hexId,
+          chainName: known.name,
+          rpcUrls: [($("rpc") as HTMLInputElement).value],
+          nativeCurrency: { name: known.symbol, symbol: known.symbol, decimals: 18 },
+        },
+      ],
+    });
+  }
+  log(`wallet on chain ${chainId} (${KNOWN_CHAINS[chainId]?.name ?? "unknown chain"})`);
+});
+
 $("sign").onclick = guard(async () => {
   if (!account) throw new Error("connect a wallet first");
   const { wallet } = clients();
