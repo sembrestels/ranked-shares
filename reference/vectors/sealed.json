@@ -1,0 +1,196 @@
+{
+  "master": "0x0ee0a1d2dcd5173eaa688b80ea3b8564b639f391cae13aee1f6c7af7600d7544",
+  "keySalt": "0xd55a1e7e438d97baa467923a51e4cd26e77a5122b94d78ee7a177fa0acfd9bbb",
+  "sk": "0x083abad4ae815c27ae5035ddfb0520ea86f0a28f12908cda56ee68f492a02a19",
+  "pk": [
+    "0x00e5f53c9afed1f9c1ef822bf03df8b2be36af7882d6d45744d989c5c8200d91",
+    "0x21c72d415f8e1a34760b86ca7a4d871c7913b305ea6ff5c2d354966a84fab321"
+  ],
+  "domain": "0x0000000000000000000052616e6b65645368617265732f7365616c65642f7632",
+  "cases": [
+    {
+      "voter": "0x1111111111111111111111111111111111111111",
+      "m": 4,
+      "ranks": [
+        2,
+        1,
+        0,
+        3
+      ],
+      "k": "0x30208c93deb694ee8346ae142b0e6687c7417e1a2bf04b46ea243100a0e6206f",
+      "ciphertext": [
+        "0x0656c259e26c7c93f06e5da9c501c3c5401ffa6514e0e3f30b91916b2bdcb084",
+        "0x2c42513bbb16004b692017ac1e0f82cffad63b648c5d2c55e53d4ae80672de49",
+        "0x2f996f763a3a50db39bec4b185cf0c74e7c2464e15f7d72da21ea40ca73dcb00"
+      ],
+      "plaintext": [
+        2,
+        1,
+        0,
+        3
+      ]
+    },
+    {
+      "voter": "0x2222222222222222222222222222222222222222",
+      "m": 4,
+      "ranks": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "k": "0x13cd9d943d55fe72b3a1b51a98d5415febffcc934059067d37f3678e03070000",
+      "ciphertext": [
+        "0x0730dd879fd30d9462b276cc1eb5c20bed0c5ed22f2ed71aceccbf40124ef97e",
+        "0x105a6c7611cd7a2e7a0f9893bc74f301888fbce539340dc3f60ae519d9870e14",
+        "0x056be8c7b0cf461c7bbbb4765d3abe4b728132dbcfb4b208c995c5d66c79e261"
+      ],
+      "plaintext": [
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "voter": "0x3333333333333333333333333333333333333333",
+      "m": 16,
+      "ranks": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "k": "0x0c2462b2f3a714f8a52077606f88b78dfd00c1383fe64c2235962ec45cb16baf",
+      "ciphertext": [
+        "0x189bfd5e68d0abeb917ff6aeff3e6b59e0918d36eaf3e947c7f2accb1c89d44e",
+        "0x0eeb8cbb98422d4dd64847e5a6551cf5d0a3e41344825ca338935f226e7f111a",
+        "0x25cf4ef1fe0252abc08e5d54c91fada0f45726c636b094be591c28f8d7ea8827"
+      ],
+      "plaintext": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    },
+    {
+      "voter": "0x4444444444444444444444444444444444444444",
+      "m": 31,
+      "ranks": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "k": "0x1188a03dd6b85aff489103199599317ac3334eb9f87f4bcf0add77613a319af7",
+      "ciphertext": [
+        "0x1976e260ed74a11493f32adb21080cc9cd3daeba197052be5e7a8f0995defbdf",
+        "0x061d7e1cb1d3892734c53a551ae71df4986e9ab37051ec9a8ee8d599765b5e96",
+        "0x18d934c7e4828b128e29bcdfc2dd0902595af183ba333185eb302842142aa575"
+      ],
+      "plaintext": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "voter": "0x2222222222222222222222222222222222222222",
+      "m": 4,
+      "ranks": [
+        2,
+        1,
+        0,
+        3
+      ],
+      "k": "0x30208c93deb694ee8346ae142b0e6687c7417e1a2bf04b46ea243100a0e6206f",
+      "ciphertext": [
+        "0x0656c259e26c7c93f06e5da9c501c3c5401ffa6514e0e3f30b91916b2bdcb084",
+        "0x2c42513bbb16004b692017ac1e0f82cffad63b648c5d2c55e53d4ae80672de49",
+        "0x2f996f763a3a50db39bec4b185cf0c74e7c2464e15f7d72da21ea40ca73dcb00"
+      ],
+      "plaintext": null,
+      "note": "replayed under another address"
+    }
+  ]
+}
