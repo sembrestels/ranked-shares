@@ -93,6 +93,23 @@ FOUNDRY_FUZZ_RUNS=500 forge test --match-contract Differential
 The differential test builds random small instances, tallies them on-chain and in
 Python, checks that both agree, and brute-forces the IPSC axiom on the result.
 
+## Reference implementation
+
+`reference/` is the oracle every port is tested against, in dependency-free Python:
+
+| Module | Defines |
+|---|---|
+| `pbear.py` | PB-EAR, the IPSC checker, and the transcript mode of the sealed design |
+| `poseidon2.py` | Poseidon2 over BN254 (t = 4), equal to Barretenberg's; vectors in `vectors/poseidon2.json` |
+| `grumpkin.py`, `sealed.py` | Grumpkin, ballot packing, ECDH ballot encryption; vectors in `vectors/sealed.json` |
+| `commitments.py`, `profiles.py` | on-chain commitments, transcript hash, circuit state and profiles |
+| `tools/make_fixture.py` | writes `vectors/fixture_<profile>.json`, consumed by the Solidity, Noir and TypeScript tests |
+
+Run `python3 -m unittest discover reference`. Regenerate Poseidon2 constants and vectors with
+`python3 reference/tools/extract_poseidon2_params.py` and
+`node reference/tools/poseidon2_vectors.mjs > reference/vectors/poseidon2.json`
+(needs `npm install` in `reference/tools`).
+
 ## Gas and limits
 
 - `step()` is O(voters × projects). At 100 voters and 20 projects it costs about
