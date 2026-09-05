@@ -5,6 +5,12 @@ global E: u32 = 8;
 global M: u32 = 4;
 global B: u32 = 2;
 
+/// `sk_lo`/`sk_hi` are deliberately not range-checked: the secret key is consumed only
+/// by `pk_matches` and `shared_point`, which are the same embedded-curve black box and
+/// read the same (lo, hi) limb pair the same way. Whatever scalar a witness's limbs
+/// denote, `sk * G == pk` pins it to the key the pool committed to on chain, and `sk * R`
+/// is then formed from that very scalar -- so an out-of-range encoding cannot make the
+/// two uses disagree.
 fn main(
     k: pub u32,
     n_sealed: pub u32,

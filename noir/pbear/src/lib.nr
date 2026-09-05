@@ -108,7 +108,19 @@ fn exhausted<let E: u32, let M: u32>(s: State<E, M>, costs: [u64; M]) -> bool {
     for c in 0..M {
         let relevant = (c as u8) < s.m;
         // `costs[c] <= budget - spent`, not `spent + costs[c] <= budget`: a cost may be
-        // any u64, so the sum would overflow, while `spent <= budget` always holds.
+        // any u64, so the sum would overflow.
+        //
+        // The subtraction needs `spent <= budget`. That is not an assert, it is a
+        // property of honest transcripts: a step only spends `best_cost`, and to be
+        // eligible the winner needed `best_cost <= total_support`, which for the real
+        // supports is at most the weight still unspent, `budget - spent`. So each step
+        // keeps `spent <= budget`, starting from `spent = 0`.
+        //
+        // An adversarial `pub_support` is not bounded by the real supports and can make
+        // a project eligible with `best_cost > budget - spent`, breaking the invariant.
+        // The circuit then fails closed: `budget - spent` underflows, its u64 range
+        // check is unsatisfiable and no proof exists for that step. That is the intended
+        // outcome -- such a transcript is rejected, never silently accepted.
         let affordable = costs[c] <= s.budget - s.spent;
         all &= (!relevant) | s.funded[c] | (!affordable);
     }
@@ -120,7 +132,10 @@ unconstrained fn div_hint(a: u64, b: u64, d: u64) -> (u64, u64) {
     ((p / (d as u128)) as u64, (p % (d as u128)) as u64)
 }
 
-/// floor(a * b / d) for u64 inputs, d != 0.
+/// floor(a * b / d) for u64 inputs, d != 0. In `tally_step` the divisor is the step's
+/// `total`, and `d != 0` is guaranteed because a funding step needs `total >= cost > 0`:
+/// the contract rejects zero-cost projects, so no eligible winner has cost zero (and a
+/// non-funding step passes the literal divisor 1).
 pub fn mul_div(a: u64, b: u64, d: u64) -> u64 {
     // Safety: q and r are fixed uniquely by the equation and the range check below.
     let (q, r) = unsafe { div_hint(a, b, d) };
@@ -428,6 +443,60 @@ mod tests {
         );
         assert(commit(after) == before);
         assert(after.weights[0] == 5000000000);
+    }
+
+    // The cumulative rounding runs over `pub_best + sum of the sealed weights`, so that
+    // sum is what must stay inside u64 -- the reweighting is provable right up to
+    // `2^64 - 1`. Here four supporters hold 4611686018427387903 each and `pub_best` is 3,
+    // so the last `new_cum` is exactly 2^64 - 1. Oracle (reference/commitments.py):
+    // weights [2305843009213693952, 2305843009213693951, 2305843009213693952,
+    // 2305843009213693951, 0, ...], spent = 2^63 - 1, done = True.
+    #[test]
+    fn cumulative_rounding_is_provable_up_to_the_u64_bound() {
+        let w: u64 = 4611686018427387903;
+        let cost: u64 = 9223372036854775807;
+        let costs = [cost, 0, 0, 0];
+        let mut s = empty_state::<8, 4>(1, 18446744073709551615);
+        for e in 0..4 {
+            s.weights[e] = w;
+        }
+        let total: u64 = 18446744073709551615; // 3 + 4 * w
+        let after = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [3, 0, 0, 0], best: 0, total },
+            ranks_of(s),
+        );
+        assert(after.weights[0] == 2305843009213693952);
+        assert(after.weights[1] == 2305843009213693951);
+        assert(after.weights[2] == 2305843009213693952);
+        assert(after.weights[3] == 2305843009213693951);
+        assert(after.spent == cost);
+        assert(after.done);
+        assert(commit(after) == 0x1f48b526d2278aacca951ae73f7d72b655e54942102ac7ca046aa4a6b566a7b4);
+    }
+
+    // `total == cost` is the boundary of `mul_div`: the multiplier equals the divisor, so
+    // every remainder is 0 (`r < d` still holds because `d = total > 0`) and each
+    // supporter is deducted its whole weight, with no underflow. Oracle
+    // (reference/commitments.py): all weights 0, spent = 100, done = True.
+    #[test]
+    fn total_equal_to_cost_zeroes_the_supporters() {
+        let costs = [100, 0, 0, 0];
+        let mut s = empty_state::<8, 4>(1, 100);
+        s.weights[0] = 60;
+        s.weights[1] = 40;
+        let after = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [0, 0, 0, 0], best: 0, total: 100 },
+            ranks_of(s),
+        );
+        assert(after.weights[0] == 0);
+        assert(after.weights[1] == 0);
+        assert(after.spent == 100);
+        assert(after.done);
+        assert(commit(after) == 0x2123ca21305cd79302f61097c869ee7611b9c4dab632499835a06454171a83f6);
     }
 
     #[test(should_fail)]
