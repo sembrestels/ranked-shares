@@ -119,6 +119,12 @@ class FixtureTest(unittest.TestCase):
         self.assertEqual(fx["profile"]["nSealedMax"], 256)
         self.assertEqual(len(fx["ingestProofs"]), fx["numBatches"])
 
+    def test_voters_carry_hasSealed(self):
+        for profile, scenario in FIXTURES:
+            for v in load(profile, scenario)["voters"]:
+                self.assertIn("hasSealed", v)
+                self.assertEqual(v["hasSealed"], v["ciphertext"] is not None)
+
 
 if __name__ == "__main__":
     unittest.main()

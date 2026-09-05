@@ -201,7 +201,7 @@ def _encode(profile, scenario, m, costs, voters, total_weight, sk, pk, public_en
         "m": m,
         "costs": [hx(c) for c in costs], "totalWeight": hx(total_weight), "minDirectVote": hx(MIN_DIRECT_VOTE),
         "voters": [{"addr": addr_hex(v["addr"]), "directWeight": hx(v["directWeight"]), "seatWeight": hx(v["seatWeight"]),
-                    "hasDirect": v["hasDirect"], "directRanks": v["directRanks"],
+                    "hasDirect": v["hasDirect"], "hasSealed": v["ciphertext"] is not None, "directRanks": v["directRanks"],
                     "directPacked": hx(sealed.pack(v["directRanks"]) if v["hasDirect"] else 0),
                     "ciphertext": None if v["ciphertext"] is None else [hx(x) for x in v["ciphertext"]],
                     "sealedRanks": v["sealedRanks"]} for v in voters],
