@@ -104,6 +104,132 @@ def pbear(costs, voters, abstaining=0):
     return funded
 
 
+NONE = 2**64 - 1
+
+
+def _ranks_of(entries, m):
+    out = []
+    for _, ballot in entries:
+        if ballot is None:
+            out.append(None)
+        else:
+            validate_ballot(ballot, m)
+            out.append(effective_ranks(ballot))
+    return out
+
+
+def _support(weights, ranks, indices, is_funded, level, m):
+    support = [0] * m
+    for i in indices:
+        r = ranks[i]
+        if r is None or weights[i] == 0:
+            continue
+        for c in range(m):
+            if not is_funded[c] and r[c] <= level:
+                support[c] += weights[i]
+    return support
+
+
+def _argmax(costs, support, is_funded):
+    best = None
+    for c in range(len(costs)):
+        if is_funded[c] or support[c] < costs[c]:
+            continue
+        if best is None or support[c] > support[best] or (
+            support[c] == support[best] and costs[c] < costs[best]
+        ):
+            best = c
+    return best
+
+
+def pbear_transcript(costs, public, sealed, budget):
+    """PB-EAR over the public block followed by the sealed block, with the transcript
+    of spec B6.3: one record per executed step, [level, pubSupport..., best, total]."""
+    m = len(costs)
+    entries = list(public) + list(sealed)
+    n_pub = len(public)
+    weights = [w for w, _ in entries]
+    if sum(weights) > budget:
+        raise ValueError("entry weights exceed the budget")
+    ranks = _ranks_of(entries, m)
+    pub_idx = range(0, n_pub)
+    sealed_idx = range(n_pub, len(entries))
+    funded, is_funded, spent, level, transcript = [], [False] * m, 0, 1, []
+
+    def exhausted():
+        return all(is_funded[c] or spent + costs[c] > budget for c in range(m))
+
+    while not exhausted():
+        pub = _support(weights, ranks, pub_idx, is_funded, level, m)
+        sea = _support(weights, ranks, sealed_idx, is_funded, level, m)
+        total_support = [pub[c] + sea[c] for c in range(m)]
+        best = _argmax(costs, total_support, is_funded)
+        if best is None:
+            transcript.append([level] + pub + [NONE, 0])
+            if level >= m:
+                break
+            level += 1
+            continue
+        total = total_support[best]
+        transcript.append([level] + pub + [best, total])
+        supporters = [i for i in range(len(entries)) if ranks[i] is not None and weights[i] and ranks[i][best] <= level]
+        for i, d in zip(supporters, cumulative_deductions([weights[i] for i in supporters], costs[best])):
+            weights[i] -= d
+        is_funded[best] = True
+        funded.append(best)
+        spent += costs[best]
+    return funded, transcript
+
+
+def replay_public(costs, public, transcript, budget):
+    """The audit of spec B6.3: replay the public block against a transcript using
+    only public data. True iff every public support vector, level, funding and
+    deduction is consistent. Cannot judge `best` against sealed support."""
+    m = len(costs)
+    weights = [w for w, _ in public]
+    try:
+        ranks = _ranks_of(public, m)
+    except ValueError:
+        return False
+    is_funded, spent, level = [False] * m, 0, 1
+
+    def exhausted():
+        return all(is_funded[c] or spent + costs[c] > budget for c in range(m))
+
+    for step in transcript:
+        if len(step) != m + 3 or exhausted():
+            return False
+        s_level, pub, best, total = step[0], step[1 : m + 1], step[m + 1], step[m + 2]
+        if s_level != level:
+            return False
+        if pub != _support(weights, ranks, range(len(public)), is_funded, level, m):
+            return False
+        if best == NONE:
+            if total != 0 or any(not is_funded[c] and pub[c] >= costs[c] for c in range(m)):
+                return False
+            if level >= m:
+                level = None  # terminal; any further step is invalid
+                continue
+            level += 1
+            continue
+        if level is None or not 0 <= best < m or is_funded[best]:
+            return False
+        if total < costs[best] or total < pub[best] or spent + costs[best] > budget:
+            return False
+        thr, cum = costs[best], 0
+        for i in range(len(public)):
+            if ranks[i] is None or weights[i] == 0 or ranks[i][best] > level:
+                continue
+            new_cum = cum + weights[i]
+            weights[i] -= new_cum * thr // total - cum * thr // total
+            cum = new_cum
+        is_funded[best] = True
+        spent += thr
+    if level is None:
+        return True
+    return exhausted()
+
+
 def is_exhaustive(costs, budget, funded):
     spent = sum(costs[c] for c in funded)
     return all(c in funded or spent + costs[c] > budget for c in range(len(costs)))
@@ -148,6 +274,16 @@ def abi_encode_uint_array(values):
 
 
 def main(argv):
+    if len(argv) > 2 and argv[1] == "--transcript":
+        payload = json.loads(argv[2])
+        funded, transcript = pbear_transcript(
+            payload["costs"],
+            [(w, b) for w, b in payload["public"]],
+            [(w, b) for w, b in payload["sealed"]],
+            payload["budget"],
+        )
+        print(json.dumps({"funded": funded, "transcript": transcript}))
+        return
     payload = json.loads(argv[1])
     costs = payload["costs"]
     voters = [(w, b) for w, b in payload["voters"]]
