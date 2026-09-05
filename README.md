@@ -134,9 +134,9 @@ Gas on the default fixture (70 voters, 65 sealed, 16 projects):
 
 | Call | Gas |
 |---|---|
-| `close(1000)`, full closing pass (total / per sealed voter) | 8,959,010 / 137,830 |
-| `onReport` (kind 1, 23 transcript steps) | 9,698,054 |
-| `voteSealed` (first / replacement) | 75,442 / 4,410 |
+| `close(1000)`, full closing pass (total / per sealed voter) | 8,266,073 / 127,170 |
+| `onReport` (kind 1, 23 transcript steps) | 8,975,324 |
+| `voteSealed` (first / replacement) | 75,475 / 4,443 |
 
 See `forge test --match-contract SealedGasTest -vv`.
 

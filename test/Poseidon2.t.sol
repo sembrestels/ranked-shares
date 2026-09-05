@@ -77,6 +77,7 @@ contract Poseidon2Test is Test {
         poseidon.hash(a);
         uint256 used = before - gasleft();
         emit log_named_uint("Poseidon2.hash(6 elements) gas", used);
-        assertLt(used, 120_000);
+        // Two permutations. 107,560 with the unrolled rounds (117,803 before), + 10%.
+        assertLt(used, 118_000);
     }
 }
