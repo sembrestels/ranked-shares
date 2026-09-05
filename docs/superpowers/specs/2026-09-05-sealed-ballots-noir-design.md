@@ -244,9 +244,10 @@ non-`NONE` `best` in order must equal `fundedOrder`. The contract computes
 emits `ProvisionalResult(fundedOrder)` and `Transcript(uint256[] transcript)`.
 
 Hashing the transcript on-chain costs one Poseidon2 sponge of `m + 4` elements per
-step, up to `2m` steps: measured at about 410k gas per step with the first Poseidon2
-contract and about half that after unrolling its rounds, so a worst-case 32-step
-transcript at the default profile is several million gas in one transaction. If the
+step, up to `2m` steps: measured at about 400k gas per step (Poseidon2 costs about 54k gas per
+permutation on the EVM even with unrolled rounds), so a worst-case 32-step transcript
+at the default profile is about 13 M gas in one transaction; the kind-3 chunked
+delivery below is the fallback if Arc's block limit requires it (B12.4, B12.7). If the
 report size or that gas turns out to be a problem (spike B12.4), the fallback is a
 kind-3 `TRANSCRIPT` report delivered in chunks with the running hash carried in
 storage.
