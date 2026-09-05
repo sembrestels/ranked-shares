@@ -86,8 +86,8 @@ the step count, so the voter ceiling spec Z9 expects a documented answer for is 
 open; establishing it — on this box or a larger one — is the first thing plan B's
 measurement work needs to do.
 
-Proving `main` on this machine (CPU, 30 GB RAM plus swap): STARK 16 min (25.8 GiB peak
-RSS, `Proof verified successfully`), PLONK wrap 11 min (25.2 GiB peak RSS, heavy swap).
+Proving `main` on this machine (CPU, 30 GB RAM plus swap): STARK 20 min (25.8 GiB peak
+RSS, `Proof verified successfully`), PLONK wrap 13 min (25.2 GiB peak RSS, heavy swap).
 `programVK` `0x7d0bd8b882832ec6121439dd210a142169a0e8dc2cbc8c1c0a29633911c1394b`,
 `rootCVadcopFinal` `0x564c2b1bcbd5932c81cfad1fa786a98372eb3d6495257c2d944544334f84382f`
 (ZisK v1.2.0-alpha PLONK key; it equals `getRootCVadcopFinal()` of
@@ -97,7 +97,7 @@ calldata; plan B verifies it against `ZiskVerifier.sol` in Foundry.
 `scripts/check_publics.py <calldata.json> <outputHash>` pins the layout: `publicValues`
 is 512 bytes, slot `i` (8 bytes) is `hash[4i..4i+4]` followed by four zero bytes for
 `i < 8` and zero beyond — confirmed against the fixture's
-`outputHash 0x21adc302526226471eb4b66bb8aed716aab9503a8df9a1364b6d616960dcdd3a`.
+`outputHash 0x1acfe0dbbf9d7e3e3ae53afa48dac536ac1912e51f3788b31053951c84aec78f`.
 `proofBytes` is 768 bytes (the `uint256[24]` PLONK proof).
 
     HWLOC_COMPONENTS=-gl GLIBC_TUNABLES=glibc.rtld.execstack=2 \
