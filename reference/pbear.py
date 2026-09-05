@@ -42,11 +42,20 @@ def effective_ranks(ranks):
     return [r or default for r in ranks]
 
 
-def cumulative_deductions(weights, thr):
-    """Deduct exactly ``thr`` from ``weights`` in proportion, integer-exact."""
-    total = sum(weights)
+def cumulative_deductions(weights, thr, total=None, start=0):
+    """Deduct ``thr`` from ``weights`` in proportion, integer-exact.
+
+    ``total`` is the whole support behind the funded project and defaults to the sum of
+    ``weights``; ``start`` is the cumulative weight already accounted for ahead of the
+    first entry. Spec B6.3 runs the public block first, so replaying only the sealed
+    block passes the transcript's ``total`` with ``start = pubSupport[best]``, and gets
+    the same deductions as one pass over both blocks. With the defaults the deductions
+    sum to exactly ``thr``.
+    """
+    if total is None:
+        total = sum(weights)
     deductions = []
-    cum = 0
+    cum = start
     for w in weights:
         new_cum = cum + w
         deductions.append(new_cum * thr // total - cum * thr // total)
@@ -216,15 +225,14 @@ def replay_public(costs, public, transcript, budget):
             return False
         if total < costs[best] or total < pub[best] or spent + costs[best] > budget:
             return False
-        thr, cum = costs[best], 0
-        for i in range(len(public)):
-            if ranks[i] is None or weights[i] == 0 or ranks[i][best] > level:
-                continue
-            new_cum = cum + weights[i]
-            weights[i] -= new_cum * thr // total - cum * thr // total
-            cum = new_cum
+        supporters = [i for i in range(len(public))
+                      if ranks[i] is not None and weights[i] and ranks[i][best] <= level]
+        for i, d in zip(supporters, cumulative_deductions(
+            [weights[i] for i in supporters], costs[best], total
+        )):
+            weights[i] -= d
         is_funded[best] = True
-        spent += thr
+        spent += costs[best]
     if level is None:
         return True
     return exhausted()

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import poseidon2
 from keccak import keccak256
-from pbear import NONE, effective_ranks
+from pbear import NONE, cumulative_deductions, effective_ranks
 from sealed import unpack
 
 
@@ -174,16 +174,16 @@ def tally_step(profile, state, costs, step):
         return
     if total != total_support[best]:
         raise TranscriptMismatch("total")
-    thr, cum = costs[best], pub[best]
-    for e, r in enumerate(ranks):
-        if r is None or r[best] > level:
-            continue
-        new_cum = cum + state.weights[e]
-        state.weights[e] -= new_cum * thr // total - cum * thr // total
-        cum = new_cum
+    # The public block came first, so the sealed block's cumulative rounding starts at
+    # `pub[best]` and divides by the transcript's `total`.
+    supporters = [e for e, r in enumerate(ranks) if r is not None and r[best] <= level]
+    for e, d in zip(supporters, cumulative_deductions(
+        [state.weights[e] for e in supporters], costs[best], total, pub[best]
+    )):
+        state.weights[e] -= d
     state.funded[best] = True
     state.funded_order[state.funded_count] = best
     state.funded_count += 1
-    state.spent += thr
+    state.spent += costs[best]
     if _exhausted(state, costs):
         state.done = True
