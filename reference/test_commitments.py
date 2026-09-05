@@ -23,9 +23,12 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(h, expected)
         self.assertEqual(checkpoints, manual)
         self.assertEqual(len(checkpoints), 1 + 3)  # ceil(5 / 2) batches
+        self.assertEqual(len(checkpoints), 1 + -(-len(entries) // 2))
 
     def test_sealed_chain_empty(self):
-        self.assertEqual(cm.sealed_chain([], batch=2), (0, [0]))
+        # B6.1: numBatches = max(1, ceil(0 / batch)) = 1, and the single batch is empty,
+        # so its hIn and hOut are both zero.
+        self.assertEqual(cm.sealed_chain([], batch=2), (0, [0, 0]))
 
     def test_public_chain(self):
         entries = [(0xAA, 5, pack([1, 2])), (0xBB, 7, pack([2, 1]))]

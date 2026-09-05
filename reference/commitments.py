@@ -17,12 +17,21 @@ def _w32(n):
 
 
 def sealed_chain(entries, batch):
+    """The Poseidon2 chain of spec B6.1 with a checkpoint every `batch` entries.
+
+    `checkpoints[0]` is zero and the list always holds `1 + max(1, ceil(n / batch))`
+    entries, one per batch of `numBatches`. An empty sealed block is therefore
+    `(0, [0, 0])`: one batch whose `hIn` and `hOut` are both zero, which is exactly
+    what an ingest proof over an empty batch produces.
+    """
     h, checkpoints = 0, [0]
     n = len(entries)
     for j, (addr, seat_weight, rx, ry, c) in enumerate(entries):
         h = poseidon2.hash([h, addr, seat_weight, rx, ry, c])
         if (j + 1) % batch == 0 or j + 1 == n:
             checkpoints.append(h)
+    if n == 0:
+        checkpoints.append(0)
     return h, checkpoints
 
 
