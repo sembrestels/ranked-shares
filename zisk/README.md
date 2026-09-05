@@ -17,7 +17,7 @@ Spec: `docs/superpowers/specs/2026-09-05-sealed-ballots-zisk-design.md`.
 
     ~/.zisk/bin/cargo-zisk build --release -p tally-guest
     scripts/emu-check.sh main         # emulator run, compares the committed bytes with the fixture
-    cargo test -p sealed -- --ignored # the same, from cargo
+    cargo test -p sealed --test fixtures -- --ignored   # the same, from cargo
 
 The ELF lands in `target/elf/riscv64ima-zisk-zkvm-elf/release/tally-guest`.
 

@@ -9,11 +9,13 @@ here=$(cd "$(dirname "$0")/.." && pwd)
 elf="$here/target/elf/riscv64ima-zisk-zkvm-elf/release/tally-guest"
 [ -f "$elf" ] || elf="$here/target/riscv64ima-zisk-zkvm-elf/release/tally-guest"
 if [ -f "$scenario" ]; then
-  fixture=$scenario                     # a fixture path, e.g. the on-demand `big`
+  # a fixture path, e.g. the on-demand `big`; absolute, because `cargo run` runs in $here
+  fixture=$(cd "$(dirname "$scenario")" && pwd)/$(basename "$scenario")
 else
   fixture="$here/../reference/vectors/zisk/fixture_${scenario}.json"
 fi
 work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
 
 (cd "$here" && cargo run -q -p sealed --bin fixture-input -- "$fixture" "$work/input.bin") > "$work/native.txt"
 expected=$(awk '/^outputHash/ {print substr($2, 3)}' "$work/native.txt")
