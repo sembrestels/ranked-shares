@@ -22,9 +22,30 @@ class GrumpkinTest(unittest.TestCase):
         self.assertEqual(grumpkin.G[0], 1)
         self.assertEqual(grumpkin.G[1], 0x2CF135E7506A45D632D270D45F1181294833FC48D823F272C)
 
-    def test_order(self):
-        self.assertIsNone(grumpkin.mul(grumpkin.Q, grumpkin.G))
-        self.assertEqual(grumpkin.mul(grumpkin.Q + 1, grumpkin.G), grumpkin.G)
+    def test_group_order(self):
+        # `grumpkin.mul` reduces the scalar mod Q first, so it would satisfy this for any
+        # Q. The ladder below does not reduce, so it is the stated Q that makes Q·G the
+        # point at infinity and (Q − 1)·G the negation of G.
+        self.assertEqual(
+            grumpkin.Q,
+            21888242871839275222246405745257275088696311157297823662689037894645226208583,
+        )
+
+        def unreduced_mul(k, pt):
+            result, acc = None, pt
+            while k:
+                if k & 1:
+                    result = grumpkin.add(result, acc)
+                acc = grumpkin.add(acc, acc)
+                k >>= 1
+            return result
+
+        self.assertEqual(unreduced_mul(3, grumpkin.G), grumpkin.mul(3, grumpkin.G))
+        self.assertIsNone(unreduced_mul(grumpkin.Q, grumpkin.G))
+        self.assertEqual(
+            unreduced_mul(grumpkin.Q - 1, grumpkin.G),
+            (grumpkin.G[0], grumpkin.P - grumpkin.G[1]),
+        )
 
     def test_add_double_consistency(self):
         two_g = grumpkin.add(grumpkin.G, grumpkin.G)
