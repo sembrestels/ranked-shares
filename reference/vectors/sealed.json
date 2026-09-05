@@ -23,6 +23,11 @@
         "0x2c42513bbb16004b692017ac1e0f82cffad63b648c5d2c55e53d4ae80672de49",
         "0x2f996f763a3a50db39bec4b185cf0c74e7c2464e15f7d72da21ea40ca73dcb00"
       ],
+      "shared": [
+        "0x275b95a7f7a54c9a2d2dd8de8368ce6f834116d98746b72c1505019bdb7f7a11",
+        "0x14f7330555ae18507636be4e92b0b9ace6c8526f0ea8bb7dbf802e149f8781dd"
+      ],
+      "mask": "0x2f996f763a3a50db39bec4b185cf0c74e7c2464e15f7d72da21ea40ca43dc9fe",
       "plaintext": [
         2,
         1,
@@ -45,6 +50,11 @@
         "0x105a6c7611cd7a2e7a0f9893bc74f301888fbce539340dc3f60ae519d9870e14",
         "0x056be8c7b0cf461c7bbbb4765d3abe4b728132dbcfb4b208c995c5d66c79e261"
       ],
+      "shared": [
+        "0x19d84d49b9679264d3d32628c5aa413f9f598c04867e3d25f317308c019cb91d",
+        "0x01432ce3960ef2f5ad566c1e13eb8227e7806ebfc76c7dcd120d53cf2eb5292f"
+      ],
+      "mask": "0x056be8c7b0cf461c7bbbb4765d3abe4b728132dbcfb4b208c995c5d66c79e261",
       "plaintext": [
         0,
         0,
@@ -79,6 +89,11 @@
         "0x0eeb8cbb98422d4dd64847e5a6551cf5d0a3e41344825ca338935f226e7f111a",
         "0x25cf4ef1fe0252abc08e5d54c91fada0f45726c636b094be591c28f8d7ea8827"
       ],
+      "shared": [
+        "0x1eed80ef328b8f9acc82856be55dd9ba056ffb40402ad1874ee208ca2a4d2fdd",
+        "0x1475eb679c182d9432d154d6169ccfef7ad47aedce0e5cbb032119335eb665f6"
+      ],
+      "mask": "0x25cf4ef1fe0252abc08e5d54c91fada0e44818b92aa58ab5511522f3d3e78626",
       "plaintext": [
         1,
         2,
@@ -140,6 +155,11 @@
         "0x061d7e1cb1d3892734c53a551ae71df4986e9ab37051ec9a8ee8d599765b5e96",
         "0x18d934c7e4828b128e29bcdfc2dd0902595af183ba333185eb302842142aa575"
       ],
+      "shared": [
+        "0x0598f20c7d966c8b5aa6fcd733dd2ba5cbb6b1ed26577bf8ef49106e82a89b92",
+        "0x0c7e46b4d7d2239fe90d6160a4100bc0995f277857d106491f708c8aba301431"
+      ],
+      "mask": "0x18d833c6e3818a118d28bbdec1dc08015859f082b9323084ea2f27411329a474",
       "plaintext": [
         1,
         1,
@@ -189,8 +209,26 @@
         "0x2c42513bbb16004b692017ac1e0f82cffad63b648c5d2c55e53d4ae80672de49",
         "0x2f996f763a3a50db39bec4b185cf0c74e7c2464e15f7d72da21ea40ca73dcb00"
       ],
+      "shared": [
+        "0x275b95a7f7a54c9a2d2dd8de8368ce6f834116d98746b72c1505019bdb7f7a11",
+        "0x14f7330555ae18507636be4e92b0b9ace6c8526f0ea8bb7dbf802e149f8781dd"
+      ],
+      "mask": "0x18255a23b0e75cfab2fe884a34c8291c8a9570a16d325ed34256c30b423c0bdc",
       "plaintext": null,
       "note": "replayed under another address"
+    },
+    {
+      "voter": "0x1111111111111111111111111111111111111111",
+      "m": 4,
+      "ranks": null,
+      "k": null,
+      "ciphertext": [
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x1210b3c720a75156284ba14b2524f80cc21036c7ae2b015fbe72328fd13e6448"
+      ],
+      "plaintext": null,
+      "note": "rx is zero; voteSealed rejects it, decrypt returns absent"
     }
   ]
 }

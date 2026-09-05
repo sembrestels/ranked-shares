@@ -115,11 +115,18 @@ class SealedTest(unittest.TestCase):
         pk = tuple(int(x, 16) for x in v["pk"])
         self.assertEqual(sk, sealed.derive_sk(bytes.fromhex(v["master"][2:]), bytes.fromhex(v["keySalt"][2:])))
         self.assertEqual(pk, sealed.pubkey(sk))
+        self.assertTrue(any(c.get("note", "").startswith("rx is zero") for c in v["cases"]))
         for case in v["cases"]:
             ct = tuple(int(x, 16) for x in case["ciphertext"])
             voter = int(case["voter"], 16)
+            if "shared" in case:
+                # Absent for a ciphertext with no shared point, such as rx == 0.
+                s = tuple(int(x, 16) for x in case["shared"])
+                self.assertEqual(s, grumpkin.mul(sk, (ct[0], ct[1])))
+                self.assertEqual(int(case["mask"], 16), sealed.mask(s, voter))
             if case.get("note"):
-                # A ciphertext made for another address: only the decryption outcome is pinned.
+                # A rejected or foreign ciphertext: only the decryption outcome is pinned.
+                self.assertIsNone(case["plaintext"])
                 self.assertIsNone(sealed.decrypt(sk, voter, ct, case["m"]))
                 continue
             self.assertEqual(sealed.encrypt(pk, voter, case["ranks"], int(case["k"], 16)), ct)
@@ -144,16 +151,30 @@ def write_vectors():
         (0x3333333333333333333333333333333333333333, 16, list(range(1, 17)), b"v3"),
         (0x4444444444444444444444444444444444444444, 31, [1] * 31, b"v4"),
     ]
+    def case(voter, m, ranks, k, ct, note=None):
+        """`shared` and `mask` are what a decryptor derives for `voter`: S = sk·R and
+        the Poseidon2 mask over it, the two intermediates a port most often gets wrong."""
+        s = grumpkin.mul(sk, (ct[0], ct[1]))
+        out = {"voter": addr_hex(voter), "m": m, "ranks": ranks,
+               "k": None if k is None else hx(k), "ciphertext": [hx(x) for x in ct],
+               "shared": [hx(s[0]), hx(s[1])], "mask": hx(sealed.mask(s, voter)),
+               "plaintext": sealed.decrypt(sk, voter, ct, m)}
+        if note is not None:
+            out["note"] = note
+        return out
+
     for voter, m, ranks, label in specs:
         k = det_k(label)
-        ct = sealed.encrypt(pk, voter, ranks, k)
-        cases.append({"voter": addr_hex(voter), "m": m, "ranks": ranks, "k": hx(k),
-                      "ciphertext": [hx(x) for x in ct], "plaintext": sealed.decrypt(sk, voter, ct, m)})
+        cases.append(case(voter, m, ranks, k, sealed.encrypt(pk, voter, ranks, k)))
     # a ciphertext made for voter 1, replayed by voter 2: absent
     ct = sealed.encrypt(pk, specs[0][0], specs[0][2], det_k(b"v1"))
-    cases.append({"voter": addr_hex(specs[1][0]), "m": 4, "ranks": specs[0][2],
-                  "k": hx(det_k(b"v1")), "ciphertext": [hx(x) for x in ct], "plaintext": None,
-                  "note": "replayed under another address"})
+    cases.append(case(specs[1][0], 4, specs[0][2], det_k(b"v1"), ct, "replayed under another address"))
+    # rx == 0 is off the curve and has no shared point: voteSealed rejects the
+    # ciphertext on-chain, and decrypt returns absent.
+    c = int.from_bytes(keccak256(b"rx zero ciphertext"), "big") % grumpkin.P
+    cases.append({"voter": addr_hex(specs[0][0]), "m": 4, "ranks": None, "k": None,
+                  "ciphertext": [hx(0), hx(1), hx(c)], "plaintext": None,
+                  "note": "rx is zero; voteSealed rejects it, decrypt returns absent"})
     out = {"master": "0x" + MASTER.hex(), "keySalt": "0x" + SALT.hex(), "sk": hx(sk),
            "pk": [hx(pk[0]), hx(pk[1])], "domain": hx(sealed.DOMAIN), "cases": cases}
     with open(VECTORS, "w") as f:
