@@ -142,6 +142,74 @@ describe("runChain submission", () => {
     expect(lines.join(" ")).toMatch(/tally plan unavailable: best/);
   });
 
+  test("batch: the whole run leaves as one advanceMany, arrays in chain order, no restart on a fresh chain", async () => {
+    const { client, wallet, prover, writes } = stubs();
+    const lines: string[] = [];
+    await runChain(client, wallet, plan, snapshotWith({ ingestCursor: 0 }), prover, (m) => lines.push(m), {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      batch: true,
+    });
+    expect(writes.length).toBe(1);
+    const [proofs, publicInputs, restart] = writes[0].args;
+    expect(writes[0].functionName).toBe("advanceMany");
+    expect(proofs.length).toBe(numBatches + plan.tallyGroups.length);
+    expect(publicInputs.length).toBe(proofs.length);
+    expect(proofs.every((p: string) => p === "0x010203")).toBe(true);
+    expect(restart).toBe(false);
+    expect(lines).toContain("proved ingest 0");
+    expect(lines).toContain(`proved tally ${plan.tallyGroups.length - 1}`);
+    expect(lines.join(" ")).toMatch(/advanceMany accepted, \d+ proofs, gas/);
+  });
+
+  test("batch: an on-chain state matching no group, with ingest complete, sends restart: true", async () => {
+    const { client, wallet, prover, writes } = stubs({ stateCommit: 0xdeadbeefn });
+    await runChain(client, wallet, plan, snapshotWith({ ingestCursor: numBatches }), prover, () => {}, {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      batch: true,
+    });
+    expect(writes.length).toBe(1);
+    const [proofs, , restart] = writes[0].args;
+    expect(writes[0].functionName).toBe("advanceMany");
+    expect(proofs.length).toBe(plan.tallyGroups.length); // ingest already on chain
+    expect(restart).toBe(true);
+  });
+
+  test("batch: a finalized pool is left alone, and nothing is batched up either", async () => {
+    const { client, wallet, prover, writes } = stubs({ finality: 2n });
+    await runChain(client, wallet, plan, snapshotWith({ ingestCursor: 0 }), prover, () => {}, {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      batch: true,
+    });
+    expect(writes.length).toBe(0);
+  });
+
+  test("batch: with no tally to prove, the pending ingest still leaves as one advanceMany", async () => {
+    const { client, wallet, prover, writes } = stubs({ resultReported: false });
+    await runChain(client, wallet, plan, snapshotWith({ ingestCursor: 0 }), prover, () => {}, {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      batch: true,
+    });
+    expect(writes.length).toBe(1);
+    expect(writes[0].functionName).toBe("advanceMany");
+    expect(writes[0].args[0].length).toBe(numBatches);
+  });
+
+  test("batch is ignored without submit: nothing is sent", async () => {
+    const { client, wallet, prover, writes } = stubs();
+    const resume = await runChain(client, wallet, plan, snapshotWith({ ingestCursor: 0 }), prover, () => {}, {
+      account: privateKeyToAccount(KEY),
+      chain: null,
+      submit: false,
+      batch: true,
+    });
+    expect(writes.length).toBe(0);
+    expect(resume).toEqual({ ingestFrom: 0, tallyFrom: 0, restart: false });
+  });
+
   test("submit: false with a tallyError plan proves the pending ingest and stops, sending nothing", async () => {
     const withTallyError = { ...plan, tallyGroups: [], expected: { ...plan.expected, tally: [] }, tallyError: "best" };
     const { client, wallet, prover, writes } = stubs();

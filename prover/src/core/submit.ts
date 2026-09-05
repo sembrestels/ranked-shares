@@ -63,6 +63,14 @@ export type OnProof = (p: { kind: "ingest" | "tally"; index: number; proof: Uint
  * proved, and the returned `Resume` says where whoever submits them should start.
  * With `submit: true` the run resumes the tally chain itself via `planTally` and returns
  * null.
+ *
+ * With `batch` (and `submit`), the proofs are not sent one `advance` at a time: everything
+ * this run proves is collected and sent as a single `advanceMany`, which is one wallet
+ * confirmation and one transaction fee instead of one per proof. The proofs, their order
+ * and the `restart` decision are exactly the same either way — `advanceMany` applies to
+ * each element the rules `advance` applies to it — so the only difference a caller sees is
+ * that nothing lands until the last proof is ready, and that a single rejected proof
+ * reverts the whole batch.
  */
 export async function runChain(
   client: PublicClient,
@@ -71,12 +79,14 @@ export async function runChain(
   snapshot: Snapshot,
   prover: Prover,
   log: (s: string) => void,
-  opts?: { restart?: boolean; account?: Account | Address; chain?: Chain | null; submit?: boolean; onProof?: OnProof },
+  opts?: { restart?: boolean; account?: Account | Address; chain?: Chain | null; submit?: boolean; batch?: boolean; onProof?: OnProof },
 ): Promise<Resume | null> {
   const pool = snapshot.pool as Address;
   const submit = opts?.submit ?? true;
   const account = opts?.account ?? wallet.account!;
   const chain = opts?.chain ?? wallet.chain;
+  /** Collect the proofs and send them as one `advanceMany`. Only meaningful with `submit`. */
+  const batched = submit && (opts?.batch ?? false);
   /** True once the pool is Proven or Attested: `advance` is closed and nothing may be sent. */
   const isDone = async () => Number(await read<bigint>(client, pool, "finality")) !== 0;
   const advance = async (proof: Uint8Array, pi: `0x${string}`[], restart: boolean) => {
@@ -91,6 +101,37 @@ export async function runChain(
     const receipt = await client.waitForTransactionReceipt({ hash });
     if (receipt.status !== "success") throw new Error(`advance reverted: ${hash}`);
     return receipt;
+  };
+
+  type Proved = { proof: Uint8Array; publicInputs: `0x${string}`[] };
+  /** What a batched run has proved and not yet sent, in chain order. */
+  const pending: Proved[] = [];
+  /** The `restart` the batch carries; the pool applies it to the batch's first tally proof. */
+  let batchRestart = false;
+  /**
+   * Send the pending proofs as one `advanceMany`. Returns false when the pool was finalized
+   * while this run was proving — the same guard the unbatched path applies before each
+   * `advance`, moved to the one place a batched run actually sends.
+   */
+  const flush = async (): Promise<boolean> => {
+    if (pending.length === 0) return true;
+    if (await isDone()) {
+      log("pool finalized while proving; nothing submitted");
+      return false;
+    }
+    const hash = await wallet.writeContract({
+      address: pool,
+      abi,
+      functionName: "advanceMany",
+      args: [pending.map((p) => toHex(p.proof)), pending.map((p) => p.publicInputs), batchRestart],
+      account,
+      chain,
+    } as any);
+    const receipt = await client.waitForTransactionReceipt({ hash });
+    if (receipt.status !== "success") throw new Error(`advanceMany reverted: ${hash}`);
+    log(`advanceMany accepted, ${pending.length} proofs, gas ${receipt.gasUsed}`);
+    pending.length = 0;
+    return true;
   };
   // Notify a caller that wants the raw proof (e.g. the prove service handing it back to
   // whoever asked) whether or not this run also submits it itself.
@@ -113,7 +154,10 @@ export async function runChain(
       log(`proving ingest batch ${k}`);
       const out = await prover.prove("ingest", ingestInputs(plan, k));
       await emit("ingest", k, out);
-      if (submit) {
+      if (batched) {
+        pending.push(out);
+        log(`proved ingest ${k}`);
+      } else if (submit) {
         const r = await advance(out.proof, out.publicInputs, false);
         log(`ingest ${k} accepted, gas ${r.gasUsed}`);
       } else {
@@ -122,24 +166,28 @@ export async function runChain(
     }
   }
 
-  const noTally = (): Resume | null => (submit ? null : { ingestFrom: snapshot.ingestCursor, tallyFrom: 0, restart: false });
+  /** Stop before the tally, sending whatever a batched run has proved so far. */
+  const noTally = async (): Promise<Resume | null> => {
+    if (batched) await flush();
+    return submit ? null : { ingestFrom: snapshot.ingestCursor, tallyFrom: 0, restart: false };
+  };
 
   if (plan.tallyError) {
     // The reported transcript didn't replay (see `rebuild`); the ingest batches above are
     // still valid and, if `submit`, already landed, so surface this without failing the run.
     log(`tally plan unavailable: ${plan.tallyError}`);
-    return noTally();
+    return await noTally();
   }
 
   const resultReported = await read<boolean>(client, pool, "resultReported");
   if (!resultReported) {
     log("transcript not reported yet; stopping after ingest");
-    return noTally();
+    return await noTally();
   }
 
   if (plan.tallyGroups.length === 0) {
     log("no tally groups to prove");
-    return noTally();
+    return await noTally();
   }
 
   const onChain = await read<bigint>(client, pool, "stateCommit");
@@ -153,6 +201,7 @@ export async function runChain(
       return null;
     }
     ({ g, restart } = decision);
+    batchRestart = restart;
     if (restart) log("restarting the tally chain from group 0");
   } else {
     resume = resumeHint(onChain, plan, snapshot);
@@ -162,7 +211,10 @@ export async function runChain(
     log(`proving tally group ${g}`);
     const out = await prover.prove("tally", tallyInputs(plan, g));
     await emit("tally", g, out, resume ? g === resume.tallyFrom && resume.restart : restart);
-    if (submit) {
+    if (batched) {
+      pending.push(out);
+      log(`proved tally ${g}`);
+    } else if (submit) {
       // Between proving and sending, someone may have accepted the provisional result or
       // proven the pool themselves; either way `advance` is closed.
       if (await isDone()) {
@@ -177,6 +229,7 @@ export async function runChain(
     restart = false;
   }
   if (submit) {
+    if (batched && !(await flush())) return null;
     const finality = Number(await read<bigint>(client, pool, "finality"));
     log(finality === 1 ? "Proven" : `finality ${finality}`);
   } else {

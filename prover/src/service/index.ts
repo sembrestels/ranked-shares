@@ -41,6 +41,8 @@ export type ServiceOptions = {
   master: Uint8Array;
   /** Submit `advance` ourselves (needs `account` to be the pool's coordinator for restarts). Default false: prove and hand the proofs back. */
   submit?: boolean;
+  /** With `submit`, send the whole run as one `advanceMany` instead of one `advance` per proof. Default false. */
+  batch?: boolean;
   account?: Account;
   chain?: Chain | null;
   threads?: number;
@@ -117,6 +119,7 @@ export function createServer(opts: ServiceOptions): http.Server {
     const prover = await proverFor(plan.profile.name as "test" | "default");
     const resume = await runChain(client, wallet, plan, snapshot, prover, (m) => pushLog(job, m), {
       submit,
+      batch: opts.batch ?? false,
       // The `Account` itself, not its address: viem signs locally with an account object
       // and would fall back to `eth_sendTransaction` (anvil only) with a bare address.
       account: opts.account,

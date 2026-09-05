@@ -11,7 +11,9 @@
       <h1>RankedShares coordinator</h1>
       <p class="hint">
         Connects an injected wallet (MetaMask etc.), derives the tallier key by signing, and runs the
-        prover in your browser to submit <code>advance</code> transactions.
+        prover in your browser. Every proof of the run is sent as a single
+        <code>advanceMany</code> transaction, so you confirm once in the wallet — after the last
+        proof is ready, not one at a time.
       </p>
       <label>RPC URL <input id="rpc" placeholder="Arc testnet RPC URL (chain id 5042002)" /></label>
       <label>Pool <input id="pool" placeholder="0x…" /></label>

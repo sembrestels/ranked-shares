@@ -50,7 +50,7 @@ async function main() {
     const master = await resolveMaster(rpc, account);
     const threads = Number(arg("threads", String(Math.max(1, os.availableParallelism() - 1))));
     const jobTimeout = Number(arg("job-timeout", "1800"));
-    const server = createServer({ rpc, master, submit: doSubmit, account, threads, jobTimeout });
+    const server = createServer({ rpc, master, submit: doSubmit, batch: process.argv.includes("--batch"), account, threads, jobTimeout });
     server.on("error", (e: NodeJS.ErrnoException) => {
       console.error(e.code === "EADDRINUSE" ? `port ${port} is already in use: stop the other prove service or pass --port` : `server error: ${e.message}`);
       process.exit(1);
@@ -96,7 +96,7 @@ async function main() {
     const plan = rebuild(s, sk);
     const prover = await Prover.create(plan.profile.name as "test" | "default", Number(arg("threads", "4")));
     try {
-      await runChain(client, wallet, plan, s, prover, (m) => console.log(m));
+      await runChain(client, wallet, plan, s, prover, (m) => console.log(m), { batch: process.argv.includes("--batch") });
     } finally {
       await prover.destroy();
     }
@@ -107,8 +107,9 @@ async function main() {
     [
       "usage: prover <audit|status|prove|serve> --rpc <url>",
       "  audit|status|prove: --pool <addr> [--from-block n]",
-      "  prove: --private-key 0x… ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--threads n]",
-      "  serve: [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--threads n] [--job-timeout 1800]",
+      "  prove: --private-key 0x… ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--threads n] [--batch]",
+      "  serve: [--port 8787] [--private-key 0x…] ($RANKED_SHARES_MASTER | --sign | --master 0x…) [--submit] [--batch] [--threads n] [--job-timeout 1800]",
+      "  --batch: send every proof of the run as one advanceMany transaction instead of one advance each",
     ].join("\n"),
   );
 }

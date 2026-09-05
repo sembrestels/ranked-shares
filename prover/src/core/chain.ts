@@ -52,7 +52,10 @@ export async function read<T>(client: PublicClient, pool: Address, functionName:
  */
 async function transcriptLogs(client: PublicClient, pool: Address, fromBlock: bigint): Promise<{ args: { transcript?: readonly bigint[] } }[]> {
   const event = parseAbiItem("event Transcript(uint256[] transcript)");
-  const latest = await client.getBlockNumber();
+  // `cacheTime: 0`: viem caches `getBlockNumber` for `pollingInterval` (4s by default) per
+  // client, and a caller that reuses one client across reads would otherwise stop the
+  // window short of a block mined moments ago — losing a `Transcript` reported just now.
+  const latest = await client.getBlockNumber({ cacheTime: 0 });
   const out: { args: { transcript?: readonly bigint[] } }[] = [];
   for (let from = fromBlock; from <= latest; from += LOG_CHUNK) {
     const to = from + LOG_CHUNK - 1n > latest ? latest : from + LOG_CHUNK - 1n;

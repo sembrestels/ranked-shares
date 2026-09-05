@@ -166,7 +166,9 @@ $("prove").onclick = guard(async () => {
     rpcUrls: { default: { http: [($("rpc") as HTMLInputElement).value] } },
   });
   try {
-    await runChain(pub, wallet, plan, s, prover, log, { account, chain });
+    // `batch: true`: the page sends the whole run as one `advanceMany`, so the operator
+    // confirms once in the wallet instead of once per proof.
+    await runChain(pub, wallet, plan, s, prover, log, { account, chain, batch: true });
   } finally {
     await prover.destroy();
   }
