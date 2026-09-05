@@ -4,6 +4,10 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    // Vite resolves an explicit `.ts` specifier fine (index.html's own `<script src="./main.ts">`,
+    // and page.test.ts's `import("../src/web/main.ts")` mirroring it); this just lets `tsc
+    // --noEmit` type-check the same import instead of rejecting the extension.
+    "allowImportingTsExtensions": true,
     "strict": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,

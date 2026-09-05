@@ -4,7 +4,6 @@ import { deriveSk, MASTER_MESSAGE } from "@lib/sealed";
 import { pubkey } from "@lib/grumpkin";
 import { readPoolSnapshot } from "../core/chain";
 import { rebuild } from "../core/state";
-import { Prover } from "../core/prove";
 import { runChain } from "../core/submit";
 import { audit } from "../core/audit";
 import { masterFromSignatureHex } from "../core/key";
@@ -103,6 +102,10 @@ $("prove").onclick = guard(async () => {
   if (account && account.toLowerCase() !== s.coordinator.toLowerCase()) log("warning: not the coordinator; a restart would be rejected");
   const plan = rebuild(s, sk);
   log(`${plan.expected.ingest.length} ingest batches, ${plan.tallyGroups.length} tally groups`);
+  // Lazy: bb.js/noir_js are heavy WASM-backed imports that only `prove` needs, so keeping
+  // them out of the page's initial module graph speeds up first load for everyone who
+  // only refreshes status or audits.
+  const { Prover } = await import("../core/prove");
   const prover = await Prover.create(plan.profile.name as "test" | "default", navigator.hardwareConcurrency ?? 4);
   try {
     await runChain(pub, wallet, plan, s, prover, log, { account });

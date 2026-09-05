@@ -196,7 +196,9 @@ tallier key (signs `MASTER_MESSAGE`, deriving the master secret in memory only),
 Refresh status, Audit, and Prove and submit (runs `runChain` in the browser with
 bb.js, logging each proof and `advance` transaction). Refresh and Audit work
 without a connected wallet; the page reads `?rpc=…&pool=…` from the URL query
-string to prefill the inputs.
+string to prefill the inputs. `bb.js`/`noir_js` are only imported (dynamically)
+inside the Prove handler, so the page's initial load doesn't pull in that WASM
+until someone actually proves.
 
 ```
 cd prover

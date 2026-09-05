@@ -9,10 +9,17 @@ import { foundry } from "viem/chains";
 import { toBig } from "@lib/field";
 import { encodeResultReport } from "@lib/report";
 
-const repoRoot = new URL("../../..", import.meta.url).pathname;
-const poolAbi = JSON.parse(readFileSync(new URL("../../../cre/src/abi/SealedRankedShares.json", import.meta.url), "utf8"));
-const artifact = (name: string) => JSON.parse(readFileSync(new URL(`../../../out/${name}.sol/${name}.json`, import.meta.url), "utf8"));
-const DEFAULT_FIXTURE = new URL("../../../reference/vectors/fixture_test_main.json", import.meta.url);
+// Indirected through a variable rather than the literal `import.meta.url` token: under a
+// browser-flavoured Vite pool (the jsdom environment page.test.ts uses), the exact
+// `new URL("...", import.meta.url)` pattern is statically rewritten into a dev-server
+// asset URL (`http://…/@fs/…`) instead of staying a real `file://` URL, which breaks
+// `readFileSync`. Assigning `import.meta.url` first defeats that static match while
+// leaving the resolved path identical under plain Node (used by every other caller here).
+const here = import.meta.url;
+const repoRoot = new URL("../../..", here).pathname;
+const poolAbi = JSON.parse(readFileSync(new URL("../../../cre/src/abi/SealedRankedShares.json", here), "utf8"));
+const artifact = (name: string) => JSON.parse(readFileSync(new URL(`../../../out/${name}.sol/${name}.json`, here), "utf8"));
+const DEFAULT_FIXTURE = new URL("../../../reference/vectors/fixture_test_main.json", here);
 
 // anvil's default (fixed-mnemonic) accounts 0-3.
 const DEPLOYER_KEY: Hex = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
