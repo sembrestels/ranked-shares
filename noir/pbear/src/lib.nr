@@ -107,7 +107,9 @@ fn exhausted<let E: u32, let M: u32>(s: State<E, M>, costs: [u64; M]) -> bool {
     let mut all = true;
     for c in 0..M {
         let relevant = (c as u8) < s.m;
-        let affordable = s.spent + costs[c] <= s.budget;
+        // `costs[c] <= budget - spent`, not `spent + costs[c] <= budget`: a cost may be
+        // any u64, so the sum would overflow, while `spent <= budget` always holds.
+        let affordable = costs[c] <= s.budget - s.spent;
         all &= (!relevant) | s.funded[c] | (!affordable);
     }
     all
@@ -205,13 +207,18 @@ pub fn tally_step<let E: u32, let M: u32>(
         }
         supports_best_col[e] = supports & (s.weights[e] != 0);
     }
+    // When the step funds nothing the reweighting must still be provable: multiplier 0,
+    // cumulative 0 and divisor 1 make every `mul_div` trivially satisfiable (0 = 0 / 1),
+    // and the results are discarded through `take` anyway. Divisor 1 alone would not do:
+    // `mul_div(a, b, 1)` needs `a * b < 2^64` for the hint to fit a u64.
     let divisor = if funding { step.total } else { 1 };
+    let mult = if funding { best_cost } else { 0 };
     let mut weights = s.weights;
-    let mut cum: u64 = pub_best;
+    let mut cum: u64 = if funding { pub_best } else { 0 };
     for e in 0..E {
         let take = funding & supports_best_col[e];
         let new_cum = cum + weights[e];
-        let deduct = mul_div(new_cum, best_cost, divisor) - mul_div(cum, best_cost, divisor);
+        let deduct = mul_div(new_cum, mult, divisor) - mul_div(cum, mult, divisor);
         weights[e] = if take {
             weights[e] - deduct
         } else {
@@ -381,6 +388,46 @@ mod tests {
         );
         assert(after.done);
         assert(after.t_hash == 0);
+    }
+
+    // A cost may be any u64, independently of the budget: the post-funding exhaustion
+    // check must not add `spent + costs[c]`. Oracle (reference/commitments.py) for this
+    // state and step: done = True, spent = 30, weights[0] = 60.
+    #[test]
+    fn a_huge_cost_does_not_overflow_exhaustion() {
+        let costs = [30, 18446744073709551615, 0, 0];
+        let s = example_state();
+        let after = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [40, 0, 0, 0], best: 0, total: 40 },
+            ranks_of(s),
+        );
+        assert(after.funded[0]);
+        assert(after.spent == 30);
+        assert(after.weights[0] == 60);
+        // project 1 is unaffordable once 30 is spent, so the state is exhausted
+        assert(after.done);
+        assert(commit(after) == 0x0faf68549dc1b31443c68a8b724fd1ecaaabbf06118dace46be109270f18575b);
+    }
+
+    // The idle reweighting of a non-funding step must be provable for any weights: with
+    // multiplier 0 it is, while `mul_div(cum, best_cost, 1)` would need `cum * cost < 2^64`.
+    #[test]
+    fn idle_reweighting_is_provable_for_large_weights() {
+        let costs = [5000000000, 0, 0, 0];
+        let mut s = empty_state::<8, 4>(1, 10000000000);
+        s.weights[0] = 5000000000;
+        s.done = true;
+        let before = commit(s);
+        let after = tally_step(
+            s,
+            costs,
+            Step { level: 1, pub_support: [5000000000, 0, 0, 0], best: 0, total: 5000000000 },
+            ranks_of(s),
+        );
+        assert(commit(after) == before);
+        assert(after.weights[0] == 5000000000);
     }
 
     #[test(should_fail)]
