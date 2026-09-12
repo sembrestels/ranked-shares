@@ -1,4 +1,5 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertRejects } from "@std/assert";
+import { custom, HttpRequestError, toHex } from "viem";
 import { noirAbi, plainAbi, sealedAbi } from "../chain/abi.ts";
 import { createClient } from "../chain/client.ts";
 import { detectKind } from "../chain/kind.ts";
@@ -32,4 +33,17 @@ Deno.test("detectKind: no kind() but profileId() = noir", async () => {
 Deno.test("detectKind: neither = plain", async () => {
   const client = clientFor(plainAbi, { tallyDone: () => false });
   assertEquals(await detectKind(client, POOL, 100n), "plain");
+});
+
+Deno.test("detectKind: a transport failure rejects instead of falling through to plain", async () => {
+  const transport = custom({
+    // deno-lint-ignore require-await
+    async request({ method }: { method: string }) {
+      if (method === "eth_chainId") return toHex(31337);
+      if (method === "eth_blockNumber") return toHex(100n);
+      throw new HttpRequestError({ url: "http://fake", cause: new Error("connection refused") });
+    },
+  });
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  await assertRejects(() => detectKind(client, POOL, 100n));
 });

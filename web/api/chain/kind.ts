@@ -2,6 +2,7 @@
  * profileId(); the plain pool has neither. Probed once per snapshot. */
 import type { Address, PublicClient } from "viem";
 import { noirAbi, sealedAbi } from "./abi.ts";
+import { isRpcDown } from "./rpc-down.ts";
 
 export type Kind = "plain" | "cre" | "zisk" | "noir";
 
@@ -18,7 +19,8 @@ export async function detectKind(
       blockNumber,
     });
     if (k === "cre" || k === "zisk") return k;
-  } catch {
+  } catch (e) {
+    if (isRpcDown(e)) throw e;
     // not a SealedPool
   }
   try {
@@ -29,7 +31,8 @@ export async function detectKind(
       blockNumber,
     });
     return "noir";
-  } catch {
+  } catch (e) {
+    if (isRpcDown(e)) throw e;
     // not a Noir pool
   }
   return "plain";
