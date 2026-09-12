@@ -56,9 +56,9 @@ function or one label.
 6. **Snapshot consistency.** One block number is read first and every contract read
    for that snapshot is pinned to it. The snapshot carries `block` and `at`; the SPA
    shows "Updated N seconds ago" from `at`.
-7. **Freshness after the user's own transaction.** The SPA refetches with
-   `?after=<receipt block>`; the API re-reads when its cached block is older. Cache
-   TTL 15 seconds, single-flight per pool.
+7. **Freshness after the user's own transaction.** The SPA refetches all three routes
+   with `?after=<receipt block>`; the API re-reads when its cached block is older.
+   Cache TTL 15 seconds, single-flight per pool.
 8. **Proposal content** is read by the API from a Bee node or gateway (`BEE_URL`,
    optional) at `/bytes/<reference>`, parsed with the same `parseContent` the browser
    uses, and cached forever by reference (content-addressed). Unset `BEE_URL` gives

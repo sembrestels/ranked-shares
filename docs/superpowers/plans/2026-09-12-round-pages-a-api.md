@@ -1994,7 +1994,7 @@ Expected: FAIL (`content` not in `Deps`, route missing).
 import { Hono } from "hono";
 import { HttpError } from "../app.ts";
 import type { Deps } from "../deps.ts";
-import { poolFrom } from "./round.ts";
+import { minBlockFrom, poolFrom } from "./round.ts";
 
 export function projectRoutes(deps: Deps) {
   const r = new Hono();
@@ -2003,7 +2003,7 @@ export function projectRoutes(deps: Deps) {
     const id = /^\d+$/.test(raw) ? Number(raw) : NaN;
     if (!Number.isInteger(id)) throw new HttpError(400, "id must be a non-negative integer");
     const pool = poolFrom(c.req.query("pool"), deps.config);
-    const { snapshot } = await deps.snapshots.get(pool);
+    const { snapshot } = await deps.snapshots.get(pool, minBlockFrom(c.req.query("after")));
     const project = snapshot.projects[id];
     if (!project) throw new HttpError(404, "unknown project");
     const resolved = await deps.content.get(project.contentRef);
@@ -2212,7 +2212,7 @@ import { getAddress, isAddress } from "viem";
 import { HttpError } from "../app.ts";
 import { readVoter } from "../chain/read.ts";
 import type { Deps } from "../deps.ts";
-import { poolFrom } from "./round.ts";
+import { minBlockFrom, poolFrom } from "./round.ts";
 
 export function voterRoutes(deps: Deps) {
   const r = new Hono();
@@ -2221,7 +2221,7 @@ export function voterRoutes(deps: Deps) {
     if (!isAddress(raw)) throw new HttpError(400, "address is not an address");
     const address = getAddress(raw);
     const pool = poolFrom(c.req.query("pool"), deps.config);
-    const { snapshot, roster } = await deps.snapshots.get(pool);
+    const { snapshot, roster } = await deps.snapshots.get(pool, minBlockFrom(c.req.query("after")));
     const facts = await readVoter(deps.client, pool, snapshot.kind, address, BigInt(snapshot.block));
     return c.json({ address, block: snapshot.block, ...facts, inRoster: roster.has(address.toLowerCase()) });
   });
