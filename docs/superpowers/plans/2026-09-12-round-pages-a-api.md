@@ -855,7 +855,7 @@ export function stageOf(f: StageFacts, now: number): Stage {
   const steps = ORDER.map((key, i) => ({
     key,
     label: labels[key],
-    state: (i < index ? "done" : i === index || alsoCurrent.has(key) ? "current" : "next") as StepState,
+    state: (i === index || alsoCurrent.has(key) ? "current" : i < index ? "done" : "next") as StepState,
   }));
   return { current: ORDER[index], steps };
 }

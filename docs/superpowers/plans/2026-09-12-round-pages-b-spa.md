@@ -810,7 +810,7 @@ function stage(current: StepKey, opts: { alsoCurrent?: StepKey[]; plain?: boolea
     steps: ORDER.map((key, i) => ({
       key,
       label: labels[key],
-      state: (i < index ? "done" : i === index || opts.alsoCurrent?.includes(key) ? "current" : "next") as StepState,
+      state: (i === index || opts.alsoCurrent?.includes(key) ? "current" : i < index ? "done" : "next") as StepState,
     })),
   };
 }
