@@ -39,6 +39,7 @@ export const openSnapshot: RoundSnapshot = {
   proposalCount: 3,
   voterCount: 2,
   sealed: { total: "500", count: 1, commitmentsAvailable: true },
+  ballots: "chain",
   closing: { closed: false, cursor: 0 },
   proving: null,
   finality: null,

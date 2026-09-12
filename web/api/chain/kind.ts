@@ -18,7 +18,8 @@ export async function detectKind(
       functionName: "kind",
       blockNumber,
     });
-    if (k === "cre" || k === "zisk") return k;
+    if (k === "public") return "plain";
+    if (k === "cre" || k === "zisk" || k === "noir") return k;
   } catch (e) {
     if (isRpcDown(e)) throw e;
     // not a SealedPool

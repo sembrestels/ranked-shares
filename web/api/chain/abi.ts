@@ -22,6 +22,11 @@ const base = [
   "function proposalCount() view returns (uint256)",
   "function voterCount() view returns (uint256)",
   "function phase() view returns (uint8)",
+  "function kind() pure returns (string)",
+  "function arkivBallots() view returns (bool)",
+  "struct BallotRef { bytes32 entityKey; bytes32 payloadHash; uint256 revision; uint256 blockNumber; }",
+  "function ballotRefOf(address voter, bool isSealed) view returns (BallotRef)",
+  "function voterRefsFrom(uint256 start, uint256 count) view returns (address[] who, uint256[] direct, uint256[] seats, BallotRef[] publicRefs, BallotRef[] sealedRefs)",
 ] as const;
 
 const sealedCommon = [
@@ -50,7 +55,6 @@ export const sealedAbi = parseAbi(
   [
     ...base,
     ...sealedCommon,
-    "function kind() pure returns (string)",
     "function directBallotOf(address voter) view returns (bytes)",
     "function sealedOf(address voter) view returns (bytes)",
     "function votersFrom(uint256 start, uint256 count) view returns (address[] who, uint256[] direct, uint256[] seats, bytes[] ballots, bytes[] cts)",

@@ -25,6 +25,22 @@ Deno.test("detectKind: kind() = cre", async () => {
   assertEquals(await detectKind(client, POOL, 100n), "cre");
 });
 
+Deno.test("detectKind: kind() = public is the plain pool", async () => {
+  const client = clientFor(plainAbi, { kind: () => "public" });
+  assertEquals(await detectKind(client, POOL, 100n), "plain");
+});
+
+Deno.test("detectKind: kind() = noir is noir without probing profileId", async () => {
+  const { transport, calls } = fakeTransport([{
+    address: POOL,
+    abi: noirAbi,
+    handlers: { kind: () => "noir" },
+  }]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  assertEquals(await detectKind(client, POOL, 100n), "noir");
+  assertEquals(calls.filter((m) => m === "eth_call").length, 1);
+});
+
 Deno.test("detectKind: no kind() but profileId() = noir", async () => {
   const client = clientFor(noirAbi, { profileId: () => "0x" + "ab".repeat(32) });
   assertEquals(await detectKind(client, POOL, 100n), "noir");

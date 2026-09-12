@@ -48,6 +48,33 @@ Deno.test("readVoter: zisk pool with a sealed ballot", async () => {
   });
 });
 
+Deno.test("readVoter: zisk pool in Arkiv mode reports presence from ballotRefOf", async () => {
+  const ref = (k: bigint) => ({
+    entityKey: ("0x" + k.toString(16).padStart(64, "0")) as `0x${string}`,
+    payloadHash: ("0x" + "11".repeat(32)) as `0x${string}`,
+    revision: k === 0n ? 0n : 1n,
+    blockNumber: k === 0n ? 0n : 120n,
+  });
+  const { transport } = fakeTransport([{
+    address: POOL,
+    abi: sealedAbi,
+    handlers: {
+      arkivBallots: () => true,
+      directWeight: () => 0n,
+      seatWeight: () => 500n,
+      directBallotOf: () => {
+        throw new Error("legacy getter");
+      },
+      ballotRefOf: ([, isSealed]) => (isSealed ? ref(2n) : ref(0n)),
+    },
+  }]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  assertEquals(await readVoter(client, POOL, "zisk", B, 100n), {
+    weight: { direct: "0", seats: "500", total: "500" },
+    ballot: { public: null, sealed: true },
+  });
+});
+
 Deno.test("readVoter: noir pool reports presence without decoding the packed ballot", async () => {
   const { transport } = fakeTransport([{
     address: POOL,

@@ -6,6 +6,8 @@ import { detectKind, type Kind } from "./kind.ts";
 import { commitmentsFrom, type RosterEntry } from "../services/commitments.ts";
 import type { Finality, PhaseName } from "../services/stage.ts";
 
+const ZERO32 = "0x" + "00".repeat(32);
+
 export interface ProjectView {
   id: number;
   cost: string;
@@ -32,6 +34,7 @@ export interface RoundFacts {
   proposalCount: number;
   voterCount: number;
   sealed: { total: string; count: number; commitmentsAvailable: boolean };
+  ballots: "chain" | "arkiv";
   closing: { closed: boolean; cursor: number } | null;
   proving: { accepted: number; total: number | null } | null;
   finality: Finality | null;
@@ -90,10 +93,24 @@ export async function readRoster(
   kind: Kind,
   voterCount: number,
   page: number,
+  arkiv: boolean,
 ): Promise<Roster> {
   const entries: RosterEntry[] = [];
   const addresses = new Set<string>();
   let sealedCount = 0;
+  if (arkiv) {
+    for (let start = 0; start < voterCount; start += page) {
+      const count = Math.min(page, voterCount - start);
+      const res = await call("voterRefsFrom", [BigInt(start), BigInt(count)]) as unknown[];
+      const who = res[0] as Address[];
+      const sealedRefs = res[4] as { entityKey: Hex }[];
+      for (let i = 0; i < who.length; i++) {
+        addresses.add(who[i].toLowerCase());
+        if (sealedRefs[i].entityKey.toLowerCase() !== ZERO32) sealedCount++;
+      }
+    }
+    return { entries, addresses, sealedCount };
+  }
   if (kind === "plain") {
     const who = await chunked(
       Array.from({ length: voterCount }, (_, i) => i),
@@ -142,6 +159,7 @@ export async function readRound(
   const blockNumber = await client.getBlockNumber();
   const kind = await detectKind(client, pool, blockNumber);
   const call = reader(client, pool, abiFor(kind), blockNumber);
+  const arkiv = await call("arkivBallots").catch(() => false) as boolean;
 
   const [
     token,
@@ -189,8 +207,8 @@ export async function readRound(
   if (m > MAX_PROJECTS || n > MAX_VOTERS) {
     throw new PoolTooLargeError(`pool too large: ${m} projects, ${n} voters`);
   }
-  const roster = await readRoster(call, kind, n, opts.rosterPage);
-  const commitments = kind === "noir"
+  const roster = await readRoster(call, kind, n, opts.rosterPage, arkiv);
+  const commitments = kind === "noir" || arkiv
     ? Array.from({ length: m }, () => 0n)
     : commitmentsFrom(roster.entries, m);
 
@@ -282,8 +300,9 @@ export async function readRound(
     sealed: {
       total: sealedTotal.toString(),
       count: sealedCount,
-      commitmentsAvailable: kind !== "noir",
+      commitmentsAvailable: kind !== "noir" && !arkiv,
     },
+    ballots: arkiv ? "arkiv" : "chain",
     closing,
     proving,
     finality,
@@ -305,13 +324,26 @@ export async function readVoter(
   blockNumber: bigint,
 ): Promise<VoterFacts> {
   const call = reader(client, pool, abiFor(kind), blockNumber);
+  const arkiv = await call("arkivBallots").catch(() => false) as boolean;
   if (kind === "plain") {
-    const [weight, ballot] = await Promise.all([
-      call("weightOf", [address]),
-      call("ballotOf", [address]),
-    ]) as [bigint, Hex];
+    const weight = await call("weightOf", [address]) as bigint;
+    const weightFacts = { direct: weight.toString(), seats: "0", total: weight.toString() };
+    if (arkiv) {
+      const [publicRef, sealedRef] = await Promise.all([
+        call("ballotRefOf", [address, false]),
+        call("ballotRefOf", [address, true]),
+      ]) as [{ entityKey: Hex }, { entityKey: Hex }];
+      return {
+        weight: weightFacts,
+        ballot: {
+          public: publicRef.entityKey.toLowerCase() !== ZERO32 ? { ranks: [] } : null,
+          sealed: sealedRef.entityKey.toLowerCase() !== ZERO32,
+        },
+      };
+    }
+    const ballot = await call("ballotOf", [address]) as Hex;
     return {
-      weight: { direct: weight.toString(), seats: "0", total: weight.toString() },
+      weight: weightFacts,
       ballot: {
         public: ballot === "0x" ? null : { ranks: Array.from(hexToBytes(ballot)) },
         sealed: false,
@@ -327,6 +359,19 @@ export async function readVoter(
     seats: seats.toString(),
     total: (direct + seats).toString(),
   };
+  if (arkiv) {
+    const [publicRef, sealedRef] = await Promise.all([
+      call("ballotRefOf", [address, false]),
+      call("ballotRefOf", [address, true]),
+    ]) as [{ entityKey: Hex }, { entityKey: Hex }];
+    return {
+      weight,
+      ballot: {
+        public: publicRef.entityKey.toLowerCase() !== ZERO32 ? { ranks: [] } : null,
+        sealed: sealedRef.entityKey.toLowerCase() !== ZERO32,
+      },
+    };
+  }
   if (kind === "noir") {
     const [hasDirect, sealed] = await Promise.all([
       call("hasDirect", [address]),

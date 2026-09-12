@@ -32,6 +32,12 @@ const common = {
   proposalCount: () => 3n,
   voterCount: () => 2n,
 };
+const REF = (k: bigint) => ({
+  entityKey: ("0x" + k.toString(16).padStart(64, "0")) as `0x${string}`,
+  payloadHash: ("0x" + "11".repeat(32)) as `0x${string}`,
+  revision: k === 0n ? 0n : 1n,
+  blockNumber: k === 0n ? 0n : 120n,
+});
 
 Deno.test("readRound: plain pool in the open phase", async () => {
   const { transport, calls } = fakeTransport([
@@ -64,6 +70,7 @@ Deno.test("readRound: plain pool in the open phase", async () => {
   assertEquals(facts.projects[0].contentRef, "0x" + "ab".repeat(32));
   assertEquals(facts.projects[1].contentRef, ZERO);
   assertEquals(facts.sealed, { total: "0", count: 0, commitmentsAvailable: true });
+  assertEquals(facts.ballots, "chain");
   assertEquals(facts.closing, null);
   assertEquals(facts.proving, null);
   assertEquals(facts.finality, null);
@@ -319,4 +326,72 @@ Deno.test("readRound: noir pool pages the roster and reports every address", asy
   const { roster } = await readRound(client, POOL, { rosterPage: 1, chainId: 31337 });
   assertEquals(calls, 3);
   assertEquals(roster.size, 3);
+});
+
+Deno.test("readRound: zisk pool in Arkiv mode uses voterRefsFrom and leaves commitments to the browser", async () => {
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: sealedAbi,
+      handlers: {
+        ...common,
+        kind: () => "zisk",
+        arkivBallots: () => true,
+        phase: () => 1,
+        votingOpen: () => true,
+        finality: () => 0,
+        closed: () => false,
+        closeCursor: () => 0n,
+        abandonGrace: () => 604_800n,
+        totalSeatWeight: () => 500n,
+        votersFrom: () => {
+          throw new Error("legacy getter must not be called in Arkiv mode");
+        },
+        voterRefsFrom: ([start, count]) => {
+          if (BigInt(start as bigint) !== 0n || BigInt(count as bigint) !== 2n) {
+            throw new Error("bad page");
+          }
+          return [[A, B], [1_000n, 0n], [0n, 500n], [REF(1n), REF(0n)], [REF(0n), REF(2n)]];
+        },
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { facts, roster } = await readRound(client, POOL, { rosterPage: 200, chainId: 31337 });
+  assertEquals(facts.ballots, "arkiv");
+  assertEquals(facts.projects.map((p) => p.commitment), ["0", "0"]);
+  assertEquals(facts.sealed, { total: "500", count: 1, commitmentsAvailable: false });
+  assertEquals(roster, new Set([A.toLowerCase(), B.toLowerCase()]));
+});
+
+Deno.test("readRound: plain pool in Arkiv mode", async () => {
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: plainAbi,
+      handlers: {
+        ...common,
+        kind: () => "public",
+        arkivBallots: () => true,
+        phase: () => 1,
+        votingOpen: () => true,
+        tallyStarted: () => false,
+        tallyDone: () => false,
+        rankLevel: () => 0n,
+        voterAt: () => {
+          throw new Error("legacy roster must not be walked in Arkiv mode");
+        },
+        voterRefsFrom:
+          () => [[A, B], [1_000n, 300n], [0n, 0n], [REF(1n), REF(2n)], [REF(0n), REF(0n)]],
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { facts, roster } = await readRound(client, POOL, { rosterPage: 200, chainId: 31337 });
+  assertEquals(facts.kind, "plain");
+  assertEquals(facts.ballots, "arkiv");
+  assertEquals(facts.sealed.commitmentsAvailable, false);
+  assertEquals(roster.size, 2);
 });

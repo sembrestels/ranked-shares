@@ -143,7 +143,11 @@ whose public ballot ranks the project first; Noir pools report
 `commitmentsAvailable: false`. A pool reporting more than 255 projects or 10,000
 voters is rejected with `400 { error: "pool too large" }` rather than read in full.
 Content that fails to resolve from `BEE_URL` is remembered as unavailable for 60
-seconds before another gateway fetch is attempted. `server.ts` serves the
+seconds before another gateway fetch is attempted. On a pool with Arkiv ballot
+storage enabled the API reports `ballots: "arkiv"`, `commitmentsAvailable: false`,
+and zero commitments: public results are computed in the browser from Arkiv
+(decision of 2026-09-13); the API still serves the stage, projects, titles,
+weights, and roster membership through `voterRefsFrom`. `server.ts` serves the
 API and `build/client` from one port for Deno Deploy (root `web`, build `deno task
 build`, entrypoint `server.ts`). Design: `docs/superpowers/specs/2026-09-12-round-pages-design.md`.
 
