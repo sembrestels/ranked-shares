@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by [Upload proposal content from the browser through Swarm ID](2026-09-12-upload-proposal-content-from-the-browser-through-swarm-id.md)
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -159,4 +159,5 @@ precedent and would be a one-service swap in `api/services/`.
   acceptance.
 - Supersedes the same-day proposal "Store proposal content in Swarm and bind its hash
   on-chain", withdrawn before acceptance.
+
 

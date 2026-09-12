@@ -91,4 +91,10 @@ tests) is unchanged. The design process feeds it:
   release line, and four proposed technology records (framework, site and API
   hosting, wallet, proposal storage), written to follow `../fund/thedao-rfps/web` at
   the decision-maker's direction. Define gate closed 2026-09-12: R1 line confirmed,
-  four records accepted. Develop in progress.
+  four records accepted. Develop drafted the same day: `docs/design/design-system.md`
+  (principles, token architecture, component inventory), `docs/design/tokens.md`
+  (three tiers, light and dark, mapped from `web/app/tokens.css`), 79 stories under
+  `docs/design/stories/`, and a proposed visual direction record. Develop gate pending:
+  principles, palette, hierarchy, and stories await the decision-maker. The `web/`
+  package on master (proposals, Swarm ID, review, editing) predates the gate; its
+  stories are marked built.

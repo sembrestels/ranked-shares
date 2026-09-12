@@ -162,7 +162,7 @@ early is better; the demo shows one counter accruing and one stopping.
 
 | Date | Hypothesis | Result | What changed |
 |---|---|---|---|
-| | | | |
+| 2026-09-12 | H9 | partly built, untested | the submit, board, review and edit screens landed in `web/`; the rule-before-cost panel (S1.1) is still to build; no participant has been tested |
 
 ## Diagnostic
 

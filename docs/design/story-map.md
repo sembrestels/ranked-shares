@@ -20,9 +20,9 @@ for proposals to the payout, with every step visible and every ballot honest.
 | **R2 First real round** | What a community needs to run a round unattended | after the hackathon |
 | **Later** | Everything else the map surfaced | unscheduled |
 
-Tasks are tagged with the release, the persona, and the hypothesis they test. Items
-marked **on the line** are in R1 only if their dependency lands; the decision-maker
-draws the final line.
+Tasks are tagged with the release, the persona, and the hypothesis they test. Tasks
+marked **built** landed on master with tests; the rest are planned. The stories for
+every R1 task are in `docs/design/stories/`.
 
 ## Backbone
 
@@ -43,12 +43,12 @@ proven or provisional or abandoned, paid, with the dates that bound the current 
 |---|---|---|---|
 | Read the round's rules on the submit page: the all-or-nothing funding rule, the token, the deadline for proposals | R1 | Pau | H9 |
 | Fill in title, summary, pitch, cost, and recipient address; see the cost formatted in the token's units | R1 | Pau | H9 |
-| Publish the proposal content to Swarm and submit its hash with cost and recipient in one transaction | R1, on the line: needs the proposal contract change (decision record) | Pau | H9, H10 |
-| See the proposal's status: received, accepted, rejected | R1, on the line | Pau | H9 |
-| Organiser reviews pending proposals with the pitch rendered from Swarm and accepts or rejects each | R1, on the line | Ona | H7 |
+| Publish the proposal content to Swarm and submit its reference with cost and recipient in one transaction | R1, built 2026-09-12 (Swarm ID) | Pau | H9, H10 |
+| See the proposal's status: pending, accepted, rejected | R1, built 2026-09-12 | Pau | H9 |
+| Organiser reviews pending proposals with the pitch rendered from Swarm and accepts or rejects each | R1, built 2026-09-12 | Ona | H7 |
 | Verify the listed cost and recipient against what was submitted | R1 | Pau | H9 |
 | Organiser adds a project directly, without a proposal, for rounds that do not take submissions | R1 | Ona | H7 |
-| Edit and resubmit a proposal before acceptance | R2 | Pau | |
+| Edit a pending proposal, by the proposer or the organiser, with revision checks | R1, built 2026-09-12 | Pau, Ona | H9 |
 | Rejection with a reason shown to the proposer | R2 | Ona, Pau | |
 | Read others' proposals before the round opens | Later | Dani | |
 
@@ -61,7 +61,7 @@ proven or provisional or abandoned, paid, with the dates that bound the current 
 | Choose the pool variant from a comparison in terms of who can see what and who runs the tally | R2 | Ona | H7 |
 | Deploy from the frontend with token, deadline, and variant parameters | R2 | Ona | H7 |
 | See a setup checklist: token, deadline, projects with cost and recipient, sponsorships, tallier key, what is missing | R1 | Ona | H7 |
-| Add a sponsorship: address list, NFT collection, or Uniswap LP pool, with the amount | R1 | Ona | H7 |
+| Add a sponsorship: address list, NFT collection, or Uniswap LP pool, with the amount. The contract allows this only once voting is open, so it lives on the join screen after opening | R1 | Ona | H7 |
 | Confirm opening with a summary of projects, token, budget so far, and deadline; state that it is irreversible | R1 | Ona | H7 |
 | Copy an invitation link per sponsorship that lands members on their claim screen | R1 | Ona | H5 |
 | Preview the round page as members will see it before opening | R2 | Ona | |
@@ -108,7 +108,7 @@ the setup checklist onward.
 | Task | Release | Persona | Tests |
 |---|---|---|---|
 | Round page: public commitments per project, the sealed total, the sealed voter count, the countdown | R1 | everyone | H4 |
-| Project page: pitch from Swarm, cost, public support, recipient, rank-this-project entry | R1, on the line for the pitch; cost and support without it | Pau, Dani | H10 |
+| Project page: pitch from Swarm, cost, public support, recipient, rank-this-project entry | R1 | Pau, Dani | H10 |
 | Own ballot status on the round page: cast or not, included in the sealed roster or not | R1 | Dani, Sol | H6 |
 | Share a project page or the round page with a link that unfurls | R1 | Pau, Dani | H10 |
 | Organiser view: claimed seats and cast counts per sponsorship | R2 | Ona | H7 |
@@ -155,8 +155,9 @@ the setup checklist onward.
 
 - The deploy step stays outside the frontend in R1; the organiser still needs the
   runbook for it. Acceptable for the demo, not for R2.
-- The proposal flow depends on a contract change that no spec describes yet. Its
-  decision record is proposed alongside this map.
+- The proposal flow landed on master on 2026-09-12 (commit b5cef88) with its own
+  contract change, uploads through Swarm ID, and revision editing; the on-the-line
+  items are in.
 - Nothing on the map serves the observer explicitly; the round page does, by being
   readable without a wallet.
 - The operator's progress in R1 is whatever the chain shows; live progress needs the
@@ -170,4 +171,6 @@ the setup checklist onward.
 
 - 2026-09-12: first draft with a proposed release line. The decision-maker confirmed the
   R1 line as drawn, including the three on-the-line proposal items, and accepted the
-  four technology records the same day. Define gate closed.
+  four technology records the same day. Define gate closed. Later the same day the
+  proposal items were found built on master and marked so; sponsorships moved to the
+  Open phase to match the contract.
