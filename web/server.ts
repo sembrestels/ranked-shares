@@ -1,4 +1,3 @@
-/// <reference lib="deno.ns" />
 /** Site server (Deno Deploy entrypoint): the API under /api and /healthz, the
  * built SPA from build/client for everything else, with the prerendered
  * shell as fallback for client-side routes such as /project/3. */

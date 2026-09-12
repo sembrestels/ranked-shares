@@ -30,4 +30,5 @@ Deno.test("serveStatic: files, immutable assets, and the SPA fallback", async ()
   const missingCacheControl = missingAsset.headers.get("cache-control");
   assertEquals(missingCacheControl === null || !missingCacheControl.includes("immutable"), true);
   await missingAsset.body?.cancel();
+  await Deno.remove(root, { recursive: true });
 });
