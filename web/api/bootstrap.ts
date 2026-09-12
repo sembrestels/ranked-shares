@@ -17,6 +17,7 @@ export function createServer(env: Record<string, string | undefined> = Deno.env.
     beeUrl: config.beeUrl,
     fetch,
     timeoutMs: config.contentTimeoutMs,
+    now,
   });
   const snapshots = createSnapshots({
     read: (pool) =>
