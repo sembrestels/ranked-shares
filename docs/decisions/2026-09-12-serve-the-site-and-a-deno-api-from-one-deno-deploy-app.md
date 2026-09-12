@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -139,3 +139,4 @@ block.
   pattern the round snapshot copies).
 - Revisit if Arc gains an indexer the team trusts, or if a feature needs a server
   session (then adopt thedao-rfps's SIWE flow as is).
+

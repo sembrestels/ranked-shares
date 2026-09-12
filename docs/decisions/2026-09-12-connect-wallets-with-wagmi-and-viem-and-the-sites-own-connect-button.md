@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -109,3 +109,4 @@ adapted to the Arc chains.
   `app/hooks/use-connectors.ts`, `app/components/wallet/`.
 - Supersedes the same-day proposal "Connect wallets with wagmi, viem and RainbowKit",
   withdrawn before acceptance.
+

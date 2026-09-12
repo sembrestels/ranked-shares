@@ -90,5 +90,5 @@ tests) is unchanged. The design process feeds it:
   day: `docs/design/hypotheses.md`, `docs/design/story-map.md` with a proposed R1
   release line, and four proposed technology records (framework, site and API
   hosting, wallet, proposal storage), written to follow `../fund/thedao-rfps/web` at
-  the decision-maker's direction. Define gate pending: the line and the records await
-  the decision-maker.
+  the decision-maker's direction. Define gate closed 2026-09-12: R1 line confirmed,
+  four records accepted. Develop in progress.

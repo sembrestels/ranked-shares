@@ -168,5 +168,6 @@ the setup checklist onward.
 
 ## History
 
-- 2026-09-12: first draft with a proposed release line. Awaiting the decision-maker's
-  line and the technology records' acceptance, which together close the Define gate.
+- 2026-09-12: first draft with a proposed release line. The decision-maker confirmed the
+  R1 line as drawn, including the three on-the-line proposal items, and accepted the
+  four technology records the same day. Define gate closed.

@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -147,3 +147,4 @@ without a subgraph on Arc.
   proposal storage record.
 - Supersedes the same-day proposal "Build the frontend with Vite, React and
   TypeScript", withdrawn before acceptance.
+

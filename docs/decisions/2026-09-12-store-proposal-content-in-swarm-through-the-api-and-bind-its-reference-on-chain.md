@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -159,3 +159,4 @@ precedent and would be a one-service swap in `api/services/`.
   acceptance.
 - Supersedes the same-day proposal "Store proposal content in Swarm and bind its hash
   on-chain", withdrawn before acceptance.
+
