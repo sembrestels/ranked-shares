@@ -33,6 +33,7 @@ funding in proportion to its share of the budget.
 
 | Phase | Who | Calls |
 |---|---|---|
+| Setup (until `votingDeadline`) | anyone / proposer / owner | Anyone `propose(contentRef, cost, recipient)`; proposer or owner `editProposal(id, revision, contentRef, cost, recipient)` while pending; owner `acceptProposal(id, revision)` or `rejectProposal(id, revision)` |
 | Setup | owner | `addProject(cost, recipient)`, `openVoting()` |
 | Open (until `votingDeadline`) | anyone | `contribute(amount)`, `sponsor(amount, members)`, `sponsorNFT(amount, nft, seats)`, `claimSeat(id, tokenId)`, `vote(ranks)` |
 | Tally | anyone | `startTally()` once the deadline has passed, then `step()` or `run(maxSteps)` until `tallyDone()` |
@@ -40,6 +41,62 @@ funding in proportion to its share of the budget.
 
 There are no withdrawals of deposits. Fee-on-transfer and rebasing tokens are not
 supported: `startTally` reverts if the pool's balance is below `totalWeight`.
+
+## Proposals and Swarm ID
+
+The `web/` frontend supports proposal submission and organizer review for newly
+deployed `RankedShares`, `NoirRankedShares`, `CreRankedShares`, and `ZiskRankedShares`
+pools. It follows the React Router SPA and Deno task structure described in the
+frontend decision records. See [`web/README.md`](web/README.md) for configuration.
+
+- `/submit`: connect a wallet and Swarm ID, write any proposal text, attach any file
+  types, and upload directly through `@snaha/swarm-id`. Review the saved amount,
+  recipient and reference, then submit the wallet transaction.
+- `/`: browse proposals and their review status; read text and download attachments.
+- On either board, the original proposer or current owner can choose **Edit proposal**
+  for a pending submission, keep/remove attachments, add files, and save a new revision.
+- `/setup`: the current pool owner can accept or reject pending proposals. Each
+  decision is an on-chain transaction; Swarm ID is not the organizer authorization.
+
+The public Swarm manifest contains `{version: 1, title, body, attachments}`. Each
+attachment has `{reference, name, type, size}` and is uploaded with `uploadFile`.
+The manifest is uploaded with `uploadData`, unencrypted, so its 64-hex-character
+reference fits in `bytes32`. Text and files have no content or MIME allowlist.
+The UI displays text literally and downloads files as binary; it never executes
+uploaded HTML. Automatic text previews are limited to 1 MB and 100 attachments;
+larger or unfamiliar content can still be downloaded.
+
+`PoolBase.proposals(id)` stores the proposer, reference, requested cost, recipient,
+status (`0` pending, `1` accepted, `2` rejected), and accepted `projectId` (only valid
+for status `1`; project zero is valid). `proposalCount()` supports paginated reads.
+Acceptance creates a project through the pool's existing registration path and
+sets `contentRefOf(projectId)`. While pending, the original proposer and current owner
+may edit the reference, amount and recipient. `proposalRevision(id)` starts at 1;
+every edit increments it, records `proposalEditor(id)`, and emits `ProposalEdited`
+with both references and the new terms. Authorship is preserved. Edits and review
+decisions require the expected revision, so stale saves or decisions revert instead
+of overwriting or approving someone else's concurrent edit. Accepted and rejected
+proposals are locked. Existing cost and project-count limits apply on acceptance; a failed
+acceptance leaves the proposal pending. Only accepted proposals enter ballots or
+receive funding. Pending submissions cannot stop the owner opening voting; once
+voting opens or its deadline passes, submissions and review close. Decisions are final.
+The existing two-argument `addProject` remains available, with a zero content reference.
+
+This revision changes the review-call ABI and requires a new pool deployment.
+Encrypted private review and revealing content when voting opens have been discussed
+but are not implemented: the current upload path and all saved revisions are public.
+
+Swarm ID holds the storage credentials in its trusted domain. No server postage
+secret or upload API is required. Uploading requires an identity with `canUpload`;
+the proposer supplies storage through Swarm ID. Storage availability and supported
+file sizes depend on that storage and browser resources. Public uploads can remain
+on Swarm even if the proposal is rejected. The frontend retains only public upload
+details and any pending transaction hash locally, allowing submission retries without
+another upload. It does not persist wallet secrets.
+
+These changes require new pool deployments: existing immutable deployed contracts
+do not gain proposal methods. The browser prover remains a separate app because its
+COOP/COEP isolation headers are incompatible with the Swarm ID popup flow.
 
 ## Ballot encoding
 

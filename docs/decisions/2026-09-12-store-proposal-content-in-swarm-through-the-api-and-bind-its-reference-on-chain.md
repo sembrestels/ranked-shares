@@ -6,6 +6,15 @@ decision-makers: Sem
 
 # Store proposal content in Swarm through the API and bind its reference on-chain
 
+> **Implementation update, 2026-09-12:** The decision-maker subsequently requested
+> uploads through **Swarm ID**, with unrestricted proposer content and organizer
+> acceptance/rejection. That request is implemented in `web/app/lib/swarm.ts`,
+> `web/app/routes/submit.tsx`, `web/app/routes/setup.tsx`, and `src/PoolBase.sol`.
+> The API-managed postage design below remains a historical proposal; its upload
+> route, content allowlist, Bee secrets and caching are not the implemented path.
+> The current setup and data format are documented in `web/README.md` and the root
+> README. Broader frontend/hosting decisions retain their existing statuses.
+
 ## Context and Problem Statement
 
 Today a project is a cost and a recipient address, added by the pool owner. The pitch
@@ -123,6 +132,25 @@ precedent and would be a one-service swap in `api/services/`.
 - Bad, because gas per proposal, or a server that owns the content.
 
 ## More Information
+
+- Editing update (2026-09-12): Sem requested that both the proposer and admin may
+  edit during review. `PoolBase.editProposal` now permits the original proposer and
+  current owner to revise pending content and terms without changing authorship.
+  Revision counters and `ProposalEdited` events preserve edit attribution and prior
+  references. Saves and review decisions require the revision being edited/reviewed
+  to reject concurrent changes; decisions still lock proposals. The form in
+  `web/app/routes/proposal-editor.tsx` retains existing attachments and supports
+  adding/removing files, upload/signature retry and conflict recovery. This resolves
+  the earlier open question about edits before acceptance. Private encryption and
+  voting-time release were researched separately and remain unimplemented; current
+  uploads and revision history are public.
+
+- Implementation verification (2026-09-12): shared proposal contract tests cover
+  permission checks, deadlines, final review decisions, immutable terms, failed
+  acceptance rollback, all pool variants, and voting/payout of an accepted project.
+  Frontend tests cover arbitrary text/files, safe display, and a real local-chain
+  submission/review flow with a fake Swarm transport. Live Swarm upload verification
+  requires an identity with available storage.
 
 - Personas: Proposer Pau in `docs/design/personas.md`; story map activity 1.
 - Reference: `/home/sem/Projects/fund/thedao-rfps/web/api/services/pinata.ts` and

@@ -89,6 +89,24 @@ contract SealedLedgerTest is Test {
 
     // ---- setup and limits ----
 
+    function test_proposalsKeepNoirProfileLimitsAndBindContent() public {
+        bytes32 ref = keccak256("Noir pitch");
+        vm.prank(alice);
+        pool.propose(ref, 5, recipientA);
+        vm.startPrank(owner);
+        pool.acceptProposal(0, 1);
+        assertEq(pool.contentRefOf(0), ref);
+        assertEq(pool.cost(0), 5);
+        for (uint256 i = 1; i < pool.mMax(); i++) {
+            pool.addProject(1, recipientA);
+        }
+        pool.propose(ref, 5, recipientA);
+        vm.expectRevert(NoirRankedShares.TooManyProjects.selector);
+        pool.acceptProposal(1, 1);
+        pool.rejectProposal(1, 1);
+        vm.stopPrank();
+    }
+
     function test_startsInSetupWithConfig() public view {
         assertEq(uint256(pool.phase()), uint256(NoirRankedShares.Phase.Setup));
         assertEq(pool.tallierPkX(), GX);

@@ -30,6 +30,12 @@ error NotNFTSponsorship();
 error BalanceBelowTotalWeight();
 error NotFunded();
 error AlreadyClaimed();
+error EmptyContentReference();
+error InvalidProposal();
+error ProposalAlreadyReviewed();
+error ZeroProposalCost();
+error UnauthorizedProposalEditor();
+error StaleProposalRevision(uint256 expected, uint256 actual);
 
 /// @title PoolBase
 /// @notice What every RankedShares pool does around the tally: token custody, projects,
@@ -42,6 +48,20 @@ abstract contract PoolBase is Ownable {
     // ---------------------------------------------------------------- events
 
     event ProjectAdded(uint256 indexed projectId, uint256 cost, address recipient);
+    event Proposed(
+        uint256 indexed proposalId, address indexed proposer, bytes32 contentRef, uint256 cost, address recipient
+    );
+    event ProposalAccepted(uint256 indexed proposalId, uint256 indexed projectId);
+    event ProposalRejected(uint256 indexed proposalId);
+    event ProposalEdited(
+        uint256 indexed proposalId,
+        address indexed editor,
+        uint256 revision,
+        bytes32 previousContentRef,
+        bytes32 contentRef,
+        uint256 cost,
+        address recipient
+    );
     event VotingOpened();
     event Contributed(address indexed contributor, uint256 amount);
     event Sponsored(uint256 indexed sponsorshipId, address indexed sponsor, uint256 amount, uint256 seats, address nft);
@@ -60,6 +80,21 @@ abstract contract PoolBase is Ownable {
         address nft; // address(0) for explicit-list sponsorships
     }
 
+    enum ProposalStatus {
+        Pending,
+        Accepted,
+        Rejected
+    }
+
+    struct Proposal {
+        address proposer;
+        bytes32 contentRef;
+        uint256 cost;
+        address recipient;
+        ProposalStatus status;
+        uint256 projectId; // meaningful only when status is Accepted (project zero is valid)
+    }
+
     // --------------------------------------------------------------- storage
 
     IERC20 public immutable token;
@@ -67,6 +102,11 @@ abstract contract PoolBase is Ownable {
 
     bool public votingOpen;
     mapping(uint256 => address) public recipientOf;
+    /// @notice Public, unencrypted Swarm reference; zero for a project added without content.
+    mapping(uint256 => bytes32) public contentRefOf;
+    Proposal[] public proposals;
+    mapping(uint256 => uint256) public proposalRevision;
+    mapping(uint256 => address) public proposalEditor;
 
     Sponsorship[] internal _sponsorships;
     /// @notice Current holder of the seat keyed by an NFT token id.
@@ -123,9 +163,88 @@ abstract contract PoolBase is Ownable {
     // ----------------------------------------------------------------- setup
 
     function addProject(uint256 cost_, address recipient) external onlyOwner onlySetup returns (uint256 id) {
+        return _createProject(cost_, recipient, bytes32(0));
+    }
+
+    /// @notice Submit content for review. Pending submissions do not occupy
+    ///         project slots, receive funds, or appear on ballots. Content is never executed.
+    function propose(bytes32 contentRef, uint256 cost_, address recipient)
+        external
+        onlySetup
+        beforeDeadline
+        returns (uint256 id)
+    {
+        if (contentRef == bytes32(0)) revert EmptyContentReference();
+        if (cost_ == 0) revert ZeroProposalCost();
+        if (recipient == address(0)) revert ZeroAddress();
+        id = proposals.length;
+        proposals.push(Proposal(msg.sender, contentRef, cost_, recipient, ProposalStatus.Pending, 0));
+        proposalRevision[id] = 1;
+        proposalEditor[id] = msg.sender;
+        emit Proposed(id, msg.sender, contentRef, cost_, recipient);
+    }
+
+    /// @notice Either author or current owner may revise a pending proposal. The
+    ///         expected revision prevents overwriting a concurrent edit or review.
+    ///         Swarm content is immutable; each save points to a new snapshot.
+    function editProposal(uint256 id, uint256 expectedRevision, bytes32 contentRef, uint256 cost_, address recipient)
+        external
+        onlySetup
+        beforeDeadline
+    {
+        Proposal storage proposal = _pendingProposal(id, expectedRevision);
+        if (msg.sender != proposal.proposer && msg.sender != owner()) revert UnauthorizedProposalEditor();
+        if (contentRef == bytes32(0)) revert EmptyContentReference();
+        if (cost_ == 0) revert ZeroProposalCost();
+        if (recipient == address(0)) revert ZeroAddress();
+        bytes32 previousContentRef = proposal.contentRef;
+        proposal.contentRef = contentRef;
+        proposal.cost = cost_;
+        proposal.recipient = recipient;
+        proposalRevision[id] = expectedRevision + 1;
+        proposalEditor[id] = msg.sender;
+        emit ProposalEdited(id, msg.sender, expectedRevision + 1, previousContentRef, contentRef, cost_, recipient);
+    }
+
+    function proposalCount() external view returns (uint256) {
+        return proposals.length;
+    }
+
+    /// @notice The owner accepts exactly the submitted terms. The pool variant's
+    ///         existing cost and project-count limits still apply, atomically.
+    function acceptProposal(uint256 id, uint256 expectedRevision)
+        external
+        onlyOwner
+        onlySetup
+        beforeDeadline
+        returns (uint256 projectId)
+    {
+        Proposal storage proposal = _pendingProposal(id, expectedRevision);
+        proposal.status = ProposalStatus.Accepted;
+        projectId = _createProject(proposal.cost, proposal.recipient, proposal.contentRef);
+        proposal.projectId = projectId;
+        emit ProposalAccepted(id, projectId);
+    }
+
+    function rejectProposal(uint256 id, uint256 expectedRevision) external onlyOwner onlySetup beforeDeadline {
+        _pendingProposal(id, expectedRevision).status = ProposalStatus.Rejected;
+        emit ProposalRejected(id);
+    }
+
+    function _pendingProposal(uint256 id, uint256 expectedRevision) private view returns (Proposal storage proposal) {
+        if (id >= proposals.length) revert InvalidProposal();
+        proposal = proposals[id];
+        if (proposal.status != ProposalStatus.Pending) revert ProposalAlreadyReviewed();
+        if (proposalRevision[id] != expectedRevision) {
+            revert StaleProposalRevision(expectedRevision, proposalRevision[id]);
+        }
+    }
+
+    function _createProject(uint256 cost_, address recipient, bytes32 contentRef) private returns (uint256 id) {
         if (recipient == address(0)) revert ZeroAddress();
         id = _registerProject(cost_);
         recipientOf[id] = recipient;
+        contentRefOf[id] = contentRef;
         emit ProjectAdded(id, cost_, recipient);
     }
 
