@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-09-12
 decision-makers: Sem
 ---
@@ -11,9 +11,8 @@ A design rationale record (UX decision), via the `develop-design-rationale` skil
 ## Decision Summary
 
 Choose the reference tier of the design tokens (palette, typefaces, the one loud
-element per screen) that every component inherits. Proposed: a "ledger and ballot"
-direction grounded in what the product is; the direction already in `web/` is the
-alternative, acceptable if the decision-maker prefers it.
+element per screen) that every component inherits. Decided: the Blossom brand palette
+and typefaces from blossom.software, delivered through Tailwind v4.
 
 ## Context
 
@@ -45,34 +44,47 @@ encode structure (a ballot's ranked rows, a ledger's columns), not decoration.
 signals, as in `thedao-rfps/web`. Same components, immediate visual kinship with the
 sibling sites.
 
+**D. Blossom brand (chosen).** The palette and typefaces of blossom.software, the
+team that builds RankedShares: four greens (`#2C4A34`, `#617767`, `#678A74`,
+`#AFC7B9`), two pinks (`#FF6A6A`, `#FD8C8C`), peach (`#FFEADB`), off-white
+(`#FAFAF9`); Lexend Deca for body, Kulim Park for headings. Green carries structure and
+actions; pink is the one signal colour, reserved for sealed things and the current
+stage; flat surfaces with borders, no drop shadows, as on the brand site. The loud
+element per screen stays the rank numeral and the support bar, set in Kulim Park.
+
 ## Evaluation
 
 Criteria, in order: grounded in the subject; distinct from generated defaults;
 contrast and legibility at small sizes (WCAG 2.2 AA); cost to adopt given what is
 built; kinship with the decision-maker's other sites.
 
-| Criterion | A | B | C |
-|---|---|---|---|
-| Grounded in the subject | weak (generic editorial) | strong (ledger, ballot) | none (another product's brand) |
-| Distinct from defaults | weak | strong | medium |
-| Contrast at small sizes | good | good | good on dark, weaker for long text |
-| Cost to adopt | none | reference tier only, one day | reference tier plus dark-first layout |
-| Kinship with siblings | none | shared components, own look | full |
+| Criterion | A | B | C | D |
+|---|---|---|---|---|
+| Grounded in the subject | weak (generic editorial) | strong (ledger, ballot) | none (another product's brand) | medium (the maker's brand; green and growth read as funding) |
+| Distinct from defaults | weak | strong | medium | strong (an existing, specific identity) |
+| Contrast at small sizes | good | good | good on dark, weaker for long text | good with green ink; sage reserved for large text and fills |
+| Cost to adopt | none | reference tier only, one day | reference tier plus dark-first layout | reference tier plus two web fonts, one day |
+| Kinship with siblings | none | shared components, own look | full | full with blossom.software |
 
 ## Decision Rationale
 
-B is recommended because it is the only option whose choices come from what
-RankedShares is, and because the token tiers make it a reference-tier change: no
-component moves. A stays available if the decision-maker prefers the built look; the
-record then simply names it as chosen. C is rejected: RankedShares is a product other
-organisations will run, not a TheDAO site.
+D was chosen by the decision-maker on 2026-09-12: RankedShares is a Blossom Labs
+product and should look like one, and the brand already has a palette and type
+system in use. It meets the distinctness criterion because it is a real identity, not
+a default, and the token tiers make it a reference-tier change. B remains the
+recommendation for the loud element (rank numerals, support bars) and for reserving
+one signal colour, both carried over into D. A is dropped. C is rejected: RankedShares
+is a product other organisations will run, not a TheDAO site.
 
 ## Trade-offs Accepted
 
-- B loses the warmth of A; the ground is cooler and the display less ornamental.
-- One type family means headings carry less contrast; weight and size do the work.
-- A single signal colour means public and sealed are distinguished by label and
+- Two web fonts to load (Lexend Deca, Kulim Park); self-hosted, subset to Latin.
+- Sage green fails 4.5:1 on white for small text, so it is limited to large text,
+  borders and fills; green-ink and green-muted carry body and meta text.
+- Pink as the only signal means public and sealed are distinguished by label and
   position as well as colour, which accessibility requires anyway.
+- The brand's warmth (peach, salmon) is used sparingly: peach as the sunken surface,
+  salmon only in dark mode.
 
 ## Reversibility
 
@@ -80,12 +92,11 @@ High. Only `--ref-` tokens change; components reference the semantic tier.
 
 ## Follow-up Considerations
 
-- Whether to deliver tokens through Tailwind v4 `@theme`, as the framework record
-  says, or keep the plain CSS custom properties the package uses. Either carries the
-  same semantic tier. The decision-maker decides before the next component is built.
-- Run the H1 and H2 clickable tests in the chosen direction, not before.
-- Dark mode values in `docs/design/tokens.md` are drafted for B and need a pass for A
-  if A is chosen.
+- Tailwind v4 `@theme` is the delivery, confirmed with this decision.
+- Run the H1 and H2 clickable tests in this direction, not before.
+- Dark mode values in `docs/design/tokens.md` are derived from the greens, not brand
+  values; check them against blossom.software if it ever ships a dark theme.
+- Confirm the font licences allow self-hosting (both are Google Fonts, OFL).
 
 ## Supporting Materials
 
@@ -95,3 +106,5 @@ High. Only `--ref-` tokens change; components reference the semantic tier.
 ## Decision History
 
 - 2026-09-12: proposed after the `web/` package landed with direction A in code.
+- 2026-09-12: accepted as D, the Blossom brand, with Tailwind v4 delivery, by the
+  decision-maker.

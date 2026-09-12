@@ -47,8 +47,10 @@ the palette or type changes.
 | Component | `--<component>-` | `--button-bg-primary`, `--stagebar-step-current` | the component's spec |
 
 Light and dark are two sets of reference-to-semantic mappings; components do not know
-which is active. `docs/design/tokens.md` holds the values and the mapping from the
-tokens already in `web/app/tokens.css`.
+which is active. `docs/design/tokens.md` holds the values: the Blossom brand palette
+(greens for structure and actions, one pink as the signal colour) and typefaces (Lexend
+Deca body, Kulim Park headings), delivered through Tailwind v4's `@theme` in
+`web/app/app.css`.
 
 ## Component inventory
 
@@ -70,7 +72,7 @@ props, events out through callbacks; route containers and hooks do the fetching.
 | Address | a checksummed address, shortened with full value on hover and copy | no | |
 | Countdown | time remaining to a timestamp | no | updates once a minute; text alternative is the date |
 | Rank numeral | the rank in a ballot, including ties | no | the loud element of the ranking screen |
-| Icon | one glyph from one set | no | lucide-react as in the sibling projects |
+| Icon | one glyph from one set | no | lucide-react as in the sibling projects; the brand's organic SVG marks are decoration for the header only |
 | Skeleton | loading placeholder | no | |
 
 ### Molecules

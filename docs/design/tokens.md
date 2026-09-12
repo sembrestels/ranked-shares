@@ -1,10 +1,9 @@
 # Design tokens
 
-Three tiers of CSS custom properties, light and dark, and the mapping from the tokens
-already in `web/app/tokens.css`. Method: W3C design tokens format, three tiers, via
-the `design-tokens` skill. The reference tier's values follow the visual direction
-record of 2026-09-12; until that record is accepted the values below are the ones in
-`web/app/tokens.css` today, so nothing built changes on its own.
+Three tiers of design tokens, light and dark, delivered through Tailwind v4's `@theme`.
+Method: W3C design tokens format, three tiers, via the `design-tokens` skill. The
+reference tier is the Blossom brand palette per the visual direction record of
+2026-09-12.
 
 Rules: components reference semantic or component tokens only; every colour, space,
 size, radius, shadow, and duration in a component comes from a token; a token used
@@ -13,90 +12,87 @@ reference-to-semantic mapping.
 
 ## Reference tier
 
-The raw palette. Prefix `--ref-`. Values from `web/app/tokens.css` (right column: the
-name used there today).
+The raw palette is the Blossom brand, taken from blossom.software on 2026-09-12 at the
+decision-maker's direction (source: the site's Tailwind theme in the `blossomlabs.eth`
+project, `src/styles/global.css`). Names are the brand's own so the two sites share a
+vocabulary. Under Tailwind v4 these are declared in `@theme` and also produce utilities
+(`bg-green-sage`, `text-green-dark`).
 
-| Token | Value | Today |
+| Token | Value | Brand name |
 |---|---|---|
-| `--ref-color-paper-100` | `#fffcf5` | `--surface` |
-| `--ref-color-paper-200` | `#f4f1e9` | `--paper` |
-| `--ref-color-paper-300` | `#e7ecdf` | `--notice` |
-| `--ref-color-paper-400` | `#f6e8df` | `--error-bg` |
-| `--ref-color-line-300` | `#d0cec1` | `--line` |
-| `--ref-color-line-600` | `#858779` | `--line-strong` |
-| `--ref-color-ink-600` | `#66685c` | `--muted` |
-| `--ref-color-ink-900` | `#262e29` | `--ink` |
-| `--ref-color-accent-500` | `#993f2b` | `--accent` |
-| `--ref-color-accent-600` | `#7b301f` | `--accent-hover` |
-| `--ref-color-accent-200` | `#e4b69d` | `--brand-muted` |
-| `--ref-color-green-700` | `#37573e` | `--green` |
-| `--ref-font-body` | Verdana, Geneva, sans-serif | `--font-body` |
-| `--ref-font-display` | Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif | `--font-display` |
-| `--ref-font-mono` | SFMono-Regular, Consolas, monospace | `--font-mono` |
-| `--ref-space-1` to `--ref-space-12` | 0.25, 0.5, 0.75, 1, 1.5, 2, 3.5 rem | `--space-1` to `--space-12` |
-| `--ref-size-1` to `--ref-size-7` | 0.7, 0.8, 0.95, 1.8, 2, 3, clamp(3.3rem, 6vw, 5.6rem) rem | `--text-tiny` to `--text-hero` |
+| `--color-green-dark` | `#2C4A34` | green dark |
+| `--color-green-muted` | `#617767` | green muted |
+| `--color-green-sage` | `#678A74` | green sage |
+| `--color-green-light` | `#AFC7B9` | green light |
+| `--color-pink-coral` | `#FF6A6A` | pink coral |
+| `--color-pink-salmon` | `#FD8C8C` | pink salmon |
+| `--color-peach` | `#FFEADB` | peach |
+| `--color-offwhite` | `#FAFAF9` | off-white |
+| `--color-white` | `#FFFFFF` | white |
+| `--font-body` | "Lexend Deca", sans-serif | body |
+| `--font-heading` | "Kulim Park", sans-serif | headings and navigation (the brand's `--font-nav`) |
+| `--font-mono` | ui-monospace, SFMono-Regular, Consolas, monospace | addresses and references (added) |
 
-Dark reference values, new (no dark mode exists today):
+Added for dark mode and for states the brand site does not need (none of these are
+brand colours; they are derived from the greens and pinks):
 
-| Token | Value |
-|---|---|
-| `--ref-color-night-900` | `#15191a` |
-| `--ref-color-night-800` | `#1f2526` |
-| `--ref-color-night-700` | `#2a3233` |
-| `--ref-color-night-600` | `#3a4446` |
-| `--ref-color-chalk-100` | `#ecebe4` |
-| `--ref-color-chalk-400` | `#a9aba0` |
-| `--ref-color-accent-400` | `#c9694f` |
-| `--ref-color-green-400` | `#7ea886` |
+| Token | Value | Role |
+|---|---|---|
+| `--color-green-night` | `#16261B` | dark page ground |
+| `--color-green-deep` | `#1E3627` | dark surface |
+| `--color-green-ink` | `#1A2B20` | body text on light |
+| `--color-pink-deep` | `#D94F4F` | coral on light backgrounds where 4.5:1 contrast is needed for text |
+| `--color-peach-dark` | `#3B2E29` | error background in dark |
+
+Spacing, sizes, radii and durations keep the scale already in `web/app/tokens.css`
+(0.25 to 3.5 rem steps, 44px controls, 2px radius, 150 and 250 ms), now as Tailwind's
+`--spacing`, `--text-*`, `--radius-*` and custom properties.
 
 ## Semantic tier
 
-Purpose-named. Light maps to paper and ink; dark maps to night and chalk. Components
-use these.
+Purpose-named, declared in `@theme` so they are utilities too (`bg-page`,
+`text-primary`, `border-edge`). Light maps to off-white and green ink; dark maps to
+night greens and off-white text. Components use these, never the brand names directly.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--color-bg-page` | paper-200 | night-900 | page ground |
-| `--color-bg-surface` | paper-100 | night-800 | cards, forms |
-| `--color-bg-sunken` | paper-300 | night-700 | notices, wells |
-| `--color-bg-inverse` | ink-900 | chalk-100 | header |
-| `--color-text-primary` | ink-900 | chalk-100 | body |
-| `--color-text-secondary` | ink-600 | chalk-400 | hints, meta |
-| `--color-text-inverse` | paper-200 | night-900 | on inverse |
-| `--color-border-default` | line-300 | night-600 | rules, inputs |
-| `--color-border-strong` | line-600 | chalk-400 | emphasised rules |
-| `--color-border-focus` | accent-500 | accent-400 | focus ring |
-| `--color-action-primary` | accent-500 | accent-400 | primary button, links in text |
-| `--color-action-primary-hover` | accent-600 | accent-500 | |
-| `--color-action-muted` | accent-200 | night-600 | secondary emphasis |
-| `--color-status-success` | green-700 | green-400 | accepted, funded, proven |
-| `--color-status-error` | accent-600 | accent-400 | rejected, abandoned, errors |
-| `--color-status-error-bg` | paper-400 | night-700 | |
-| `--color-status-info-bg` | paper-300 | night-700 | pending, closing, proving |
-| `--font-family-body` | ref-font-body | same | |
-| `--font-family-display` | ref-font-display | same | h1, h2, rank numerals |
-| `--font-family-mono` | ref-font-mono | same | addresses, references |
-| `--text-xs`, `--text-sm`, `--text-base`, `--text-lg`, `--text-xl`, `--text-2xl`, `--text-display` | size-1 to size-7 | same | |
-| `--line-height-body` | 1.65 | same | |
-| `--line-height-heading` | 1.07 | same | |
-| `--tracking-tight` | -0.035em | same | display only |
-| `--space-xs` to `--space-3xl` | space-1 to space-12 | same | `--space-inline-*` and `--space-stack-*` alias these where direction matters |
-| `--radius-sm` | 2px | same | controls |
-| `--radius-full` | 999px | same | badges |
-| `--rule-width` | 1px | same | |
-| `--rule-width-accent` | 3px | same | the one loud rule per screen |
-| `--focus-ring-width` | 2px | same | |
-| `--control-height` | 44px | same | touch target |
-| `--width-page` | 1120px | same | |
-| `--width-reading` | 820px | same | |
-| `--width-copy` | 38rem | same | under 80 characters of body |
+| `--color-page` | offwhite | green-night | page ground |
+| `--color-surface` | white | green-deep | cards, forms |
+| `--color-sunken` | peach | green-dark | notices, wells, the sealed total's mark |
+| `--color-inverse` | green-dark | offwhite | header, footer |
+| `--color-primary` | green-ink | offwhite | body text |
+| `--color-secondary` | green-muted | green-light | hints, meta |
+| `--color-on-inverse` | offwhite | green-dark | text on inverse |
+| `--color-on-accent` | white | green-night | text on accent |
+| `--color-edge` | green-light | green-muted | rules, inputs (border) |
+| `--color-edge-strong` | green-sage | green-light | emphasised rules (border) |
+| `--color-focus` | pink-coral | pink-salmon | focus ring |
+| `--color-accent` | green-sage | green-light | primary action, links, the loud element |
+| `--color-accent-hover` | green-dark | green-sage | |
+| `--color-signal` | pink-coral | pink-salmon | sealed things, the current stage, one per screen |
+| `--color-signal-text` | pink-deep | pink-salmon | signal used as text |
+| `--color-success` | green-dark | green-light | accepted, funded, proven |
+| `--color-error` | pink-deep | pink-salmon | rejected, abandoned, errors |
+| `--color-error-bg` | peach | peach-dark | |
+| `--color-info-bg` | green-light at 30% | green-deep | pending, closing, proving |
+| `--font-body`, `--font-heading`, `--font-mono` | as reference | same | body; h1, h2, rank numerals; addresses |
+| `--text-xs` … `--text-display` | 0.7, 0.8, 0.95, 1.8, 2, 3 rem, clamp(3.3rem, 6vw, 5.6rem) | same | |
+| `--leading-body`, `--leading-heading` | 1.55, 1.1 | same | Lexend Deca is wide; body leading a little tighter than the serif had |
+| `--tracking-tight` | -0.02em | same | display only |
+| `--radius-sm`, `--radius-full` | 2px, 999px | same | controls; badges |
+| `--rule-width`, `--rule-width-accent` | 1px, 3px | same | the one loud rule per screen |
+| `--focus-ring-width`, `--control-height` | 2px, 44px | same | |
+| `--width-page`, `--width-reading`, `--width-copy` | 1120px, 820px, 38rem | same | |
 | `--opacity-disabled` | 0.6 | same | |
-| `--duration-fast` | 150ms | same | state changes |
-| `--duration-normal` | 250ms | same | reveals |
+| `--duration-fast`, `--duration-normal` | 150ms, 250ms | same | 0ms under reduced motion |
 | `--easing-default` | cubic-bezier(0.4, 0, 0.2, 1) | same | |
-| `--shadow-raised` | none | none | the direction has no drop shadows; a border carries elevation |
+| `--shadow-raised` | none | none | a border carries elevation, as on blossom.software's flat cards |
 
-Motion respects `prefers-reduced-motion: reduce` by setting both durations to 0ms.
+Contrast checks (WCAG 2.2 AA, 4.5:1 for text): green-ink on offwhite 12.9:1; green-muted
+on offwhite 4.6:1; green-sage on white 3.7:1, so sage is used for large text, borders
+and fills, never for small text; pink-deep on offwhite 4.5:1; offwhite on green-dark
+9.8:1; pink-coral is a focus ring and a fill, never small text on light. Values are
+computed from the hex pairs above and re-checked in the accessibility review.
 
 ## Component tier
 
@@ -127,20 +123,18 @@ for the organisms the stories need:
 
 ## Delivery
 
-`web/app/tokens.css` becomes three blocks in this order: `:root` reference tier;
-`:root` light semantic tier; `:root[data-theme="dark"]` and
-`@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }` dark semantic
-tier; component tokens live in each component's stylesheet. The existing names
-(`--paper`, `--ink`, `--accent`, and the rest) are kept as aliases of the semantic
-tokens for one release so nothing in `web/` breaks, then removed.
-
-The accepted framework record names Tailwind v4 with tokens under `@theme` as the
-delivery format, following thedao-rfps. The package on master uses plain CSS custom
-properties and class names instead. The semantic tier above is the same either way:
-under Tailwind it is declared inside `@theme` and consumed as utilities, under plain
-CSS it is consumed with `var()`. Whether to add Tailwind is an open question for the
-decision-maker, noted in the visual direction record.
+Tailwind v4, as the framework record says and as the decision-maker confirmed on
+2026-09-12. `web/app/app.css` starts with `@import "tailwindcss"` and one `@theme`
+block holding the reference and semantic tiers; dark overrides sit in
+`:root[data-theme="dark"]` and `@media (prefers-color-scheme: dark)
+{ :root:not([data-theme="light"]) }` outside the theme block; component tokens live in
+each component's stylesheet or as utilities on the element. The previous names
+(`--paper`, `--ink`, `--accent`, and the rest of `tokens.css`) are kept as aliases of
+the semantic tokens for one release so the existing screens keep working, then removed
+as each component is rebuilt from the inventory.
 
 ## History
 
 - 2026-09-12: first draft, mapped from `web/app/tokens.css`, dark tier added.
+- 2026-09-12: reference tier replaced by the Blossom brand palette and typefaces;
+  delivery set to Tailwind v4, both at the decision-maker's direction.
