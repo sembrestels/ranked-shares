@@ -24,10 +24,11 @@ export async function serveStatic(req: Request, root: string): Promise<Response>
   const { pathname } = new URL(req.url);
   const res = await serveDir(req, { fsRoot: root, quiet: true });
   if (res.status !== 404) return withCaching(res, pathname);
+  if (pathname.startsWith("/assets/")) return res;
   await res.body?.cancel();
   const fallback = await serveDir(new Request(new URL("/index.html", req.url), req), {
     fsRoot: root,
     quiet: true,
   });
-  return withCaching(fallback, pathname);
+  return withCaching(fallback, "/index.html");
 }

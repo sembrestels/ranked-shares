@@ -23,5 +23,11 @@ Deno.test("serveStatic: files, immutable assets, and the SPA fallback", async ()
   await shell.body?.cancel();
   const deep = await serveStatic(new Request("http://x/project/3"), root);
   assertEquals(deep.status, 200);
+  assertEquals(deep.headers.get("cache-control"), "no-cache");
   assertEquals(await deep.text(), "<!doctype html><title>shell</title>");
+  const missingAsset = await serveStatic(new Request("http://x/assets/missing-xyz.js"), root);
+  assertEquals(missingAsset.status, 404);
+  const missingCacheControl = missingAsset.headers.get("cache-control");
+  assertEquals(missingCacheControl === null || !missingCacheControl.includes("immutable"), true);
+  await missingAsset.body?.cancel();
 });

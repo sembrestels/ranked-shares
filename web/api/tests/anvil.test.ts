@@ -46,6 +46,7 @@ function artifact(name: string) {
 function available(): boolean {
   try {
     artifact("RankedShares");
+    artifact("MockERC20");
     return new Deno.Command("anvil", { args: ["--version"], stdout: "null", stderr: "null" })
       .outputSync().success;
   } catch {
