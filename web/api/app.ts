@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { HttpRequestError, TimeoutError } from "viem";
 import type { Deps } from "./deps.ts";
 import { healthRoutes } from "./routes/health.ts";
+import { projectRoutes } from "./routes/project.ts";
 import { roundRoutes } from "./routes/round.ts";
 
 export class HttpError extends Error {
@@ -37,5 +38,6 @@ export function createApp(deps: Deps) {
   );
   app.route("/healthz", healthRoutes(deps));
   app.route("/api/round", roundRoutes(deps));
+  app.route("/api/project", projectRoutes(deps));
   return app;
 }

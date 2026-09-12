@@ -15,6 +15,8 @@ function depsWith(
     client: {} as Deps["client"],
     // deno-lint-ignore require-await
     snapshots: { get: async () => ({ snapshot: openSnapshot, roster: new Set() }) },
+    // deno-lint-ignore require-await
+    content: { get: async () => ({ status: "none", content: null, reason: null }) },
     now: () => 0,
     log: () => {},
     ...overrides,

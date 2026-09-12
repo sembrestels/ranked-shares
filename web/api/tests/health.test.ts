@@ -12,6 +12,8 @@ const deps: Deps = {
       throw new Error("unused");
     },
   },
+  // deno-lint-ignore require-await
+  content: { get: async () => ({ status: "none", content: null, reason: null }) },
   now: () => 0,
   log: () => {},
 };

@@ -5,6 +5,7 @@ import { createClient } from "./chain/client.ts";
 import { readRound } from "./chain/read.ts";
 import { loadConfig } from "./config.ts";
 import type { Deps } from "./deps.ts";
+import { createContent } from "./services/content.ts";
 import { createSnapshots } from "./services/snapshot.ts";
 
 export function createServer(env: Record<string, string | undefined> = Deno.env.toObject()) {
@@ -12,14 +13,18 @@ export function createServer(env: Record<string, string | undefined> = Deno.env.
   const log = (msg: string) => console.log(`[${new Date().toISOString()}] ${msg}`);
   const now = () => Math.floor(Date.now() / 1000);
   const client = createClient({ rpcUrls: config.rpcUrls, chainId: config.chainId });
+  const content = createContent({
+    beeUrl: config.beeUrl,
+    fetch,
+    timeoutMs: config.contentTimeoutMs,
+  });
   const snapshots = createSnapshots({
     read: (pool) =>
       readRound(client, pool, { rosterPage: config.rosterPage, chainId: config.chainId }),
-    // deno-lint-ignore require-await
-    titleOf: async () => null, // Task 7 wires the content service here
+    titleOf: async (ref) => (await content.get(ref)).content?.title ?? null,
     ttlMs: config.snapshotTtlMs,
     now,
   });
-  const deps: Deps = { config, client, snapshots, now, log };
+  const deps: Deps = { config, client, snapshots, content, now, log };
   return { app: createApp(deps), config, deps };
 }
