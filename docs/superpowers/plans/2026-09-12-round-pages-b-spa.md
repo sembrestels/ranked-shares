@@ -19,6 +19,8 @@
 - Money is shown in the token's units with the symbol after the number, at most two decimals shown, the full value in a `title`. Times are shown in the viewer's local time zone with an ISO `dateTime` attribute.
 - Never render proposal content as HTML: text nodes only, attachments downloaded as binary.
 - S5.8 ("Rank this project") is out of scope: no `/vote` route exists yet; the project page has no rank control in this slice.
+- Master gained the Arkiv ballots change on 2026-09-13 (`docs/decisions/2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md`): `/vote` and `/liquidity` routes exist, the shell's navigation lists them, and on Arkiv-enabled pools the API reports `ballots: "arkiv"` with zero commitments, so the round page computes public commitments and the provisional funded set in the browser with `readArkivVoters` (`prover/src/core/arkiv.ts`), `loadPayloads` (`app/lib/arkiv.ts`), and `pbearTranscript` (`shared/pbear.ts`), exactly as `/vote` does. The vote and liquidity pages belong to another session's work: do not edit `app/routes/vote.tsx`, `app/routes/liquidity.tsx`, `app/components/voting/`, `app/lib/arkiv.ts`, `app/lib/ballots.ts`, or `app/lib/lp.ts`; import from them.
+- Test counts: the vitest suite has 31 tests on master. Every "suite N pass" expectation below means "every existing test still passes plus this task's new ones"; do not chase the absolute number.
 - Commits: one per task, imperative message, no attribution lines.
 
 ---
@@ -74,6 +76,8 @@ export interface RoundSnapshot {
   proposalCount: number;
   voterCount: number;
   sealed: { total: string; count: number; commitmentsAvailable: boolean };
+  /** Where ballots live. "arkiv": the browser computes public results from Arkiv. */
+  ballots: "chain" | "arkiv";
   closing: { closed: boolean; cursor: number } | null;
   proving: { accepted: number; total: number | null } | null;
   finality: Finality | null;
@@ -840,9 +844,16 @@ const base: RoundSnapshot = {
   ],
   fundedOrder: [], proposalCount: 3, voterCount: 2,
   sealed: { total: "500000000", count: 1, commitmentsAvailable: true },
+  ballots: "chain",
   closing: { closed: false, cursor: 0 }, proving: null, finality: null,
   graces: { abandonFrom: null, provisionalFrom: null },
   stage: stage("open"),
+};
+export const arkivSnapshot: RoundSnapshot = {
+  ...base,
+  ballots: "arkiv",
+  sealed: { total: "500000000", count: 1, commitmentsAvailable: false },
+  projects: base.projects.map((p) => ({ ...p, commitment: "0" })),
 };
 
 const withPhase = (phase: PhaseName, extra: Partial<RoundSnapshot>): RoundSnapshot => ({ ...base, phase, ...extra });
@@ -1114,12 +1125,12 @@ git commit -m "Add the stage bar with closing, proving, and outcome details, and
 ### Task 5: The round page
 
 **Files:**
-- Create: `web/app/components/round/board.tsx`, `web/app/components/round/sealed-panel.tsx`, `web/app/components/round/your-ballot.tsx`, `web/app/components/round/outcome.tsx`, `web/app/components/round/round-heading.tsx`, `web/app/lib/copy.ts`, `web/app/routes/round.tsx`
-- Test: `web/test/round-page.test.tsx`
+- Create: `web/app/components/round/board.tsx`, `web/app/components/round/sealed-panel.tsx`, `web/app/components/round/your-ballot.tsx`, `web/app/components/round/outcome.tsx`, `web/app/components/round/round-heading.tsx`, `web/app/lib/copy.ts`, `web/app/lib/live.ts`, `web/app/hooks/use-arkiv-public.ts`, `web/app/routes/round.tsx`
+- Test: `web/test/round-page.test.tsx`, `web/test/live.test.ts`
 
 **Interfaces:**
 - Consumes: fixtures, atoms, molecules, hooks.
-- Produces: `<Board snapshot />`, `<SealedPanel snapshot />`, `<YourBallot snapshot voter loading />`, `<Outcome snapshot />`, `<RoundHeading snapshot now name />`; `FINALITY_SENTENCES`, `REPO_URL`, `ROUND_NAME` in `copy.ts`; the route module `routes/round.tsx` (default export `RoundPage`), not yet in `routes.ts` (Task 7 wires it).
+- Produces: `<Board snapshot commitments? />` (the optional `commitments: string[]` overrides the snapshot's, for Arkiv pools), `<SealedPanel snapshot />`, `<YourBallot snapshot voter loading />`, `<Outcome snapshot />`, `<RoundHeading snapshot now name />`; `FINALITY_SENTENCES`, `REPO_URL`, `ROUND_NAME` in `copy.ts`; `commitmentsFromEntries(entries: { weight: bigint; ballot: number[] }[], projectCount: number): bigint[]` in `lib/live.ts`; `useArkivPublic(snapshot)` returning `{ commitments: string[]; funded: number[]; ballots: number; block: number }` for Arkiv pools (disabled otherwise); the route module `routes/round.tsx` (default export `RoundPage`), not yet in `routes.ts` (Task 7 wires it).
 
 - [ ] **Step 1: Write `web/app/lib/copy.ts`**
 
@@ -1151,6 +1162,103 @@ export const PITCH_FAILED = "The pitch could not be loaded; try again";
 export const AUDIT_LABEL = "check this result yourself";
 ```
 
+- [ ] **Step 1b: Write the failing live test `web/test/live.test.ts`, then `web/app/lib/live.ts` and the hook**
+
+`web/test/live.test.ts`:
+
+```ts
+import { expect, test } from "vitest";
+import { commitmentsFromEntries } from "../app/lib/live";
+
+test("commitmentsFromEntries sums first-ranked direct weight, ties included, unranked ignored", () => {
+  expect(commitmentsFromEntries([
+    { weight: 1000n, ballot: [1, 2] },
+    { weight: 300n, ballot: [2, 1] },
+    { weight: 50n, ballot: [1, 1] },
+    { weight: 7n, ballot: [0, 3] },
+  ], 2)).toEqual([1050n, 350n]);
+  expect(commitmentsFromEntries([{ weight: 5n, ballot: [1] }], 3)).toEqual([5n, 0n, 0n]);
+  expect(commitmentsFromEntries([], 0)).toEqual([]);
+});
+```
+
+`web/app/lib/live.ts` (pure; the same rule the API uses for chain-mode pools):
+
+```ts
+/** Public commitment per project from public ballots: the direct weight of every
+ * voter whose ballot gives the project competition rank 1, ties included. */
+export interface LiveEntry {
+  weight: bigint;
+  ballot: number[];
+}
+
+export function commitmentsFromEntries(entries: readonly LiveEntry[], projectCount: number): bigint[] {
+  const out = Array.from({ length: projectCount }, () => 0n);
+  for (const { weight, ballot } of entries) {
+    if (weight === 0n) continue;
+    const n = Math.min(projectCount, ballot.length);
+    for (let p = 0; p < n; p++) if (ballot[p] === 1) out[p] += weight;
+  }
+  return out;
+}
+```
+
+`web/app/hooks/use-arkiv-public.ts` (a container hook; not unit-tested here because it reads Arkiv and the chain, the same reads `/vote` already exercises):
+
+```ts
+import { useQuery } from "@tanstack/react-query";
+import { usePublicClient } from "wagmi";
+import { hexToBytes } from "viem";
+import { readArkivVoters } from "../../../prover/src/core/arkiv";
+import { pbearTranscript } from "../../../shared/pbear";
+import { chain, useRound } from "../context/providers";
+import type { RoundSnapshot } from "../lib/api-types";
+import { loadPayloads } from "../lib/arkiv";
+import { commitmentsFromEntries } from "../lib/live";
+
+export interface ArkivPublic {
+  commitments: string[];
+  funded: number[];
+  ballots: number;
+  block: number;
+}
+
+/** For Arkiv-mode pools: public commitments and the provisional funded set,
+ * computed in the browser from every accepted public ballot at the snapshot's
+ * block (decision of 2026-09-13). Disabled for chain-mode pools and once the
+ * pool is done, where the outcome comes from the chain. */
+export function useArkivPublic(snapshot: RoundSnapshot | undefined) {
+  const client = usePublicClient({ chainId: chain.id });
+  const { pool } = useRound();
+  const enabled = !!client && !!pool && !!snapshot && snapshot.ballots === "arkiv" && snapshot.phase !== "done";
+  return useQuery({
+    queryKey: ["arkiv-public", pool ?? "", snapshot?.block ?? 0],
+    enabled,
+    refetchInterval: 15_000,
+    queryFn: async (): Promise<ArkivPublic> => {
+      const s = snapshot!;
+      const voters = await readArkivVoters(client!, pool!, {
+        blockNumber: BigInt(s.block),
+        publicOnly: true,
+        load: loadPayloads,
+      });
+      const pub = voters
+        .filter((v) => v.publicRef.revision > 0n)
+        .map((v) => ({ weight: v.directWeight, ballot: [...hexToBytes(v.publicBallot)] }));
+      const m = s.projects.length;
+      const commitments = commitmentsFromEntries(pub, m).map(String);
+      const { funded } = pbearTranscript(s.projects.map((p) => BigInt(p.cost)), pub, [], BigInt(s.totalWeight));
+      return { commitments, funded, ballots: pub.length, block: s.block };
+    },
+  });
+}
+```
+
+Check the field names `publicRef`, `directWeight`, `publicBallot` against `ResolvedVoter` in `prover/src/core/arkiv.ts` (they are what `publicResults` in `app/lib/ballots.ts` uses) and the import paths against how `app/routes/vote.tsx` imports the same modules; match them.
+
+Run: `deno run -A npm:vitest run test/live.test.ts`
+Expected: 1 pass.
+
 - [ ] **Step 2: Write the failing page tests `web/test/round-page.test.tsx`**
 
 ```tsx
@@ -1163,7 +1271,7 @@ import { SealedPanel } from "../app/components/round/sealed-panel";
 import { YourBallot } from "../app/components/round/your-ballot";
 import { Outcome } from "../app/components/round/outcome";
 import { RoundHeading } from "../app/components/round/round-heading";
-import { abandonedSnapshot, attestedSnapshot, DEADLINE, NOW, openSnapshot, provenSnapshot, provingNoirSnapshot } from "./fixtures/snapshots";
+import { abandonedSnapshot, arkivSnapshot, attestedSnapshot, DEADLINE, NOW, openSnapshot, provenSnapshot, provingNoirSnapshot } from "./fixtures/snapshots";
 
 const inRouter = (ui: ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
@@ -1182,6 +1290,19 @@ test("Board lists projects by public commitment, descending, with name, cost, an
 test("Board shows the funded badge once the outcome is set", () => {
   inRouter(<Board snapshot={provenSnapshot} />);
   expect(screen.getByText("Funded")).toBeTruthy();
+});
+
+test("Board takes browser-computed commitments for an Arkiv pool", () => {
+  inRouter(<Board snapshot={arkivSnapshot} commitments={["250000000", "900000000"]} />);
+  const rows = screen.getAllByRole("listitem");
+  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 1");
+  expect(within(rows[0]).getByTitle("900 USDC")).toBeTruthy();
+  expect(within(rows[1]).getByTitle("250 USDC")).toBeTruthy();
+});
+
+test("Board says commitments are still loading for an Arkiv pool without them", () => {
+  inRouter(<Board snapshot={arkivSnapshot} />);
+  expect(screen.getByText(/Public commitments are being computed from Arkiv/)).toBeTruthy();
 });
 
 test("SealedPanel shows the sealed weight and count, and the noir caveat", () => {
@@ -1260,13 +1381,17 @@ import { Badge, Money, SupportBar } from "../ui";
 
 export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id}`;
 
-/** Public commitments per project, most backed first. */
-export function Board({ snapshot: s }: { snapshot: RoundSnapshot }) {
-  const rows = [...s.projects].sort((a, b) => (BigInt(b.commitment) > BigInt(a.commitment) ? 1 : BigInt(b.commitment) < BigInt(a.commitment) ? -1 : a.id - b.id));
+/** Public commitments per project, most backed first. For an Arkiv pool the
+ * commitments come from the browser (useArkivPublic) and override the snapshot's. */
+export function Board({ snapshot: s, commitments }: { snapshot: RoundSnapshot; commitments?: string[] }) {
+  const withCommitments = s.projects.map((p, i) => ({ ...p, commitment: commitments?.[i] ?? p.commitment }));
+  const rows = [...withCommitments].sort((a, b) => (BigInt(b.commitment) > BigInt(a.commitment) ? 1 : BigInt(b.commitment) < BigInt(a.commitment) ? -1 : a.id - b.id));
   const { symbol, decimals } = s.token;
+  const computing = s.ballots === "arkiv" && !commitments && !s.finality;
   return (
     <section aria-labelledby="board-heading">
       <h2 id="board-heading" className="font-heading text-xl">Public commitments</h2>
+      {computing && <p className="mt-2 text-sm text-secondary">Public commitments are being computed from Arkiv in your browser.</p>}
       <ul className="mt-4 flex flex-col gap-4">
         {rows.map((p) => (
           <li key={p.id} className="border border-edge bg-surface p-6">
@@ -1309,7 +1434,8 @@ export function SealedPanel({ snapshot: s }: { snapshot: RoundSnapshot }) {
         <dd>{s.sealed.count}</dd>
       </dl>
       <p className="mt-3 text-sm text-secondary">Sealed ballots are counted after the deadline; nobody sees how they rank until then, and the result never reveals them.</p>
-      {!s.sealed.commitmentsAvailable && <p className="mt-2 text-sm text-secondary">Public commitments are not available for this pool variant yet.</p>}
+      {!s.sealed.commitmentsAvailable && s.ballots === "chain" && <p className="mt-2 text-sm text-secondary">Public commitments are not available for this pool variant yet.</p>}
+      {s.ballots === "arkiv" && <p className="mt-2 text-sm text-secondary">Ballots are stored in Arkiv; public commitments and the provisional result are computed in your browser from every accepted public ballot.</p>}
     </aside>
   );
 }
@@ -1411,17 +1537,21 @@ import { RoundHeading } from "../components/round/round-heading";
 import { SealedPanel } from "../components/round/sealed-panel";
 import { YourBallot } from "../components/round/your-ballot";
 import { Notice, Skeleton } from "../components/ui";
+import { PublicResults } from "../components/voting";
 import { useRound } from "../context/providers";
+import { useArkivPublic } from "../hooks/use-arkiv-public";
 import { useNow } from "../hooks/use-now";
 import { useRoundSnapshot, useVoter } from "../hooks/use-snapshot";
 import { ROUND_NAME } from "../lib/copy";
 import { errorMessage } from "../lib/proposals";
+import { projectName } from "../components/round/board";
 
 export default function RoundPage() {
   const { pool } = useRound();
   const { address } = useAccount();
   const round = useRoundSnapshot();
   const voter = useVoter();
+  const live = useArkivPublic(round.data);
   const now = useNow(10_000);
   if (!pool) return <Notice>Choose a round above to see the board.</Notice>;
   if (!round.data) {
@@ -1436,7 +1566,18 @@ export default function RoundPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-6">
           <Outcome snapshot={s} />
-          <Board snapshot={s} />
+          {s.ballots === "arkiv" && live.data && !s.finality && (
+            <PublicResults
+              titles={s.projects.map(projectName)}
+              funded={live.data.funded}
+              final={false}
+              ballots={live.data.ballots}
+              block={BigInt(live.data.block)}
+              sealedPool={s.kind !== "plain"}
+            />
+          )}
+          {s.ballots === "arkiv" && live.isError && <Notice error>Could not compute public results from Arkiv: {errorMessage(live.error)}</Notice>}
+          <Board snapshot={s} commitments={s.ballots === "arkiv" ? live.data?.commitments : undefined} />
         </div>
         <SealedPanel snapshot={s} />
       </div>
@@ -1447,14 +1588,14 @@ export default function RoundPage() {
 
 - [ ] **Step 5: Run the tests, suite, and type check**
 
-Run: `deno run -A npm:vitest run test/round-page.test.tsx && deno task test && deno task typecheck`
-Expected: 7 pass; suite 51 pass; clean.
+Run: `deno run -A npm:vitest run test/round-page.test.tsx test/live.test.ts && deno task test && deno task typecheck`
+Expected: 9 + 1 pass; suite all pass; clean. Check `PublicResults`'s props in `app/components/voting/index.tsx` and match them.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add app/components/round app/lib/copy.ts app/routes/round.tsx test/round-page.test.tsx
-git commit -m "Add the round page: heading, your ballot, board, sealed panel, and outcome"
+git add app/components/round app/lib/copy.ts app/lib/live.ts app/hooks/use-arkiv-public.ts app/routes/round.tsx test/round-page.test.tsx test/live.test.ts
+git commit -m "Add the round page: heading, your ballot, board, sealed panel, outcome, and Arkiv live results"
 ```
 
 ---
@@ -1692,7 +1833,7 @@ git commit -m "Add the project page: summary, pitch as text, attachments, and ou
 
 **Interfaces:**
 - Consumes: `StageBarContainer`, the route modules of Tasks 5 and 6.
-- Produces: routes `/` (round), `/project/:id`, `/proposals`, `/submit`, `/setup`; the shell layout with the stage bar under the header on every route.
+- Produces: routes `/` (round), `/project/:id`, `/proposals`, `/vote`, `/liquidity`, `/submit`, `/setup`; the shell layout with the stage bar under the header on every route.
 
 - [ ] **Step 1: Move the proposals board and update the route table**
 
@@ -1708,6 +1849,8 @@ export default [
   index("routes/round.tsx"),
   route("project/:id", "routes/project.tsx"),
   route("proposals", "routes/proposals.tsx"),
+  route("vote", "routes/vote.tsx"),
+  route("liquidity", "routes/liquidity.tsx"),
   route("submit", "routes/submit.tsx"),
   route("setup", "routes/setup.tsx"),
 ] satisfies RouteConfig;
@@ -1747,8 +1890,8 @@ test("the shell has the wordmark, the four navigation links, and the stage bar s
     </QueryClientProvider>,
   );
   const nav = screen.getByRole("navigation", { name: "Main" });
-  expect(within(nav).getAllByRole("link").map((a) => a.textContent)).toEqual(["Round", "Proposals", "Submit an idea", "Organizer"]);
-  expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual(["/", "/proposals", "/submit", "/setup"]);
+  expect(within(nav).getAllByRole("link").map((a) => a.textContent)).toEqual(["Round", "Proposals", "Vote", "Liquidity", "Submit an idea", "Organizer"]);
+  expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual(["/", "/proposals", "/vote", "/liquidity", "/submit", "/setup"]);
   expect(screen.getByText("page")).toBeTruthy();
   expect(screen.getByRole("contentinfo").textContent).toContain("check this result yourself");
 });
@@ -1776,6 +1919,8 @@ export function Shell({ children }: { children: ReactNode }) {
           <nav aria-label="Main" className="flex flex-wrap gap-6 text-sm">
             <NavLink to={`/${search}`} end className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Round</NavLink>
             <NavLink to={`/proposals${search}`} className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Proposals</NavLink>
+            <NavLink to={`/vote${search}`} className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Vote</NavLink>
+            <NavLink to={`/liquidity${search}`} className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Liquidity</NavLink>
             <NavLink to={`/submit${search}`} className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Submit an idea</NavLink>
             <NavLink to={`/setup${search}`} className={({ isActive }) => `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`}>Organizer</NavLink>
           </nav>
@@ -1805,7 +1950,7 @@ export default function App() {
 }
 ```
 
-Import `StageBarContainer` from `./components/stage/stage-bar-container`, `AUDIT_LABEL`, `AUDIT_URL` from `./lib/copy`. Move the round picker and `Connections` JSX into the `toolbar` div exactly as they are today. Remove the now-unused `.site-header`, `.header-inner`, `.brand`, `.main-nav`, `.skip-link`, `.workspace` rules from `app/app.css`; keep every rule the proposals, submit, and setup screens still use.
+Import `StageBarContainer` from `./components/stage/stage-bar-container`, `AUDIT_LABEL`, `AUDIT_URL` from `./lib/copy`. Start from master's current `root.tsx` (it has `RoundPicker`, `Connections`, `ErrorPopup`, and the Tiramisu chain in the providers); move the round picker and `Connections` JSX into the `toolbar` div exactly as they are today and keep `ErrorPopup` where it is. Remove the now-unused `.site-header`, `.header-inner`, `.brand`, `.main-nav`, `.skip-link`, `.workspace` rules from `app/app.css`; keep every rule the proposals, submit, and setup screens still use.
 
 In `app/routes/proposals.tsx`, `submit.tsx`, and `setup.tsx` (through the board), replace the all-caps `.eyebrow` texts with sentence case ("The proposal board", "The organizer's desk", "Submissions", "N submissions") and change `.eyebrow` in `app.css` to `font-size: var(--text-sm); color: var(--muted); letter-spacing: 0;`. The `h1` markup with `<em>` stays.
 
@@ -2064,7 +2209,7 @@ Replace `web/react-router.config.ts` with:
 import type { Config } from "@react-router/dev/config";
 import { buildPool, projectIds } from "./app/lib/build-chain";
 
-const FIXED = ["/", "/proposals", "/submit", "/setup"];
+const FIXED = ["/", "/proposals", "/vote", "/liquidity", "/submit", "/setup"];
 
 export default {
   ssr: false,
@@ -2147,7 +2292,7 @@ Run `deno task typecheck` first so `react-router typegen` creates the `+types` f
 - [ ] **Step 8: Verify the build without a pool and with Anvil**
 
 Run: `VITE_POOL_ADDRESS= deno task build`
-Expected: the warning "prerender: VITE_POOL_ADDRESS is not set" and `build/client/index.html`, `build/client/proposals/index.html`, `build/client/submit/index.html`, `build/client/setup/index.html` exist; `grep -c 'og:title' build/client/index.html` prints 1.
+Expected: the warning "prerender: VITE_POOL_ADDRESS is not set" and `build/client/index.html`, `build/client/proposals/index.html`, `build/client/vote/index.html`, `build/client/liquidity/index.html`, `build/client/submit/index.html`, `build/client/setup/index.html` exist; `grep -c 'og:title' build/client/index.html` prints 1.
 
 Then, with Anvil: start `anvil --port 8545 --silent` in the background, deploy a pool the way `test/workflow.test.tsx` does (or with the root repository's `forge script`), set `VITE_POOL_ADDRESS` to it, run `deno task build`, and check `build/client/project/0/index.html` exists and contains `og:title`. Then start the site server (`POOL_ADDRESS=<pool> PORT=8099 deno task start` in the background) and confirm `curl -sS -o /dev/null -w '%{http_code}' -L http://127.0.0.1:8099/project/0` prints `200` and `curl -sSL http://127.0.0.1:8099/project/0 | grep -c 'og:title'` prints `1`, so a prerendered nested page is served by `serveDir` (directly or after its trailing-slash redirect). Stop the server and Anvil. If no deploy path is convenient, record in the report that the with-pool build and serve were not exercised and why.
 

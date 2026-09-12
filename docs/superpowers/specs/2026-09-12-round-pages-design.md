@@ -212,10 +212,11 @@ CONTENT_TIMEOUT_MS=5000
 ### 4.1 Routes
 
 ```
-/                 round page (board, sealed totals, your ballot, outcome)
+/                 round page (board, sealed totals, your ballot, outcome; Arkiv live results)
 /project/:id      project page
 /proposals        the proposals board (today's `/`)
-/submit, /submit/thanks, /setup   unchanged, restyled by the shell
+/vote, /liquidity another session's pages (Arkiv voting, LP seats), linked from the shell, untouched
+/submit, /setup   unchanged, restyled by the shell
 ```
 
 ### 4.2 Components (from `docs/design/design-system.md`)
@@ -243,10 +244,14 @@ rebuilt.
 
 ### 4.3 Data
 
-`app/lib/api.ts`: `fetchRound(pool?, after?)`, `fetchProject(id, pool?)`,
-`fetchVoter(address, pool?)` against `VITE_API_URL || ""` (same origin). Hooks
+`app/lib/api.ts`: `fetchRound(pool?, after?)`, `fetchProject(id, pool?, after?)`,
+`fetchVoter(address, pool?, after?)` against `VITE_API_URL || ""` (same origin). Hooks
 `useRoundSnapshot`, `useProject`, `useVoter` with `refetchInterval` 15 s while
-visible; `useAfterTransaction(receipt)` invalidates with `after = receipt.blockNumber`.
+visible, faster while the snapshot is behind the requested block; the round context's
+`markMined(block)` sets `after`. For Arkiv-mode pools `useArkivPublic(snapshot)`
+computes public commitments and the provisional funded set in the browser from every
+accepted public ballot at the snapshot's block, reusing the roster reader, payload
+loader, and shared tally the `/vote` page uses (decision 12).
 
 ### 4.4 Prerender and meta
 
