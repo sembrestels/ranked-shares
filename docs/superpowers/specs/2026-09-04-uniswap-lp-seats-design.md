@@ -1,5 +1,11 @@
 # Uniswap v4 LP seats: liquidity providers as sponsored voters
 
+> Superseded on 2026-09-13 by the
+> [implemented proportional Arc demo](2026-09-13-uniswap-proportional-arc-demo.md).
+> This historical draft's whole-seat, reveal, privacy and manual-price assumptions
+> do not describe the implementation. Current prize eligibility is not established
+> by this draft.
+
 Status: draft, under discussion (2026-09-04). Uniswap Foundation prize entry for
 ETHOnline 2026. Builds on the seat ledger of
 `2026-09-04-sealed-seat-ballots-design.md` (A3 there) and must not conflict with its

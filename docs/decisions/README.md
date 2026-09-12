@@ -23,6 +23,8 @@ The process that uses them is `docs/design/PROCESS.md`.
 
 ## Records
 
+- [Allocate LP voting weight proportionally and automate the Arc demo with CRE](2026-09-13-allocate-lp-voting-weight-proportionally-with-cre.md) (accepted, 2026-09-13)
+
 - [Store ballots in Arkiv and calculate live results in the browser](2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md) (accepted, 2026-09-13)
 
 - [Adopt the frontend design process](2026-09-05-adopt-the-frontend-design-process.md) (accepted, 2026-09-05)

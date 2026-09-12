@@ -175,9 +175,15 @@ Commitments: plain from `ballotOf` and `weightOf` per voter; cre and zisk from
 
 ### 3.4 Errors
 
-`400` for a malformed address or id; `404` for an unknown project; `502` with
-`{ error: "rpc unavailable" }` when every RPC endpoint fails; `500` otherwise. The SPA
-shows the error's text in a Notice and keeps the last good snapshot on screen.
+`400` for a malformed address or id, and `400 { error: "pool too large" }` when a pool
+reports more than 255 projects or 10 000 voters (the API bounds the work one request
+can cause, since `?pool=` accepts any address); `404` for an unknown project; `502`
+with `{ error: "rpc unavailable" }` when every RPC endpoint fails, including during
+variant detection; `500` otherwise. The SPA shows the error's text in a Notice and
+keeps the last good snapshot on screen. The snapshot cache holds at most 64 pools and
+drops a pool whose only read failed. Content that cannot be resolved is remembered as
+unavailable for 60 seconds so a dead gateway does not stall every refresh; a body
+above 2 MB is refused without being read.
 
 ### 3.5 Configuration (`web/.env.example` gains these; secrets never `VITE_`)
 
@@ -190,6 +196,7 @@ WEB_ORIGIN=http://localhost:5174
 BEE_URL=                               # optional Bee node or gateway for proposal content
 SNAPSHOT_TTL_MS=15000
 ROSTER_PAGE=200
+CONTENT_TIMEOUT_MS=5000
 ```
 
 ## 4. The SPA
