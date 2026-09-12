@@ -24,3 +24,6 @@ The process that uses them is `docs/design/PROCESS.md`.
 ## Records
 
 - [Adopt the frontend design process](2026-09-05-adopt-the-frontend-design-process.md) (accepted, 2026-09-05)
+- [Build the frontend with Vite, React and TypeScript](2026-09-12-build-the-frontend-with-vite-react-and-typescript.md) (proposed, 2026-09-12)
+- [Connect wallets with wagmi, viem and RainbowKit](2026-09-12-connect-wallets-with-wagmi-viem-and-rainbowkit.md) (proposed, 2026-09-12)
+- [Store proposal content in Swarm and bind its hash on-chain](2026-09-12-store-proposal-content-in-swarm-and-bind-its-hash-on-chain.md) (proposed, 2026-09-12)

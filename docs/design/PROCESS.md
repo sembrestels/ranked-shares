@@ -86,4 +86,7 @@ tests) is unchanged. The design process feeds it:
 - 2026-09-12: four proto-personas drafted in `docs/design/personas.md` (donor,
   seat holder, organiser, proposer), confirmed by the decision-maker the same day.
   Job statements and forces in `docs/design/jobs.md`; current-state journey maps in
-  `docs/design/journey.md`. Discover gate pending: pain points await confirmation.
+  `docs/design/journey.md`. Discover gate closed 2026-09-12. Define drafted the same
+  day: `docs/design/hypotheses.md`, `docs/design/story-map.md` with a proposed R1
+  release line, and three proposed technology records (framework, wallet, proposal
+  storage). Define gate pending: the line and the records await the decision-maker.

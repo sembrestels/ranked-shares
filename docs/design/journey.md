@@ -315,5 +315,5 @@ hypotheses and story map.
 ## History
 
 - 2026-09-12: first draft from the runbook, the README, and the confirmed personas.
-  Awaiting the decision-maker's confirmation of the pain points, which closes the
-  Discover gate.
+  The decision-maker closed the Discover gate the same day, directing that all of it
+  serves the frontend design.
