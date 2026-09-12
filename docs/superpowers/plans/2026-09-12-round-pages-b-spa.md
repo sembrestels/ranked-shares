@@ -20,7 +20,7 @@
 - Never render proposal content as HTML: text nodes only, attachments downloaded as binary.
 - S5.8 ("Rank this project") is out of scope: no `/vote` route exists yet; the project page has no rank control in this slice.
 - Master gained the Arkiv ballots change on 2026-09-13 (`docs/decisions/2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md`): `/vote` and `/liquidity` routes exist, the shell's navigation lists them, and on Arkiv-enabled pools the API reports `ballots: "arkiv"` with zero commitments, so the round page computes public commitments and the provisional funded set in the browser with `readArkivVoters` (`prover/src/core/arkiv.ts`), `loadPayloads` (`app/lib/arkiv.ts`), and `pbearTranscript` (`shared/pbear.ts`), exactly as `/vote` does. The vote and liquidity pages belong to another session's work: do not edit `app/routes/vote.tsx`, `app/routes/liquidity.tsx`, `app/components/voting/`, `app/lib/arkiv.ts`, `app/lib/ballots.ts`, or `app/lib/lp.ts`; import from them.
-- Test counts: the vitest suite has 31 tests on master. Every "suite N pass" expectation below means "every existing test still passes plus this task's new ones"; do not chase the absolute number.
+- Test counts: the vitest suite has 48 tests on master (9 files). Every "suite N pass" expectation below means "every existing test still passes plus this task's new ones"; do not chase the absolute number.
 - Commits: one per task, imperative message, no attribution lines.
 
 ---
