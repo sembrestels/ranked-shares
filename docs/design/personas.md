@@ -266,3 +266,5 @@ hackathon `[ASSUMPTION]`.
 - 2026-09-05: first draft from repo notes, all assumptions untested.
 - 2026-09-12: added Proposer Pau, the project that receives the funds, as a secondary
   persona.
+- 2026-09-12: the four personas confirmed by the decision-maker as the working set for
+  the Discover phase. Assumptions remain untested.
