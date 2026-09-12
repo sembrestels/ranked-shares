@@ -1,31 +1,65 @@
-:root {
-  color-scheme: light;
-  --paper: #f4f1e9;
-  --surface: #fffcf5;
-  --ink: #262e29;
-  --muted: #66685c;
-  --accent: #993f2b;
-  --accent-hover: #7b301f;
-  --brand-muted: #e4b69d;
-  --green: #37573e;
-  --line: #d0cec1;
-  --line-strong: #858779;
-  --notice: #e7ecdf;
-  --error-bg: #f6e8df;
-  --font-body: "Verdana", "Geneva", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Georgia", serif;
-  --font-mono: "SFMono-Regular", "Consolas", monospace;
-  --text-tiny: 0.7rem;
-  --text-small: 0.8rem;
-  --text-body: 0.95rem;
-  --text-brand: 1.8rem;
-  --text-heading: 2rem;
-  --text-hero: clamp(3.3rem, 6vw, 5.6rem);
-  --text-hero-mobile: 3rem;
-  --line-body: 1.65;
-  --line-heading: 1.07;
-  --tracking-tight: -0.035em;
+/* Design tokens: docs/design/tokens.md. Three tiers, delivered through Tailwind v4.
+   Reference tier: the Blossom brand (blossom.software). Semantic tier: purpose names
+   that components use. Component tokens live next to each component. The names from
+   the first version of this file are kept at the bottom as aliases for one release. */
+@theme {
+  /* Reference: brand palette */
+  --color-green-dark: #2c4a34;
+  --color-green-muted: #617767;
+  --color-green-sage: #678a74;
+  --color-green-light: #afc7b9;
+  --color-pink-coral: #ff6a6a;
+  --color-pink-salmon: #fd8c8c;
+  --color-peach: #ffeadb;
+  --color-offwhite: #fafaf9;
+  --color-white: #ffffff;
+  /* Reference: derived, not brand */
+  --color-green-night: #16261b;
+  --color-green-deep: #1e3627;
+  --color-green-ink: #1a2b20;
+  --color-pink-deep: #d94f4f;
+  --color-peach-dark: #3b2e29;
+
+  /* Reference: type */
+  --font-body: "Lexend Deca", "Segoe UI", sans-serif;
+  --font-heading: "Kulim Park", "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Consolas", monospace;
+
+  /* Semantic: colour (light) */
+  --color-page: var(--color-offwhite);
+  --color-surface: var(--color-white);
+  --color-sunken: var(--color-peach);
+  --color-inverse: var(--color-green-dark);
+  --color-primary: var(--color-green-ink);
+  --color-secondary: var(--color-green-muted);
+  --color-on-inverse: var(--color-offwhite);
+  --color-on-accent: var(--color-white);
+  --color-edge: var(--color-green-light);
+  --color-edge-strong: var(--color-green-sage);
+  --color-focus: var(--color-pink-coral);
+  --color-accent: var(--color-green-sage);
+  --color-accent-hover: var(--color-green-dark);
+  --color-signal: var(--color-pink-coral);
+  --color-signal-text: var(--color-pink-deep);
+  --color-success: var(--color-green-dark);
+  --color-error: var(--color-pink-deep);
+  --color-error-bg: var(--color-peach);
+  --color-info-bg: color-mix(in oklab, var(--color-green-light) 30%, var(--color-offwhite));
+
+  /* Semantic: type scale */
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.95rem;
+  --text-lg: 1.8rem;
+  --text-xl: 2rem;
+  --text-2xl: 3rem;
+  --text-display: clamp(3.3rem, 6vw, 5.6rem);
+  --leading-body: 1.55;
+  --leading-heading: 1.1;
+  --tracking-tight: -0.02em;
   --tracking-wide: 0.12em;
+
+  /* Semantic: space, shape, motion */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -33,16 +67,114 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-12: 3.5rem;
-  --rule: 1px;
-  --accent-rule: 3px;
-  --focus-ring: 2px;
-  --radius: 2px;
-  --pill: 999px;
+  --radius-sm: 2px;
+  --radius-full: 999px;
+  --rule-width: 1px;
+  --rule-width-accent: 3px;
+  --focus-ring-width: 2px;
   --control-height: 44px;
   --text-area-height: 15rem;
-  --page-width: 1120px;
-  --reading-width: 820px;
-  --copy-width: 38rem;
-  --form-width: 900px;
-  --disabled: 0.6;
+  --width-page: 1120px;
+  --width-reading: 820px;
+  --width-copy: 38rem;
+  --width-form: 900px;
+  --opacity-disabled: 0.6;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Semantic: colour (dark). Only the mapping changes; components do not know. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-page: var(--color-green-night);
+  --color-surface: var(--color-green-deep);
+  --color-sunken: var(--color-green-dark);
+  --color-inverse: var(--color-offwhite);
+  --color-primary: var(--color-offwhite);
+  --color-secondary: var(--color-green-light);
+  --color-on-inverse: var(--color-green-dark);
+  --color-on-accent: var(--color-green-night);
+  --color-edge: var(--color-green-muted);
+  --color-edge-strong: var(--color-green-light);
+  --color-focus: var(--color-pink-salmon);
+  --color-accent: var(--color-green-light);
+  --color-accent-hover: var(--color-green-sage);
+  --color-signal: var(--color-pink-salmon);
+  --color-signal-text: var(--color-pink-salmon);
+  --color-success: var(--color-green-light);
+  --color-error: var(--color-pink-salmon);
+  --color-error-bg: var(--color-peach-dark);
+  --color-info-bg: var(--color-green-deep);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-page: var(--color-green-night);
+    --color-surface: var(--color-green-deep);
+    --color-sunken: var(--color-green-dark);
+    --color-inverse: var(--color-offwhite);
+    --color-primary: var(--color-offwhite);
+    --color-secondary: var(--color-green-light);
+    --color-on-inverse: var(--color-green-dark);
+    --color-on-accent: var(--color-green-night);
+    --color-edge: var(--color-green-muted);
+    --color-edge-strong: var(--color-green-light);
+    --color-focus: var(--color-pink-salmon);
+    --color-accent: var(--color-green-light);
+    --color-accent-hover: var(--color-green-sage);
+    --color-signal: var(--color-pink-salmon);
+    --color-signal-text: var(--color-pink-salmon);
+    --color-success: var(--color-green-light);
+    --color-error: var(--color-pink-salmon);
+    --color-error-bg: var(--color-peach-dark);
+    --color-info-bg: var(--color-green-deep);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+  }
+}
+
+/* Aliases for the first version's names. Remove as each component is rebuilt. */
+:root {
+  --paper: var(--color-page);
+  --surface: var(--color-surface);
+  --ink: var(--color-primary);
+  --muted: var(--color-secondary);
+  --accent: var(--color-accent);
+  --accent-hover: var(--color-accent-hover);
+  --brand-muted: var(--color-green-light);
+  --green: var(--color-success);
+  --line: var(--color-edge);
+  --line-strong: var(--color-edge-strong);
+  --notice: var(--color-info-bg);
+  --error-bg: var(--color-error-bg);
+  --font-display: var(--font-heading);
+  --text-tiny: var(--text-xs);
+  --text-small: var(--text-sm);
+  --text-body: var(--text-base);
+  --text-brand: var(--text-lg);
+  --text-heading: var(--text-xl);
+  --text-hero: var(--text-display);
+  --text-hero-mobile: var(--text-2xl);
+  --line-body: var(--leading-body);
+  --line-heading: var(--leading-heading);
+  --rule: var(--rule-width);
+  --accent-rule: var(--rule-width-accent);
+  --focus-ring: var(--focus-ring-width);
+  --radius: var(--radius-sm);
+  --pill: var(--radius-full);
+  --page-width: var(--width-page);
+  --reading-width: var(--width-reading);
+  --copy-width: var(--width-copy);
+  --form-width: var(--width-form);
+  --disabled: var(--opacity-disabled);
 }

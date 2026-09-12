@@ -91,6 +91,6 @@ a browser wallet are needed to validate a live upload and its retrieval on Swarm
 `app/components/proposals` composes them into presentational forms and review cards.
 Route containers and `app/hooks` own queries and mutations. `app/lib` holds the
 Swarm adapter, contract ABI, exact token parsing, and transaction guards.
-`app/tokens.css` supplies the shared visual tokens. The screens use native form
+`app/tokens.css` supplies the shared visual tokens as a Tailwind v4 `@theme` block (the Blossom brand palette and typefaces, light and dark), documented in `docs/design/tokens.md`; the first version's variable names remain as aliases until each component is rebuilt. The screens use native form
 controls, visible focus, descriptive labels, text status badges, and live error and
 progress announcements; attached files are never embedded in the document.

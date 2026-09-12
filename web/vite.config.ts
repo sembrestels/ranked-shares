@@ -1,8 +1,9 @@
 import { reactRouter } from "@react-router/dev/vite";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [!process.env.VITEST && reactRouter()],
+  plugins: [tailwindcss(), !process.env.VITEST && reactRouter()],
   // Match the house frontend's renderer: Deno otherwise selects React's browser
   // export, while React Router's SPA prerender entry needs the Node stream API.
   resolve: {
