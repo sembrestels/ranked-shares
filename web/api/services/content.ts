@@ -21,6 +21,9 @@ export const NEGATIVE_TTL_MS = 60_000;
 /** Refuse to read a declared body past this size; the content is discarded
  * as unavailable rather than a bound-sized read being attempted. */
 export const MAX_CONTENT_BYTES = 2_000_000;
+/** How many failed references to remember at once, so a burst of distinct
+ * bad references cannot grow the negative cache without bound. */
+export const MAX_NEGATIVE = 1_000;
 
 export function createContent(
   opts: { beeUrl: string | null; fetch: typeof fetch; timeoutMs: number; now: () => number },
@@ -33,6 +36,17 @@ export function createContent(
     reason,
   });
   const remember = (key: string, result: Resolved): Resolved => {
+    if (!negative.has(key) && negative.size >= MAX_NEGATIVE) {
+      let oldestKey: string | null = null;
+      let oldestAt = Infinity;
+      for (const [k, v] of negative) {
+        if (v.at < oldestAt) {
+          oldestAt = v.at;
+          oldestKey = k;
+        }
+      }
+      if (oldestKey !== null) negative.delete(oldestKey);
+    }
     negative.set(key, { result, at: opts.now() });
     return result;
   };
@@ -66,6 +80,7 @@ export function createContent(
       try {
         const content = parseContent(new Uint8Array(await res.arrayBuffer()));
         cache.set(key, content);
+        negative.delete(key);
         return { status: "ok", content, reason: null };
       } catch (e) {
         return remember(

@@ -50,6 +50,11 @@ export function createSnapshots(opts: {
     let oldestKey: string | null = null;
     let oldestAt = Infinity;
     for (const [k, v] of entries) {
+      // An in-flight read (including a first-time pool, whose `at` is 0)
+      // must never be evicted: doing so would drop it from the map while a
+      // concurrent caller's get() is about to look it up, making that caller
+      // start a duplicate read instead of joining the one already running.
+      if (v.pending !== null) continue;
       if (v.at < oldestAt) {
         oldestAt = v.at;
         oldestKey = k;

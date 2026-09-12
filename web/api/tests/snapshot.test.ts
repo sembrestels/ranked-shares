@@ -182,6 +182,44 @@ Deno.test("snapshots: bounds the cache to 64 pools, evicting the oldest on the 6
   assertEquals(reads, 66);
 });
 
+Deno.test("snapshots: never evicts a pool whose first read is still pending", async () => {
+  const addressFor = (i: number) => `0x${i.toString(16).padStart(40, "0")}` as `0x${string}`;
+  const key65 = addressFor(65).toLowerCase();
+  const reads: Record<string, number> = {};
+  const resolvers: Array<() => void> = [];
+  let t = 0;
+  const s = createSnapshots({
+    read: (pool) => {
+      const key = pool.toLowerCase();
+      reads[key] = (reads[key] ?? 0) + 1;
+      if (key === key65) {
+        return new Promise((resolve) => {
+          resolvers.push(() => resolve(facts(10)));
+        });
+      }
+      return Promise.resolve(facts(10));
+    },
+    titleOf: noTitle,
+    ttlMs: 1_000_000_000,
+    now: () => t,
+  });
+  for (let i = 1; i <= 64; i++) {
+    t = i;
+    await s.get(addressFor(i));
+  }
+  t = 65;
+  const first = s.get(addressFor(65)); // first-time read for pool 65: pending, at = 0
+  t = 66;
+  // Pool 66's read resolves immediately and runs evictIfFull while pool 65 is still pending.
+  await s.get(addressFor(66));
+  t = 67;
+  // A concurrent get for pool 65, still mid-flight: must reuse the pending read, not start another.
+  const second = s.get(addressFor(65));
+  for (const resolve of resolvers) resolve();
+  await Promise.all([first, second]);
+  assertEquals(reads[key65], 1);
+});
+
 Deno.test("snapshots: a failure inside the success handler resets the cache instead of poisoning it", async () => {
   let reads = 0;
   let broken = true;

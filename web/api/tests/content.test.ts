@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { createContent } from "../services/content.ts";
+import { createContent, MAX_NEGATIVE } from "../services/content.ts";
 
 const REF = ("0x" + "ab".repeat(32)) as `0x${string}`;
 const ZERO = ("0x" + "00".repeat(32)) as `0x${string}`;
@@ -96,6 +96,40 @@ Deno.test("content: a failure is negative-cached for 60s, then refetched", async
   const third = await c.get(REF);
   assertEquals(third.status, "unavailable");
   assertEquals(calls, 2);
+});
+
+Deno.test("content: the negative cache is bounded to MAX_NEGATIVE entries, forgetting the oldest", async () => {
+  const { f, urls } = fetchWith(() => new Response("nope", { status: 503 }));
+  const c = createContent({ beeUrl: "http://bee", fetch: f, timeoutMs: 100, now: () => 0 });
+  const refFor = (i: number) => ("0x" + (i + 1).toString(16).padStart(64, "0")) as `0x${string}`;
+  for (let i = 0; i < MAX_NEGATIVE + 1; i++) {
+    await c.get(refFor(i));
+  }
+  assertEquals(urls.length, MAX_NEGATIVE + 1);
+  // The first (oldest) failing ref was forgotten: fetching it again issues a new request,
+  // even though `now()` never advanced past the negative TTL.
+  await c.get(refFor(0));
+  assertEquals(urls.length, MAX_NEGATIVE + 2);
+});
+
+Deno.test("content: a ref that fails then succeeds is served from the positive cache with no negative entry", async () => {
+  let ok = false;
+  let t = 0;
+  const { f, urls } = fetchWith(() =>
+    ok ? new Response(manifest) : new Response("nope", { status: 503 })
+  );
+  const c = createContent({ beeUrl: "http://bee", fetch: f, timeoutMs: 100, now: () => t });
+  const first = await c.get(REF);
+  assertEquals(first.status, "unavailable");
+  t = 60; // past the negative TTL, so a retry is attempted
+  ok = true;
+  const second = await c.get(REF);
+  assertEquals(second.status, "ok");
+  assertEquals(urls.length, 2);
+  ok = false; // the gateway would fail again, but REF is now served from the positive cache
+  const third = await c.get(REF);
+  assertEquals(third.status, "ok");
+  assertEquals(urls.length, 2);
 });
 
 Deno.test("content: a too-large declared length is unavailable and the body is not read", async () => {
