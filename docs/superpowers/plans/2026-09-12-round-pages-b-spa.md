@@ -868,7 +868,7 @@ test("lists the seven steps and marks open as current with the deadline", () => 
   expect(current[0].textContent).toContain("Open");
   expect(current[0].textContent).toContain("Voting closes in 1 hour");
   expect(current[0].textContent).toContain("voting closes on");
-  expect(within(current[0]).getAllByRole("time")[1].getAttribute("dateTime")).toBe(new Date(DEADLINE * 1000).toISOString());
+  expect(current[0].querySelectorAll("time")[1].getAttribute("dateTime")).toBe(new Date(DEADLINE * 1000).toISOString());
 });
 
 test("setup marks proposals and setup current and shows the detail once", () => {
@@ -1143,6 +1143,7 @@ export const AUDIT_LABEL = "check this result yourself";
 import { expect, test } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
+import type { ReactElement } from "react";
 import { Board } from "../app/components/round/board";
 import { SealedPanel } from "../app/components/round/sealed-panel";
 import { YourBallot } from "../app/components/round/your-ballot";
@@ -1150,7 +1151,7 @@ import { Outcome } from "../app/components/round/outcome";
 import { RoundHeading } from "../app/components/round/round-heading";
 import { abandonedSnapshot, attestedSnapshot, DEADLINE, NOW, openSnapshot, provenSnapshot, provingNoirSnapshot } from "./fixtures/snapshots";
 
-const inRouter = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
+const inRouter = (ui: ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 test("Board lists projects by public commitment, descending, with name, cost, and commitment", () => {
   inRouter(<Board snapshot={openSnapshot} />);
@@ -1224,7 +1225,7 @@ test("Outcome lists the funded set in order, the finality in words, and the audi
 test("RoundHeading names the round, the pool total, and when the snapshot was taken", () => {
   render(<RoundHeading snapshot={openSnapshot} now={NOW} name="Autumn grants" />);
   expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Autumn grants");
-  expect(screen.getByText(/1,300 USDC in the pool/)).toBeTruthy();
+  expect(screen.getByRole("heading", { level: 1 }).nextElementSibling?.textContent).toBe("1,300 USDC in the pool");
   expect(screen.getByText("Updated 12 seconds ago")).toBeTruthy();
 });
 ```
@@ -1706,6 +1707,8 @@ In `web/test/workflow.test.tsx` change `import { ProposalBoard } from "../app/ro
 import { expect, test, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 
 vi.mock("wagmi", () => ({
   useAccount: () => ({ address: undefined, chainId: undefined }),
@@ -1717,14 +1720,18 @@ vi.mock("wagmi", () => ({
 }));
 vi.mock("../app/context/providers", () => ({
   chain: { id: 31337, name: "Anvil" },
-  Providers: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Providers: ({ children }: { children: ReactNode }) => <>{children}</>,
   useRound: () => ({ pool: undefined, setPool: () => {}, after: undefined, markMined: () => {} }),
   useSwarm: () => ({ client: undefined, info: undefined, error: undefined, retry: () => {} }),
 }));
 import { Shell } from "../app/root";
 
 test("the shell has the wordmark, the four navigation links, and the stage bar slot", () => {
-  render(<MemoryRouter><Shell><p>page</p></Shell></MemoryRouter>);
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter><Shell><p>page</p></Shell></MemoryRouter>
+    </QueryClientProvider>,
+  );
   const nav = screen.getByRole("navigation", { name: "Main" });
   expect(within(nav).getAllByRole("link").map((a) => a.textContent)).toEqual(["Round", "Proposals", "Submit an idea", "Organizer"]);
   expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual(["/", "/proposals", "/submit", "/setup"]);
