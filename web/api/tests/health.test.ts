@@ -1,8 +1,20 @@
 import { assertEquals } from "@std/assert";
 import { createApp } from "../app.ts";
 import { loadConfig } from "../config.ts";
+import type { Deps } from "../deps.ts";
 
-const deps = { config: loadConfig({ CHAIN_ID: "31337" }), now: () => 0, log: () => {} };
+const deps: Deps = {
+  config: loadConfig({ CHAIN_ID: "31337" }),
+  client: {} as Deps["client"],
+  snapshots: {
+    // deno-lint-ignore require-await
+    get: async () => {
+      throw new Error("unused");
+    },
+  },
+  now: () => 0,
+  log: () => {},
+};
 
 Deno.test("GET /healthz reports the chain and pool", async () => {
   const res = await createApp(deps).fetch(new Request("http://x/healthz"));

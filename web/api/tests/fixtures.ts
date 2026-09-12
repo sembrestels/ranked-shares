@@ -1,0 +1,58 @@
+import type { RoundSnapshot } from "../services/snapshot.ts";
+import { A, B, POOL, TOKEN } from "./fake-pool.ts";
+
+export const openSnapshot: RoundSnapshot = {
+  pool: POOL,
+  kind: "zisk",
+  chainId: 31337,
+  block: 123,
+  at: 1_700_000_000,
+  token: { address: TOKEN, symbol: "USDC", decimals: 6 },
+  phase: "open",
+  votingDeadline: 1_700_003_600,
+  totalWeight: "1300",
+  spent: "0",
+  claimedTotal: "0",
+  projects: [
+    {
+      id: 0,
+      cost: "4000",
+      recipient: B,
+      contentRef: "0x" + "ab".repeat(32) as `0x${string}`,
+      commitment: "1000",
+      funded: false,
+      claimed: false,
+      title: "Formal audit of the tally",
+    },
+    {
+      id: 1,
+      cost: "2500",
+      recipient: A,
+      contentRef: ("0x" + "00".repeat(32)) as `0x${string}`,
+      commitment: "300",
+      funded: false,
+      claimed: false,
+      title: null,
+    },
+  ],
+  fundedOrder: [],
+  proposalCount: 3,
+  voterCount: 2,
+  sealed: { total: "500", count: 1, commitmentsAvailable: true },
+  closing: { closed: false, cursor: 0 },
+  proving: null,
+  finality: null,
+  graces: { abandonFrom: null, provisionalFrom: null },
+  stage: {
+    current: "open",
+    steps: [
+      { key: "proposals", state: "done", label: "Proposals" },
+      { key: "setup", state: "done", label: "Setup" },
+      { key: "open", state: "current", label: "Open" },
+      { key: "closing", state: "next", label: "Closing" },
+      { key: "proving", state: "next", label: "Proving" },
+      { key: "proven", state: "next", label: "Proven" },
+      { key: "paid", state: "next", label: "Paid" },
+    ],
+  },
+};

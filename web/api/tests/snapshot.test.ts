@@ -1,0 +1,112 @@
+import { assertEquals, assertRejects } from "@std/assert";
+import { createSnapshots } from "../services/snapshot.ts";
+import { openSnapshot } from "./fixtures.ts";
+import { POOL } from "./fake-pool.ts";
+
+const facts = (block: number) => {
+  const { at: _at, stage: _stage, projects, ...rest } = openSnapshot;
+  return {
+    facts: { ...rest, block, projects: projects.map(({ title: _t, ...p }) => p) },
+    roster: new Set<string>(),
+  };
+};
+// deno-lint-ignore require-await
+const noTitle = async () => null;
+
+Deno.test("snapshots: reads once within the TTL and stamps at and stage", async () => {
+  let reads = 0;
+  let t = 1_000;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => {
+      reads++;
+      return facts(10);
+    },
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => t,
+  });
+  const first = await s.get(POOL);
+  assertEquals(first.snapshot.at, 1_000);
+  assertEquals(first.snapshot.stage.current, "open");
+  assertEquals(first.snapshot.projects.map((p) => p.title), [null, null]);
+  t = 1_010;
+  await s.get(POOL);
+  assertEquals(reads, 1);
+  t = 1_016;
+  await s.get(POOL);
+  assertEquals(reads, 2);
+});
+
+Deno.test("snapshots: concurrent callers share one read", async () => {
+  let reads = 0;
+  const s = createSnapshots({
+    read: async () => {
+      reads++;
+      await new Promise((r) => setTimeout(r, 5));
+      return facts(10);
+    },
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  await Promise.all([s.get(POOL), s.get(POOL), s.get(POOL)]);
+  assertEquals(reads, 1);
+});
+
+Deno.test("snapshots: minBlock forces a re-read when the cache is older, at most twice", async () => {
+  const blocks = [10, 10, 12];
+  let reads = 0;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => facts(blocks[reads++]),
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  await s.get(POOL);
+  const r = await s.get(POOL, 12);
+  assertEquals(r.snapshot.block, 12);
+  assertEquals(reads, 3);
+});
+
+Deno.test("snapshots: a failed read rejects and keeps the last good value for the next call", async () => {
+  let fail = false;
+  let t = 1_000;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => {
+      if (fail) throw new Error("rpc");
+      return facts(10);
+    },
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => t,
+  });
+  await s.get(POOL);
+  fail = true;
+  t = 1_020;
+  await assertRejects(() => s.get(POOL), Error, "rpc");
+  fail = false;
+  const again = await s.get(POOL);
+  assertEquals(again.snapshot.block, 10);
+});
+
+Deno.test("snapshots: titles come from titleOf per content reference; a zero reference or a failure gives null", async () => {
+  const asked: string[] = [];
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => facts(10),
+    // deno-lint-ignore require-await
+    titleOf: async (ref) => {
+      asked.push(ref);
+      if (ref.startsWith("0xabab")) return "Formal audit of the tally";
+      throw new Error("gateway down");
+    },
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  const { snapshot } = await s.get(POOL);
+  assertEquals(snapshot.projects.map((p) => p.title), ["Formal audit of the tally", null]);
+  assertEquals(asked.length, 1);
+});
