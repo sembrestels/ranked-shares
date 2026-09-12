@@ -43,21 +43,30 @@ export function createSnapshots(opts: {
 
   function start(key: string, pool: Address): Promise<Snapshot> {
     const e = entries.get(key) ?? { at: 0, value: null, pending: null };
-    const pending = opts.read(pool).then(async ({ facts, roster }) => {
-      const projects: SnapshotProject[] = await Promise.all(facts.projects.map(async (p) => ({
-        ...p,
-        title: p.contentRef.toLowerCase() === ZERO_REF
-          ? null
-          : await opts.titleOf(p.contentRef).catch(() => null),
-      })));
-      const at = opts.now();
-      const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };
-      entries.set(key, { at, value, pending: null });
-      return value;
-    }, (err) => {
-      entries.set(key, { at: e.at, value: e.value, pending: null });
-      throw err;
-    });
+    // A single .catch after the whole chain, not a second .then argument: a
+    // second .then argument only catches a rejection of opts.read itself, not
+    // a throw from anywhere later in the chain (per-project titles, stageOf,
+    // the entries.set below) — such a throw would otherwise leave `pending`
+    // pointed at a rejected promise forever, poisoning every later get().
+    const pending = opts.read(pool)
+      .then(async ({ facts, roster }) => {
+        const projects: SnapshotProject[] = await Promise.all(facts.projects.map(async (p) => ({
+          ...p,
+          // Wrapped so a titleOf that throws synchronously (not just one
+          // that rejects) is also swallowed to null.
+          title: p.contentRef.toLowerCase() === ZERO_REF
+            ? null
+            : await Promise.resolve().then(() => opts.titleOf(p.contentRef)).catch(() => null),
+        })));
+        const at = opts.now();
+        const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };
+        entries.set(key, { at, value, pending: null });
+        return value;
+      })
+      .catch((err) => {
+        entries.set(key, { at: e.at, value: e.value, pending: null });
+        throw err;
+      });
     entries.set(key, { ...e, pending });
     return pending;
   }

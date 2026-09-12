@@ -110,3 +110,46 @@ Deno.test("snapshots: titles come from titleOf per content reference; a zero ref
   assertEquals(snapshot.projects.map((p) => p.title), ["Formal audit of the tally", null]);
   assertEquals(asked.length, 1);
 });
+
+Deno.test("snapshots: a titleOf that throws synchronously gives null and does not poison the cache", async () => {
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => facts(10),
+    titleOf: (() => {
+      throw new Error("boom");
+    }) as unknown as (ref: `0x${string}`) => Promise<string | null>,
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  const first = await s.get(POOL);
+  assertEquals(first.snapshot.projects.map((p) => p.title), [null, null]);
+  const second = await s.get(POOL);
+  assertEquals(second.snapshot.projects.map((p) => p.title), [null, null]);
+});
+
+Deno.test("snapshots: a failure inside the success handler resets the cache instead of poisoning it", async () => {
+  let reads = 0;
+  let broken = true;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => {
+      reads++;
+      const f = facts(10);
+      return broken
+        ? {
+          facts: { ...f.facts, projects: null as unknown as typeof f.facts.projects },
+          roster: f.roster,
+        }
+        : f;
+    },
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  await assertRejects(() => s.get(POOL));
+  assertEquals(reads, 1);
+  broken = false;
+  const again = await s.get(POOL);
+  assertEquals(again.snapshot.block, 10);
+  assertEquals(reads, 2);
+});
