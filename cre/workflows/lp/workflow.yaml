@@ -1,0 +1,7 @@
+staging-settings:
+  user-workflow:
+    workflow-name: "ranked-shares-lp-demo"
+  workflow-artifacts:
+    workflow-path: "../../src/lp-main.ts"
+    config-path: "./config.staging.json"
+    secrets-path: "../sealed/secrets.yaml"

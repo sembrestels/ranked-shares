@@ -380,6 +380,27 @@ should not compete with — and size `--threads` to leave a couple of cores free
 has 16 threads and 30 GiB, so 14 is a reasonable default rather than
 `os.availableParallelism()`).
 
+## Uniswap LP voting: proportional Arc demo
+
+LPs can subscribe a Uniswap v4 position to earn voting weight from a sponsored
+budget, proportional to liquidity value multiplied by time. The position stays in
+their wallet; withdrawal or transfer stops future accrual and preserves earned
+credit. Registered LPs can cast an encrypted ballot before final allocation.
+
+The new [LP subscriber](src/uniswap/LPVoting.sol) tracks callbacks and allocation;
+[LPCreRankedShares](src/uniswap/LPCreRankedShares.sol) gates ballot closing until that
+allocation finishes. The [CRE workflow](cre/src/lp-workflow.ts) samples finalized pool
+prices, finalizes LP weight, closes Arkiv ballots and attests the tally. These are
+pool spot samples, not an independent oracle. Limits and privacy/trust assumptions
+are in the [implemented specification](docs/superpowers/specs/2026-09-13-uniswap-proportional-arc-demo.md).
+
+Open `/liquidity` for positions, projected weights and sponsorships. Follow the
+[Arc demo signing runbook](docs/superpowers/notes/2026-09-13-arc-lp-demo-runbook.md)
+to deploy pinned official v4 contracts, DAO/USDC and DAO/EURC pools, and two sponsored
+budgets. Local rehearsal and real-v4 integration tests pass; live Arc deployment and
+DON activation require the operator's configuration and signatures. Integration
+feedback is in [FEEDBACK.md](FEEDBACK.md).
+
 ## Off-chain: CRE workflow and secrets
 
 `cre/` is a bun project holding the shared TypeScript port of the reference (Poseidon2,

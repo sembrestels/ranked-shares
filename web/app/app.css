@@ -4,6 +4,22 @@
 .ballot-review-list { list-style: none; padding: 0; }
 .ballot-review-row { overflow-wrap: anywhere; }
 
+.liquidity-page, .lp-positions, .lp-campaigns { display: grid; gap: var(--space-6); }
+.lp-header { display: grid; gap: var(--space-4); max-width: var(--width-reading); padding-block: var(--space-6); }
+.lp-header > p:not(.eyebrow) { max-width: var(--width-copy); }
+.lp-campaign, .lp-sponsor { padding: var(--space-6); border: var(--rule) solid var(--line); background: var(--color-surface); display: grid; gap: var(--space-4); }
+.lp-card-heading, .lp-position { display: flex; justify-content: space-between; align-items: start; gap: var(--space-4); flex-wrap: wrap; }
+.lp-position { padding-block: var(--space-4); border-bottom: var(--rule) solid var(--line); }
+.lp-position h3 { margin-block: var(--space-2); font-family: var(--font-display); font-size: var(--text-lg); }
+.lp-campaign details { border-top: var(--rule) solid var(--line); padding-top: var(--space-4); }
+.lp-campaign details p { margin-top: var(--space-3); }
+.liquidity-page code { overflow-wrap: anywhere; }
+.lp-lookup { max-width: var(--width-copy); }
+.lp-lookup-controls { display: flex; gap: var(--space-4); align-items: center; }
+.lp-lookup-controls .input { flex: 1; min-width: 0; }
+.lp-lookup-controls .button { flex-shrink: 0; }
+.lp-sponsor .proposal-form { margin-top: var(--space-6); }
+
 .voting-page {
   display: grid;
   gap: var(--space-6);
@@ -163,6 +179,31 @@ code {
 }
 .connections .notice {
   font-size: var(--text-small);
+}
+.connection-popups {
+  position: fixed;
+  inset-inline-end: var(--space-4);
+  inset-block-end: var(--space-4);
+  z-index: var(--layer-notification);
+  width: min(var(--width-popup), calc(100% - var(--space-8)));
+  max-height: calc(100dvh - var(--space-8));
+  overflow-y: auto;
+  display: grid;
+  gap: var(--space-3);
+}
+.error-popup {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: var(--rule) solid var(--line-strong);
+  border-inline-start: var(--accent-rule) solid var(--color-error);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  overflow-wrap: anywhere;
+}
+.error-popup p {
+  margin-top: var(--space-2);
 }
 .page-heading {
   padding-block: var(--space-12);

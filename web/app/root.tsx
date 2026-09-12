@@ -11,7 +11,7 @@ import {
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { isAddress } from "viem";
 import { chain, Providers, useRound, useSwarm } from "./context/providers";
-import { Button, Field, Input, Notice } from "./components/ui";
+import { Button, ErrorPopup, Field, Input, Notice } from "./components/ui";
 import { errorMessage } from "./lib/proposals";
 import "./app.css";
 
@@ -23,7 +23,11 @@ export function Layout({ children }: { children: ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Proposals · RankedShares</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Kulim+Park:wght@400;600;700&family=Lexend+Deca:wght@300;400;500;600&display=swap"
@@ -48,6 +52,11 @@ function Connections() {
   const { client, info, error: swarmError, retry } = useSwarm();
   const [error, setError] = useState<string>();
   const [swarmBusy, setSwarmBusy] = useState(false);
+  const [dismissedSwarmError, setDismissedSwarmError] = useState<string>();
+  function retrySwarm() {
+    setDismissedSwarmError(undefined);
+    retry();
+  }
   async function connectWallet() {
     setError(undefined);
     try {
@@ -89,8 +98,8 @@ function Connections() {
         </Button>
         <Button
           variant="secondary"
-          disabled={!client || swarmBusy}
-          onClick={connectSwarm}
+          disabled={(!client && !swarmError) || swarmBusy}
+          onClick={!client && swarmError ? retrySwarm : connectSwarm}
         >
           {swarmBusy
             ? "Connecting…"
@@ -99,7 +108,7 @@ function Connections() {
             : client
             ? "Connect Swarm ID"
             : swarmError
-            ? "Swarm ID unavailable"
+            ? "Retry Swarm ID"
             : "Loading Swarm ID…"}
         </Button>
       </div>
@@ -132,13 +141,29 @@ function Connections() {
           </a>
         </Notice>
       )}
-      {swarmError && (
-        <Notice error>
-          Swarm ID could not load: {swarmError}{" "}
-          <Button variant="secondary" onClick={retry}>Retry Swarm ID</Button>
-        </Notice>
-      )}
-      {error && <Notice error>{error}</Notice>}
+      <div className="connection-popups">
+        {swarmError && swarmError !== dismissedSwarmError && (
+          <ErrorPopup
+            title="Swarm ID could not load"
+            onDismiss={() => setDismissedSwarmError(swarmError)}
+            actions={
+              <Button variant="secondary" onClick={retrySwarm}>
+                Retry Swarm ID
+              </Button>
+            }
+          >
+            {swarmError}
+          </ErrorPopup>
+        )}
+        {error && (
+          <ErrorPopup
+            title="Connection failed"
+            onDismiss={() => setError(undefined)}
+          >
+            {error}
+          </ErrorPopup>
+        )}
+      </div>
     </div>
   );
 }
@@ -202,6 +227,7 @@ function Shell() {
             <NavLink to={`/${search}`} end>Proposals</NavLink>
             <NavLink to={`/submit${search}`}>Submit an idea</NavLink>
             <NavLink to={`/vote${search}`}>Vote & results</NavLink>
+            <NavLink to={`/liquidity${search}`}>Liquidity</NavLink>
             <NavLink to={`/setup${search}`}>Organizer</NavLink>
           </nav>
         </div>

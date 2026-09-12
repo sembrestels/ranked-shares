@@ -5,6 +5,7 @@
   "scripts": {
     "test": "bun test",
     "compile": "bun x cre-compile src/main.ts dist/workflow.wasm",
+    "compile:lp": "bun x cre-compile src/lp-main.ts dist/lp-workflow.wasm",
     "sync-abi": "bash scripts/sync-abi.sh"
   },
   "dependencies": {

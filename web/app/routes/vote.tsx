@@ -73,7 +73,7 @@ export default function VotePage() {
     r.direct >= r.minimum &&
     (r.kind === "public" || r.publicRef?.revision === 0n);
   const canSealed = canVote && !!address && r.kind !== "public" &&
-    r.seats > 0n && r.seats >= r.minimumSealed;
+    ((r.seats > 0n && r.seats >= r.minimumSealed) || r.lpEligible);
   useEffect(() => {
     if (!canPublic && canSealed) setSealed(true);
     else if (canPublic && !canSealed) setSealed(false);

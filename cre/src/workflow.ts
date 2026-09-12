@@ -130,7 +130,7 @@ function call<T>(runtime: Runtime<Config>, evm: EVMClient, pool: Address, functi
   return callWith<T>(runtime, evm, pool, abi, functionName, args);
 }
 
-function arkivPayloads(runtime: Runtime<Config>, keys: readonly Hex[]): Map<string, Hex> {
+export function arkivPayloads(runtime: Runtime<Config>, keys: readonly Hex[]): Map<string, Hex> {
   if (!keys.length) return new Map();
   const http = new cre.capabilities.HTTPClient();
   // Agree on immutable key/payload pairs, not the head block number, which can

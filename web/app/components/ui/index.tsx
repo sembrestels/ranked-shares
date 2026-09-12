@@ -62,6 +62,28 @@ export function Status(
 ) {
   return <span className={`badge status-${status}`}>{children}</span>;
 }
+
+export function ErrorPopup(
+  { title, children, actions, onDismiss }: {
+    title: string;
+    children: ReactNode;
+    actions?: ReactNode;
+    onDismiss: () => void;
+  },
+) {
+  return (
+    <aside className="error-popup" aria-label={title}>
+      <div role="alert">
+        <strong>{title}</strong>
+        <p>{children}</p>
+      </div>
+      <div className="actions">
+        {actions}
+        <Button variant="secondary" onClick={onDismiss}>Dismiss</Button>
+      </div>
+    </aside>
+  );
+}
 export function Fact(
   { label, children }: { label: string; children: ReactNode },
 ) {

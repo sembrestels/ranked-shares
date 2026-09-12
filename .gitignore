@@ -2,6 +2,7 @@ cache/
 out/
 broadcast/
 .env
+.env.lp-demo
 __pycache__/
 reference/noir/tools/node_modules/
 reference/noir/tools/package-lock.json
@@ -18,3 +19,7 @@ prover/dist/
 web/node_modules/
 web/build/
 web/.react-router/
+v4/lib/
+v4/out/
+v4/cache/
+v4/broadcast/

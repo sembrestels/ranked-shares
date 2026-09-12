@@ -217,7 +217,7 @@ abstract contract SealedPool is PoolBase {
     ///         absent ballot in the tally, and only its owner loses by it.
     function voteSealed(bytes calldata ciphertext) external inPhase(Phase.Open) beforeDeadline {
         if (arkivBallots) revert ArkivBallotsRequired();
-        if (seatWeight[msg.sender] == 0) revert NoSeatWeight();
+        if (!_canVoteSealed(msg.sender)) revert NoSeatWeight();
         if (ciphertext.length != PK_LENGTH + _costs.length) revert InvalidCiphertext();
         _sealed[msg.sender] = ciphertext;
         _register(msg.sender);
@@ -243,7 +243,7 @@ abstract contract SealedPool is PoolBase {
         inPhase(Phase.Open)
         beforeDeadline
     {
-        if (seatWeight[msg.sender] == 0) revert NoSeatWeight();
+        if (!_canVoteSealed(msg.sender)) revert NoSeatWeight();
         if (payload.length != PK_LENGTH + _costs.length) revert InvalidCiphertext();
         _storeBallot(msg.sender, true, entityKey, payload, expectedRevision);
         _register(msg.sender);
@@ -306,6 +306,7 @@ abstract contract SealedPool is PoolBase {
     }
 
     function _closeResolved(uint256 maxVoters, BallotData[] memory ballots) internal {
+        _beforeClose();
         if (closeCursor == 0) _requireBalanceCoversBudget();
         uint256 n = voters.length;
         uint256 end = closeCursor + maxVoters;
@@ -404,6 +405,12 @@ abstract contract SealedPool is PoolBase {
     }
 
     // ----------------------------------------------------------------- hooks
+
+    function _canVoteSealed(address who) internal view virtual returns (bool) {
+        return seatWeight[who] > 0;
+    }
+
+    function _beforeClose() internal view virtual {}
 
     function _isSetup() internal view override returns (bool) {
         return phase() == Phase.Setup;

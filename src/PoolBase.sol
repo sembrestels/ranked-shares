@@ -361,7 +361,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
 
     // ------------------------------------------------------------- internals
 
-    function _deposit(uint256 amount) private {
+    function _deposit(uint256 amount) internal {
         if (amount == 0) revert ZeroAmount();
         token.safeTransferFrom(msg.sender, address(this), amount);
         _addBudget(amount);

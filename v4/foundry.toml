@@ -1,0 +1,24 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+allow_paths = ["../lib"]
+auto_detect_solc = true
+via_ir = true
+optimizer = true
+optimizer_runs = 200
+evm_version = "cancun"
+additional_compiler_profiles = [{ name = "permit", evm_version = "london" }]
+compilation_restrictions = [{ paths = "src/Permit.sol", evm_version = "london" }]
+fs_permissions = [{ access = "read", path = "out" }, { access = "read", path = "../out" }]
+remappings = [
+  "@openzeppelin/=lib/periphery/lib/v4-core/lib/openzeppelin-contracts/",
+  "@uniswap/v4-core/=lib/periphery/lib/v4-core/",
+  "v4-periphery/=lib/periphery/",
+  "permit2/=lib/periphery/lib/permit2/",
+  "solmate/=lib/periphery/lib/v4-core/lib/solmate/",
+  "openzeppelin-contracts/=lib/periphery/lib/v4-core/lib/openzeppelin-contracts/",
+  "forge-std/=../lib/forge-std/src/",
+]

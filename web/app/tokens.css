@@ -77,6 +77,8 @@
   --width-page: 1120px;
   --width-reading: 820px;
   --width-copy: 38rem;
+  --width-popup: 26rem;
+  --layer-notification: 20;
   --width-form: 900px;
   --opacity-disabled: 0.6;
   --duration-fast: 150ms;

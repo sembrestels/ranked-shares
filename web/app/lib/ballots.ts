@@ -1,4 +1,5 @@
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
+import { lpPoolAbi } from "../../../cre/src/lib/lp-abi";
 import {
   type Address,
   concat,
@@ -183,6 +184,9 @@ export async function readVoting(
     functionName: "seatWeight",
     args: [account],
   });
+  const lpEligible = !account || kind !== "cre" ? false : await client.readContract({
+    ...at, abi: lpPoolAbi, functionName: "canVoteLP", args: [account],
+  }).catch(() => false); // Older CRE rounds do not expose the LP extension.
   const publicRef = account
     ? await client.readContract({
       ...refs,
@@ -214,6 +218,7 @@ export async function readVoting(
     grace,
     direct,
     seats,
+    lpEligible,
     publicRef,
     sealedRef,
     minimum,

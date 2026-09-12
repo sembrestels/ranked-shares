@@ -1,0 +1,9 @@
+{
+  "schedule": "0 */2 * * * *",
+  "chainSelectorName": "arc-testnet",
+  "pools": [],
+  "lpModules": ["0x0000000000000000000000000000000000000000"],
+  "priceIntervalSeconds": 120,
+  "closeChunk": 25,
+  "gasLimit": "12000000"
+}

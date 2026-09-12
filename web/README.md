@@ -72,6 +72,24 @@ the remaining live-submission evidence. For an expiry demo, use a short-lived te
 record and record the same query before and after its native expiry block; passing
 local simulated tests alone does not establish mission completion.
 
+## Uniswap LP demo
+
+The CRE LP pool adds `/liquidity?pool=0x…`. It displays sponsored budgets, accepted
+price timestamps, per-wallet accumulated shares and projected final weights.
+Connect an LP wallet to register its PositionManager NFT with one subscription
+transaction. An eligible registered wallet can vote privately before weight is
+finalized. **Stop accruing** retains previously earned credit. After the deadline,
+the page offers permissionless chunked finalization if the CRE workflow needs help.
+
+Use a newly deployed `LPCreRankedShares` with its `LPVoting` module attached.
+`VITE_LP_FROM_BLOCK` should be the PositionManager deployment block: discovery scans
+Transfer logs in 2,000-block chunks, capped at 100,000 blocks. Manual NFT ID lookup
+remains available for older positions or RPC log limits. This is not a chain-wide
+Uniswap NFT indexer. The public price source is the sponsored pool itself, not an
+independent oracle. The
+[signing runbook](../docs/superpowers/notes/2026-09-13-arc-lp-demo-runbook.md)
+contains all Arc and CRE configuration.
+
 ## Run
 
 ```sh
