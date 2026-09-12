@@ -127,6 +127,61 @@ Deno.test("snapshots: a titleOf that throws synchronously gives null and does no
   assertEquals(second.snapshot.projects.map((p) => p.title), [null, null]);
 });
 
+Deno.test("snapshots: a failed first read leaves no entry, so the next read tries again", async () => {
+  let reads = 0;
+  let fail = true;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => {
+      reads++;
+      if (fail) throw new Error("rpc");
+      return facts(10);
+    },
+    titleOf: noTitle,
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  await assertRejects(() => s.get(POOL), Error, "rpc");
+  assertEquals(reads, 1);
+  fail = false;
+  const again = await s.get(POOL);
+  assertEquals(again.snapshot.block, 10);
+  assertEquals(reads, 2);
+});
+
+Deno.test("snapshots: bounds the cache to 64 pools, evicting the oldest on the 65th", async () => {
+  const addressFor = (i: number) => `0x${i.toString(16).padStart(40, "0")}` as `0x${string}`;
+  let reads = 0;
+  let t = 0;
+  const s = createSnapshots({
+    // deno-lint-ignore require-await
+    read: async () => {
+      reads++;
+      return facts(10);
+    },
+    titleOf: noTitle,
+    ttlMs: 1_000_000_000, // far longer than the test runs, so entries stay fresh
+    now: () => t,
+  });
+  for (let i = 1; i <= 64; i++) {
+    t = i;
+    await s.get(addressFor(i));
+  }
+  assertEquals(reads, 64);
+  // The 65th pool evicts pool #1, the oldest `at`.
+  t = 65;
+  await s.get(addressFor(65));
+  assertEquals(reads, 65);
+  // Pool #1 was evicted: reading it again is a fresh read.
+  t = 66;
+  await s.get(addressFor(1));
+  assertEquals(reads, 66);
+  // A recent pool (#64) is still cached: reading it triggers no read.
+  t = 67;
+  await s.get(addressFor(64));
+  assertEquals(reads, 66);
+});
+
 Deno.test("snapshots: a failure inside the success handler resets the cache instead of poisoning it", async () => {
   let reads = 0;
   let broken = true;

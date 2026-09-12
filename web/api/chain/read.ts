@@ -43,6 +43,13 @@ export interface ReadOptions {
   chainId: number;
 }
 
+/** Thrown before any roster or project read when a pool reports more work
+ * than a single request should do. */
+export class PoolTooLargeError extends Error {}
+/** The plain contract's own project cap (PBEAR.sol MAX_PROJECTS). */
+export const MAX_PROJECTS = 255;
+export const MAX_VOTERS = 10_000;
+
 type Abi = typeof plainAbi | typeof sealedAbi | typeof noirAbi;
 
 /** A loosely typed reader: the per-variant ABI is chosen at runtime, so the
@@ -179,6 +186,9 @@ export async function readRound(
 
   const m = Number(projectCount);
   const n = Number(voterCount);
+  if (m > MAX_PROJECTS || n > MAX_VOTERS) {
+    throw new PoolTooLargeError(`pool too large: ${m} projects, ${n} voters`);
+  }
   const roster = await readRoster(call, kind, n, opts.rosterPage);
   const commitments = kind === "noir"
     ? Array.from({ length: m }, () => 0n)

@@ -1,6 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { HttpRequestError } from "viem";
 import { createApp } from "../app.ts";
+import { PoolTooLargeError } from "../chain/read.ts";
 import { loadConfig } from "../config.ts";
 import type { Deps } from "../deps.ts";
 import { openSnapshot } from "./fixtures.ts";
@@ -68,4 +69,18 @@ Deno.test("GET /api/round answers 502 when the RPC is down", async () => {
   const res = await createApp(deps).fetch(new Request("http://x/api/round"));
   assertEquals(res.status, 502);
   assertEquals(await res.json(), { error: "rpc unavailable" });
+});
+
+Deno.test("GET /api/round answers 400 when the pool reports too much work", async () => {
+  const deps = depsWith({
+    snapshots: {
+      // deno-lint-ignore require-await
+      get: async () => {
+        throw new PoolTooLargeError("pool too large: 1 projects, 10001 voters");
+      },
+    },
+  });
+  const res = await createApp(deps).fetch(new Request("http://x/api/round"));
+  assertEquals(res.status, 400);
+  assertEquals(await res.json(), { error: "pool too large" });
 });

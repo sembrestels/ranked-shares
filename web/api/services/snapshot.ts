@@ -25,6 +25,10 @@ interface Entry {
   pending: Promise<Snapshot> | null;
 }
 
+/** How many pools' snapshots to keep at once, so an attacker cycling through
+ * ?pool= addresses cannot grow the cache without bound. */
+const MAX_ENTRIES = 64;
+
 export function createSnapshots(opts: {
   read: (pool: Address) => Promise<{ facts: RoundFacts; roster: Set<string> }>;
   /** A project's pitch title by content reference; null when there is none or it fails. */
@@ -39,6 +43,19 @@ export function createSnapshots(opts: {
     if ((opts.now() - e.at) * 1000 >= opts.ttlMs) return null;
     if (minBlock !== undefined && e.value.snapshot.block < minBlock) return null;
     return e.value;
+  }
+
+  function evictIfFull() {
+    if (entries.size <= MAX_ENTRIES) return;
+    let oldestKey: string | null = null;
+    let oldestAt = Infinity;
+    for (const [k, v] of entries) {
+      if (v.at < oldestAt) {
+        oldestAt = v.at;
+        oldestKey = k;
+      }
+    }
+    if (oldestKey !== null) entries.delete(oldestKey);
   }
 
   function start(key: string, pool: Address): Promise<Snapshot> {
@@ -61,10 +78,12 @@ export function createSnapshots(opts: {
         const at = opts.now();
         const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };
         entries.set(key, { at, value, pending: null });
+        evictIfFull();
         return value;
       })
       .catch((err) => {
-        entries.set(key, { at: e.at, value: e.value, pending: null });
+        if (e.value === null) entries.delete(key);
+        else entries.set(key, { at: e.at, value: e.value, pending: null });
         throw err;
       });
     entries.set(key, { ...e, pending });

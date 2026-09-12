@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { HttpRequestError, TimeoutError } from "viem";
+import { isRpcDown } from "./chain/rpc-down.ts";
+import { PoolTooLargeError } from "./chain/read.ts";
 import type { Deps } from "./deps.ts";
 import { healthRoutes } from "./routes/health.ts";
 import { projectRoutes } from "./routes/project.ts";
@@ -13,18 +14,11 @@ export class HttpError extends Error {
   }
 }
 
-/** viem wraps transport failures in ContractFunctionExecutionError; walk the causes. */
-export function isRpcDown(err: unknown): boolean {
-  for (let e: any = err; e; e = e.cause) {
-    if (e instanceof HttpRequestError || e instanceof TimeoutError) return true;
-  }
-  return false;
-}
-
 export function createApp(deps: Deps) {
   const app = new Hono();
   app.onError((err, c) => {
     if (err instanceof HttpError) return c.json({ error: err.message }, err.status as 400);
+    if (err instanceof PoolTooLargeError) return c.json({ error: "pool too large" }, 400);
     if (isRpcDown(err)) {
       deps.log(`rpc unavailable: ${err.message}`);
       return c.json({ error: "rpc unavailable" }, 502);

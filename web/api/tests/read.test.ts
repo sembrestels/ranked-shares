@@ -1,10 +1,15 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertRejects } from "@std/assert";
+import type { Address } from "viem";
 import { erc20Abi, noirAbi, plainAbi, sealedAbi } from "../chain/abi.ts";
 import { createClient } from "../chain/client.ts";
-import { readRound } from "../chain/read.ts";
+import { PoolTooLargeError, readRound } from "../chain/read.ts";
 import { A, B, fakeTransport, POOL, TOKEN } from "./fake-pool.ts";
 
 const ZERO = "0x" + "00".repeat(32);
+// Anvil default accounts #2-#4: distinct addresses for multi-voter roster paging.
+const C = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" as const;
+const D = "0x90F79bf6EB2c4f870365E785982E1f101E93b906" as const;
+const E = "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65" as const;
 const tokenContract = {
   address: TOKEN,
   abi: erc20Abi,
@@ -208,4 +213,110 @@ Deno.test("readRound: token symbol falls back to 'tokens'", async () => {
   const { facts } = await readRound(client, POOL, { rosterPage: 200, chainId: 31337 });
   assertEquals(facts.token.symbol, "tokens");
   assertEquals(facts.phase, "setup");
+});
+
+Deno.test("readRound: a pool reporting more voters than the limit rejects without reading them", async () => {
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: plainAbi,
+      handlers: {
+        ...common,
+        phase: () => 1,
+        votingOpen: () => true,
+        tallyStarted: () => false,
+        tallyDone: () => false,
+        rankLevel: () => 0n,
+        voterCount: () => 10_001n,
+        voterAt: () => {
+          throw new Error("voterAt should not be called");
+        },
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  await assertRejects(
+    () => readRound(client, POOL, { rosterPage: 200, chainId: 31337 }),
+    PoolTooLargeError,
+    "pool too large: 2 projects, 10001 voters",
+  );
+});
+
+Deno.test("readRound: zisk pool pages the roster and sums commitments across pages", async () => {
+  const voters: [Address, bigint][] = [[C, 100n], [D, 200n], [E, 300n]];
+  let calls = 0;
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: sealedAbi,
+      handlers: {
+        ...common,
+        kind: () => "zisk",
+        phase: () => 3,
+        votingOpen: () => true,
+        finality: () => 0,
+        closed: () => true,
+        closeCursor: () => 3n,
+        abandonGrace: () => 604_800n,
+        totalSeatWeight: () => 0n,
+        projectCount: () => 1n,
+        cost: () => 4_000n,
+        contentRefOf: () => ZERO,
+        voterCount: () => 3n,
+        votersFrom: ([start, count]) => {
+          assertEquals([Number(start as bigint), Number(count as bigint)], [calls, 1]);
+          const [addr, weight] = voters[calls];
+          calls++;
+          // ballot "0x01": the pool's one project ranked first.
+          return [[addr], [weight], [0n], ["0x01"], ["0x"]];
+        },
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { facts } = await readRound(client, POOL, { rosterPage: 1, chainId: 31337 });
+  assertEquals(calls, 3);
+  assertEquals(facts.projects.map((p) => p.commitment), ["600"]);
+});
+
+Deno.test("readRound: noir pool pages the roster and reports every address", async () => {
+  const addresses = [C, D, E];
+  let calls = 0;
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: noirAbi,
+      handlers: {
+        ...common,
+        profileId: () => "0x" + "ab".repeat(32),
+        phase: () => 3,
+        votingOpen: () => true,
+        finality: () => 0,
+        closed: () => true,
+        closeCursor: () => 3n,
+        abandonGrace: () => 604_800n,
+        proofGrace: () => 86_400n,
+        reportedAt: () => 0n,
+        resultReported: () => false,
+        ingestCursor: () => 0n,
+        numBatches: () => 4n,
+        sealedCount: () => 0n,
+        totalSeatWeight: () => 0n,
+        voterCount: () => 3n,
+        votersFrom: ([start, count]) => {
+          assertEquals([Number(start as bigint), Number(count as bigint)], [calls, 1]);
+          const addr = addresses[calls];
+          calls++;
+          return [[addr], [0n], [0n], [0n], [[0n, 0n, 0n]], [false]];
+        },
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { roster } = await readRound(client, POOL, { rosterPage: 1, chainId: 31337 });
+  assertEquals(calls, 3);
+  assertEquals(roster.size, 3);
 });
