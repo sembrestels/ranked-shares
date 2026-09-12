@@ -2286,7 +2286,12 @@ Deno.test("serveStatic: files, immutable assets, and the SPA fallback", async ()
   await shell.body?.cancel();
   const deep = await serveStatic(new Request("http://x/project/3"), root);
   assertEquals(deep.status, 200);
+  assertEquals(deep.headers.get("cache-control"), "no-cache");
   assertEquals(await deep.text(), "<!doctype html><title>shell</title>");
+  const missing = await serveStatic(new Request("http://x/assets/missing-xyz.js"), root);
+  assertEquals(missing.status, 404);
+  assertEquals(missing.headers.get("cache-control")?.includes("immutable") ?? false, false);
+  await missing.body?.cancel();
 });
 ```
 
@@ -2326,12 +2331,14 @@ export async function serveStatic(req: Request, root: string): Promise<Response>
   const { pathname } = new URL(req.url);
   const res = await serveDir(req, { fsRoot: root, quiet: true });
   if (res.status !== 404) return withCaching(res, pathname);
+  // A missing hashed asset is a real 404; never answer it with the HTML shell.
+  if (pathname.startsWith("/assets/")) return res;
   await res.body?.cancel();
   const fallback = await serveDir(new Request(new URL("/index.html", req.url), req), {
     fsRoot: root,
     quiet: true,
   });
-  return withCaching(fallback, pathname);
+  return withCaching(fallback, "/index.html");
 }
 ```
 
@@ -2407,6 +2414,7 @@ function artifact(name: string) {
 function available(): boolean {
   try {
     artifact("RankedShares");
+    artifact("MockERC20");
     return new Deno.Command("anvil", { args: ["--version"], stdout: "null", stderr: "null" }).outputSync().success;
   } catch {
     return false;
