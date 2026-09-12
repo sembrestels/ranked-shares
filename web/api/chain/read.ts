@@ -1,6 +1,6 @@
 /** One consistent read of a pool: block number first, then every view pinned
  * to it, through the ABI of the detected variant. Spec section 3.3. */
-import { type Address, getAddress, type Hex, type PublicClient } from "viem";
+import { type Address, getAddress, type Hex, hexToBytes, type PublicClient } from "viem";
 import { erc20Abi, noirAbi, plainAbi, sealedAbi } from "./abi.ts";
 import { detectKind, type Kind } from "./kind.ts";
 import { commitmentsFrom, type RosterEntry } from "../services/commitments.ts";
@@ -280,4 +280,62 @@ export async function readRound(
     graces,
   };
   return { facts, roster: roster.addresses };
+}
+
+export interface VoterFacts {
+  weight: { direct: string; seats: string; total: string };
+  ballot: { public: { ranks: number[] } | null; sealed: boolean };
+}
+
+export async function readVoter(
+  client: PublicClient,
+  pool: Address,
+  kind: Kind,
+  address: Address,
+  blockNumber: bigint,
+): Promise<VoterFacts> {
+  const call = reader(client, pool, abiFor(kind), blockNumber);
+  if (kind === "plain") {
+    const [weight, ballot] = await Promise.all([
+      call("weightOf", [address]),
+      call("ballotOf", [address]),
+    ]) as [bigint, Hex];
+    return {
+      weight: { direct: weight.toString(), seats: "0", total: weight.toString() },
+      ballot: {
+        public: ballot === "0x" ? null : { ranks: Array.from(hexToBytes(ballot)) },
+        sealed: false,
+      },
+    };
+  }
+  const [direct, seats] = await Promise.all([
+    call("directWeight", [address]),
+    call("seatWeight", [address]),
+  ]) as [bigint, bigint];
+  const weight = {
+    direct: direct.toString(),
+    seats: seats.toString(),
+    total: (direct + seats).toString(),
+  };
+  if (kind === "noir") {
+    const [hasDirect, sealed] = await Promise.all([
+      call("hasDirect", [address]),
+      call("sealedOf", [address]),
+    ]) as [boolean, [bigint, bigint, bigint]];
+    return {
+      weight,
+      ballot: { public: hasDirect ? { ranks: [] } : null, sealed: sealed[0] !== 0n },
+    };
+  }
+  const [ballot, ct] = await Promise.all([
+    call("directBallotOf", [address]),
+    call("sealedOf", [address]),
+  ]) as [Hex, Hex];
+  return {
+    weight,
+    ballot: {
+      public: ballot === "0x" ? null : { ranks: Array.from(hexToBytes(ballot)) },
+      sealed: ct !== "0x",
+    },
+  };
 }

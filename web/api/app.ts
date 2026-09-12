@@ -5,6 +5,7 @@ import type { Deps } from "./deps.ts";
 import { healthRoutes } from "./routes/health.ts";
 import { projectRoutes } from "./routes/project.ts";
 import { roundRoutes } from "./routes/round.ts";
+import { voterRoutes } from "./routes/voter.ts";
 
 export class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -39,5 +40,6 @@ export function createApp(deps: Deps) {
   app.route("/healthz", healthRoutes(deps));
   app.route("/api/round", roundRoutes(deps));
   app.route("/api/project", projectRoutes(deps));
+  app.route("/api/voter", voterRoutes(deps));
   return app;
 }
