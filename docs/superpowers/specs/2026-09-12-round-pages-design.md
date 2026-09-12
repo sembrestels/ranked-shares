@@ -69,6 +69,13 @@ function or one label.
 10. **Prerender** `/`, `/proposals`, `/submit`, `/submit/thanks`, and `/project/:id`
     for every project id read from `POOL_ADDRESS` at build time; when the pool is
     unset or unreachable the build logs a warning and prerenders the fixed routes only.
+12. **Arkiv-mode pools** (added 2026-09-13 after the accepted record "Store ballots in
+    Arkiv and calculate live results in the browser"). When a pool has Arkiv ballot
+    storage enabled, the legacy ballot getters revert, so the API reads the roster
+    through `voterRefsFrom`, reports `ballots: "arkiv"` and `commitmentsAvailable:
+    false`, and computes no commitments; the round page then computes public
+    results in the browser from Arkiv with the shared tally, as the `/vote` page
+    already does. For legacy pools (`ballots: "chain"`) the API's commitments stand.
 11. **Copy** is fixed here and reused verbatim (design principle 3):
     - Proven: "the sealed ballots were proven against their commitments and the public
       ballots can be replayed from chain data"
@@ -131,6 +138,7 @@ interface RoundSnapshot {
   projects: ProjectView[]; fundedOrder: number[];
   proposalCount: number; voterCount: number;
   sealed: { total: string; count: number; commitmentsAvailable: boolean };
+  ballots: "chain" | "arkiv";   // where ballots live; "arkiv" means the browser computes public results
   closing: { closed: boolean; cursor: number } | null;
   proving: { accepted: number; total: number | null } | null;
   finality: Finality | null;

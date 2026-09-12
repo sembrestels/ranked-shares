@@ -2556,3 +2556,192 @@ Expected: all API tests pass including the Anvil test, lint clean, both checks c
 git add api server.ts deno.json .env.example README.md ../README.md
 git commit -m "Serve the API next to the built SPA, document it, and test it end to end on Anvil"
 ```
+
+---
+
+### Task 10: Arkiv-mode pools (added 2026-09-13 after the Arkiv ballots decision)
+
+**Context:** `docs/decisions/2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md` (accepted) adds owner-enabled Arkiv ballot storage to every pool variant. In that mode the legacy getters `ballotOf`, `directBallotOf`, `sealedOf`, and `votersFrom` revert with `ArkivBallotsRequired`, and live public results are computed in the browser from Arkiv, not by any service. The plain pool now answers `kind()` with `"public"` and the Noir pool with `"noir"`. The API must keep working on such pools: it serves the stage, projects, titles, weights, and roster membership, and reports that commitments are the browser's job.
+
+**Files:**
+- Modify: `web/api/chain/abi.ts`, `web/api/chain/kind.ts`, `web/api/chain/read.ts`, `web/api/services/snapshot.ts` (type only), `web/README.md`
+- Test: `web/api/tests/kind.test.ts`, `web/api/tests/read.test.ts`, `web/api/tests/voter.test.ts`, `web/api/tests/fixtures.ts`
+
+**Interfaces:**
+- Produces: `RoundFacts.ballots: "chain" | "arkiv"` (new field, carried into `RoundSnapshot` and the JSON); `readRound` and `readVoter` work in both modes; `detectKind` maps `kind()` strings `"public"` → plain, `"cre"`, `"zisk"`, `"noir"` directly, and keeps the `profileId()` fallback for pools deployed before `kind()` existed on Noir.
+
+- [ ] **Step 1: ABI additions (`web/api/chain/abi.ts`)**
+
+Add to `base` (so every variant ABI has them):
+
+```ts
+  "function kind() pure returns (string)",
+  "function arkivBallots() view returns (bool)",
+  "struct BallotRef { bytes32 entityKey; bytes32 payloadHash; uint256 revision; uint256 blockNumber; }",
+  "function ballotRefOf(address voter, bool isSealed) view returns (BallotRef)",
+  "function voterRefsFrom(uint256 start, uint256 count) view returns (address[] who, uint256[] direct, uint256[] seats, BallotRef[] publicRefs, BallotRef[] sealedRefs)",
+```
+
+and remove the now-duplicate `"function kind() pure returns (string)"` line from `sealedAbi`. viem's `parseAbi` accepts struct declarations in the same array.
+
+- [ ] **Step 2: Failing kind tests (`web/api/tests/kind.test.ts`)**
+
+Add:
+
+```ts
+Deno.test("detectKind: kind() = public is the plain pool", async () => {
+  const client = clientFor(plainAbi, { kind: () => "public" });
+  assertEquals(await detectKind(client, POOL, 100n), "plain");
+});
+
+Deno.test("detectKind: kind() = noir is noir without probing profileId", async () => {
+  const { transport, calls } = fakeTransport([{ address: POOL, abi: noirAbi, handlers: { kind: () => "noir" } }]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  assertEquals(await detectKind(client, POOL, 100n), "noir");
+  assertEquals(calls.filter((m) => m === "eth_call").length, 1);
+});
+```
+
+(`clientFor` in that file builds a client over `fakeTransport`; reuse it. The existing "neither = plain" and "no kind() but profileId()" tests stay.)
+
+- [ ] **Step 3: `detectKind` (`web/api/chain/kind.ts`)**
+
+```ts
+export async function detectKind(client: PublicClient, pool: Address, blockNumber: bigint): Promise<Kind> {
+  try {
+    const k = await client.readContract({ address: pool, abi: sealedAbi, functionName: "kind", blockNumber });
+    if (k === "public") return "plain";
+    if (k === "cre" || k === "zisk" || k === "noir") return k;
+  } catch (e) {
+    if (isRpcDown(e)) throw e;
+    // no kind(): a pool deployed before it existed
+  }
+  try {
+    await client.readContract({ address: pool, abi: noirAbi, functionName: "profileId", blockNumber });
+    return "noir";
+  } catch (e) {
+    if (isRpcDown(e)) throw e;
+  }
+  return "plain";
+}
+```
+
+- [ ] **Step 4: Failing read tests (`web/api/tests/read.test.ts`)**
+
+Add a zisk Arkiv-mode case and a plain Arkiv-mode case. Fixture refs: `const REF = (k: bigint) => ({ entityKey: ("0x" + k.toString(16).padStart(64, "0")) as Hex, payloadHash: ("0x" + "11".repeat(32)) as Hex, revision: k === 0n ? 0n : 1n, blockNumber: k === 0n ? 0n : 120n });` and a zero ref `REF(0n)`.
+
+```ts
+Deno.test("readRound: zisk pool in Arkiv mode uses voterRefsFrom and leaves commitments to the browser", async () => {
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: sealedAbi,
+      handlers: {
+        ...common,
+        kind: () => "zisk",
+        arkivBallots: () => true,
+        phase: () => 1,
+        votingOpen: () => true,
+        finality: () => 0,
+        closed: () => false,
+        closeCursor: () => 0n,
+        abandonGrace: () => 604_800n,
+        totalSeatWeight: () => 500n,
+        votersFrom: () => { throw new Error("legacy getter must not be called in Arkiv mode"); },
+        voterRefsFrom: ([start, count]) => {
+          if (BigInt(start as bigint) !== 0n || BigInt(count as bigint) !== 2n) throw new Error("bad page");
+          return [[A, B], [1_000n, 0n], [0n, 500n], [REF(1n), REF(0n)], [REF(0n), REF(2n)]];
+        },
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { facts, roster } = await readRound(client, POOL, { rosterPage: 200, chainId: 31337 });
+  assertEquals(facts.ballots, "arkiv");
+  assertEquals(facts.projects.map((p) => p.commitment), ["0", "0"]);
+  assertEquals(facts.sealed, { total: "500", count: 1, commitmentsAvailable: false });
+  assertEquals(roster, new Set([A.toLowerCase(), B.toLowerCase()]));
+});
+
+Deno.test("readRound: plain pool in Arkiv mode", async () => {
+  const { transport } = fakeTransport([
+    tokenContract,
+    {
+      address: POOL,
+      abi: plainAbi,
+      handlers: {
+        ...common,
+        kind: () => "public",
+        arkivBallots: () => true,
+        phase: () => 1,
+        votingOpen: () => true,
+        tallyStarted: () => false,
+        tallyDone: () => false,
+        rankLevel: () => 0n,
+        voterAt: () => { throw new Error("legacy roster must not be walked in Arkiv mode"); },
+        voterRefsFrom: () => [[A, B], [1_000n, 300n], [0n, 0n], [REF(1n), REF(2n)], [REF(0n), REF(0n)]],
+      },
+    },
+  ]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  const { facts, roster } = await readRound(client, POOL, { rosterPage: 200, chainId: 31337 });
+  assertEquals(facts.kind, "plain");
+  assertEquals(facts.ballots, "arkiv");
+  assertEquals(facts.sealed.commitmentsAvailable, false);
+  assertEquals(roster.size, 2);
+});
+```
+
+Every existing test keeps passing because `arkivBallots` is absent from their handlers: the reader treats a reverting `arkivBallots()` as `false` (an older deployment). Assert that explicitly in the existing plain open-phase test: `assertEquals(facts.ballots, "chain");`.
+
+- [ ] **Step 5: `readRound` and `readRoster` (`web/api/chain/read.ts`)**
+
+- Add `ballots: "chain" | "arkiv"` to `RoundFacts`.
+- After `detectKind`, read `const arkiv = await call("arkivBallots").catch(() => false) as boolean;` (pinned to the block like every read).
+- `readRoster(call, kind, voterCount, page, arkiv)`: when `arkiv` is true, for every variant page through `voterRefsFrom(start, count)`; `res[0]` who, `res[1]` direct, `res[3]` publicRefs, `res[4]` sealedRefs (each a `{ entityKey, payloadHash, revision, blockNumber }` object as viem decodes structs); add every `who` to `addresses`; `sealedCount` counts `sealedRefs[i].entityKey !== ZERO32`; push no `entries` (commitments are the browser's). When `arkiv` is false keep the existing legacy paths unchanged.
+- `commitmentsAvailable: kind !== "noir" && !arkiv`; commitments are zeros when `arkiv`.
+- `ballots: arkiv ? "arkiv" : "chain"` in the facts.
+- `readVoter(client, pool, kind, address, blockNumber)`: read `arkivBallots` the same way; when true, weights come from `weightOf` (plain) or `directWeight`/`seatWeight` (others) as today, and ballots from `ballotRefOf(address, false)` and `ballotRefOf(address, true)`: `public: ref.entityKey !== ZERO32 ? { ranks: [] } : null`, `sealed: sealedRef.entityKey !== ZERO32`. Legacy mode unchanged. Define `const ZERO32 = "0x" + "00".repeat(32);` once at the top of the file.
+
+- [ ] **Step 6: Voter test (`web/api/tests/voter.test.ts`)**
+
+```ts
+Deno.test("readVoter: zisk pool in Arkiv mode reports presence from ballotRefOf", async () => {
+  const ref = (k: bigint) => ({ entityKey: ("0x" + k.toString(16).padStart(64, "0")) as `0x${string}`, payloadHash: ("0x" + "11".repeat(32)) as `0x${string}`, revision: k === 0n ? 0n : 1n, blockNumber: k === 0n ? 0n : 120n });
+  const { transport } = fakeTransport([{
+    address: POOL,
+    abi: sealedAbi,
+    handlers: {
+      arkivBallots: () => true,
+      directWeight: () => 0n,
+      seatWeight: () => 500n,
+      directBallotOf: () => { throw new Error("legacy getter"); },
+      ballotRefOf: ([, isSealed]) => (isSealed ? ref(2n) : ref(0n)),
+    },
+  }]);
+  const client = createClient({ rpcUrls: ["http://fake"], chainId: 31337, transport });
+  assertEquals(await readVoter(client, POOL, "zisk", B, 100n), {
+    weight: { direct: "0", seats: "500", total: "500" },
+    ballot: { public: null, sealed: true },
+  });
+});
+```
+
+- [ ] **Step 7: Fixture and type (`web/api/tests/fixtures.ts`, `web/api/services/snapshot.ts`)**
+
+Add `ballots: "chain"` to `openSnapshot`. `RoundSnapshot` inherits the field from `RoundFacts`; no other change. The route tests compare the fixture, so they keep passing.
+
+- [ ] **Step 8: README**
+
+In `web/README.md` "The read API" section add: "On a pool with Arkiv ballot storage enabled the API reports `ballots: "arkiv"`, `commitmentsAvailable: false`, and zero commitments: public results are computed in the browser from Arkiv (decision of 2026-09-13); the API still serves the stage, projects, titles, weights, and roster membership through `voterRefsFrom`."
+
+- [ ] **Step 9: Run everything and commit**
+
+Run: `deno test -A api/ && deno lint && deno task check:api`
+Expected: all pass (the Anvil test deploys the current `RankedShares`, which stays in legacy mode, so its expectations are unchanged).
+
+```bash
+git add api README.md
+git commit -m "Serve Arkiv-mode pools: roster from voterRefsFrom, commitments left to the browser"
+```
