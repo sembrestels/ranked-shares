@@ -96,6 +96,7 @@ tests) is unchanged. The design process feeds it:
   (three tiers, light and dark, mapped from `web/app/tokens.css`), 79 stories under
   `docs/design/stories/`, and a proposed visual direction record. Palette and delivery
   decided the same evening (Blossom brand, Tailwind v4) and landed in `web/app/tokens.css`.
-  Develop gate pending: principles, hierarchy, and stories await the decision-maker. The `web/`
+  Develop gate closed 2026-09-12: principles, hierarchy, and stories approved. Deliver
+  in progress, first slice: app shell, stage bar, round page, project page. The `web/`
   package on master (proposals, Swarm ID, review, editing) predates the gate; its
   stories are marked built.

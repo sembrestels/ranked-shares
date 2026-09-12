@@ -134,4 +134,4 @@ before a slice is called done and their findings become stories.
 ## History
 
 - 2026-09-12: first draft after the Define gate, inventoried against the `web/`
-  package that landed the same day.
+  package that landed the same day. Principles and hierarchy approved the same day.
