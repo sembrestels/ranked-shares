@@ -1,7 +1,6 @@
 import {
   createPublicClient,
   createWalletClient,
-  ExpirationTime,
 } from "@arkiv-network/sdk";
 import { addr, bytes32, key, str, u256, u64 } from "@arkiv-network/sdk/attr";
 import { tiramisu } from "@arkiv-network/sdk/chains";
@@ -23,6 +22,7 @@ import {
   BALLOT_SCHEMA,
   checkedPayload,
 } from "../../../cre/src/lib/arkiv";
+import { ballotExpiry } from "./ballot-retention";
 
 export const arkivChain = tiramisu;
 export const arkiv = createPublicClient({
@@ -41,6 +41,9 @@ export type PublishedBallot = {
   storageTx?: Hex;
   entityKey?: Hex;
   expiresAt?: string;
+  /** Present on new deadline-based ballots; absent on legacy pending drafts. */
+  retentionUntil?: string;
+  requestedExpiry?: string;
   voteTx?: Hex;
 };
 const JOURNAL_KEY = "ranked-shares.arkiv.pending.v1";
@@ -70,6 +73,7 @@ export function attributes(ballot: PublishedBallot) {
     revision: u256(BigInt(ballot.revision)),
     projects: u64(BigInt(ballot.projects)),
     payload_hash: bytes32(keccak256(ballot.payload)),
+    ...(ballot.retentionUntil ? { retention_until: u64(BigInt(ballot.retentionUntil)) } : {}),
   };
 }
 
@@ -110,11 +114,14 @@ export async function verifyPublished(ballot: PublishedBallot) {
   if (
     entity.creator.toLowerCase() !== ballot.account.toLowerCase() ||
     !entity.creationFlags.readonly ||
-    !entity.creationFlags.permissionlessExtension
+    entity.creationFlags.permissionlessExtension !== !ballot.retentionUntil
   ) {
     throw new Error(
       "The stored ballot has an unexpected creator or storage flags.",
     );
+  }
+  if (ballot.retentionUntil && entity.expiresAt !== BigInt(ballot.requestedExpiry!)) {
+    throw new Error("The ballot expiry changed. Check its Arkiv entity before confirming this vote.");
   }
   for (const [name, expected] of Object.entries(attributes(ballot))) {
     const actual = entity.attributes[name];
@@ -148,7 +155,6 @@ export async function publishBallot(
   wallet: WalletClient,
   ballot: PublishedBallot,
   deadline: bigint,
-  grace: bigint,
 ) {
   const assertSigner = async () => {
     const [accounts, chainId, rpcChain] = await Promise.all([
@@ -173,6 +179,10 @@ export async function publishBallot(
       "This ballot already has a storage transaction. Resume it instead of publishing again.",
     );
   }
+  const retention = ballotExpiry(deadline, await arkiv.getBlock());
+  ballot.retentionUntil = retention.until.toString();
+  ballot.expiresAt = retention.expiresAt.toString();
+  ballot.requestedExpiry = retention.expiresAt.toString();
   // Save only public ranks or ciphertext. Never journal a sealed ranking or its
   // ephemeral encryption scalar. Save hashes immediately, even if receipt waits fail.
   savePending(ballot);
@@ -192,18 +202,14 @@ export async function publishBallot(
       },
     }, { retryCount: 0 }),
   });
-  // Retain through the whole dispute/abandon window plus thirty days. Lifetime is
-  // measured in Arkiv blocks; the UI shows the actual expiry returned by the node.
-  const days = Math.max(
-    30,
-    Math.ceil((Number(deadline + grace) - Date.now() / 1000) / 86400) + 30,
-  );
   const result = await storageWallet.createEntity({
     payload: hexToBytes(ballot.payload),
     contentType: "application/octet-stream",
     attributes: attributes(ballot),
-    flags: { readonly: true, permissionlessExtension: true },
-    expires: ExpirationTime.fromDays(days),
+    // Owners still have native extension/deletion authority. This is the app's
+    // default retention policy, not an irrevocable erasure guarantee.
+    flags: { readonly: true, permissionlessExtension: false },
+    expires: retention.expires,
   });
   ballot.storageTx = result.txHash;
   ballot.entityKey = result.entityKey;

@@ -37,12 +37,40 @@ missing, browser/prover readers try the original vote transaction in its recorde
 
 `VITE_ARKIV_RPC_URL` can override the default Tiramisu endpoint. It is public
 configuration; no backend key, tally service or result snapshots are needed.
-Arkiv readonly entities can still be deleted by their owner and expire approximately
-thirty days after the round's abandon deadline. Anyone can extend their lifetime.
+New Arkiv ballots are readonly and expire approximately **15 days after the voting
+deadline**, for all pool implementations. This is a fixed deadline, not 15 days
+from each upload or from the tally. The publisher converts the target timestamp
+to a block using Arkiv's current block timestamp and nominal two-second cadence;
+the receipt's actual expiry block is displayed and checked. No browser clock,
+cleanup job, automatic deletion, review copy or result snapshot sets the cutoff.
+
+New entities disable permissionless extension. Their owner can still extend,
+transfer or delete them. Existing entities keep their original lifetime and flags;
+legacy pending drafts can still be confirmed. Expiry cannot be shortened in place.
+
+After voting closes, **Ballot review** displays current public ranks and encrypted
+payloads directly from Arkiv. Each refresh checks the current on-chain references,
+hashes and native expiry heights at one Arkiv block. When records disappear, their
+contents disappear from this view. It does not use the tally reader's calldata
+fallback, and does not treat a missing ballot as an abstention. RPC errors hide
+cached review contents. Previously observed expiry metadata distinguishes a passed
+expiry from unknown absence; a fresh browser cannot prove why a missing record is
+gone. Final funded results remain readable from the pool after all ballots expire.
+
+Finish closing and tallying before expiry. A tally delayed beyond retention can
+need transaction recovery or a separately preserved archive; the CRE workflow's
+normal Arkiv reads cannot revive expired data. Pools with an abandonment window
+longer than 15 days show a notice. No contract redeployment is required for this
+frontend retention change on a pool that already supports Arkiv ballots.
+
 Ballot bytes also occur in the original pool transaction calldata; this is not
 exclusive off-chain storage or automatic erasure. See the
 [storage decision](../docs/decisions/2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md)
 for query fields, recovery limits and the migration API.
+The [Arkiv feedback report](../arkiv/feedback.md) records integration findings and
+the remaining live-submission evidence. For an expiry demo, use a short-lived test
+record and record the same query before and after its native expiry block; passing
+local simulated tests alone does not establish mission completion.
 
 ## Run
 

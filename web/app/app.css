@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+.ballot-review-list { list-style: none; padding: 0; }
+.ballot-review-row { overflow-wrap: anywhere; }
+
 .voting-page {
   display: grid;
   gap: var(--space-6);

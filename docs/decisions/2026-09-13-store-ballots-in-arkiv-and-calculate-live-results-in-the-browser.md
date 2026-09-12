@@ -62,7 +62,8 @@ soon as they are returned and can resume receipt/confirmation checks. An upload
 without an accepted pool transaction is not a vote. Discarding a draft neither
 cancels a transaction nor deletes its Arkiv entity.
 
-Entities are created readonly, with permissionless expiry extension, for the round's
+The initial retention policy (superseded by the update below) created entities
+readonly, with permissionless expiry extension, for the round's
 deadline plus its abandon grace plus thirty days (at least thirty days). Expiry is
 measured in Arkiv blocks and is approximate in wall time. Readonly does not prevent
 an owner deleting an entity. The browser and Noir prover can recover direct wallet
@@ -109,6 +110,44 @@ sealed ranks, ephemeral scalar, secret key or signature is persisted in the draf
 - [x] Rejected/interrupted confirmation retains the draft and does not resend a known transaction.
 - [x] CRE reads reconstruct the fixture and produce the same tally; kind 3 closes Arkiv rounds.
 - [ ] Live end-to-end signing with a funded Tiramisu wallet and a deployed pool.
+
+## Retention update — 2026-09-13
+
+Sem requested natural ballot expiry and a local Arkiv feedback report, then chose
+**15 days after the voting deadline** over creating review copies after final tally.
+That explicit choice replaces the initial retention policy above. No extra archive,
+publication step, backend task or result snapshot is introduced.
+
+- `web/app/lib/ballot-retention.ts` maps `votingDeadline + 15 days` to an absolute
+  Arkiv block, rounding up from the current Arkiv timestamp at nominal two-second
+  cadence. Browser clock changes and upload time do not reset the window. Actual
+  wall time may drift with block production.
+- New uploads use `readonly: true`, `permissionlessExtension: false`, and a typed
+  `retention_until` attribute. The pending draft records the requested block and
+  receipt's applied block; read-back checks the actual entity. Older drafts lack
+  the retention marker and continue to verify against their original flags.
+- Original published entities cannot be shortened or have their flags changed.
+  Owners retain native deletion and extension authority. This is an application
+  default, not an enforceable guarantee that no copy or extension survives.
+- `ballot-review.ts`, `use-ballot-review.ts` and the voting components inspect
+  current accepted ballots after the voting deadline. Every query page is pinned
+  to one Arkiv head; hashes bind the payloads to the pool's current references.
+  Missing and expired payloads are omitted from the new review state. Only prior
+  expiry metadata is used to explain absence; expired contents are not restored.
+  Unknown absence is labeled unavailable, not proven natural expiration.
+- The existing browser/prover recovery path remains available for tally witnesses.
+  This is intentionally separate from review. CRE normal reads still require live
+  entities. Operators must finish tallying within retention or preserve sufficient
+  recovery data, especially when a configured proof/abandon window exceeds 15 days.
+- Final on-chain funded orders remain visible independently of Arkiv. The review
+  is a list of available ballot bytes, never a partial recalculation of final results.
+- `arkiv/feedback.md` records observed integration behavior, documented limits and
+  Sem's requested multisig/permission and EEZ feedback. It is not submitted remotely.
+
+Validation covers fixed deadlines across all four kinds, wallet/read-back checks,
+legacy drafts, native expiry boundaries, owner extensions, pagination, missing or
+altered data, RPC errors, and preserving final results while review payloads vanish.
+Live natural expiry and funded publication remain separate unverified demo steps.
 
 ## References
 

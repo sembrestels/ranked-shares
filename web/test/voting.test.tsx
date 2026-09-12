@@ -16,11 +16,13 @@ import {
   defineChain,
   type Hex,
   http,
+  hexToBytes,
   toHex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { ballotAbi } from "../../cre/src/lib/arkiv";
 import type { PublishedBallot } from "../app/lib/arkiv";
+import { arkiv } from "../app/lib/arkiv";
 
 const state = vi.hoisted(() => ({
   pool: undefined as Address | undefined,
@@ -152,7 +154,7 @@ afterAll(() => {
 });
 
 test(
-  "rendered ballot flow: store, reject pool signature, resume, and show live result",
+  "rendered ballot flow: resume voting, finalize the tally, and expire review payloads",
   async () => {
     render(
       <QueryClientProvider client={query}>
@@ -203,6 +205,36 @@ test(
         args: [account.address, false],
       })).revision,
     ).toBe(1n);
+
+    // Finalize the real local pool, then let the simulated Arkiv node expire its
+    // entity. The rendered route must drop review contents, not its final result.
+    let arkivHead = 100n;
+    vi.spyOn(arkiv, "getChainId").mockResolvedValue(7738577);
+    vi.spyOn(arkiv, "getBlockNumber").mockImplementation(async () => arkivHead);
+    const reviewQuery = { where: vi.fn(), atBlock: vi.fn(), limit: vi.fn(), fetch: async () => ({
+      blockNumber: arkivHead,
+      entities: arkivHead < 101n ? [{ key: toHex(1n, { size: 32 }), payload: hexToBytes("0x0102"), expiresAt: 101n }] : [],
+      hasNextPage: () => false,
+    }) };
+    reviewQuery.where.mockReturnValue(reviewQuery);
+    reviewQuery.atBlock.mockReturnValue(reviewQuery);
+    reviewQuery.limit.mockReturnValue(reviewQuery);
+    vi.spyOn(arkiv, "select").mockReturnValue(reviewQuery as never);
+    await pub.request({ method: "evm_increaseTime", params: [3601] } as never);
+    await pub.request({ method: "evm_mine" } as never);
+    for (const [functionName, args] of [["startTally", []], ["runArkiv", [20n, ["0x0102"]]]] as const) {
+      const hash = await wallet.writeContract({ address: state.pool!, abi: artifact("RankedShares").abi, functionName, args });
+      expect((await pub.waitForTransactionReceipt({ hash })).status).toBe("success");
+    }
+    await query.invalidateQueries({ queryKey: ["voting"] });
+    await screen.findByText("Final funded projects");
+    await screen.findByText(/1 of 1 accepted ballots are available for review/);
+    expect(screen.getByText("1, 2")).toBeTruthy();
+    arkivHead = 101n;
+    await query.invalidateQueries({ queryKey: ["arkiv-ballot-review"] });
+    await screen.findByText(/Ballot review period ended/);
+    expect(screen.queryByText("1, 2")).toBeNull();
+    expect(screen.getByText("Final funded projects")).toBeTruthy();
   },
   15_000,
 );

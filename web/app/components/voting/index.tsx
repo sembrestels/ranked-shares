@@ -1,4 +1,5 @@
-import { Button, Field, Input } from "../ui";
+import { Button, Field, Input, Notice, Status } from "../ui";
+import type { BallotReviewData, ReviewRow } from "../../lib/ballot-review";
 
 export function RankField(
   { id, title, value, count, disabled, onChange }: {
@@ -108,6 +109,11 @@ export function BallotForm(
         Storing the ballot and accepting it in the round require two wallet
         transactions. Arkiv Tiramisu uses testGLM.
       </p>
+      <p className="hint">
+        New ballots expire from Arkiv approximately 15 days after voting closes.
+        The owner can still extend or delete their entity. Transaction history
+        and final results remain available.
+      </p>
       <Button
         type="submit"
         disabled={busy || (sealed ? !canSealed : !canPublic)}
@@ -115,6 +121,80 @@ export function BallotForm(
         1. Store {sealed ? "encrypted " : ""}ballot in Arkiv
       </Button>
     </form>
+  );
+}
+
+export function BallotReviewRow({ row }: { row: ReviewRow }) {
+  const labels = {
+    available: "Available",
+    "expiry-passed": "Expiry passed",
+    unavailable: "Unavailable",
+    invalid: "Payload does not match",
+  };
+  return (
+    <li className="ballot-review-row">
+      <p>
+        <code>{row.voter}</code> · {row.isSealed ? "Encrypted" : "Public"}
+        {" "}· revision {row.revision.toString()} · <Status>{labels[row.status]}</Status>
+      </p>
+      {row.payload && (
+        <details>
+          <summary>{row.isSealed ? "Inspect encrypted bytes" : "Inspect public ranks"}</summary>
+          <code>{row.isSealed ? row.payload : row.payload.slice(2).match(/../g)?.map((v) => parseInt(v, 16)).join(", ")}</code>
+        </details>
+      )}
+      <p className="hint">
+        Entity <code>{row.entityKey}</code>
+        {row.expiresAt !== undefined && <> · last observed expiry block {row.expiresAt.toString()}</>}
+      </p>
+    </li>
+  );
+}
+
+export function BallotReview(
+  { data, error, loading, until, final, limit, onMore }: {
+    data?: BallotReviewData;
+    error?: string;
+    loading: boolean;
+    until: bigint;
+    final: boolean;
+    limit: number;
+    onMore: () => void;
+  },
+) {
+  const available = data?.rows.filter((r) => r.status === "available").length ?? 0;
+  const ended = !!data?.rows.length && data.rows.every((r) => r.status === "expiry-passed");
+  return (
+    <section className="voting-results" aria-labelledby="ballot-review-title">
+      <h2 id="ballot-review-title">Ballot review</h2>
+      <p>
+        New ballots are scheduled to expire around {new Date(Number(until) * 1000).toLocaleString()}.
+        {" "}The cutoff follows the voting deadline, even if tallying takes longer.
+      </p>
+      {error ? <Notice error>Ballot availability could not be checked: {error} Cached ballot contents are hidden.</Notice>
+        : !data ? <Notice>{loading ? "Checking current ballots in Arkiv…" : "Ballot availability has not been checked."}</Notice>
+        : (
+          <>
+            <Notice>
+              {ended ? "Ballot review period ended: the last observed expiry blocks have passed and no live payloads remain."
+                : !data.rows.length ? "No ballots were accepted by this round."
+                : available === 0 ? "No accepted ballot payloads are currently available in Arkiv."
+                : `${available} of ${data.rows.length} accepted ballots are available for review.`}
+              {final ? " The final on-chain result remains available." : " Tally recovery remains separate from this review."}
+            </Notice>
+            <ul className="ballot-review-list">
+              {data.rows.slice(0, limit).map((row) => <BallotReviewRow key={`${row.voter}-${row.isSealed}`} row={row} />)}
+            </ul>
+            {data.rows.length > limit && <Button variant="secondary" onClick={onMore}>Show more ballots</Button>}
+            {data.arkivBlock !== null && <p className="hint">Arkiv block {data.arkivBlock.toString()} · checked every 15 seconds</p>}
+          </>
+        )}
+      <p className="hint">
+        Review reads only live Arkiv entities. Missing data can also mean an owner
+        deleted it; older ballots and owner extensions may outlive the default.
+        Expiry does not erase transaction history or copies held elsewhere.
+      </p>
+    </section>
   );
 }
 

@@ -10,7 +10,9 @@ import {
 import { getWalletClient } from "wagmi/actions";
 import { chain, config, useRound, useSwarm } from "../context/providers";
 import { Button, Notice } from "../components/ui";
-import { BallotForm, PublicResults } from "../components/voting";
+import { BallotForm, BallotReview, PublicResults } from "../components/voting";
+import { useBallotReview } from "../hooks/use-ballot-review";
+import { ballotRetentionUntil, BALLOT_RETENTION_SECONDS } from "../lib/ballot-retention";
 import { errorMessage } from "../lib/proposals";
 import {
   arkivChain,
@@ -44,6 +46,7 @@ export default function VotePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
+  const [reviewLimit, setReviewLimit] = useState(50);
   useEffect(() => {
     try {
       setPending(readPending());
@@ -54,6 +57,7 @@ export default function VotePage() {
   useEffect(() => {
     setRanks([]);
     setSealed(false);
+    setReviewLimit(50);
   }, [pool, address]);
   const round = useQuery({
     queryKey: ["voting", chain.id, pool, address],
@@ -62,6 +66,8 @@ export default function VotePage() {
     queryFn: () => readVoting(client!, pool!, address),
   });
   const r = round.data;
+  const showReview = !!r?.enabled && r.phase > 0 && r.timestamp >= r.deadline;
+  const review = useBallotReview(client, chain.id, pool, showReview);
   const canVote = !!r?.enabled && r.phase === 1 && r.timestamp < r.deadline;
   const canPublic = canVote && !!address && r.direct > 0n &&
     r.direct >= r.minimum &&
@@ -159,7 +165,7 @@ export default function VotePage() {
     const storageWallet = await getWalletClient(config, {
       chainId: arkivChain.id,
     });
-    await publishBallot(storageWallet, ballot, fresh.deadline, fresh.grace);
+    await publishBallot(storageWallet, ballot, fresh.deadline);
     setRanks([]);
     setMessage(
       "Your ballot is stored. Confirm it in the round to make it count.",
@@ -285,6 +291,13 @@ export default function VotePage() {
           {new Date(Number(r.deadline) * 1000).toLocaleString()}
         </p>
       )}
+      {r?.enabled && r.grace > BALLOT_RETENTION_SECONDS && (
+        <Notice>
+          This round's recovery window is longer than the default ballot retention.
+          Complete the tally before Arkiv expiry; a delayed tally may need original
+          transaction data or a separately preserved copy.
+        </Notice>
+      )}
       {pending && (
         <section className="voting-pending">
           <h2>Finish your ballot</h2>
@@ -409,6 +422,17 @@ export default function VotePage() {
               : "Prepare next batch for final tally"}
           </Button>
         )}
+      {showReview && r && (
+        <BallotReview
+          data={review.data}
+          error={review.error ? errorMessage(review.error) : undefined}
+          loading={review.isFetching}
+          until={ballotRetentionUntil(r.deadline)}
+          final={r.phase === (r.kind === "public" ? 3 : 4)}
+          limit={reviewLimit}
+          onMore={() => setReviewLimit((n) => n + 50)}
+        />
+      )}
     </div>
   );
 }
