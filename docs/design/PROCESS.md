@@ -83,3 +83,6 @@ tests) is unchanged. The design process feeds it:
 
 - 2026-09-05: process adopted (record accepted). No personas, journey, or story map
   yet. Personas will start as assumptions; no user interviews have been run.
+- 2026-09-12: four proto-personas drafted in `docs/design/personas.md` (donor,
+  seat holder, organiser, proposer), all assumptions untested, awaiting the Discover
+  gate. Jobs and journey not started.

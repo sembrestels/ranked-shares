@@ -18,13 +18,13 @@ ballot and Uniswap LP seat specs, and the ETHOnline hackathon notes.
 | Donor | own deposit | public and final, or private and replaceable | contribute, rank, choose mode, watch the round | **Donor Dani** (primary) |
 | Seat holder | sponsored seats (address list, NFT, or Uniswap v4 LP position) | private only, replaceable | claim seats, rank privately, confirm the ballot landed | **Seat-holder Sol** (secondary) |
 | Organiser | none, or sponsor's treasury | none | create pool, add projects, sponsor seats, open voting, sweep | **Organiser Ona** (secondary) |
-| Project recipient | none | none | see funding status, claim | served by one screen, no persona yet |
+| Proposer | none, unless they also donate | none as proposer | get listed with the right cost and recipient, campaign, follow support, learn the outcome, receive the funds | **Proposer Pau** (secondary) |
 | Operator | none | none | run the tally and the proof | runbook and CLI, not the frontend |
 | Observer | none | none | public board, sealed total, proof status | same screens as Dani, read-only |
 
-The frontend is designed for the three named personas. Recipient and observer needs are
-covered by screens those personas already use. The operator stays on the command line
-for the hackathon `[ASSUMPTION]`.
+The frontend is designed for the four named personas. Observer needs are covered by
+screens those personas already use. The operator stays on the command line for the
+hackathon `[ASSUMPTION]`.
 
 ---
 
@@ -179,6 +179,68 @@ for the hackathon `[ASSUMPTION]`.
 
 ---
 
+## Proposer Pau (secondary)
+
+### Bio and context
+- Leads a small team, or works alone, asking the round for a fixed amount to do one
+  specific thing; sets the cost themselves and names the address that receives it
+  `[ASSUMPTION]`
+- Applies off-chain: pitches to the organiser, who lists the project. Has no contract
+  action of their own until the pool is done (from the contract: only the owner adds
+  projects; anyone may trigger the payout)
+- Knows several donors personally and campaigns in the community chat during the
+  voting window `[ASSUMPTION]`
+- Applies to more than one round or grants programme at a time and treats each as a
+  grant application with a deadline and a decision date `[ASSUMPTION]`
+- Cares about whether and when the money arrives far more than about how the tally
+  works `[ASSUMPTION]`
+
+### Quotes
+- "We asked for 4k because that is what it costs. If we get 3.9k we get nothing? Then
+  say so up front." `[DRAFTED]`
+- "The board shows 1.2k public behind us and 'sealed: 18k in total'. Are we close or
+  not?" `[DRAFTED]`
+- "Voting closed two days ago. Who presses the button, and when do we get paid?"
+  `[DRAFTED]`
+
+### Pains
+- Funding is exactly the cost or nothing: a cost set too high loses everything and one
+  set too low leaves the work underfunded (from the README and the contract spec)
+- The cost and recipient are fixed once listed; a typo in the address or a wrong
+  number cannot be corrected after voting opens (from the contract: no edit function)
+- During the window, public commitments show per project but sealed support is only a
+  pool-wide total, so the proposer cannot tell how close they are (from the proposal
+  note)
+- After the deadline the result waits on the operator's tally and, for sealed pools, a
+  proof; the proposer has no lever and no status `[ASSUMPTION]`
+- On-chain a project is just a cost and an address; the pitch lives in a form or a chat
+  message, so donors see nothing about the work unless the frontend carries it
+  `[ASSUMPTION]`
+
+### What Pau is trying to accomplish
+- Get listed with the right cost and the right recipient address, and check both before
+  voting opens
+- Get donors and seat holders to rank the project, using a link that lands on it
+- Learn the outcome the moment it is final and receive the funds without chasing anyone
+
+### Goals
+- Fund the work in one round rather than piecing it together across programmes
+- Be judged on the pitch, not on who campaigned last `[ASSUMPTION]`
+- Keep the relationship with the organiser and the community when not funded, so the
+  next application is easier `[ASSUMPTION]`
+
+### Attitudes and influences
+- **Decision-making authority:** over the cost and the recipient address only; whether
+  the project is listed is the organiser's call and whether it is funded is the voters'
+- **Decision influencers:** the organiser's guidance on a reasonable ask, the costs
+  funded in previous rounds, other proposers `[ASSUMPTION]`
+- **Beliefs and attitudes:** reads "funded" as "paid" and is confused by any gap
+  between the two `[ASSUMPTION]`; trusts a sealed tally only if the proof status is
+  visible next to the result `[ASSUMPTION]`; will share the round's link widely if the
+  project page presents the work well `[ASSUMPTION]`
+
+---
+
 ## Gaps and validation plan
 
 - No persona has been checked with a real person. The first interviews should be two
@@ -189,7 +251,16 @@ for the hackathon `[ASSUMPTION]`.
   round feel alive for observers, is the assumption with the largest design impact.
 - The operator is excluded from the frontend on the assumption that the hackathon
   operator is the team itself.
+- Pau is drafted from the contract's view of a project (a cost and a recipient) and
+  from how grants rounds usually run. One conversation with a team that applied to a
+  grants round would test whether they want live support figures during the window or
+  whether that mainly invites campaigning, which is the assumption with the largest
+  impact on the project screen.
+- Whether the frontend should carry the pitch (title, description, links) alongside the
+  on-chain cost, and where that text lives, is open.
 
 ## History
 
 - 2026-09-05: first draft from repo notes, all assumptions untested.
+- 2026-09-12: added Proposer Pau, the project that receives the funds, as a secondary
+  persona.
