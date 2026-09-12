@@ -3,7 +3,8 @@
     "app",
     "test",
     ".react-router/types/**/*",
-    "*.ts"
+    "vite.config.ts",
+    "react-router.config.ts"
   ],
   "compilerOptions": {
     "lib": [
@@ -42,5 +43,11 @@
         "./node_modules/@zkpassport/poseidon2"
       ]
     }
-  }
+  },
+  "exclude": [
+    "api",
+    "server.ts",
+    "node_modules",
+    "build"
+  ]
 }
