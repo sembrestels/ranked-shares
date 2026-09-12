@@ -1548,13 +1548,16 @@ export function createSnapshots(opts: {
     const pending = opts.read(pool).then(async ({ facts, roster }) => {
       const projects: SnapshotProject[] = await Promise.all(facts.projects.map(async (p) => ({
         ...p,
-        title: p.contentRef.toLowerCase() === ZERO_REF ? null : await opts.titleOf(p.contentRef).catch(() => null),
+        title: p.contentRef.toLowerCase() === ZERO_REF
+          ? null
+          : await Promise.resolve().then(() => opts.titleOf(p.contentRef)).catch(() => null),
       })));
       const at = opts.now();
       const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };
       entries.set(key, { at, value, pending: null });
       return value;
-    }, (err) => {
+    }).catch((err) => {
+      // Covers a failed read and a failure inside the handler alike, so pending never dangles.
       entries.set(key, { at: e.at, value: e.value, pending: null });
       throw err;
     });

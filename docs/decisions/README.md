@@ -23,6 +23,8 @@ The process that uses them is `docs/design/PROCESS.md`.
 
 ## Records
 
+- [Store ballots in Arkiv and calculate live results in the browser](2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md) (accepted, 2026-09-13)
+
 - [Adopt the frontend design process](2026-09-05-adopt-the-frontend-design-process.md) (accepted, 2026-09-05)
 - [Build the frontend as a React Router single-page app on Deno, following thedao-rfps](2026-09-12-build-the-frontend-as-a-react-router-single-page-app-on-deno-following-thedao-rfps.md) (accepted, 2026-09-12)
 - [Serve the site and a Deno API from one Deno Deploy app](2026-09-12-serve-the-site-and-a-deno-api-from-one-deno-deploy-app.md) (accepted, 2026-09-12)
