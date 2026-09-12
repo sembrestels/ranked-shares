@@ -94,7 +94,8 @@ tests) is unchanged. The design process feeds it:
   four records accepted. Develop drafted the same day: `docs/design/design-system.md`
   (principles, token architecture, component inventory), `docs/design/tokens.md`
   (three tiers, light and dark, mapped from `web/app/tokens.css`), 79 stories under
-  `docs/design/stories/`, and a proposed visual direction record. Develop gate pending:
-  principles, palette, hierarchy, and stories await the decision-maker. The `web/`
+  `docs/design/stories/`, and a proposed visual direction record. Palette and delivery
+  decided the same evening (Blossom brand, Tailwind v4) and landed in `web/app/tokens.css`.
+  Develop gate pending: principles, hierarchy, and stories await the decision-maker. The `web/`
   package on master (proposals, Swarm ID, review, editing) predates the gate; its
   stories are marked built.
