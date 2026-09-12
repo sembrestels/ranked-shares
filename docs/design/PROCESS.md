@@ -88,5 +88,7 @@ tests) is unchanged. The design process feeds it:
   Job statements and forces in `docs/design/jobs.md`; current-state journey maps in
   `docs/design/journey.md`. Discover gate closed 2026-09-12. Define drafted the same
   day: `docs/design/hypotheses.md`, `docs/design/story-map.md` with a proposed R1
-  release line, and three proposed technology records (framework, wallet, proposal
-  storage). Define gate pending: the line and the records await the decision-maker.
+  release line, and four proposed technology records (framework, site and API
+  hosting, wallet, proposal storage), written to follow `../fund/thedao-rfps/web` at
+  the decision-maker's direction. Define gate pending: the line and the records await
+  the decision-maker.

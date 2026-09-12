@@ -161,6 +161,10 @@ the setup checklist onward.
   readable without a wallet.
 - The operator's progress in R1 is whatever the chain shows; live progress needs the
   prove service to expose it (R2).
+- The frontend follows the architecture of the decision-maker's other projects
+  (`../fund/thedao-rfps/web`): a React Router single-page app plus a small Deno API on
+  one Deno Deploy app. The API caches pool reads, indexes LP positions, and uploads
+  proposal content; see the four proposed records of 2026-09-12.
 
 ## History
 
