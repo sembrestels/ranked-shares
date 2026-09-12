@@ -85,4 +85,5 @@ tests) is unchanged. The design process feeds it:
   yet. Personas will start as assumptions; no user interviews have been run.
 - 2026-09-12: four proto-personas drafted in `docs/design/personas.md` (donor,
   seat holder, organiser, proposer), confirmed by the decision-maker the same day.
-  Job statements and forces in `docs/design/jobs.md`. Journey map not started.
+  Job statements and forces in `docs/design/jobs.md`; current-state journey maps in
+  `docs/design/journey.md`. Discover gate pending: pain points await confirmation.
