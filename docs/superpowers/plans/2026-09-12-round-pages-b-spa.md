@@ -242,13 +242,19 @@ import { fetchProject, fetchRound, fetchVoter } from "../lib/api";
 
 export const POLL_MS = 15_000;
 
+/** The API caps itself at two reads per request, so a snapshot can still be behind
+ * the block we asked for; poll faster until it catches up. */
+export const CATCH_UP_MS = 2_000;
+export const behind = (block: number | undefined, after: number | undefined) =>
+  after !== undefined && block !== undefined && block < after;
+
 export function useRoundSnapshot() {
   const { pool, after } = useRound();
   return useQuery({
     queryKey: ["round", pool ?? "", after ?? 0],
     queryFn: () => fetchRound(pool, after),
     enabled: !!pool,
-    refetchInterval: POLL_MS,
+    refetchInterval: (query) => (behind(query.state.data?.block, after) ? CATCH_UP_MS : POLL_MS),
     placeholderData: keepPreviousData,
   });
 }
@@ -308,6 +314,14 @@ test("useRoundSnapshot fetches the configured pool and passes after", async () =
   expect(f).toHaveBeenCalledWith("/api/round?pool=0x5FbDB2315678afecb367f032d93F642f64180aa3&after=42");
 });
 
+test("behind: only when both are known and the block is older", async () => {
+  const { behind } = await import("../app/hooks/use-snapshot");
+  expect(behind(10, 12)).toBe(true);
+  expect(behind(12, 12)).toBe(false);
+  expect(behind(undefined, 12)).toBe(false);
+  expect(behind(10, undefined)).toBe(false);
+});
+
 test("useVoter fetches the connected address", async () => {
   state.after = undefined;
   const f = vi.fn(async () => new Response(JSON.stringify({ inRoster: true }), { status: 200 }));
@@ -323,7 +337,7 @@ test("useVoter fetches the connected address", async () => {
 - [ ] **Step 9: Run the hook tests, the whole suite, and the type check**
 
 Run: `deno run -A npm:vitest run test/snapshot-hooks.test.tsx && deno task test && deno task typecheck`
-Expected: 2 pass; suite 25 pass (20 + 3 + 2); typecheck clean.
+Expected: 3 pass; suite 26 pass (20 + 3 + 3); typecheck clean.
 
 - [ ] **Step 10: Commit**
 
@@ -612,7 +626,7 @@ In `web/app/components/proposals/proposal-card.tsx`: replace the `Status` import
 - [ ] **Step 8: Run the atom tests and the whole suite**
 
 Run: `deno run -A npm:vitest run test/atoms.test.tsx && deno task test && deno task typecheck`
-Expected: 4 pass; suite 33 pass; typecheck clean. The existing `components.test.tsx` still passes with the badge texts unchanged.
+Expected: 4 pass; suite 34 pass; typecheck clean. The existing `components.test.tsx` still passes with the badge texts unchanged.
 
 - [ ] **Step 9: Commit**
 
@@ -762,7 +776,7 @@ Add to `index.tsx`: `export { SupportBar } from "./support-bar"; export { StageS
 - [ ] **Step 4: Run the tests and the suite**
 
 Run: `deno run -A npm:vitest run test/molecules.test.tsx && deno task test && deno task typecheck`
-Expected: 4 pass; suite 37 pass; clean.
+Expected: 4 pass; suite 38 pass; clean.
 
 - [ ] **Step 5: Commit**
 
@@ -1086,7 +1100,7 @@ export function StageBarContainer() {
 - [ ] **Step 5: Run the tests, suite, and type check**
 
 Run: `deno run -A npm:vitest run test/stage-bar.test.tsx && deno task test && deno task typecheck`
-Expected: 6 pass; suite 43 pass; clean.
+Expected: 6 pass; suite 44 pass; clean.
 
 - [ ] **Step 6: Commit**
 
@@ -1434,7 +1448,7 @@ export default function RoundPage() {
 - [ ] **Step 5: Run the tests, suite, and type check**
 
 Run: `deno run -A npm:vitest run test/round-page.test.tsx && deno task test && deno task typecheck`
-Expected: 7 pass; suite 50 pass; clean.
+Expected: 7 pass; suite 51 pass; clean.
 
 - [ ] **Step 6: Commit**
 
@@ -1659,7 +1673,7 @@ Check `readContent`'s signature in `app/lib/swarm.ts` (it takes the storage clie
 - [ ] **Step 4: Run the tests, suite, and type check**
 
 Run: `deno run -A npm:vitest run test/project-page.test.tsx && deno task test && deno task typecheck`
-Expected: 4 pass; suite 54 pass; clean.
+Expected: 4 pass; suite 55 pass; clean.
 
 - [ ] **Step 5: Commit**
 
@@ -1798,7 +1812,7 @@ In `app/routes/proposals.tsx`, `submit.tsx`, and `setup.tsx` (through the board)
 - [ ] **Step 5: Run the shell test, the suite, the type check, and the build**
 
 Run: `deno run -A npm:vitest run test/shell.test.tsx && deno task test && deno task typecheck && deno task build`
-Expected: 1 pass; suite 55 pass; typecheck clean; build succeeds and `build/client/index.html` exists.
+Expected: 1 pass; suite 56 pass; typecheck clean; build succeeds and `build/client/index.html` exists.
 
 - [ ] **Step 6: Update `web/README.md` routes**
 
@@ -2135,12 +2149,12 @@ Run `deno task typecheck` first so `react-router typegen` creates the `+types` f
 Run: `VITE_POOL_ADDRESS= deno task build`
 Expected: the warning "prerender: VITE_POOL_ADDRESS is not set" and `build/client/index.html`, `build/client/proposals/index.html`, `build/client/submit/index.html`, `build/client/setup/index.html` exist; `grep -c 'og:title' build/client/index.html` prints 1.
 
-Then, with Anvil: start `anvil --port 8545 --silent` in the background, deploy a pool the way `test/workflow.test.tsx` does (or with the root repository's `forge script`), set `VITE_POOL_ADDRESS` to it, run `deno task build`, and check `build/client/project/0/index.html` exists and contains `og:title`. Stop Anvil. If no deploy path is convenient, record in the report that the with-pool build was not exercised and why.
+Then, with Anvil: start `anvil --port 8545 --silent` in the background, deploy a pool the way `test/workflow.test.tsx` does (or with the root repository's `forge script`), set `VITE_POOL_ADDRESS` to it, run `deno task build`, and check `build/client/project/0/index.html` exists and contains `og:title`. Then start the site server (`POOL_ADDRESS=<pool> PORT=8099 deno task start` in the background) and confirm `curl -sS -o /dev/null -w '%{http_code}' -L http://127.0.0.1:8099/project/0` prints `200` and `curl -sSL http://127.0.0.1:8099/project/0 | grep -c 'og:title'` prints `1`, so a prerendered nested page is served by `serveDir` (directly or after its trailing-slash redirect). Stop the server and Anvil. If no deploy path is convenient, record in the report that the with-pool build and serve were not exercised and why.
 
 - [ ] **Step 9: Run the suite and type check, then commit**
 
 Run: `deno task test && deno task typecheck`
-Expected: 61 pass; clean.
+Expected: 62 pass; clean.
 
 ```bash
 git add app/lib/build-chain.ts app/lib/meta.ts react-router.config.ts app/routes/round.tsx app/routes/project.tsx test/meta.test.ts test/build-chain.test.ts
@@ -2345,7 +2359,7 @@ Match `assertWallet`'s real signature as in Task 4.
 - [ ] **Step 5: Run the tests, the suite, the type check, and the build**
 
 Run: `deno run -A npm:vitest run test/rules-and-setup.test.tsx && deno task test && deno task typecheck && VITE_POOL_ADDRESS= deno task build`
-Expected: 3 pass; suite 64 pass; clean; build succeeds. The existing workflow test still passes (the submit page renders the panel above the form).
+Expected: 3 pass; suite 65 pass; clean; build succeeds. The existing workflow test still passes (the submit page renders the panel above the form).
 
 - [ ] **Step 6: Docs and story statuses**
 
