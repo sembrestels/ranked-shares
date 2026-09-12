@@ -134,9 +134,16 @@ their public commitment, the sealed total and count, the stage bar's steps, the
 outcome), `GET /api/project/:id` (a project with its pitch resolved from Swarm by
 reference through `BEE_URL`), `GET /api/voter/:address` (weight, ballot presence,
 roster membership), and `GET /healthz`. `?pool=0x…` overrides `POOL_ADDRESS`;
-`?after=<block>` on `/api/round` forces a re-read after the caller's own transaction.
-A public commitment is the direct weight of voters whose public ballot ranks the
-project first; Noir pools report `commitmentsAvailable: false`. `server.ts` serves the
+`?after=<block>` is accepted by all three routes and forces a re-read at or past
+that block, for after the caller's own transaction. Reads are pinned to one block
+across the several `RPC_URL`s used for failover, so point them at the same provider
+or at replicas of it — a failover to a node that has not caught up to that block
+yet is not otherwise detected. A public commitment is the direct weight of voters
+whose public ballot ranks the project first; Noir pools report
+`commitmentsAvailable: false`. A pool reporting more than 255 projects or 10,000
+voters is rejected with `400 { error: "pool too large" }` rather than read in full.
+Content that fails to resolve from `BEE_URL` is remembered as unavailable for 60
+seconds before another gateway fetch is attempted. `server.ts` serves the
 API and `build/client` from one port for Deno Deploy (root `web`, build `deno task
 build`, entrypoint `server.ts`). Design: `docs/superpowers/specs/2026-09-12-round-pages-design.md`.
 
