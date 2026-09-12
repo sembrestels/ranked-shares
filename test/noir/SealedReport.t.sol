@@ -7,7 +7,6 @@ import {NoirRankedShares} from "../../src/noir/NoirRankedShares.sol";
 import {IReceiver} from "../../src/interfaces/IReceiver.sol";
 import {IPoseidon2} from "../../src/noir/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../../src/noir/interfaces/IHonkVerifier.sol";
-import {Poseidon2} from "../../src/noir/lib/Poseidon2.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
 import {FixtureLoader} from "./FixtureLoader.sol";
@@ -120,7 +119,7 @@ contract SealedReportTest is FixtureLoader {
         // The fixture's projects' costs never exceed its totalWeight even all funded, so
         // exercise the budget check on a small standalone pool sized to violate it.
         MockERC20 token2 = new MockERC20();
-        Poseidon2 poseidon2 = new Poseidon2();
+        IPoseidon2 poseidon2 = IPoseidon2(deployCode("Poseidon2.sol:Poseidon2"));
         MockHonkVerifier ingest2 = new MockHonkVerifier();
         MockHonkVerifier tally2 = new MockHonkVerifier();
         uint256[] memory pk = fxWords(".pk");

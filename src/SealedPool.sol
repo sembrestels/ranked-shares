@@ -151,10 +151,12 @@ abstract contract SealedPool is PoolBase {
     }
 
     function directBallotOf(address voter) external view returns (bytes memory) {
+        if (arkivBallots) revert ArkivBallotsRequired();
         return _directBallot[voter];
     }
 
     function sealedOf(address voter) external view returns (bytes memory) {
+        if (arkivBallots) revert ArkivBallotsRequired();
         return _sealed[voter];
     }
 
@@ -178,6 +180,7 @@ abstract contract SealedPool is PoolBase {
         )
     {
         uint256 n = voters.length;
+        if (arkivBallots) revert ArkivBallotsRequired();
         uint256 len = start >= n ? 0 : (n - start > count ? count : n - start);
         who = new address[](len);
         direct = new uint256[](len);
@@ -199,6 +202,7 @@ abstract contract SealedPool is PoolBase {
     /// @notice Cast the caller's public ballot: one per address, never replaced, at least
     ///         `minDirectVote` of the caller's own money behind it (spec Z2).
     function vote(bytes calldata ranks) external inPhase(Phase.Open) beforeDeadline {
+        if (arkivBallots) revert ArkivBallotsRequired();
         if (_directBallot[msg.sender].length != 0) revert BallotAlreadyCast();
         uint256 w = directWeight[msg.sender];
         if (w == 0 || w < minDirectVote) revert BelowMinimumVote();
@@ -212,11 +216,77 @@ abstract contract SealedPool is PoolBase {
     ///         Only the length is checked: a malformed point or an invalid ranking is an
     ///         absent ballot in the tally, and only its owner loses by it.
     function voteSealed(bytes calldata ciphertext) external inPhase(Phase.Open) beforeDeadline {
+        if (arkivBallots) revert ArkivBallotsRequired();
         if (seatWeight[msg.sender] == 0) revert NoSeatWeight();
         if (ciphertext.length != PK_LENGTH + _costs.length) revert InvalidCiphertext();
         _sealed[msg.sender] = ciphertext;
         _register(msg.sender);
         emit SealedVote(msg.sender);
+    }
+
+    function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
+        external
+        inPhase(Phase.Open)
+        beforeDeadline
+    {
+        if (_publicRefs[msg.sender].revision != 0) revert BallotAlreadyCast();
+        uint256 w = directWeight[msg.sender];
+        if (w == 0 || w < minDirectVote) revert BelowMinimumVote();
+        _validate(payload);
+        _storeBallot(msg.sender, false, entityKey, payload, expectedRevision);
+        _register(msg.sender);
+        emit Voted(msg.sender);
+    }
+
+    function voteSealedArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
+        external
+        inPhase(Phase.Open)
+        beforeDeadline
+    {
+        if (seatWeight[msg.sender] == 0) revert NoSeatWeight();
+        if (payload.length != PK_LENGTH + _costs.length) revert InvalidCiphertext();
+        _storeBallot(msg.sender, true, entityKey, payload, expectedRevision);
+        _register(msg.sender);
+        emit SealedVote(msg.sender);
+    }
+
+    function voterRefsFrom(uint256 start, uint256 count)
+        external
+        view
+        returns (
+            address[] memory who,
+            uint256[] memory direct,
+            uint256[] memory seats,
+            BallotRef[] memory publicRefs,
+            BallotRef[] memory sealedRefs
+        )
+    {
+        uint256 len = start >= voters.length ? 0 : voters.length - start;
+        if (count < len) len = count;
+        who = new address[](len);
+        direct = new uint256[](len);
+        seats = new uint256[](len);
+        publicRefs = new BallotRef[](len);
+        sealedRefs = new BallotRef[](len);
+        for (uint256 i; i < len; i++) {
+            address a = voters[start + i];
+            who[i] = a;
+            direct[i] = directWeight[a];
+            seats[i] = seatWeight[a];
+            publicRefs[i] = _publicRefs[a];
+            sealedRefs[i] = _sealedRefs[a];
+        }
+    }
+
+    function closeArkiv(uint256 expectedCursor, BallotData[] calldata ballots) external inPhase(Phase.Closing) {
+        _closeArkiv(expectedCursor, ballots);
+    }
+
+    function _closeArkiv(uint256 expectedCursor, BallotData[] memory ballots) internal {
+        if (!arkivBallots) revert ArkivNotEnabled();
+        if (expectedCursor != closeCursor) revert StaleCloseCursor();
+        if (ballots.length > voters.length - closeCursor) revert InvalidBallotWitness();
+        _closeResolved(ballots.length, ballots);
     }
 
     // --------------------------------------------------------------- closing
@@ -231,6 +301,11 @@ abstract contract SealedPool is PoolBase {
     ///      keccak of each ballot's bytes, `keccak256("")` when absent. Chunking never
     ///      changes the result: the chain only depends on the order of `voters`.
     function _close(uint256 maxVoters) internal {
+        if (arkivBallots) revert ArkivBallotsRequired();
+        _closeResolved(maxVoters, new BallotData[](0));
+    }
+
+    function _closeResolved(uint256 maxVoters, BallotData[] memory ballots) internal {
         if (closeCursor == 0) _requireBalanceCoversBudget();
         uint256 n = voters.length;
         uint256 end = closeCursor + maxVoters;
@@ -238,11 +313,15 @@ abstract contract SealedPool is PoolBase {
         bytes32 h = voterChain;
         for (uint256 i = closeCursor; i < end; i++) {
             address a = voters[i];
-            h = keccak256(
-                abi.encodePacked(
-                    h, a, directWeight[a], seatWeight[a], keccak256(_directBallot[a]), keccak256(_sealed[a])
-                )
-            );
+            bytes memory pub = _directBallot[a];
+            bytes memory sealedData = _sealed[a];
+            if (arkivBallots) {
+                pub = ballots[i - closeCursor].publicBallot;
+                sealedData = ballots[i - closeCursor].sealedBallot;
+                _checkBallot(a, false, pub);
+                _checkBallot(a, true, sealedData);
+            }
+            h = keccak256(abi.encodePacked(h, a, directWeight[a], seatWeight[a], keccak256(pub), keccak256(sealedData)));
         }
         closeCursor = end;
         voterChain = h;

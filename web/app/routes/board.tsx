@@ -147,7 +147,7 @@ function ProposalEntry(
   const { pool } = useRound();
   const { client } = useSwarm();
   const { address, chainId } = useAccount();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId: chain.id });
   const { data: wallet } = useWalletClient();
   const queryClient = useQueryClient();
   const [loaded, setLoaded] = useState<

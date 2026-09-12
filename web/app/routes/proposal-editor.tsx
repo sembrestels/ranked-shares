@@ -43,7 +43,7 @@ export function ProposalEditor(
   const { pool } = useRound();
   const { address, chainId } = useAccount();
   const { client, info } = useSwarm();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId: chain.id });
   const { data: wallet } = useWalletClient();
   const query = useQueryClient();
   const [value, setValue] = useState<FormValues>({

@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {ArkivBallots} from "../../src/ArkivBallots.sol";
 import {SealedPool} from "../../src/SealedPool.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockERC721} from "../mocks/MockERC721.sol";
@@ -92,6 +93,10 @@ abstract contract ZiskFixtureLoader is Test {
 
     // ---- pool construction ----
 
+    function useArkiv() internal pure virtual returns (bool) {
+        return false;
+    }
+
     function newMocks() internal {
         token = new MockERC20();
         nft = new MockERC721();
@@ -109,6 +114,7 @@ abstract contract ZiskFixtureLoader is Test {
         for (uint256 c = 0; c < costs.length; c++) {
             pool.addProject(costs[c], recipient);
         }
+        if (useArkiv()) pool.enableArkivBallots();
         pool.openVoting();
         vm.stopPrank();
         token.mint(org, type(uint64).max);
@@ -174,12 +180,14 @@ abstract contract ZiskFixtureLoader is Test {
             bytes memory ballot = fxBytes(voterKey(i, "directBallot"));
             if (ballot.length != 0) {
                 vm.prank(a);
-                pool.vote(ballot);
+                if (useArkiv()) pool.voteArkiv(bytes32(i + 1), ballot, 0);
+                else pool.vote(ballot);
             }
             bytes memory ct = fxBytes(voterKey(i, "ciphertext"));
             if (ct.length != 0) {
                 vm.prank(a);
-                pool.voteSealed(ct);
+                if (useArkiv()) pool.voteSealedArkiv(bytes32(i + 1000), ct, 0);
+                else pool.voteSealed(ct);
             }
         }
         if (tFrom != address(0)) {
@@ -203,8 +211,22 @@ abstract contract ZiskFixtureLoader is Test {
         }
     }
 
+    function witnesses(uint256 start, uint256 count) internal view returns (ArkivBallots.BallotData[] memory out) {
+        uint256 n = pool.voterCount() - start;
+        if (count < n) n = count;
+        out = new ArkivBallots.BallotData[](n);
+        for (uint256 j; j < n; j++) {
+            if (start + j >= fxCount(".voters")) continue; // extra silent voters in negative proof tests
+            out[j].publicBallot = fxBytes(voterKey(start + j, "directBallot"));
+            out[j].sealedBallot = fxBytes(voterKey(start + j, "ciphertext"));
+        }
+    }
+
     function closeAll(uint256 chunk) internal {
         vm.warp(DEADLINE);
-        while (!pool.closed()) pool.close(chunk);
+        while (!pool.closed()) {
+            if (useArkiv()) pool.closeArkiv(pool.closeCursor(), witnesses(pool.closeCursor(), chunk));
+            else pool.close(chunk);
+        }
     }
 }

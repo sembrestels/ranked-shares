@@ -49,7 +49,7 @@ function Submission() {
   const { pool } = useRound();
   const { address, chainId } = useAccount();
   const { data: wallet } = useWalletClient();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId: chain.id });
   const { client, info } = useSwarm();
   const round = usePool();
   const queryClient = useQueryClient();

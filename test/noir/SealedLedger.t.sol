@@ -8,7 +8,6 @@ import {PoolBase, WrongPhase} from "../../src/PoolBase.sol";
 import {NoirRankedShares} from "../../src/noir/NoirRankedShares.sol";
 import {IPoseidon2} from "../../src/noir/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../../src/noir/interfaces/IHonkVerifier.sol";
-import {Poseidon2} from "../../src/noir/lib/Poseidon2.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockERC721} from "../mocks/MockERC721.sol";
 import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
@@ -16,7 +15,7 @@ import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
 contract SealedLedgerTest is Test {
     MockERC20 token;
     MockERC721 nft;
-    Poseidon2 poseidon;
+    IPoseidon2 poseidon;
     MockHonkVerifier ingestVerifier;
     MockHonkVerifier tallyVerifier;
     NoirRankedShares pool;
@@ -62,7 +61,7 @@ contract SealedLedgerTest is Test {
         vm.warp(1);
         token = new MockERC20();
         nft = new MockERC721();
-        poseidon = new Poseidon2();
+        poseidon = IPoseidon2(deployCode("Poseidon2.sol:Poseidon2"));
         ingestVerifier = new MockHonkVerifier();
         tallyVerifier = new MockHonkVerifier();
         pool = new NoirRankedShares(token, owner, DEADLINE, config());

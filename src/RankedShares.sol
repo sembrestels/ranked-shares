@@ -32,6 +32,10 @@ contract RankedShares is PoolBase, PBEAR {
 
     event Voted(address indexed voter);
 
+    function kind() external pure returns (string memory) {
+        return "public";
+    }
+
     enum Phase {
         Setup,
         Open,
@@ -55,8 +59,73 @@ contract RankedShares is PoolBase, PBEAR {
 
     /// @notice Cast or replace the caller's ballot. See `PBEAR` for the encoding.
     function vote(bytes calldata ranks) external inPhase(Phase.Open) beforeDeadline {
+        if (arkivBallots) revert ArkivBallotsRequired();
         _setBallot(msg.sender, ranks);
         emit Voted(msg.sender);
+    }
+
+    function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
+        external
+        inPhase(Phase.Open)
+        beforeDeadline
+    {
+        _defaultRank[msg.sender] = _validateBallot(payload);
+        _storeBallot(msg.sender, false, entityKey, payload, expectedRevision);
+        _registerVoter(msg.sender);
+        emit Voted(msg.sender);
+    }
+
+    function voterRefsFrom(uint256 start, uint256 count)
+        external
+        view
+        returns (
+            address[] memory who,
+            uint256[] memory direct,
+            uint256[] memory seats,
+            BallotRef[] memory publicRefs,
+            BallotRef[] memory sealedRefs
+        )
+    {
+        uint256 len = start >= _voters.length ? 0 : _voters.length - start;
+        if (count < len) len = count;
+        who = new address[](len);
+        direct = new uint256[](len);
+        seats = new uint256[](len);
+        publicRefs = new BallotRef[](len);
+        sealedRefs = new BallotRef[](len);
+        for (uint256 i; i < len; i++) {
+            address a = _voters[start + i];
+            who[i] = a;
+            direct[i] = _weight[a];
+            publicRefs[i] = _publicRefs[a];
+        }
+    }
+
+    function step() public override {
+        if (arkivBallots) revert ArkivBallotsRequired();
+        super.step();
+    }
+
+    function ballotOf(address voter) public view override returns (bytes memory) {
+        if (arkivBallots) revert ArkivBallotsRequired();
+        return super.ballotOf(voter);
+    }
+
+    function effectiveRank(address voter, uint256 projectId) public view override returns (uint8) {
+        if (arkivBallots) revert ArkivBallotsRequired();
+        return super.effectiveRank(voter, projectId);
+    }
+
+    /// @notice Reuse checked Arkiv payloads for a bounded number of tally steps. No ballot bytes are persisted.
+    function runArkiv(uint256 maxSteps, bytes[] calldata ballots) external {
+        if (!arkivBallots) revert ArkivNotEnabled();
+        if (ballots.length != _voters.length) revert InvalidBallotWitness();
+        for (uint256 i; i < ballots.length; i++) {
+            _checkBallot(_voters[i], false, ballots[i]);
+        }
+        for (uint256 i; i < maxSteps && !tallyDone; i++) {
+            _step(ballots);
+        }
     }
 
     /// @notice Close the voting window and start the tally once the deadline has passed.

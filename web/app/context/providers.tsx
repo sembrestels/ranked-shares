@@ -11,6 +11,7 @@ import { type Address, defineChain, isAddress } from "viem";
 import type { ConnectionInfo, SwarmIdClient } from "@snaha/swarm-id";
 import { errorMessage } from "../lib/proposals";
 import { initializeSwarm } from "../lib/swarm";
+import { tiramisu } from "@arkiv-network/sdk/chains";
 
 const env = import.meta.env;
 export const chain = defineChain({
@@ -24,9 +25,9 @@ export const chain = defineChain({
   rpcUrls: { default: { http: [env.VITE_RPC_URL || "http://127.0.0.1:8545"] } },
 });
 export const config = createConfig({
-  chains: [chain],
+  chains: [chain, tiramisu],
   connectors: [injected()],
-  transports: { [chain.id]: http() },
+  transports: { [chain.id]: http(), [tiramisu.id]: http(env.VITE_ARKIV_RPC_URL) },
   ssr: true,
 });
 

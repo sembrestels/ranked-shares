@@ -588,3 +588,15 @@ allowed to report to that pool:
 - `ALLOW_ANY_WORKFLOW=1` is required to deploy with `WORKFLOW_OWNER` unset, which turns
   the check off. That is for `cre workflow simulate` only — its MockForwarder calls
   `onReport` with no metadata — and such a pool must never hold real funds.
+
+## Arkiv ballot storage
+
+The updated public, Noir, CRE and ZisK pools can store ballot payloads in Arkiv.
+For a new round, the owner calls `enableArkivBallots()` in Setup before opening
+voting. The web app's `/vote` page uploads and confirms votes, and calculates live
+public results in the browser. Proposals remain in Swarm; no result snapshots are
+stored. Existing deployed rounds retain their original storage and require a new
+deployment to adopt this mode.
+
+See [the voting guide](web/README.md#arkiv-voting) and
+[the architecture decision](docs/decisions/2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md).

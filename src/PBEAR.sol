@@ -90,7 +90,7 @@ abstract contract PBEAR {
         return _weight[voter];
     }
 
-    function ballotOf(address voter) public view returns (bytes memory) {
+    function ballotOf(address voter) public view virtual returns (bytes memory) {
         return _ballot[voter];
     }
 
@@ -101,7 +101,7 @@ abstract contract PBEAR {
 
     /// @notice Rank used by the tally: the stored rank, or the last tier if unranked.
     ///         Reverts for a voter without a ballot.
-    function effectiveRank(address voter, uint256 projectId) public view returns (uint8) {
+    function effectiveRank(address voter, uint256 projectId) public view virtual returns (uint8) {
         bytes storage ballot = _ballot[voter];
         if (ballot.length == 0) revert InvalidBallot();
         uint8 rank = uint8(ballot[projectId]);
@@ -123,7 +123,15 @@ abstract contract PBEAR {
     ///         (highest support, then lowest cost, then lowest id) and deducts
     ///         exactly its cost from its supporters, or, if nothing is eligible,
     ///         expands every ballot by one rank level.
-    function step() public {
+    function step() public virtual {
+        bytes[] memory ballots = new bytes[](_voters.length);
+        for (uint256 i; i < ballots.length; i++) {
+            ballots[i] = _ballot[_voters[i]];
+        }
+        _step(ballots);
+    }
+
+    function _step(bytes[] memory ballots) internal {
         if (!tallyStarted) revert TallyNotStarted();
         if (tallyDone) revert TallyAlreadyDone();
 
@@ -137,7 +145,7 @@ abstract contract PBEAR {
             address voter = _voters[i];
             uint256 w = _weight[voter];
             if (w == 0) continue;
-            bytes memory ballot = _ballot[voter];
+            bytes memory ballot = ballots[i];
             if (ballot.length == 0) continue;
             uint8 defaultRank = _defaultRank[voter];
             for (uint256 c = 0; c < m; c++) {
@@ -183,7 +191,7 @@ abstract contract PBEAR {
             address voter = _voters[i];
             uint256 w = _weight[voter];
             if (w == 0) continue;
-            bytes storage ballot = _ballot[voter];
+            bytes memory ballot = ballots[i];
             if (ballot.length == 0) continue;
             uint8 r = uint8(ballot[best]);
             if (r == 0) r = _defaultRank[voter];
@@ -241,6 +249,12 @@ abstract contract PBEAR {
     }
 
     function _setBallot(address voter, bytes calldata ranks) internal beforeTally {
+        _defaultRank[voter] = _validateBallot(ranks);
+        _registerVoter(voter);
+        _ballot[voter] = ranks;
+    }
+
+    function _validateBallot(bytes calldata ranks) internal view returns (uint8) {
         uint256 m = _costs.length;
         if (ranks.length != m) revert InvalidBallot();
 
@@ -258,9 +272,7 @@ abstract contract PBEAR {
             seen += counts[r];
         }
 
-        _registerVoter(voter);
-        _ballot[voter] = ranks;
-        _defaultRank[voter] = uint8(seen + 1);
+        return uint8(seen + 1);
     }
 
     function _startTally() internal beforeTally {
@@ -275,7 +287,7 @@ abstract contract PBEAR {
         }
     }
 
-    function _registerVoter(address voter) private {
+    function _registerVoter(address voter) internal {
         if (!_isVoter[voter]) {
             _isVoter[voter] = true;
             _voters.push(voter);

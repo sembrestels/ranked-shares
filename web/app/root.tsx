@@ -201,6 +201,7 @@ function Shell() {
           <nav className="main-nav" aria-label="Main navigation">
             <NavLink to={`/${search}`} end>Proposals</NavLink>
             <NavLink to={`/submit${search}`}>Submit an idea</NavLink>
+            <NavLink to={`/vote${search}`}>Vote & results</NavLink>
             <NavLink to={`/setup${search}`}>Organizer</NavLink>
           </nav>
         </div>

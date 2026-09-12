@@ -3,8 +3,6 @@ pragma solidity ^0.8.28;
 
 import {NoirRankedShares} from "../../../src/noir/NoirRankedShares.sol";
 import {IHonkVerifier} from "../../../src/noir/interfaces/IHonkVerifier.sol";
-import {IngestVerifierTest} from "./IngestVerifierTest.sol";
-import {TallyVerifierTest} from "./TallyVerifierTest.sol";
 import {FixtureLoader} from "../FixtureLoader.sol";
 
 /// @dev The whole chain with the generated Honk verifiers and proofs made by bb from
@@ -12,7 +10,12 @@ import {FixtureLoader} from "../FixtureLoader.sol";
 ///      reference and the contract agree.
 contract RealProofsTest is FixtureLoader {
     function makeVerifiers() internal override returns (IHonkVerifier, IHonkVerifier) {
-        return (IHonkVerifier(address(new IngestVerifierTest())), IHonkVerifier(address(new TallyVerifierTest())));
+        // Generated assembly stays on its original compiler pipeline; the pool
+        // uses IR to remain deployable under EIP-170.
+        return (
+            IHonkVerifier(deployCode("IngestVerifierTest.sol:IngestVerifierTest")),
+            IHonkVerifier(deployCode("TallyVerifierTest.sol:TallyVerifierTest"))
+        );
     }
 
     function loadProof(string memory fixture, string memory kind, uint256 i)
@@ -112,7 +115,10 @@ contract RealProofsTest is FixtureLoader {
         for (uint256 i = 0; i < proofs.length; i++) {
             callBytes += abi.encodeCall(NoirRankedShares.advance, (proofs[i], pis[i], false)).length;
         }
-        emit log_named_uint("test_main advanceMany calldata bytes", abi.encodeCall(NoirRankedShares.advanceMany, (proofs, pis, false)).length);
+        emit log_named_uint(
+            "test_main advanceMany calldata bytes",
+            abi.encodeCall(NoirRankedShares.advanceMany, (proofs, pis, false)).length
+        );
         emit log_named_uint("test_main 6x advance calldata bytes", callBytes);
 
         pool.advanceMany(proofs, pis, false);
@@ -176,7 +182,11 @@ contract RealProofsTest is FixtureLoader {
         }
     }
 
-    function wholeChainProofs(string memory name) internal view returns (bytes[] memory proofs, bytes32[][] memory pis) {
+    function wholeChainProofs(string memory name)
+        internal
+        view
+        returns (bytes[] memory proofs, bytes32[][] memory pis)
+    {
         uint256 nI = fxCount(".ingestProofs");
         uint256 nT = fxCount(".tallyProofs");
         proofs = new bytes[](nI + nT);

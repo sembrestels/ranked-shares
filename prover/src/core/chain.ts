@@ -1,8 +1,10 @@
+import { readArkivVoters } from "./arkiv";
 // prover/src/core/chain.ts — reads the pool's on-chain state into a Snapshot
 import { type Address, type PublicClient, parseAbiItem } from "viem";
 import abi from "../../../cre/src/abi/NoirRankedShares.json";
 import { isSealed, type Voter } from "@lib/entries";
 import { profileFor } from "./profile";
+import { ballotAbi, toNoirVoter } from "@lib/arkiv";
 
 /**
  * The most voters a snapshot will page through. A pool's roster is bounded only by
@@ -46,8 +48,8 @@ export type Snapshot = {
   voters: Voter[];
 };
 
-export async function read<T>(client: PublicClient, pool: Address, functionName: string, args: unknown[] = []): Promise<T> {
-  return (await client.readContract({ address: pool, abi, functionName, args } as any)) as T;
+export async function read<T>(client: PublicClient, pool: Address, functionName: string, args: unknown[] = [], blockNumber?: bigint): Promise<T> {
+  return (await client.readContract({ address: pool, abi, functionName, args, blockNumber } as any)) as T;
 }
 
 /**
@@ -69,6 +71,8 @@ async function transcriptLogs(client: PublicClient, pool: Address, fromBlock: bi
 }
 
 export async function readPoolSnapshot(client: PublicClient, pool: Address, fromBlock = 0n): Promise<Snapshot> {
+  const blockNumber = await client.getBlockNumber({ cacheTime: 0 });
+  const at = <T>(functionName: string, args: unknown[] = []) => read<T>(client, pool, functionName, args, blockNumber);
   const [
     phase,
     costs,
@@ -94,29 +98,29 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     provisional,
     n,
   ] = await Promise.all([
-    read<number>(client, pool, "phase"),
-    read<bigint[]>(client, pool, "costs"),
-    read<bigint>(client, pool, "totalWeight"),
-    read<`0x${string}`>(client, pool, "keySalt"),
-    read<bigint>(client, pool, "batch"),
-    read<bigint>(client, pool, "nSealedMax"),
-    read<bigint>(client, pool, "mMax"),
-    read<bigint>(client, pool, "tallierPkX"),
-    read<bigint>(client, pool, "tallierPkY"),
-    read<Address>(client, pool, "coordinator"),
-    read<Address>(client, pool, "workflowOwner"),
-    read<`0x${string}`>(client, pool, "workflowName"),
-    read<bigint>(client, pool, "sealedCount"),
-    read<bigint>(client, pool, "numBatches"),
-    read<bigint>(client, pool, "costsHash"),
-    read<`0x${string}`>(client, pool, "inputsRoot"),
-    read<boolean>(client, pool, "resultReported"),
-    read<bigint>(client, pool, "transcriptHash"),
-    read<bigint>(client, pool, "ingestCursor"),
-    read<bigint>(client, pool, "stateCommit"),
-    read<bigint>(client, pool, "ingestedState"),
-    read<bigint[]>(client, pool, "provisionalResult"),
-    read<bigint>(client, pool, "voterCount"),
+    at<number>("phase"),
+    at<bigint[]>("costs"),
+    at<bigint>("totalWeight"),
+    at<`0x${string}`>("keySalt"),
+    at<bigint>("batch"),
+    at<bigint>("nSealedMax"),
+    at<bigint>("mMax"),
+    at<bigint>("tallierPkX"),
+    at<bigint>("tallierPkY"),
+    at<Address>("coordinator"),
+    at<Address>("workflowOwner"),
+    at<`0x${string}`>("workflowName"),
+    at<bigint>("sealedCount"),
+    at<bigint>("numBatches"),
+    at<bigint>("costsHash"),
+    at<`0x${string}`>("inputsRoot"),
+    at<boolean>("resultReported"),
+    at<bigint>("transcriptHash"),
+    at<bigint>("ingestCursor"),
+    at<bigint>("stateCommit"),
+    at<bigint>("ingestedState"),
+    at<bigint[]>("provisionalResult"),
+    at<bigint>("voterCount"),
   ]);
   // Bound both loops below before running them: the profile fixes how many ingest
   // batches can exist, and MAX_VOTERS caps the roster paging.
@@ -130,10 +134,16 @@ export async function readPoolSnapshot(client: PublicClient, pool: Address, from
     throw new Error(`pool ${pool} reports voterCount=${n}, above MAX_VOTERS=${MAX_VOTERS}`);
   }
   const checkpoints: bigint[] = [];
-  for (let k = 0; k <= Number(numBatches); k++) checkpoints.push(await read<bigint>(client, pool, "checkpoint", [BigInt(k)]));
+  for (let k = 0; k <= Number(numBatches); k++) checkpoints.push(await at<bigint>("checkpoint", [BigInt(k)]));
   const voters: Voter[] = [];
-  for (let start = 0; start < voterCount; start += VOTER_PAGE) {
-    const [who, direct, ballots, seats, cts, flags] = await read<[Address[], bigint[], bigint[], bigint[], [bigint, bigint, bigint][], boolean[]]>(client, pool, "votersFrom", [
+  // Old deployed contracts have no arkivBallots selector. A failed probe is only
+  // a compatibility fallback; new Arkiv pools must never use the empty legacy maps.
+  const arkiv = await client.readContract({ address: pool, abi: ballotAbi, functionName: "arkivBallots", blockNumber }).catch(() => false);
+  if (arkiv) {
+    voters.push(...(await readArkivVoters(client, pool, { blockNumber })).map((v) => toNoirVoter(v, costs.length)));
+  }
+  for (let start = 0; !arkiv && start < voterCount; start += VOTER_PAGE) {
+    const [who, direct, ballots, seats, cts, flags] = await at<[Address[], bigint[], bigint[], bigint[], [bigint, bigint, bigint][], boolean[]]>("votersFrom", [
       BigInt(start),
       BigInt(VOTER_PAGE),
     ]);

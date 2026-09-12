@@ -5,7 +5,6 @@ import {WrongPhase, AlreadyClaimed, NotFunded} from "../../src/PoolBase.sol";
 import {NoirRankedShares} from "../../src/noir/NoirRankedShares.sol";
 import {IPoseidon2} from "../../src/noir/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../../src/noir/interfaces/IHonkVerifier.sol";
-import {Poseidon2} from "../../src/noir/lib/Poseidon2.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
 import {MockRevertingVerifier} from "../mocks/MockRevertingVerifier.sol";
@@ -251,7 +250,7 @@ contract SealedAdvanceTest is FixtureLoader {
             workflowOwner: address(0),
             workflowName: bytes10(0),
             coordinator: coordinator,
-            poseidon: IPoseidon2(address(new Poseidon2())),
+            poseidon: IPoseidon2(address(IPoseidon2(deployCode("Poseidon2.sol:Poseidon2")))),
             ingestVerifier: IHonkVerifier(ingest),
             tallyVerifier: IHonkVerifier(tally),
             tallierPkX: pk[0],
@@ -316,7 +315,7 @@ contract SealedAdvanceTest is FixtureLoader {
     function test_abandonGraceArithmeticDoesNotOverflow() public {
         uint64 laterDeadline = uint64(block.timestamp) + 1000;
         MockERC20 tok2 = new MockERC20();
-        Poseidon2 pos2 = new Poseidon2();
+        IPoseidon2 pos2 = IPoseidon2(deployCode("Poseidon2.sol:Poseidon2"));
         MockHonkVerifier iv2 = new MockHonkVerifier();
         MockHonkVerifier tv2 = new MockHonkVerifier();
         uint256[] memory pk = fxWords(".pk");

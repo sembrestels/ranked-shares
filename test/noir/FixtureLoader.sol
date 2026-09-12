@@ -4,10 +4,10 @@ pragma solidity ^0.8.28;
 import {Test} from "forge-std/Test.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {ArkivBallots} from "../../src/ArkivBallots.sol";
 import {NoirRankedShares} from "../../src/noir/NoirRankedShares.sol";
 import {IPoseidon2} from "../../src/noir/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../../src/noir/interfaces/IHonkVerifier.sol";
-import {Poseidon2} from "../../src/noir/lib/Poseidon2.sol";
 import {MockERC20} from "../mocks/MockERC20.sol";
 import {MockERC721} from "../mocks/MockERC721.sol";
 import {MockHonkVerifier} from "../mocks/MockHonkVerifier.sol";
@@ -20,7 +20,7 @@ abstract contract FixtureLoader is Test {
     string internal json;
     MockERC20 internal token;
     MockERC721 internal nft;
-    Poseidon2 internal poseidon;
+    IPoseidon2 internal poseidon;
     MockHonkVerifier internal ingestVerifier;
     MockHonkVerifier internal tallyVerifier;
     NoirRankedShares internal pool;
@@ -108,11 +108,15 @@ abstract contract FixtureLoader is Test {
         return (address(0), bytes10(0));
     }
 
+    function useArkiv() internal pure virtual returns (bool) {
+        return false;
+    }
+
     function deployFromFixture() internal {
         vm.warp(1);
         token = new MockERC20();
         nft = new MockERC721();
-        poseidon = new Poseidon2();
+        poseidon = IPoseidon2(deployCode("Poseidon2.sol:Poseidon2"));
         (IHonkVerifier iv, IHonkVerifier tv) = makeVerifiers();
         uint256[] memory pk = fxWords(".pk");
         (address wfOwner, bytes10 wfName) = workflowConfig();
@@ -141,6 +145,7 @@ abstract contract FixtureLoader is Test {
         for (uint256 c = 0; c < costs.length; c++) {
             pool.addProject(costs[c], recipient);
         }
+        if (useArkiv()) pool.enableArkivBallots();
         pool.openVoting();
         vm.stopPrank();
         token.mint(org, type(uint64).max);
@@ -170,7 +175,8 @@ abstract contract FixtureLoader is Test {
             }
             if (fxBool(voterKey(i, "hasDirect"))) {
                 vm.prank(a);
-                pool.vote(ranksBytes(fxUintArray(voterKey(i, "directRanks"))));
+                if (useArkiv()) pool.voteArkiv(bytes32(i + 1), ranksBytes(fxUintArray(voterKey(i, "directRanks"))), 0);
+                else pool.vote(ranksBytes(fxUintArray(voterKey(i, "directRanks"))));
             }
             granted += direct + seat;
         }
@@ -178,7 +184,8 @@ abstract contract FixtureLoader is Test {
             if (!fxBool(voterKey(i, "hasSealed"))) continue;
             uint256[] memory ct = fxWords(voterKey(i, "ciphertext"));
             vm.prank(fxAddress(voterKey(i, "addr")));
-            pool.voteSealed(ct[0], ct[1], ct[2]);
+            if (useArkiv()) pool.voteSealedArkiv(bytes32(i + 1000), abi.encode(ct[0], ct[1], ct[2]), 0);
+            else pool.voteSealed(ct[0], ct[1], ct[2]);
         }
         uint256 dust = fxWord(".totalWeight") - granted;
         if (dust > 0) {
@@ -194,7 +201,26 @@ abstract contract FixtureLoader is Test {
 
     function closeAll(uint256 chunk) internal {
         vm.warp(DEADLINE);
-        while (!pool.closed()) pool.close(chunk);
+        while (!pool.closed()) {
+            if (useArkiv()) pool.closeArkiv(pool.closeCursor(), witnesses(pool.closeCursor(), chunk));
+            else pool.close(chunk);
+        }
+    }
+
+    function witnesses(uint256 start, uint256 count) internal view returns (ArkivBallots.BallotData[] memory out) {
+        uint256 n = pool.voterCount() - start;
+        if (count < n) n = count;
+        out = new ArkivBallots.BallotData[](n);
+        for (uint256 j; j < n; j++) {
+            uint256 i = start + j;
+            if (fxBool(voterKey(i, "hasDirect"))) {
+                out[j].publicBallot = ranksBytes(fxUintArray(voterKey(i, "directRanks")));
+            }
+            if (fxBool(voterKey(i, "hasSealed"))) {
+                uint256[] memory ct = fxWords(voterKey(i, "ciphertext"));
+                out[j].sealedBallot = abi.encode(ct[0], ct[1], ct[2]);
+            }
+        }
     }
 
     // ---- the DON's report and the fixture's proof public inputs ----

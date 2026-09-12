@@ -7,7 +7,6 @@ import {NoirRankedShares} from "../src/noir/NoirRankedShares.sol";
 import {deriveWorkflowName} from "../src/lib/CreMetadata.sol";
 import {IPoseidon2} from "../src/noir/interfaces/IPoseidon2.sol";
 import {IHonkVerifier} from "../src/noir/interfaces/IHonkVerifier.sol";
-import {Poseidon2} from "../src/noir/lib/Poseidon2.sol";
 import {MockHonkVerifier} from "../test/mocks/MockHonkVerifier.sol";
 
 /// @notice Deploys a NoirRankedShares pool.
@@ -100,7 +99,13 @@ contract DeployNoir is Script {
         vm.startBroadcast();
         address poseidon = vm.envOr("POSEIDON", address(0));
         if (poseidon == address(0)) {
-            poseidon = address(new Poseidon2());
+            // Keep the generated Poseidon assembly on its legacy pipeline. The
+            // pool uses IR, whose Poseidon output would exceed EIP-170.
+            bytes memory code = vm.getCode("Poseidon2.sol:Poseidon2");
+            assembly ("memory-safe") {
+                poseidon := create(0, add(code, 32), mload(code))
+            }
+            require(poseidon != address(0), "Poseidon deployment failed");
             console.log("Poseidon2 deployed at", poseidon);
         }
         cfg.poseidon = IPoseidon2(poseidon);

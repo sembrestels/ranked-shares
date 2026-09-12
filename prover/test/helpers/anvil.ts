@@ -92,7 +92,7 @@ export async function deployUnclosedPool(rpc: string, fixture?: URL, workflow: W
   const fx = loadFixture(fixture ?? DEFAULT_FIXTURE);
   const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
   const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
-  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const pub = createPublicClient({ pollingInterval: 50, chain: foundry, transport: http(rpc) });
   const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
   const deploy = async (name: string, args: unknown[] = [], abi?: any): Promise<Address> => {
     const a = artifact(name);
@@ -135,7 +135,7 @@ export async function deployVoterPool(rpc: string, n: number, fixture?: URL): Pr
   const fx = loadFixture(fixture ?? DEFAULT_FIXTURE);
   const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
   const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
-  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const pub = createPublicClient({ pollingInterval: 50, chain: foundry, transport: http(rpc) });
   const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(rpc) });
   const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
   const write = (client: any, params: unknown): Promise<Hex> => client.writeContract(params);
@@ -238,7 +238,7 @@ export async function startFixtureChain(opts: { port: number; fixture?: URL }): 
   const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
 
   execFileSync("forge", ["build", "-q"], { cwd: repoRoot });
-  const anvil: ChildProcess = spawn("anvil", ["--port", String(port), "--silent", "--code-size-limit", "100000"], { stdio: "ignore" });
+  const anvil: ChildProcess = spawn("anvil", ["--port", String(port), "--silent"], { stdio: "ignore" });
 
   try {
     return await setUpFixtureChain(rpc, fx, DEPLOYER, COORDINATOR, anvil);
@@ -251,7 +251,7 @@ export async function startFixtureChain(opts: { port: number; fixture?: URL }): 
 }
 
 async function setUpFixtureChain(rpc: string, fx: any, DEPLOYER: Account, COORDINATOR: Account, anvil: ChildProcess): Promise<FixtureChain> {
-  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const pub = createPublicClient({ pollingInterval: 50, chain: foundry, transport: http(rpc) });
   await waitForRpc(pub);
   const { pool, token, reportGas, reportBytes } = await replayFixturePool(rpc, fx);
   return {
@@ -282,7 +282,7 @@ export type ReplayedPool = { pool: Address; token: Address; reportGas: bigint; r
 export async function replayFixturePool(rpc: string, fx: any): Promise<ReplayedPool> {
   const DEPLOYER = privateKeyToAccount(DEPLOYER_KEY);
   const COORDINATOR = privateKeyToAccount(COORDINATOR_KEY);
-  const pub = createPublicClient({ chain: foundry, transport: http(rpc) });
+  const pub = createPublicClient({ pollingInterval: 50, chain: foundry, transport: http(rpc) });
   const testClient = createTestClient({ chain: foundry, mode: "anvil", transport: http(rpc) });
   const deployerWallet = createWalletClient({ account: DEPLOYER, chain: foundry, transport: http(rpc) });
 

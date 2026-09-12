@@ -1,4 +1,14 @@
 import { encodeAbiParameters } from "viem";
+import type { BallotData } from "./arkiv";
+
+/** kind 3: close a specific range with hash-checked Arkiv payload witnesses. */
+export function encodeArkivCloseReport(cursor: number, ballots: BallotData[]): `0x${string}` {
+  const payload = encodeAbiParameters([
+    { type: "uint256" },
+    { type: "tuple[]", components: [{ name: "publicBallot", type: "bytes" }, { name: "sealedBallot", type: "bytes" }] },
+  ], [BigInt(cursor), ballots]);
+  return encodeAbiParameters([{ type: "uint8" }, { type: "bytes" }], [3, payload]);
+}
 
 /** kind 1: the provisional result (funded order) with the PB-EAR transcript. */
 export function encodeResultReport(inputsRoot: `0x${string}`, funded: number[], transcript: bigint[][]): `0x${string}` {

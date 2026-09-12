@@ -1,6 +1,30 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+.voting-page {
+  display: grid;
+  gap: var(--space-6);
+}
+.voting-page .proposal-form,
+.voting-results,
+.voting-pending {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: var(--rule) solid var(--line);
+}
+.voting-page fieldset label {
+  display: block;
+  margin-block: var(--space-3);
+}
+.voting-page code {
+  overflow-wrap: anywhere;
+}
+.voting-results ol {
+  list-style: decimal;
+  padding-inline-start: var(--space-6);
+}
+
 * {
   box-sizing: border-box;
 }

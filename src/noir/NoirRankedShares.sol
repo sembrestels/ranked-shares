@@ -244,6 +244,10 @@ contract NoirRankedShares is PoolBase, IReceiver {
 
     // ----------------------------------------------------------------- views
 
+    function kind() external pure returns (string memory) {
+        return "noir";
+    }
+
     function phase() public view returns (Phase) {
         if (finality != Finality.None) return Phase.Done;
         if (_closed()) return Phase.Tally;
@@ -277,10 +281,12 @@ contract NoirRankedShares is PoolBase, IReceiver {
     }
 
     function directBallotOf(address voter) external view returns (uint256) {
+        if (arkivBallots) revert ArkivBallotsRequired();
         return _directBallot[voter];
     }
 
     function sealedOf(address voter) external view returns (uint256 rx, uint256 ry, uint256 c) {
+        if (arkivBallots) revert ArkivBallotsRequired();
         uint256[3] storage ct = _sealed[voter];
         return (ct[0], ct[1], ct[2]);
     }
@@ -304,6 +310,7 @@ contract NoirRankedShares is PoolBase, IReceiver {
         )
     {
         uint256 n = voters.length;
+        if (arkivBallots) revert ArkivBallotsRequired();
         // `n - start > count` rather than `start + count > n`, which a huge `count` would
         // overflow.
         uint256 len = start >= n ? 0 : (n - start > count ? count : n - start);
@@ -331,6 +338,7 @@ contract NoirRankedShares is PoolBase, IReceiver {
     ///         zero-weight ballot is refused whatever `minDirectVote` is: it would only
     ///         enlarge `voters` and the work every close and tally pays for (spec B2).
     function vote(bytes calldata ranks) external inPhase(Phase.Open) beforeDeadline {
+        if (arkivBallots) revert ArkivBallotsRequired();
         if (hasDirect[msg.sender]) revert BallotAlreadyCast();
         uint256 w = directWeight[msg.sender];
         if (w == 0 || w < minDirectVote) revert BelowMinimumVote();
@@ -345,6 +353,7 @@ contract NoirRankedShares is PoolBase, IReceiver {
     ///         costs `minSealedVote` of seat weight, as `minDirectVote` does on the public
     ///         side; a zero-weight sealed ballot is refused whatever the minimum is.
     function voteSealed(uint256 rx, uint256 ry, uint256 c) external inPhase(Phase.Open) beforeDeadline {
+        if (arkivBallots) revert ArkivBallotsRequired();
         uint256 w = seatWeight[msg.sender];
         if (w == 0 || w < minSealedVote) revert NoSeatWeight();
         if (rx == 0 || c >= FIELD || !Grumpkin.isOnCurve(rx, ry)) revert InvalidCiphertext();
@@ -390,6 +399,79 @@ contract NoirRankedShares is PoolBase, IReceiver {
         return closed;
     }
 
+    function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
+        external
+        inPhase(Phase.Open)
+        beforeDeadline
+    {
+        if (hasDirect[msg.sender]) revert BallotAlreadyCast();
+        uint256 w = directWeight[msg.sender];
+        if (w == 0 || w < minDirectVote) revert BelowMinimumVote();
+        _validateAndPack(payload);
+        hasDirect[msg.sender] = true;
+        _storeBallot(msg.sender, false, entityKey, payload, expectedRevision);
+        _register(msg.sender);
+        emit Voted(msg.sender);
+    }
+
+    function voteSealedArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
+        external
+        inPhase(Phase.Open)
+        beforeDeadline
+    {
+        uint256 w = seatWeight[msg.sender];
+        if (w == 0 || w < minSealedVote) revert NoSeatWeight();
+        if (payload.length != 96) revert InvalidCiphertext();
+        (uint256 rx, uint256 ry, uint256 c) = abi.decode(payload, (uint256, uint256, uint256));
+        if (rx == 0 || c >= FIELD || !Grumpkin.isOnCurve(rx, ry)) revert InvalidCiphertext();
+        if (_sealedRefs[msg.sender].revision == 0) {
+            if (sealedCount >= nSealedMax) revert TooManySealedVoters();
+            sealedCount++;
+        }
+        _storeBallot(msg.sender, true, entityKey, payload, expectedRevision);
+        _register(msg.sender);
+        emit SealedVote(msg.sender);
+    }
+
+    function voterRefsFrom(uint256 start, uint256 count)
+        external
+        view
+        returns (
+            address[] memory who,
+            uint256[] memory direct,
+            uint256[] memory seats,
+            BallotRef[] memory publicRefs,
+            BallotRef[] memory sealedRefs
+        )
+    {
+        uint256 len = start >= voters.length ? 0 : voters.length - start;
+        if (count < len) len = count;
+        who = new address[](len);
+        direct = new uint256[](len);
+        seats = new uint256[](len);
+        publicRefs = new BallotRef[](len);
+        sealedRefs = new BallotRef[](len);
+        for (uint256 i; i < len; i++) {
+            address a = voters[start + i];
+            who[i] = a;
+            direct[i] = directWeight[a];
+            seats[i] = seatWeight[a];
+            publicRefs[i] = _publicRefs[a];
+            sealedRefs[i] = _sealedRefs[a];
+        }
+    }
+
+    function closeArkiv(uint256 expectedCursor, BallotData[] calldata ballots) external inPhase(Phase.Closing) {
+        _closeArkiv(expectedCursor, ballots);
+    }
+
+    function _closeArkiv(uint256 expectedCursor, BallotData[] memory ballots) internal {
+        if (!arkivBallots) revert ArkivNotEnabled();
+        if (expectedCursor != closeCursor) revert StaleCloseCursor();
+        if (ballots.length > voters.length - closeCursor) revert InvalidBallotWitness();
+        _closeResolved(ballots.length, ballots);
+    }
+
     // --------------------------------------------------------------- closing
 
     /// @notice Walk the voters and commit to every input, at most `maxVoters` per call.
@@ -411,6 +493,11 @@ contract NoirRankedShares is PoolBase, IReceiver {
     ///      whole proof chain is anchored on those checkpoints, so `close` asserts it
     ///      rather than trusting three hops of reasoning.
     function _close(uint256 maxVoters) internal {
+        if (arkivBallots) revert ArkivBallotsRequired();
+        _closeResolved(maxVoters, new BallotData[](0));
+    }
+
+    function _closeResolved(uint256 maxVoters, BallotData[] memory ballots) internal {
         if (closeCursor == 0) _requireBalanceCoversBudget();
         uint256 n = voters.length;
         uint256 end = closeCursor + maxVoters;
@@ -421,10 +508,20 @@ contract NoirRankedShares is PoolBase, IReceiver {
         uint256 sc = sealedCount;
         for (uint256 i = closeCursor; i < end; i++) {
             address a = voters[i];
-            if (hasDirect[a]) {
-                hp = keccak256(abi.encodePacked(hp, a, directWeight[a], _directBallot[a]));
+            uint256 packed = _directBallot[a];
+            uint256[3] memory ct = _sealed[a];
+            if (arkivBallots) {
+                BallotData memory data = ballots[i - closeCursor];
+                _checkBallot(a, false, data.publicBallot);
+                _checkBallot(a, true, data.sealedBallot);
+                for (uint256 c; c < data.publicBallot.length; c++) {
+                    packed |= uint256(uint8(data.publicBallot[c])) << (8 * c);
+                }
+                if (data.sealedBallot.length != 0) ct = abi.decode(data.sealedBallot, (uint256[3]));
             }
-            uint256[3] storage ct = _sealed[a];
+            if (hasDirect[a]) {
+                hp = keccak256(abi.encodePacked(hp, a, directWeight[a], packed));
+            }
             if (ct[0] != 0) {
                 uint256[] memory in6 = new uint256[](6);
                 in6[0] = hs;
@@ -474,6 +571,12 @@ contract NoirRankedShares is PoolBase, IReceiver {
         if (kind == 2) {
             if (phase() != Phase.Closing) revert WrongPhase();
             _close(abi.decode(payload, (uint256)));
+            return;
+        }
+        if (kind == 3) {
+            if (phase() != Phase.Closing) revert WrongPhase();
+            (uint256 cursor, BallotData[] memory ballots) = abi.decode(payload, (uint256, BallotData[]));
+            _closeArkiv(cursor, ballots);
             return;
         }
         if (kind != 1) revert UnknownReport();

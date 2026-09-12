@@ -88,6 +88,12 @@ contract CreRankedShares is SealedPool, IReceiver {
             _close(abi.decode(payload, (uint256)));
             return;
         }
+        if (reportKind == 3) {
+            if (phase() != Phase.Closing) revert WrongPhase();
+            (uint256 cursor, BallotData[] memory ballots) = abi.decode(payload, (uint256, BallotData[]));
+            _closeArkiv(cursor, ballots);
+            return;
+        }
         if (reportKind != KIND_RESULT) revert UnknownReport();
         if (phase() != Phase.Tally) revert WrongPhase();
         (bytes32 reported, uint256[] memory order) = abi.decode(payload, (bytes32, uint256[]));

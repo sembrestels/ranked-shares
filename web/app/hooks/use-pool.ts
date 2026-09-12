@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { erc20Abi } from "viem";
-import { useRound } from "../context/providers";
+import { chain, useRound } from "../context/providers";
 import { type Proposal, proposalAbi } from "../lib/proposals";
 
 export const PAGE_SIZE = 12n;
 export function usePool(page = 0) {
   const { pool } = useRound();
-  const client = usePublicClient();
+  const client = usePublicClient({ chainId: chain.id });
   return useQuery({
     queryKey: ["pool", client?.chain?.id, pool, page],
     enabled: !!pool && !!client,

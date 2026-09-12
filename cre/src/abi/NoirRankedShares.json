@@ -248,6 +248,65 @@
   },
   {
     "type": "function",
+    "name": "arkivBallots",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ballotRefOf",
+    "inputs": [
+      {
+        "name": "voter",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "isSealed",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct ArkivBallots.BallotRef",
+        "components": [
+          {
+            "name": "entityKey",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "payloadHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "revision",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "blockNumber",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "batch",
     "inputs": [],
     "outputs": [
@@ -349,6 +408,36 @@
         "name": "maxVoters",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "closeArkiv",
+    "inputs": [
+      {
+        "name": "expectedCursor",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "ballots",
+        "type": "tuple[]",
+        "internalType": "struct ArkivBallots.BallotData[]",
+        "components": [
+          {
+            "name": "publicBallot",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "sealedBallot",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
       }
     ],
     "outputs": [],
@@ -543,6 +632,13 @@
   },
   {
     "type": "function",
+    "name": "enableArkivBallots",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "finality",
     "inputs": [],
     "outputs": [
@@ -708,6 +804,19 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "kind",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -1469,6 +1578,29 @@
   },
   {
     "type": "function",
+    "name": "voteArkiv",
+    "inputs": [
+      {
+        "name": "entityKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "payload",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "expectedRevision",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "voteSealed",
     "inputs": [
       {
@@ -1492,6 +1624,29 @@
   },
   {
     "type": "function",
+    "name": "voteSealedArkiv",
+    "inputs": [
+      {
+        "name": "entityKey",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "payload",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "expectedRevision",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "voterCount",
     "inputs": [],
     "outputs": [
@@ -1499,6 +1654,94 @@
         "name": "",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "voterRefsFrom",
+    "inputs": [
+      {
+        "name": "start",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "count",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "who",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "direct",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "seats",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      {
+        "name": "publicRefs",
+        "type": "tuple[]",
+        "internalType": "struct ArkivBallots.BallotRef[]",
+        "components": [
+          {
+            "name": "entityKey",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "payloadHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "revision",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "blockNumber",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "sealedRefs",
+        "type": "tuple[]",
+        "internalType": "struct ArkivBallots.BallotRef[]",
+        "components": [
+          {
+            "name": "entityKey",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "payloadHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "revision",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "blockNumber",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
@@ -1646,6 +1889,49 @@
     "type": "event",
     "name": "Advanced",
     "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ArkivBallotsEnabled",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BallotStored",
+    "inputs": [
+      {
+        "name": "voter",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "isSealed",
+        "type": "bool",
+        "indexed": true,
+        "internalType": "bool"
+      },
+      {
+        "name": "entityKey",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "payloadHash",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "revision",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
     "anonymous": false
   },
   {
@@ -2068,6 +2354,16 @@
   },
   {
     "type": "error",
+    "name": "ArkivBallotsRequired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ArkivNotEnabled",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "BadMetadata",
     "inputs": []
   },
@@ -2098,6 +2394,11 @@
   },
   {
     "type": "error",
+    "name": "EmptyBallotReference",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "EmptyBatch",
     "inputs": []
   },
@@ -2114,6 +2415,11 @@
   {
     "type": "error",
     "name": "InvalidBallot",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidBallotWitness",
     "inputs": []
   },
   {
@@ -2262,6 +2568,16 @@
   {
     "type": "error",
     "name": "SeatsUnknown",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "StaleBallotRevision",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "StaleCloseCursor",
     "inputs": []
   },
   {

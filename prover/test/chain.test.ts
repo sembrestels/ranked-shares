@@ -1,8 +1,8 @@
 // prover/test/chain.test.ts — readPoolSnapshot's bounds, against a stubbed PublicClient
 // (no anvil, no network): a pool that reports absurd counts must be rejected before the
 // checkpoint and voter loops run, not paged through forever.
-import { describe, expect, test } from "vitest";
-import type { PublicClient } from "viem";
+import { describe, expect, test, vi } from "vitest";
+import { type PublicClient, keccak256, toHex } from "viem";
 import { MAX_VOTERS, readPoolSnapshot } from "../src/core/chain";
 
 const POOL = "0x00000000000000000000000000000000000000aa" as const;
@@ -52,6 +52,18 @@ const base: Record<string, unknown> = {
 };
 
 describe("readPoolSnapshot bounds", () => {
+  test("Arkiv pools load accepted payloads instead of empty legacy storage", async () => {
+    const key = toHex(1n, { size: 32 });
+    const payload = "0x01020304";
+    const ref = { entityKey: key, payloadHash: keccak256(payload), revision: 1n, blockNumber: 0n };
+    const { client, asked } = stubClient({ ...base, arkivBallots: true, voterCount: 1n, voterRefsFrom: [[POOL], [100n], [0n], [ref], [{ ...ref, revision: 0n }]] });
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify({ result: { data: [{ key, payload }], blockNumber: "0x1" } }), { status: 200 }));
+    try {
+      const snapshot = await readPoolSnapshot(client, POOL);
+      expect(snapshot.voters[0]).toMatchObject({ hasDirect: true, directPacked: 0x04030201n, ciphertext: null });
+      expect(asked).not.toContain("votersFrom");
+    } finally { fetch.mockRestore(); }
+  });
   test("rejects a pool whose (nSealedMax, mMax, batch) is no known circuit profile", async () => {
     const { client } = stubClient({ ...base, nSealedMax: 999n });
     await expect(readPoolSnapshot(client, POOL)).rejects.toThrow(/no circuit profile for E=999 M=4 B=2/);

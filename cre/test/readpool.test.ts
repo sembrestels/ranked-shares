@@ -6,13 +6,14 @@
 import { describe, expect } from "bun:test";
 import { addContractMock, EvmMock, newTestRuntime, test } from "@chainlink/cre-sdk/test";
 import { cre } from "@chainlink/cre-sdk";
-import { erc20Abi, type Address } from "viem";
+import { erc20Abi, type Address, type Hex, encodeAbiParameters, keccak256, toHex } from "viem";
 // The CRE SDK types every `node:fs` export as `never` (WASM guardrail), so the fixture
 // comes in as a JSON import, like the other vector tests.
 import fixture from "../../reference/vectors/noir/fixture_test_main.json";
 import poolAbi from "../src/abi/NoirRankedShares.json";
 import { toBig } from "../src/lib/field";
 import { readPool } from "../src/workflow";
+import { processPool } from "../src/workflow";
 
 const fx = fixture as any;
 const hexBytes = (h: string) => Uint8Array.from(Buffer.from(h.slice(2), "hex"));
@@ -73,6 +74,46 @@ function expectedVoters(voters: any[] = fx.voters) {
 }
 
 describe("readPool", () => {
+  test("Arkiv references reconstruct exactly the existing fixture and tally report", async () => {
+    const { runtime, evm, pool } = setup();
+    mockTally(pool);
+    pool.arkivBallots = () => true;
+    pool.votersFrom = () => { throw new Error("Arkiv must not use legacy ballot getters"); };
+    const payloads = new Map<string, Hex>();
+    const ref = (index: number, bytes: Hex, present: boolean) => {
+      const entityKey = toHex(BigInt(index), { size: 32 });
+      if (present) payloads.set(entityKey, bytes);
+      return { entityKey, payloadHash: keccak256(bytes), revision: present ? 1n : 0n, blockNumber: 1n };
+    };
+    const rows = fx.voters.map((v: any, i: number) => ({
+      address: v.addr, direct: toBig(v.directWeight), seats: toBig(v.seatWeight),
+      pub: ref(i + 1, v.hasDirect ? toHex(new Uint8Array(v.directRanks)) : "0x", v.hasDirect),
+      sealed: ref(i + 1000, v.hasSealed ? encodeAbiParameters([{ type: "uint256" }, { type: "uint256" }, { type: "uint256" }], v.ciphertext.map(toBig)) : "0x", v.hasSealed),
+    }));
+    pool.voterRefsFrom = (start: unknown, count: unknown) => {
+      const page = rows.slice(Number(start), Number(start) + Number(count));
+      return [page.map((v: any) => v.address), page.map((v: any) => v.direct), page.map((v: any) => v.seats), page.map((v: any) => v.pub), page.map((v: any) => v.sealed)];
+    };
+    const reads = readPool(runtime, evm, POOL, CLOSE_CHUNK, () => payloads);
+    expect(reads.phase).toBe(3);
+    if (reads.phase !== 3) throw new Error("expected tally");
+    expect(reads.voters).toEqual(expectedVoters());
+    expect(processPool(reads, hexBytes(fx.master))?.kind).toBe(1);
+    payloads.clear();
+    expect(() => readPool(runtime, evm, POOL, CLOSE_CHUNK, () => payloads)).toThrow("missing");
+  });
+
+  test("Arkiv closing produces a cursor-bound kind-3 report", async () => {
+    const { runtime, evm, evmMock, pool } = setup();
+    pool.phase = () => 2n; pool.arkivBallots = () => true; pool.closeCursor = () => 0n;
+    pool.totalWeight = () => 0n; pool.token = () => TOKEN; pool.voterCount = () => 0n;
+    pool.voterRefsFrom = () => [[], [], [], [], []];
+    const token = addContractMock(evmMock, { address: TOKEN, abi: erc20Abi });
+    token.balanceOf = () => 0n;
+    const out = readPool(runtime, evm, POOL, CLOSE_CHUNK, () => new Map());
+    expect(processPool(out, new Uint8Array(32))?.kind).toBe(3);
+  });
+
   test("Tally: assembles exactly what processPool's own tests feed in", async () => {
     const { runtime, evm, pool } = setup();
     mockTally(pool);

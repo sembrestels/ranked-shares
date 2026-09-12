@@ -93,7 +93,9 @@ sealed ranks, ephemeral scalar, secret key or signature is persisted in the draf
 - `web/app/lib/arkiv.ts`, `ballots.ts`, and `/vote`: SDK 0.8.0, Noble 2.4.0,
   Poseidon2 0.6.2; explicit pool network reads, wallet checks and resumable drafts.
 - `foundry.toml` compiles Noir and its importers with IR to fit EIP-170. Generated
-  verifier artifacts are built separately with their existing compiler settings.
+  verifier and Poseidon2 artifacts are built separately with their existing compiler settings.
+  Tests and the Noir deployment script load their compiled creation code instead of
+  forcing those helpers through the pool’s IR pipeline.
 - Deploy new contracts, configure `VITE_POOL_ADDRESS`/pool network, optionally set
   `VITE_ARKIV_RPC_URL` to another Tiramisu endpoint, then have the owner enable Arkiv
   before opening voting. No automatic production deployment or historical backfill.

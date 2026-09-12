@@ -3,10 +3,24 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [tailwindcss(), !process.env.VITEST && reactRouter()],
+  plugins: [
+    tailwindcss(),
+    // Shared CRE crypto source is bundled by this app. Resolve its dependencies
+    // from web so a web-only install works, without deduping Swarm's older Noble.
+    {
+      name: "shared-ballot-dependencies",
+      async resolveId(source, importer) {
+        if (importer?.includes("/cre/src/lib/") && !source.startsWith(".")) {
+          return this.resolve(source, new URL("./app/lib/ballots.ts", import.meta.url).pathname, { skipSelf: true });
+        }
+      },
+    },
+    !process.env.VITEST && reactRouter(),
+  ],
   // Match the house frontend's renderer: Deno otherwise selects React's browser
   // export, while React Router's SPA prerender entry needs the Node stream API.
   resolve: {
+    dedupe: ["viem"],
     alias: {
       "react-dom/server":
         new URL("./app/lib/react-dom-server.node.mjs", import.meta.url)

@@ -6,6 +6,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ArkivBallots} from "./ArkivBallots.sol";
 
 // ---------------------------------------------------------------- errors
 //
@@ -42,7 +43,7 @@ error StaleProposalRevision(uint256 expected, uint256 actual);
 ///         deposits, sponsorships, NFT seats, claims and sweep. How weight is accounted,
 ///         when each phase holds and what got funded are left to the concrete pool
 ///         through the hooks at the bottom.
-abstract contract PoolBase is Ownable {
+abstract contract PoolBase is Ownable, ArkivBallots {
     using SafeERC20 for IERC20;
 
     // ---------------------------------------------------------------- events
@@ -246,6 +247,12 @@ abstract contract PoolBase is Ownable {
         recipientOf[id] = recipient;
         contentRefOf[id] = contentRef;
         emit ProjectAdded(id, cost_, recipient);
+    }
+
+    /// @notice Select Arkiv before voting opens. Existing deployed pools require redeployment.
+    function enableArkivBallots() external onlyOwner onlySetup beforeDeadline {
+        arkivBallots = true;
+        emit ArkivBallotsEnabled();
     }
 
     function openVoting() external onlyOwner onlySetup beforeDeadline {

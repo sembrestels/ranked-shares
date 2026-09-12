@@ -1,6 +1,7 @@
 import {
   bytesToHex,
   cre,
+  consensusIdenticalAggregation,
   encodeCallMsg,
   getNetwork,
   LAST_FINALIZED_BLOCK_NUMBER,
@@ -13,8 +14,9 @@ import abi from "./abi/NoirRankedShares.json";
 import * as cm from "./lib/commitments";
 import { isSealed, publicEntries, sealedEntries, sealedVoters, type Voter } from "./lib/entries";
 import { pbearTranscript } from "./lib/pbear";
-import { encodeCloseReport, encodeResultReport } from "./lib/report";
+import { encodeArkivCloseReport, encodeCloseReport, encodeResultReport } from "./lib/report";
 import { deriveSk } from "./lib/sealed";
+import { ARKIV_RPC, MAX_VOTERS, checkedPayload, payloadQuery, payloadReply, rosterPage, toNoirVoter, type BallotData, type RefPage, type ResolvedVoter } from "./lib/arkiv";
 
 export type Config = {
   schedule: string;
@@ -22,6 +24,7 @@ export type Config = {
   pools: string[];
   closeChunk: number;
   gasLimit: string;
+  arkivRpcUrl?: string;
 };
 
 /**
@@ -53,7 +56,7 @@ type IdleReads = { phase: 0 | 1 | 4; closeChunk: number };
  * totalWeight` once, at `closeCursor == 0`; a pool whose balance has since dropped below
  * `totalWeight` would otherwise get a `close` report every tick that reverts forever.
  */
-type ClosingReads = { phase: typeof PHASE_CLOSING; closeChunk: number; closeCursor: number; totalWeight: bigint; balance: bigint };
+type ClosingReads = { phase: typeof PHASE_CLOSING; closeChunk: number; closeCursor: number; totalWeight: bigint; balance: bigint; arkivBallots?: BallotData[] };
 
 type TallyReads = {
   phase: typeof PHASE_TALLY;
@@ -70,7 +73,7 @@ type TallyReads = {
 
 export type PoolReads = IdleReads | ClosingReads | TallyReads;
 
-export type PoolAction = { kind: 1 | 2; report: `0x${string}` } | null;
+export type PoolAction = { kind: 1 | 2 | 3; report: `0x${string}` } | null;
 
 /**
  * The tally itself, free of any runtime so it can be unit-tested. Everything that
@@ -81,6 +84,7 @@ export function processPool(r: PoolReads, master: Uint8Array): PoolAction {
     // Mirrors `_close`'s own check: once past the first chunk the balance requirement has
     // already been enforced on chain, so only `closeCursor === 0` needs it here.
     if (r.closeCursor === 0 && r.balance < r.totalWeight) return null;
+    if (r.arkivBallots) return { kind: 3, report: encodeArkivCloseReport(r.closeCursor, r.arkivBallots) };
     return { kind: 2, report: encodeCloseReport(r.closeChunk) };
   }
   if (r.phase !== PHASE_TALLY || r.resultReported) return null;
@@ -126,13 +130,44 @@ function call<T>(runtime: Runtime<Config>, evm: EVMClient, pool: Address, functi
   return callWith<T>(runtime, evm, pool, abi, functionName, args);
 }
 
-export function readPool(runtime: Runtime<Config>, evm: EVMClient, pool: Address, closeChunk: number): PoolReads {
+function arkivPayloads(runtime: Runtime<Config>, keys: readonly Hex[]): Map<string, Hex> {
+  if (!keys.length) return new Map();
+  const http = new cre.capabilities.HTTPClient();
+  // Agree on immutable key/payload pairs, not the head block number, which can
+  // differ between DON nodes. Never fetch plaintext or the tallier's key here.
+  const result = http.sendRequest(runtime, (sender) => {
+    const response = sender.sendRequest({ url: runtime.config.arkivRpcUrl || ARKIV_RPC, method: "POST", headers: { "Content-Type": "application/json" }, body: new TextEncoder().encode(JSON.stringify(payloadQuery(keys))) }).result();
+    if (response.statusCode !== 200) throw new Error("Arkiv could not serve the accepted ballots.");
+    const rows = payloadReply(JSON.parse(new TextDecoder().decode(response.body)));
+    return JSON.stringify([...rows].sort(([a], [b]) => a.localeCompare(b)));
+  }, consensusIdenticalAggregation<string>())().result();
+  return new Map(JSON.parse(result) as [string, Hex][]);
+}
+
+export function readPool(runtime: Runtime<Config>, evm: EVMClient, pool: Address, closeChunk: number, load: (keys: readonly Hex[]) => Map<string, Hex> = (keys) => arkivPayloads(runtime, keys)): PoolReads {
   const phase = Number(call<bigint | number>(runtime, evm, pool, "phase"));
+  let arkiv = false;
+  if (phase === PHASE_CLOSING || phase === PHASE_TALLY) {
+    try { arkiv = call<boolean>(runtime, evm, pool, "arkivBallots"); } catch { /* Legacy deployment has no selector. */ }
+  }
+  const arkivPage = (start: number, count: number): ResolvedVoter[] => {
+    const page = call<RefPage>(runtime, evm, pool, "voterRefsFrom", [BigInt(start), BigInt(count)]);
+    const roster = rosterPage(page, count);
+    const keys = [...new Set(roster.flatMap((v) => [v.publicRef, v.sealedRef]).filter((ref) => ref.revision > 0n).map((ref) => ref.entityKey))];
+    const payloads = load(keys);
+    return roster.map((v) => ({ ...v, publicBallot: checkedPayload(v.publicRef, payloads.get(v.publicRef.entityKey.toLowerCase())), sealedBallot: checkedPayload(v.sealedRef, payloads.get(v.sealedRef.entityKey.toLowerCase())), recovered: 0 }));
+  };
   if (phase === PHASE_CLOSING) {
     const closeCursor = Number(call<bigint>(runtime, evm, pool, "closeCursor"));
     const totalWeight = call<bigint>(runtime, evm, pool, "totalWeight");
     const token = call<Address>(runtime, evm, pool, "token");
     const balance = callWith<bigint>(runtime, evm, token, erc20Abi, "balanceOf", [pool]);
+    if (arkiv) {
+      const n = Number(call<bigint>(runtime, evm, pool, "voterCount"));
+      if (n > MAX_VOTERS || closeCursor > n || !Number.isSafeInteger(n)) throw new Error("Invalid Arkiv roster size.");
+      const count = Math.min(50, Math.max(1, closeChunk), n - closeCursor);
+      return { phase: PHASE_CLOSING, closeChunk, closeCursor, totalWeight, balance, arkivBallots: arkivPage(closeCursor, count) };
+    }
     return { phase: PHASE_CLOSING, closeChunk, closeCursor, totalWeight, balance };
   }
   if (phase !== PHASE_TALLY) return { phase: phase as 0 | 1 | 4, closeChunk };
@@ -143,8 +178,13 @@ export function readPool(runtime: Runtime<Config>, evm: EVMClient, pool: Address
   const inputsRoot = call<Hex>(runtime, evm, pool, "inputsRoot");
   const batch = Number(call<bigint>(runtime, evm, pool, "batch"));
   const n = Number(call<bigint>(runtime, evm, pool, "voterCount"));
+  if (n > MAX_VOTERS || !Number.isSafeInteger(n)) throw new Error("Invalid voter count.");
   const voters: Voter[] = [];
   for (let start = 0; start < n; start += VOTER_PAGE) {
+    if (arkiv) {
+      voters.push(...arkivPage(start, Math.min(VOTER_PAGE, n - start)).map((v) => toNoirVoter(v, costs.length)));
+      continue;
+    }
     const [who, direct, ballots, seats, cts, hasDirectFlags] = call<
       [
         readonly Address[],

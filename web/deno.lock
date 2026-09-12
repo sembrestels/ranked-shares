@@ -1,6 +1,9 @@
 {
   "version": "5",
   "specifiers": {
+    "npm:@arkiv-network/sdk@0.8.0": "0.8.0_typescript@5.9.3_viem@2.56.3",
+    "npm:@noble/curves@2.4.0": "2.4.0",
+    "npm:@noble/hashes@2.4.0": "2.4.0",
     "npm:@react-router/dev@*": "7.9.5_react-router@7.9.5_typescript@5.9.3_vite@7.2.4_@types+node@24.13.3_react@19.2.0_react-dom@19.2.0",
     "npm:@react-router/dev@7.9.5": "7.9.5_react-router@7.9.5_typescript@5.9.3_vite@7.2.4_@types+node@24.13.3_react@19.2.0_react-dom@19.2.0",
     "npm:@react-router/node@7.9.5": "7.9.5_react-router@7.9.5_typescript@5.9.3_react@19.2.0_react-dom@19.2.0",
@@ -11,6 +14,7 @@
     "npm:@types/node@24.13.3": "24.13.3",
     "npm:@types/react-dom@19.2.3": "19.2.3_@types+react@19.2.5",
     "npm:@types/react@19.2.5": "19.2.5",
+    "npm:@zkpassport/poseidon2@0.6.2": "0.6.2",
     "npm:isbot@5.2.2": "5.2.2",
     "npm:jsdom@27.1.0": "27.1.0",
     "npm:react-dom@19.2.0": "19.2.0_react@19.2.0",
@@ -31,6 +35,17 @@
     },
     "@adraffy/ens-normalize@1.11.1": {
       "integrity": "sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ=="
+    },
+    "@arkiv-network/sdk@0.8.0_typescript@5.9.3_viem@2.56.3": {
+      "integrity": "sha512-OnCrCfJqbnqrNtCIw6LaDrjh8mee03BSHz4naNRDjV43LjqEnhrfqCRura6GrbFx75Zzc0y3mfGupxn2oj6Hlg==",
+      "dependencies": [
+        "brotli-wasm",
+        "typescript",
+        "viem"
+      ],
+      "optionalPeers": [
+        "typescript"
+      ]
     },
     "@asamuzakjp/css-color@4.1.2": {
       "integrity": "sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==",
@@ -512,11 +527,20 @@
         "@noble/hashes@1.8.0"
       ]
     },
+    "@noble/curves@2.4.0": {
+      "integrity": "sha512-P4/62zrgfH33CneE3Dn4WhJVA22YUU0eR51wKIan4NVRvwsA0YnPTwWGpNbpuacSujmSFLvyzpyuR30+fbq2Ew==",
+      "dependencies": [
+        "@noble/hashes@2.4.0"
+      ]
+    },
     "@noble/hashes@1.3.2": {
       "integrity": "sha512-MVC8EAQp7MvEcm30KWENFjgR+Mkmf+D189XJTkFIlwohU5hcBbn1ZkKq7KVTi2Hme3PMGF390DaL52beVrIihQ=="
     },
     "@noble/hashes@1.8.0": {
       "integrity": "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="
+    },
+    "@noble/hashes@2.4.0": {
+      "integrity": "sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA=="
     },
     "@npmcli/git@4.1.0": {
       "integrity": "sha512-9hwoB3gStVfa0N31ymBmrX+GuDGdVA/QWShZVqE0HK2Af+7QGGrCTbZia/SW0ImUTjTne7SP91qxDmtXvDHRPQ==",
@@ -1009,6 +1033,9 @@
         "typescript"
       ]
     },
+    "@zkpassport/poseidon2@0.6.2": {
+      "integrity": "sha512-6sFHX9kAcrmDmBEEndvjZ8DA9FomunirQ5oCV6oD7bqr/lP0n0OBSRn86SZgQBXwRR+vq7sk16y31OgRBIOJ5Q=="
+    },
     "abitype@1.2.3_typescript@5.9.3": {
       "integrity": "sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg==",
       "dependencies": [
@@ -1089,6 +1116,9 @@
       "dependencies": [
         "balanced-match"
       ]
+    },
+    "brotli-wasm@3.0.1": {
+      "integrity": "sha512-U3K72/JAi3jITpdhZBqzSUq+DUY697tLxOuFXB+FpAE/Ug+5C3VZrv4uA674EUZHxNAuQ9wETXNqQkxZD6oL4A=="
     },
     "browserslist@4.28.9": {
       "integrity": "sha512-EWazOblFYUvlGZcfGhPUPmYh3nikUxBVb+y9MJun5f3hBi812X+8MSQTujLBtgK3cf51fJWbWfOjyeO954d+Eg==",
@@ -2246,6 +2276,9 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@arkiv-network/sdk@0.8.0",
+        "npm:@noble/curves@2.4.0",
+        "npm:@noble/hashes@2.4.0",
         "npm:@react-router/dev@7.9.5",
         "npm:@react-router/node@7.9.5",
         "npm:@snaha/swarm-id@0.4.0",
@@ -2255,6 +2288,7 @@
         "npm:@types/node@24.13.3",
         "npm:@types/react-dom@19.2.3",
         "npm:@types/react@19.2.5",
+        "npm:@zkpassport/poseidon2@0.6.2",
         "npm:isbot@5.2.2",
         "npm:jsdom@27.1.0",
         "npm:react-dom@19.2.0",
