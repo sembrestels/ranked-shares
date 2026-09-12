@@ -9,7 +9,7 @@
     "dev:api": "deno run --env-file=.env -A --watch api/main.ts",
     "start": "deno run --env-file=.env --allow-net --allow-read --allow-env server.ts",
     "test:api": "deno test -A api/",
-    "check:api": "deno check api/main.ts",
+    "check:api": "deno check api/main.ts server.ts",
     "lint": "deno lint",
     "fmt": "deno fmt"
   },
@@ -24,8 +24,8 @@
     "jsxImportSource": "react"
   },
   "lint": {
-    "include": ["api/"],
+    "include": ["api/", "server.ts"],
     "rules": { "tags": ["recommended"], "exclude": ["no-explicit-any"] }
   },
-  "fmt": { "include": ["api/"], "lineWidth": 100, "indentWidth": 2 }
+  "fmt": { "include": ["api/", "server.ts"], "lineWidth": 100, "indentWidth": 2 }
 }

@@ -47,7 +47,9 @@ supported: `startTally` reverts if the pool's balance is below `totalWeight`.
 The `web/` frontend supports proposal submission and organizer review for newly
 deployed `RankedShares`, `NoirRankedShares`, `CreRankedShares`, and `ZiskRankedShares`
 pools. It follows the React Router SPA and Deno task structure described in the
-frontend decision records. See [`web/README.md`](web/README.md) for configuration.
+frontend decision records. The same package holds the read API (`web/api/`, `deno
+task dev:api`) that the round and project pages read from; see `web/README.md`.
+See [`web/README.md`](web/README.md) for configuration.
 
 - `/submit`: connect a wallet and Swarm ID, write any proposal text, attach any file
   types, and upload directly through `@snaha/swarm-id`. Review the saved amount,

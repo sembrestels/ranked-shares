@@ -112,6 +112,10 @@ deno task typecheck
 deno task test
 deno task build
 deno task preview
+deno task dev:api           # the read API on http://localhost:8000
+deno task test:api          # deno test: fake pool transport, plus Anvil when installed
+deno task check:api         # type-check the API and the site server
+deno task start             # the deployed server: API under /api plus build/client
 ```
 
 The integration test launches a temporary Anvil chain on port 8573. Run `forge build`
@@ -121,6 +125,20 @@ and a fake Swarm transport. It covers submission, a rejected wallet request foll
 by reload/retry, edits by both roles, an edit signature retry without re-upload,
 concurrent edit conflicts, owner acceptance and rejection, and wallet changes.
 The fake transport's references are test identifiers, not actual Swarm content hashes.
+
+## The read API
+
+`api/` is a Deno + Hono API that reads one consistent snapshot of a pool (every
+view pinned to one block) and serves it as JSON: `GET /api/round` (projects with
+their public commitment, the sealed total and count, the stage bar's steps, the
+outcome), `GET /api/project/:id` (a project with its pitch resolved from Swarm by
+reference through `BEE_URL`), `GET /api/voter/:address` (weight, ballot presence,
+roster membership), and `GET /healthz`. `?pool=0x…` overrides `POOL_ADDRESS`;
+`?after=<block>` on `/api/round` forces a re-read after the caller's own transaction.
+A public commitment is the direct weight of voters whose public ballot ranks the
+project first; Noir pools report `commitmentsAvailable: false`. `server.ts` serves the
+API and `build/client` from one port for Deno Deploy (root `web`, build `deno task
+build`, entrypoint `server.ts`). Design: `docs/superpowers/specs/2026-09-12-round-pages-design.md`.
 
 ## Storage and deployment
 
