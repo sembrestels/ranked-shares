@@ -1359,7 +1359,7 @@ git commit -m "Read a pool's round facts per variant, pinned to one block"
 
 **Interfaces:**
 - Consumes: `readRound`, `stageOf`, `RoundFacts`.
-- Produces: `RoundSnapshot = RoundFacts & { at: number; stage: Stage }`; `Snapshots = { get(pool: Address, minBlock?: number): Promise<{ snapshot: RoundSnapshot; roster: Set<string> }> }`; `createSnapshots({ read, ttlMs, now })`; `poolFrom(param, config): Address`; `isRpcDown(err): boolean`; `Deps` gains `client: PublicClient` and `snapshots: Snapshots`; fixture `openSnapshot: RoundSnapshot`.
+- Produces: `SnapshotProject = ProjectView & { title: string | null }`; `RoundSnapshot = Omit<RoundFacts, "projects"> & { projects: SnapshotProject[]; at: number; stage: Stage }`; `Snapshots = { get(pool: Address, minBlock?: number): Promise<{ snapshot: RoundSnapshot; roster: Set<string> }> }`; `createSnapshots({ read, titleOf, ttlMs, now })` where `titleOf(ref: Hex): Promise<string | null>` resolves a project's pitch title (Task 7 wires it to the content service; until then bootstrap passes `async () => null`); `poolFrom(param, config): Address`; `isRpcDown(err): boolean`; `Deps` gains `client: PublicClient` and `snapshots: Snapshots`; fixture `openSnapshot: RoundSnapshot`.
 
 - [ ] **Step 1: Write the fixture `web/api/tests/fixtures.ts`**
 
@@ -1380,8 +1380,8 @@ export const openSnapshot: RoundSnapshot = {
   spent: "0",
   claimedTotal: "0",
   projects: [
-    { id: 0, cost: "4000", recipient: B, contentRef: "0x" + "ab".repeat(32) as `0x${string}`, commitment: "1000", funded: false, claimed: false },
-    { id: 1, cost: "2500", recipient: A, contentRef: ("0x" + "00".repeat(32)) as `0x${string}`, commitment: "300", funded: false, claimed: false },
+    { id: 0, cost: "4000", recipient: B, contentRef: "0x" + "ab".repeat(32) as `0x${string}`, commitment: "1000", funded: false, claimed: false, title: "Formal audit of the tally" },
+    { id: 1, cost: "2500", recipient: A, contentRef: ("0x" + "00".repeat(32)) as `0x${string}`, commitment: "300", funded: false, claimed: false, title: null },
   ],
   fundedOrder: [],
   proposalCount: 3,
@@ -1415,17 +1415,22 @@ import { openSnapshot } from "./fixtures.ts";
 import { POOL } from "./fake-pool.ts";
 
 const facts = (block: number) => {
-  const { at: _at, stage: _stage, ...rest } = openSnapshot;
-  return { facts: { ...rest, block }, roster: new Set<string>() };
+  const { at: _at, stage: _stage, projects, ...rest } = openSnapshot;
+  return {
+    facts: { ...rest, block, projects: projects.map(({ title: _t, ...p }) => p) },
+    roster: new Set<string>(),
+  };
 };
+const noTitle = async () => null;
 
 Deno.test("snapshots: reads once within the TTL and stamps at and stage", async () => {
   let reads = 0;
   let t = 1_000;
-  const s = createSnapshots({ read: async () => { reads++; return facts(10); }, ttlMs: 15_000, now: () => t });
+  const s = createSnapshots({ read: async () => { reads++; return facts(10); }, titleOf: noTitle, ttlMs: 15_000, now: () => t });
   const first = await s.get(POOL);
   assertEquals(first.snapshot.at, 1_000);
   assertEquals(first.snapshot.stage.current, "open");
+  assertEquals(first.snapshot.projects.map((p) => p.title), [null, null]);
   t = 1_010;
   await s.get(POOL);
   assertEquals(reads, 1);
@@ -1438,6 +1443,7 @@ Deno.test("snapshots: concurrent callers share one read", async () => {
   let reads = 0;
   const s = createSnapshots({
     read: async () => { reads++; await new Promise((r) => setTimeout(r, 5)); return facts(10); },
+    titleOf: noTitle,
     ttlMs: 15_000,
     now: () => 1_000,
   });
@@ -1448,7 +1454,7 @@ Deno.test("snapshots: concurrent callers share one read", async () => {
 Deno.test("snapshots: minBlock forces a re-read when the cache is older, at most twice", async () => {
   const blocks = [10, 10, 12];
   let reads = 0;
-  const s = createSnapshots({ read: async () => facts(blocks[reads++]), ttlMs: 15_000, now: () => 1_000 });
+  const s = createSnapshots({ read: async () => facts(blocks[reads++]), titleOf: noTitle, ttlMs: 15_000, now: () => 1_000 });
   await s.get(POOL);
   const r = await s.get(POOL, 12);
   assertEquals(r.snapshot.block, 12);
@@ -1458,7 +1464,7 @@ Deno.test("snapshots: minBlock forces a re-read when the cache is older, at most
 Deno.test("snapshots: a failed read rejects and keeps the last good value for the next call", async () => {
   let fail = false;
   let t = 1_000;
-  const s = createSnapshots({ read: async () => { if (fail) throw new Error("rpc"); return facts(10); }, ttlMs: 15_000, now: () => t });
+  const s = createSnapshots({ read: async () => { if (fail) throw new Error("rpc"); return facts(10); }, titleOf: noTitle, ttlMs: 15_000, now: () => t });
   await s.get(POOL);
   fail = true;
   t = 1_020;
@@ -1466,6 +1472,23 @@ Deno.test("snapshots: a failed read rejects and keeps the last good value for th
   fail = false;
   const again = await s.get(POOL);
   assertEquals(again.snapshot.block, 10);
+});
+
+Deno.test("snapshots: titles come from titleOf per content reference; a zero reference or a failure gives null", async () => {
+  const asked: string[] = [];
+  const s = createSnapshots({
+    read: async () => facts(10),
+    titleOf: async (ref) => {
+      asked.push(ref);
+      if (ref.startsWith("0xabab")) return "Formal audit of the tally";
+      throw new Error("gateway down");
+    },
+    ttlMs: 15_000,
+    now: () => 1_000,
+  });
+  const { snapshot } = await s.get(POOL);
+  assertEquals(snapshot.projects.map((p) => p.title), ["Formal audit of the tally", null]);
+  assertEquals(asked.length, 1);
 });
 ```
 
@@ -1479,11 +1502,17 @@ Expected: FAIL, module not found.
 ```ts
 /** Per-pool cache of the round snapshot: TTL, single-flight, and a minimum
  * block for the refetch after a user's own transaction. Spec decisions 6, 7. */
-import type { Address } from "viem";
-import type { RoundFacts } from "../chain/read.ts";
+import type { Address, Hex } from "viem";
+import type { ProjectView, RoundFacts } from "../chain/read.ts";
 import { type Stage, stageOf } from "./stage.ts";
 
-export type RoundSnapshot = RoundFacts & { at: number; stage: Stage };
+export type SnapshotProject = ProjectView & { title: string | null };
+export type RoundSnapshot = Omit<RoundFacts, "projects"> & {
+  projects: SnapshotProject[];
+  at: number;
+  stage: Stage;
+};
+const ZERO_REF = "0x" + "00".repeat(32);
 export interface Snapshot {
   snapshot: RoundSnapshot;
   roster: Set<string>;
@@ -1500,6 +1529,8 @@ interface Entry {
 
 export function createSnapshots(opts: {
   read: (pool: Address) => Promise<{ facts: RoundFacts; roster: Set<string> }>;
+  /** A project's pitch title by content reference; null when there is none or it fails. */
+  titleOf: (ref: Hex) => Promise<string | null>;
   ttlMs: number;
   now: () => number;
 }): Snapshots {
@@ -1514,9 +1545,13 @@ export function createSnapshots(opts: {
 
   function start(key: string, pool: Address): Promise<Snapshot> {
     const e = entries.get(key) ?? { at: 0, value: null, pending: null };
-    const pending = opts.read(pool).then(({ facts, roster }) => {
+    const pending = opts.read(pool).then(async ({ facts, roster }) => {
+      const projects: SnapshotProject[] = await Promise.all(facts.projects.map(async (p) => ({
+        ...p,
+        title: p.contentRef.toLowerCase() === ZERO_REF ? null : await opts.titleOf(p.contentRef).catch(() => null),
+      })));
       const at = opts.now();
-      const value = { snapshot: { ...facts, at, stage: stageOf(facts, at) }, roster };
+      const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };
       entries.set(key, { at, value, pending: null });
       return value;
     }, (err) => {
@@ -1731,6 +1766,7 @@ export function createServer(env: Record<string, string | undefined> = Deno.env.
   const client = createClient({ rpcUrls: config.rpcUrls, chainId: config.chainId });
   const snapshots = createSnapshots({
     read: (pool) => readRound(client, pool, { rosterPage: config.rosterPage, chainId: config.chainId }),
+    titleOf: async () => null, // Task 7 wires the content service here
     ttlMs: config.snapshotTtlMs,
     now,
   });
@@ -1744,7 +1780,7 @@ Update `web/api/tests/health.test.ts` so its `deps` object has the two new field
 - [ ] **Step 9: Run all API tests, lint, check**
 
 Run: `deno test -A api/ && deno lint && deno check api/main.ts`
-Expected: all pass (7 + 4 + 5 + 9 + 5 + 4 + 4 = 38), clean.
+Expected: all pass (7 + 4 + 5 + 9 + 5 + 5 + 4 = 39), clean.
 
 - [ ] **Step 10: Commit**
 
@@ -1988,6 +2024,8 @@ In `web/api/app.ts` add `import { projectRoutes } from "./routes/project.ts";` a
 
 In `web/api/bootstrap.ts` add `import { createContent } from "./services/content.ts";`, build
 `const content = createContent({ beeUrl: config.beeUrl, fetch, timeoutMs: config.contentTimeoutMs });`
+before `createSnapshots`, replace the `titleOf` placeholder with
+`titleOf: async (ref) => (await content.get(ref)).content?.title ?? null,`
 and include `content` in `deps`.
 
 In `web/api/tests/health.test.ts` and `web/api/tests/round.test.ts`, add to the fake deps:
@@ -1996,7 +2034,7 @@ In `web/api/tests/health.test.ts` and `web/api/tests/round.test.ts`, add to the 
 - [ ] **Step 8: Run everything**
 
 Run: `deno test -A api/ && deno lint && deno check api/main.ts`
-Expected: 45 pass, clean.
+Expected: 46 pass, clean.
 
 - [ ] **Step 9: Commit**
 
@@ -2196,7 +2234,7 @@ In `web/api/app.ts` add `import { voterRoutes } from "./routes/voter.ts";` and `
 - [ ] **Step 5: Run everything**
 
 Run: `deno test -A api/ && deno lint && deno check api/main.ts`
-Expected: 49 pass, clean.
+Expected: 50 pass, clean.
 
 - [ ] **Step 6: Commit**
 
@@ -2433,6 +2471,7 @@ Deno.test({
 
       const project = await (await app.fetch(new Request("http://x/api/project/1"))).json();
       assertEquals(project.project.commitment, (300n * unit).toString());
+      assertEquals(project.project.title, null);
       assertEquals(project.contentStatus, "none");
     } finally {
       anvil.kill("SIGTERM");

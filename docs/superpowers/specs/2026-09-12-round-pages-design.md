@@ -117,6 +117,7 @@ type StepKey = "proposals" | "setup" | "open" | "closing" | "proving" | "proven"
 interface ProjectView {
   id: number; cost: string; recipient: Address; contentRef: Hex;
   commitment: string; funded: boolean; claimed: boolean;
+  title: string | null;   // the pitch's title resolved by reference, null when none or unavailable
 }
 interface Stage {
   current: StepKey;
