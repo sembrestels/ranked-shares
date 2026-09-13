@@ -46,3 +46,17 @@ test("projectFacts reads cost, token, and the title through the gateway", async 
 test("roundFacts reads the deadline", async () => {
   expect(await roundFacts(cfg, transport, "Autumn grants")).toEqual({ name: "Autumn grants", votingDeadline: 1_700_003_600 });
 });
+
+test("projectFacts rejects when the token's decimals read fails, rather than guessing 18", async () => {
+  const failingTransport = custom({
+    async request({ method, params }: { method: string; params?: unknown[] }) {
+      if (method === "eth_chainId") return toHex(31337);
+      if (method !== "eth_call") throw new Error(method);
+      const [{ data }] = params as [{ data: `0x${string}` }];
+      const { functionName, args } = decodeFunctionData({ abi, data });
+      if (functionName === "decimals") throw new Error("execution reverted");
+      return encodeFunctionResult({ abi, functionName, result: handlers[functionName](args ?? []) as never });
+    },
+  });
+  await expect(projectFacts(0, cfg, failingTransport, "http://bee", fetchTitle)).rejects.toThrow();
+});

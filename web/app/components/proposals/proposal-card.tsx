@@ -38,7 +38,7 @@ export function ProposalCard(
     <article className="proposal-card">
       <div className="card-top">
         <span className="eyebrow">
-          PROPOSAL {String(proposal.id + 1n).padStart(2, "0")}
+          Proposal {proposal.id + 1n}
         </span>
         <Badge tone={(["info", "success", "error"] as const)[proposal.status] ?? "neutral"}>
           {statuses[proposal.status] ?? "Unknown status"}

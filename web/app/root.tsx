@@ -145,7 +145,7 @@ function Connections() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Manage storage ↗
+            Manage storage
           </a>
         </Notice>
       )}
@@ -182,11 +182,11 @@ function RoundPicker() {
   return (
     <details className="round-picker" open={!pool} key={pool}>
       <summary>
-        <span className="eyebrow">{chain.name} / ROUND</span>
+        <span className="eyebrow">{chain.name} / Round</span>
         <code>
           {pool ? `${pool.slice(0, 10)}…${pool.slice(-6)}` : "Choose a pool"}
         </code>
-        <span>Change ↗</span>
+        <span>Change</span>
       </summary>
       <form
         onSubmit={(event) => {
@@ -284,7 +284,7 @@ export function HydrateFallback() {
   return (
     <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>RankedShares</h1>
-      <Notice>Loading the proposal board…</Notice>
+      <Notice>Loading the round…</Notice>
     </main>
   );
 }
@@ -294,7 +294,7 @@ export function ErrorBoundary() {
     <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>Unable to load this page.</h1>
       <Notice error>{errorMessage(error)}</Notice>
-      <a href="/">Return to proposals</a>
+      <a href="/">Return to the round</a>
     </main>
   );
 }

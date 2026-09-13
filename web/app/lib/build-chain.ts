@@ -67,7 +67,7 @@ export async function projectFacts(
   ]);
   const [symbol, decimals] = await Promise.all([
     c.readContract({ address: token, abi, functionName: "symbol" }).catch(() => "tokens"),
-    c.readContract({ address: token, abi, functionName: "decimals" }).catch(() => 18),
+    c.readContract({ address: token, abi, functionName: "decimals" }),
   ]);
   return { title: await titleOf(ref, beeUrl, fetchFn), cost: cost.toString(), decimals: Number(decimals), symbol };
 }
