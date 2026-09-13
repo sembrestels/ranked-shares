@@ -1206,7 +1206,7 @@ export function commitmentsFromEntries(entries: readonly LiveEntry[], projectCou
 `web/app/hooks/use-arkiv-public.ts` (a container hook; not unit-tested here because it reads Arkiv and the chain, the same reads `/vote` already exercises):
 
 ```ts
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { hexToBytes } from "viem";
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
@@ -1236,7 +1236,9 @@ export function useArkivPublic(snapshot: RoundSnapshot | undefined) {
   return useQuery({
     queryKey: ["arkiv-public", pool ?? "", snapshot?.block ?? 0],
     enabled,
-    placeholderData: keepPreviousData,
+    // Keep the previous numbers only for the same pool: a plain keepPreviousData
+    // would show one pool's live commitments on another pool's board after a switch.
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === pool ? prev : undefined),
     queryFn: async (): Promise<ArkivPublic> => {
       const s = snapshot!;
       const voters = await readArkivVoters(client!, pool!, {
