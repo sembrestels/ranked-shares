@@ -1,0 +1,223 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>RankedShares architecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kulim+Park:wght@700&family=Lexend+Deca:wght@300;400&display=swap">
+<style>
+html,body{margin:0;width:1600px;height:1120px;overflow:hidden;background:#16261B}
+svg{display:block;font-family:"Lexend Deca","Trebuchet MS",sans-serif;font-weight:300}
+.h{font-family:"Kulim Park","Trebuchet MS",sans-serif;font-weight:700;fill:#FAFAF9}
+.title{font-size:44px;letter-spacing:-0.02em}
+.sub{font-size:19px;fill:#AFC7B9}
+.box{fill:#1F3326;stroke:#678A74;stroke-width:1.5}
+.zone{fill:none;stroke:#678A74;stroke-width:1.5;stroke-dasharray:6 6}
+.arc{fill:#182D1F;stroke:#FF6A6A;stroke-width:2}
+.bh{font-size:20px}
+.zh{font-size:22px}
+.t{font-size:15px;fill:#DDE7E0}
+.m{font-size:14px;fill:#AFC7B9}
+.l{font-size:13px;fill:#AFC7B9}
+.lm{font-size:13px;fill:#FF6A6A}
+.d{stroke:#AFC7B9;stroke-width:1.6;fill:none}
+.money{stroke:#FF6A6A;stroke-width:2.2;fill:none}
+.tag{font-size:12px;fill:#16261B;font-weight:400}
+</style></head><body>
+<svg width="1600" height="1120" viewBox="0 0 1600 1120" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#AFC7B9"/></marker>
+  <marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF6A6A"/></marker>
+</defs>
+
+<!-- brand mark and title -->
+<g transform="translate(40 34)">
+  <rect width="46" height="9" rx="1" fill="#FF6A6A"/><rect y="14" width="30" height="9" rx="1" fill="#AFC7B9"/><rect y="28" width="18" height="9" rx="1" fill="#678A74"/>
+</g>
+<text x="104" y="66" class="h title">RankedShares architecture</text>
+<text x="104" y="96" class="sub">Proportional participatory budgeting on Arc. One stablecoin is the budget, the voting weight and the gas.</text>
+
+<!-- ===== LEFT COLUMN ===== -->
+<!-- Browser -->
+<rect x="40" y="140" width="400" height="250" rx="6" class="box"/>
+<text x="60" y="172" class="h bh">Browser</text>
+<text x="60" y="196" class="m">React Router 7 SPA, wagmi + viem, Tailwind 4</text>
+<text x="60" y="230" class="t">Rank projects, ties allowed</text>
+<text x="60" y="254" class="t">Encrypt the ballot to the round key (noble, Poseidon2)</text>
+<text x="60" y="278" class="t">Contribute and vote in one castBallot transaction</text>
+<text x="60" y="302" class="t">Write a proposal, upload text and files to Swarm</text>
+<text x="60" y="326" class="t">Register a Uniswap v4 position without transferring it</text>
+<text x="60" y="350" class="t">Follow the live result, claim a funded payout</text>
+<text x="60" y="376" class="m">Voters, LPs, proposers and the organiser use the same app</text>
+
+<!-- API -->
+<rect x="100" y="430" width="340" height="150" rx="6" class="box"/>
+<text x="120" y="462" class="h bh">Read API</text>
+<text x="120" y="486" class="m">Deno + Hono, one Deno Deploy app with the SPA</text>
+<text x="120" y="516" class="t">Snapshots of pool state every 15 s</text>
+<text x="120" y="540" class="t">Three Arc RPC providers in a fallback transport</text>
+<text x="120" y="564" class="t">Proposal content by Swarm reference</text>
+
+<!-- Provers -->
+<rect x="100" y="620" width="340" height="200" rx="6" class="box"/>
+<text x="120" y="652" class="h bh">Provers</text>
+<text x="120" y="676" class="m">Prove service on the operator's machine</text>
+<text x="120" y="706" class="t">Noir: one ingest proof, then chained Honk</text>
+<text x="120" y="728" class="t">proofs for every tally batch</text>
+<text x="120" y="758" class="t">ZisK zkVM: one proof of the whole tally</text>
+<text x="120" y="788" class="t">Both replay the same PB-EAR transcript</text>
+<text x="120" y="808" class="m">Ballots are recovered from pool events</text>
+
+<!-- ===== CENTER: ARC ===== -->
+<rect x="500" y="140" width="620" height="720" rx="8" class="arc"/>
+<text x="520" y="172" class="h zh">Arc testnet</text>
+<text x="660" y="172" class="m">chain 5042002 · gas paid in USDC · Solidity, Foundry</text>
+
+<!-- Pool -->
+<rect x="520" y="190" width="580" height="230" rx="6" class="box"/>
+<text x="540" y="222" class="h bh">RankedShares pool</text>
+<text x="820" y="222" class="m">one per round, USDC or EURC</text>
+<text x="540" y="254" class="t">Invariant: pool balance = total voting weight</text>
+<text x="540" y="278" class="t">Proposals carry a cost and a recipient; content bound by Swarm reference</text>
+<text x="540" y="302" class="t">Contributions, sponsored seats and LP weight all vote with one ballot</text>
+<text x="540" y="326" class="t">PB-EAR tally: fund a project when its supporters' unspent weight</text>
+<text x="540" y="348" class="t">reaches its cost, deduct exactly, expand rank tiers, repeat</text>
+<text x="540" y="378" class="t">Sealed ballots are finalised by any of three verifiers below</text>
+<text x="540" y="404" class="lm">claim(project) pays the recipient in the pool's stablecoin</text>
+
+<!-- Verifiers -->
+<rect x="520" y="460" width="180" height="110" rx="6" class="box"/>
+<text x="540" y="488" class="h bh">ZisK verifier</text>
+<text x="540" y="514" class="t">One zkVM proof of</text>
+<text x="540" y="534" class="t">the entire tally</text>
+<text x="540" y="556" class="m">strongest trust</text>
+
+<rect x="720" y="460" width="180" height="110" rx="6" class="box"/>
+<text x="740" y="488" class="h bh">Noir verifiers</text>
+<text x="740" y="514" class="t">Ingest + tally Honk,</text>
+<text x="740" y="534" class="t">chained per batch</text>
+<text x="740" y="556" class="m">proof per step</text>
+
+<rect x="920" y="460" width="180" height="110" rx="6" class="box"/>
+<text x="940" y="488" class="h bh">CRE receiver</text>
+<text x="940" y="514" class="t">Checks forwarder,</text>
+<text x="940" y="534" class="t">workflow id, inputs root</text>
+<text x="940" y="556" class="m">DON attestation</text>
+
+<!-- LP module -->
+<rect x="520" y="610" width="580" height="90" rx="6" class="box"/>
+<text x="540" y="642" class="h bh">LP voting module</text>
+<text x="740" y="642" class="m">PositionManager subscriber, no vault, no hook</text>
+<text x="540" y="668" class="t">Weight = position value at the reference price, integrated over time</text>
+<text x="540" y="690" class="t">Settles at the old rate before every new rate; unsubscribe is constant work</text>
+
+<!-- Uniswap -->
+<rect x="520" y="730" width="580" height="110" rx="6" class="box"/>
+<text x="540" y="762" class="h bh">Uniswap v4</text>
+<text x="680" y="762" class="m">self-deployed pinned core and periphery, Arc's Permit2</text>
+<text x="540" y="790" class="t">PoolManager, PositionManager, StateView</text>
+<text x="540" y="814" class="t">DAO/USDC and DAO/EURC pools; positions stay in the LP's wallet</text>
+
+<!-- ===== RIGHT COLUMN ===== -->
+<!-- CRE -->
+<rect x="1180" y="140" width="340" height="400" rx="8" class="zone"/>
+<text x="1200" y="172" class="h zh">Chainlink CRE</text>
+<text x="1200" y="196" class="m">TypeScript workflows in confidential compute</text>
+
+<rect x="1200" y="216" width="300" height="130" rx="6" class="box"/>
+<text x="1220" y="246" class="h bh">Price workflow</text>
+<text x="1220" y="272" class="t">Cron every 2 minutes</text>
+<text x="1220" y="294" class="t">Reads StateView slot0, finalized block</text>
+<text x="1220" y="316" class="t">Signs a reference price report</text>
+<text x="1220" y="338" class="m">rejects stale or out-of-order reports</text>
+
+<rect x="1200" y="370" width="300" height="150" rx="6" class="box"/>
+<text x="1220" y="400" class="h bh">Tally workflow</text>
+<text x="1220" y="426" class="t">getSecret, derive the round's tallier key</text>
+<text x="1220" y="448" class="t">Decrypt every ballot inside the enclave</text>
+<text x="1220" y="470" class="t">Run PB-EAR, report inputs root,</text>
+<text x="1220" y="492" class="t">funded set and transcript</text>
+<text x="1220" y="512" class="m">no one outside sees a ballot</text>
+
+<!-- Operator -->
+<rect x="1180" y="620" width="340" height="200" rx="6" class="box"/>
+<text x="1200" y="652" class="h bh">Operator scripts</text>
+<text x="1200" y="676" class="m">bun + viem, signed transactions journaled first</text>
+<text x="1200" y="706" class="t">Deploy pools, verifiers and the v4 stack</text>
+<text x="1200" y="730" class="t">Import proposals, open rounds, run demos</text>
+<text x="1200" y="754" class="t">Storage worker: copy accepted ballot bytes</text>
+<text x="1200" y="776" class="t">from pool events into Arkiv</text>
+<text x="1200" y="806" class="m">retries reuse the same nonce and hash</text>
+
+<!-- ===== STORAGE ROW ===== -->
+<rect x="40" y="900" width="700" height="170" rx="6" class="box"/>
+<text x="60" y="932" class="h bh">Swarm</text>
+<text x="150" y="932" class="m">decentralised content, uploaded with Swarm ID</text>
+<text x="60" y="964" class="t">Proposal text and attachments, public or encrypted for private review</text>
+<text x="60" y="988" class="t">The content reference is stored on the proposal on Arc</text>
+<text x="60" y="1012" class="t">The read API and the browser fetch by reference; never rendered as HTML</text>
+<text x="60" y="1044" class="m">Proposal budgets never move here; money stays in the pool</text>
+
+<rect x="820" y="900" width="740" height="170" rx="6" class="box"/>
+<text x="840" y="932" class="h bh">Arkiv</text>
+<text x="920" y="932" class="m">Tiramisu testnet, typed searchable entities</text>
+<text x="840" y="964" class="t">Encrypted ballot bytes stored after the pool accepts them, one entity per ballot</text>
+<text x="840" y="988" class="t">Live results in the browser from the public ballots; CRE and the provers read the sealed ones</text>
+<text x="840" y="1012" class="t">Entities expire about 15 days after the deadline; chain history keeps the bytes</text>
+<text x="840" y="1044" class="m">A vote counts when its Arc transaction succeeds; storage is reported separately</text>
+
+<!-- ===== ARROWS ===== -->
+<!-- Browser -> pool (money) -->
+<path d="M440 256 H518" class="money" marker-end="url(#am)"/>
+<text x="470" y="214" class="lm" text-anchor="middle" font-size="12">propose</text>
+<text x="470" y="230" class="lm" text-anchor="middle" font-size="12">castBallot</text>
+<text x="470" y="246" class="lm" text-anchor="middle" font-size="12">claim</text>
+
+<!-- Browser -> LP module (subscribe) -->
+<path d="M440 330 H480 V655 H518" class="d" marker-end="url(#a)"/>
+<text x="452" y="372" class="l" transform="rotate(-90 452 372)" text-anchor="end">subscribe position</text>
+
+<!-- Browser <-> API -->
+<path d="M240 390 V428" class="d" marker-end="url(#a)" marker-start="url(#a)"/>
+<text x="250" y="414" class="l">JSON</text>
+
+<!-- API -> pool (reads) -->
+<path d="M440 505 H470 V380 H518" class="d" marker-end="url(#a)"/>
+<text x="474" y="500" class="l">reads</text>
+
+<!-- Provers -> ZisK and Noir verifiers -->
+<path d="M440 760 H480 V590 H610 V572" class="d" marker-end="url(#a)"/>
+<path d="M610 590 H810 V572" class="d" marker-end="url(#a)"/>
+<text x="470" y="604" class="l" transform="rotate(-90 470 604)" text-anchor="start">proofs</text>
+
+<!-- Browser -> Swarm -->
+<path d="M65 390 V898" class="d" marker-end="url(#a)"/>
+<text x="58" y="760" class="l" transform="rotate(-90 58 760)" text-anchor="start">upload proposal content</text>
+
+<!-- Pool events -> Arkiv (storage worker) -->
+<path d="M900 860 V898" class="d" marker-end="url(#a)"/>
+<text x="910" y="884" class="l">accepted ballot bytes, copied by the storage worker</text>
+
+<!-- Arkiv -> CRE tally, and -> nothing else -->
+<path d="M1545 900 V522" class="d" marker-end="url(#a)"/>
+<text x="1560" y="700" class="l" transform="rotate(-90 1560 700)" text-anchor="middle">encrypted ballots</text>
+
+<!-- Tally workflow -> CRE receiver -->
+<path d="M1200 500 H1160 V515 H1102" class="d" marker-end="url(#a)"/>
+<text x="1130" y="590" class="l">signed reports through the Keystone forwarder</text>
+<!-- Price workflow -> LP module -->
+<path d="M1200 300 H1140 V655 H1102" class="d" marker-end="url(#a)"/>
+<text x="1128" y="470" class="l" transform="rotate(-90 1128 470)" text-anchor="middle">reference price</text>
+
+<!-- Operator -> Arc -->
+<path d="M1180 720 H1122" class="d" marker-end="url(#a)"/>
+<text x="1176" y="704" class="l" text-anchor="end">deploy · import</text>
+
+<!-- Operator -> Arkiv (storage worker) -->
+<path d="M1370 820 V898" class="d" marker-end="url(#a)"/>
+<text x="1380" y="864" class="l">storage worker</text>
+
+<!-- legend -->
+<g transform="translate(1180 60)">
+  <path d="M0 0 H40" class="money" marker-end="url(#am)"/><text x="52" y="5" class="l">stablecoin moves</text>
+  <path d="M170 0 H210" class="d" marker-end="url(#a)"/><text x="222" y="5" class="l">data, proofs, reports</text>
+</g>
+<text x="1180" y="96" class="l">Live addresses: docs/deployments/arc-testnet.md</text>
+</svg>
+</body></html>

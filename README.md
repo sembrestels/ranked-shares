@@ -9,6 +9,11 @@ the uniform fractional reweighting of Aziz & Lee, *The expanding approvals rule*
 Live pools and shared contracts on Arc testnet are listed in
 [`docs/deployments/arc-testnet.md`](docs/deployments/arc-testnet.md).
 
+![RankedShares architecture](docs/design/brand/architecture.png)
+
+The diagram source is `docs/design/brand/architecture.html`; render it with headless
+Chrome at 1600×1120 and device scale 2 to refresh the PNG.
+
 Voters rank projects (ties allowed), projects have costs, and the outcome satisfies
 **Inclusion PSC**: any group of voters that solidly supports a set of projects gets
 funding in proportion to its share of the budget.
