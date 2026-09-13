@@ -17,6 +17,7 @@ import {
   type FormValues,
   SubmitForm,
 } from "../components/proposals/submit-form";
+import { RulesPanel } from "../components/proposals/rules-panel";
 import { Button, Fact, Notice } from "../components/ui";
 
 type Prepared = {
@@ -305,16 +306,21 @@ function Submission() {
           </div>
         )
         : (
-          <SubmitForm
-            value={value}
-            onChange={setValue}
-            onUpload={upload}
-            busy={busy}
-            symbol={round.data?.symbol || "tokens"}
-            disabled={!round.data?.canSubmit || !address ||
-              chainId !== chain.id || !client || !info?.identity ||
-              !info.canUpload}
-          />
+          <>
+            {round.data && (
+              <RulesPanel symbol={round.data.symbol} deadline={Number(round.data.deadline)} />
+            )}
+            <SubmitForm
+              value={value}
+              onChange={setValue}
+              onUpload={upload}
+              busy={busy}
+              symbol={round.data?.symbol || "tokens"}
+              disabled={!round.data?.canSubmit || !address ||
+                chainId !== chain.id || !client || !info?.identity ||
+                !info.canUpload}
+            />
+          </>
         )}
       {status && <Notice>{status}</Notice>}
       {error && <Notice error>{error}</Notice>}

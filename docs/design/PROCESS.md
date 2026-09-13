@@ -100,3 +100,5 @@ tests) is unchanged. The design process feeds it:
   in progress, first slice: app shell, stage bar, round page, project page. The `web/`
   package on master (proposals, Swarm ID, review, editing) predates the gate; its
   stories are marked built.
+- 2026-09-12: first Deliver slice built (round page, project page, stage bar, shell) on
+  branch round-pages; heuristic and accessibility reviews pending.

@@ -49,7 +49,9 @@ deployed `RankedShares`, `NoirRankedShares`, `CreRankedShares`, and `ZiskRankedS
 pools. It follows the React Router SPA and Deno task structure described in the
 frontend decision records. The same package holds the read API (`web/api/`, `deno
 task dev:api`) that the round and project pages read from; see `web/README.md`.
-See [`web/README.md`](web/README.md) for configuration.
+See [`web/README.md`](web/README.md) for configuration. The web app's round page
+(`/`) and project pages (`/project/:id`) show public commitments, the sealed total,
+the stage of the round, and the outcome; see `web/README.md`.
 
 - `/submit`: connect a wallet and Swarm ID, write any proposal text, attach any file
   types, and upload directly through `@snaha/swarm-id`. Review the saved amount,

@@ -14,7 +14,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Donor Dani
 - **I want to** see which stage the round is in on every screen
 - **so that** I never have to ask in chat what is happening
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** any route renders the stage bar with the current stage marked
 - **Given** the pool is in the open phase with a deadline in the future
 - **and Given** I open any route of the app
@@ -26,7 +26,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** see the date that ends the current stage
 - **so that** I can tell members when the next thing happens
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the current stage carries its bounding date
 - **Given** the pool is open and `votingDeadline` is set
 - **and Given** the stage bar is rendered
@@ -38,7 +38,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** see how much of the voter roster has been closed
 - **so that** I know whether the close step is finished or stuck
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the closing stage renders roster progress from chain state
 - **Given** the deadline has passed and `closed()` is false
 - **and Given** the API reports the number of voters processed and the total voter count
@@ -50,7 +50,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** press one button to close the next chunk of the roster
 - **so that** the round moves on without the runbook
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the close action sends one `close(maxVoters)` transaction
 - **Given** the deadline has passed and `closed()` is false
 - **and Given** my wallet is connected on the pool's chain
@@ -63,7 +63,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** stop seeing the close action once the roster is closed
 - **so that** I do not send a transaction that would revert
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** a closed roster hides the action
 - **Given** `closed()` is true
 - **When** the stage bar renders
@@ -74,7 +74,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** see how far the tally and proof have got
 - **so that** I know the operator is working and I do not chase them
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the proving stage renders progress from chain events
 - **Given** `closed()` is true and `finality()` is not yet set
 - **and Given** the API reports the tally steps or proof batches accepted so far
@@ -86,7 +86,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Donor Dani
 - **I want to** see when the round can be accepted provisionally or abandoned
 - **so that** I know the round cannot hang forever
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the proving stage lists both grace deadlines
 - **Given** the pool is in the proving stage
 - **and Given** the API reports the `proofGrace` and `abandonGrace` end times
@@ -98,7 +98,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Donor Dani
 - **I want to** see which projects were funded and in what order
 - **so that** I know where the round's money went
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the round page renders the funded set once finality is set
 - **Given** `finality()` is set
 - **and Given** `fundedProjects()` returns a non-empty list
@@ -110,7 +110,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Seat-holder Sol
 - **I want to** read what kind of result this is
 - **so that** I can trust it without decoding a number
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** a proven pool is described in plain words
 - **Given** `finality()` reports proven
 - **When** I open `/`
@@ -121,7 +121,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Donor Dani
 - **I want to** open the instructions for checking the result myself
 - **so that** I do not have to trust the operator
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** the proven outcome carries an audit link
 - **Given** `finality()` reports proven
 - **and Given** the outcome section is rendered
@@ -133,7 +133,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** see that the result is provisional and why
 - **so that** I can explain it to members honestly
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** an accepted provisional result is labelled and explained
 - **Given** `finality()` reports provisional
 - **When** I open `/`
@@ -144,7 +144,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Organiser Ona
 - **I want to** see that the round was abandoned and what follows
 - **so that** I know the money can be swept back
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** an abandoned pool is labelled and explained
 - **Given** `finality()` reports abandoned
 - **When** I open `/`
@@ -155,7 +155,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **As a** Proposer Pau
 - **I want to** see on my project's page whether it was funded
 - **so that** I learn the result where I already look
-- **Release:** R1 | **Tests:** H8 | **Status:** planned
+- **Release:** R1 | **Tests:** H8 | **Status:** built
 - **Scenario:** a funded project's page states the result
 - **Given** `finality()` is set
 - **and Given** the project is in `fundedProjects()`

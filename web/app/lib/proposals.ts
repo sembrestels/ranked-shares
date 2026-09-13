@@ -22,6 +22,8 @@ export const proposalAbi = parseAbi([
   "function editProposal(uint256 id, uint256 expectedRevision, bytes32 contentRef, uint256 cost, address recipient)",
   "function acceptProposal(uint256 id, uint256 expectedRevision) returns (uint256)",
   "function rejectProposal(uint256 id, uint256 expectedRevision)",
+  "function addProject(uint256 cost, address recipient) returns (uint256)",
+  "function projectCount() view returns (uint256)",
   "event Proposed(uint256 indexed proposalId, address indexed proposer, bytes32 contentRef, uint256 cost, address recipient)",
   "event ProposalAccepted(uint256 indexed proposalId, uint256 indexed projectId)",
   "event ProposalRejected(uint256 indexed proposalId)",

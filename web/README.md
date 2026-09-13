@@ -3,6 +3,18 @@
 A React Router SPA for public proposal uploads through Swarm ID and owner review.
 The on-chain pool is the source of truth for submission revisions, terms and decisions.
 
+## Round and project pages
+
+`/` shows the round page: every project with its public commitment, the sealed total
+and voter count, the stage bar, and the outcome once the round is done, all read from
+the API (`GET /api/round`). `/project/:id` shows one project's pitch, cost, support,
+and recipient, read from `GET /api/project/:id`. `VITE_ROUND_NAME`, `VITE_SITE_URL`,
+`VITE_REPO_URL`, and `VITE_CLOSE_CHUNK` shape the copy and links on these pages (the
+round's display name, the canonical site URL used in shared links, the linked
+repository, and the roster chunk size the close-and-prove flow suggests). Project
+pages are prerendered at build time when `VITE_POOL_ADDRESS` is set, one page per
+known project (see `deno task build` below).
+
 ## Arkiv voting
 
 Open `/vote?pool=0x…` for public/encrypted ballots and live public results. All four

@@ -13,7 +13,7 @@ acceptance tests have a home; the two planned ones are what R1 still needs.
   in the form
 - **so that** I set a cost I can live with, knowing a project is funded at exactly that
   amount or not at all
-- **Release:** R1 | **Tests:** H9 | **Status:** planned
+- **Release:** R1 | **Tests:** H9 | **Status:** built
 - **Scenario:** the rules panel is on the submit page above the cost field
 - **Given** I am on `/submit` for a round in the proposals stage
 - **and Given** the page shows a panel with "Funded at exactly the amount you ask for,
@@ -110,7 +110,7 @@ acceptance tests have a home; the two planned ones are what R1 still needs.
 - **As an** Organiser Ona
 - **I want to** add a project with a cost and recipient without a proposal
 - **so that** a round that takes no submissions can still be set up from the frontend
-- **Release:** R1 | **Tests:** H7 | **Status:** planned
+- **Release:** R1 | **Tests:** H7 | **Status:** built
 - **Scenario:** direct add from setup
 - **Given** I am on `/setup` with the owner's wallet and the pool in the setup stage
 - **and Given** the "Add a project" form has a cost and a recipient filled in validly

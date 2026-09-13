@@ -11,7 +11,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** see how much public weight stands behind each project
 - **so that** I can tell whether the projects I back are ahead or behind
-- **Release:** R1 | **Tests:** H4 | **Status:** planned
+- **Release:** R1 | **Tests:** H4 | **Status:** built
 - **Scenario:** an observer without a wallet opens the round page during voting
 - **Given** the round is open and the API round snapshot lists projects with their public commitments
 - **and Given** I have no wallet connected
@@ -23,7 +23,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Seat-holder Sol
 - **I want to** see how much sealed weight is in the round and how many sealed ballots exist
 - **so that** I know the sealed side is alive even though no ranking is shown
-- **Release:** R1 | **Tests:** H4 | **Status:** planned
+- **Release:** R1 | **Tests:** H4 | **Status:** built
 - **Scenario:** a seat holder opens the round page after casting
 - **Given** the round is open and the API round snapshot carries the sealed total and the sealed voter count
 - **When** I open `/`
@@ -34,7 +34,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** see how long is left to vote
 - **so that** I come back in time to cast or replace my ballot
-- **Release:** R1 | **Tests:** H4 | **Status:** planned
+- **Release:** R1 | **Tests:** H4 | **Status:** built
 - **Scenario:** a donor opens the round page two days before the deadline
 - **Given** the round is open and the deadline is 2 days and 3 hours away
 - **When** I open `/`
@@ -45,7 +45,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** see my contribution or ballot reflected on the round page right after it confirms
 - **so that** I trust that the board is live and my action counted
-- **Release:** R1 | **Tests:** H4 | **Status:** planned
+- **Release:** R1 | **Tests:** H4 | **Status:** built
 - **Scenario:** a donor's public ballot for project B confirms
 - **Given** I am on `/` and my `vote` transaction ranking B first has just been mined
 - **and Given** the page refetches the API round snapshot as soon as the receipt arrives
@@ -57,7 +57,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** read what a project proposes before I rank it
 - **so that** my ranking is based on the work, not just the name and the cost
-- **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Release:** R1 | **Tests:** H10 | **Status:** built
 - **Scenario:** a donor opens an accepted project's page
 - **Given** project 3 was accepted from a proposal whose content reference resolves on Swarm to a manifest with a title, a body, and one attachment
 - **When** I open `/project/3`
@@ -68,7 +68,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Proposer Pau
 - **I want to** see my project's cost, public support, and recipient address on its page
 - **so that** I can check that what is listed is what I submitted and how far it has to go
-- **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Release:** R1 | **Tests:** H10 | **Status:** built
 - **Scenario:** a proposer checks their listed project
 - **Given** project 3 has cost 4000 USDC, recipient 0xabc…, and public commitment 1200 USDC
 - **When** I open `/project/3`
@@ -79,7 +79,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** see a project's page even when its pitch cannot be loaded
 - **so that** I can still rank it and I know why the pitch is missing
-- **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Release:** R1 | **Tests:** H10 | **Status:** built
 - **Scenario:** the content reference is zero or Swarm does not answer
 - **Given** project 1 was added with a zero content reference, or its reference does not resolve within the fetch timeout
 - **When** I open `/project/1`
@@ -91,6 +91,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **I want to** start ranking from the project page I arrived at
 - **so that** the link a proposer shared takes me straight to backing their project
 - **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Note:** waits for /vote
 - **Scenario:** a donor arrives on a project page by a shared link
 - **Given** I am on `/project/3` during the open stage
 - **and Given** the page has a "Rank this project" control
@@ -102,7 +103,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Seat-holder Sol
 - **I want to** see on the round page whether I have cast and whether my sealed ballot is in the roster
 - **so that** I know I am counted without opening the ballot
-- **Release:** R1 | **Tests:** H6 | **Status:** planned
+- **Release:** R1 | **Tests:** H6 | **Status:** built
 - **Scenario:** a seat holder with a sealed ballot opens the round page
 - **Given** I am connected and the API voter response for my address says a sealed ballot exists and the address is in the roster
 - **When** I open `/`
@@ -113,7 +114,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** be told on the round page that I have weight but no ballot
 - **so that** my money does not sit abstaining by oversight
-- **Release:** R1 | **Tests:** H6 | **Status:** planned
+- **Release:** R1 | **Tests:** H6 | **Status:** built
 - **Scenario:** a donor contributed but never voted
 - **Given** I am connected with contributed weight and the API voter response for my address says no ballot exists
 - **When** I open `/`
@@ -124,7 +125,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Proposer Pau
 - **I want to** share my project's link and have it show the project's name and cost in chat previews
 - **so that** supporters know what they are clicking before they arrive
-- **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Release:** R1 | **Tests:** H10 | **Status:** built
 - **Scenario:** a chat client fetches the project page without JavaScript
 - **Given** `/project/3` was prerendered at build time for a project whose title is "Formal audit of the tally"
 - **When** the page is fetched with a plain HTTP request
@@ -135,7 +136,7 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **As a** Donor Dani
 - **I want to** share the round itself with a link that previews the round's name and deadline
 - **so that** people I invite see it is a live funding round
-- **Release:** R1 | **Tests:** H10 | **Status:** planned
+- **Release:** R1 | **Tests:** H10 | **Status:** built
 - **Scenario:** a chat client fetches the round page without JavaScript
 - **Given** `/` was prerendered at build time with the round's name and deadline
 - **When** the page is fetched with a plain HTTP request
