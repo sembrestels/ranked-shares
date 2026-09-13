@@ -126,3 +126,25 @@ repeated here. Personas: Dani, Sol, Pau; screens `/`, `/project/:id`, the shell.
 - **Given** the open step of the stage bar renders
 - **When** I read it without a pointer
 - **Then** the deadline's date and time are visible text, not only a `title`
+
+### S8.12 Keep the ballot panel and the stage bar on the same clock (final review)
+
+- **As a** Seat-holder Sol between the deadline and the close transaction
+- **I want to** see that voting has closed in the ballot panel as well as in the stage bar
+- **so that** I am not offered a replacement the contract will refuse
+- **Release:** R1 | **Tests:** H6 | **Status:** planned
+- **Scenario:** the deadline has passed but nobody has called close yet
+- **Given** the snapshot's phase is still "open" and its `at` is past `votingDeadline`
+- **When** the round page renders
+- **Then** the ballot panel omits "replaceable until" and the "Rank the projects" link, matching the stage bar's "Voting closed on"
+
+### S8.13 State roster membership only when it is true (final review)
+
+- **As a** Seat-holder Sol whose sealed ballot is not yet in the roster
+- **I want to** see "not registered yet" rather than "in the roster"
+- **so that** the status never claims what the API denies
+- **Release:** R1 | **Tests:** H6 | **Status:** planned
+- **Scenario:** a sealed ballot with `inRoster: false` after the deadline
+- **Given** the voter response says `sealed: true` and `inRoster: false`
+- **When** the ballot panel renders
+- **Then** it reads "Your ballot: sealed, not registered yet"

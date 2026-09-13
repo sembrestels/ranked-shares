@@ -31,7 +31,7 @@ provisional, or abandoned; `fundedProjects()` lists funded ids in order.
 - **Given** the pool is open and `votingDeadline` is set
 - **and Given** the stage bar is rendered
 - **When** I read the current stage
-- **Then** the stage bar shows "voting closes on" followed by the deadline in the viewer's local time zone
+- **Then** the stage bar shows the deadline as a date and time in the viewer's local time zone next to the countdown ("Voting closes in … , on <date>"; after the deadline "Voting closed on <date>")
 
 ### S6.3 Closing shows the roster progress
 
