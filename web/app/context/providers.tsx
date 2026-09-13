@@ -31,8 +31,14 @@ export const config = createConfig({
   ssr: true,
 });
 
-type RoundContext = { pool?: Address; setPool: (pool: Address) => void };
-const Round = createContext<RoundContext>({ setPool: () => {} });
+type RoundContext = {
+  pool?: Address;
+  setPool: (pool: Address) => void;
+  /** Block number of the user's last mined transaction; the API re-reads past it. */
+  after?: number;
+  markMined: (block: number) => void;
+};
+const Round = createContext<RoundContext>({ setPool: () => {}, markMined: () => {} });
 export const useRound = () => useContext(Round);
 type SwarmContext = {
   client?: SwarmIdClient;
@@ -50,6 +56,8 @@ export function Providers({ children }: { children: ReactNode }) {
       ? env.VITE_POOL_ADDRESS as Address
       : undefined,
   );
+  const [after, setAfter] = useState<number>();
+  const markMined = (block: number) => setAfter((prev) => (prev === undefined || block > prev ? block : prev));
   const [client, setClient] = useState<SwarmIdClient>();
   const [info, setInfo] = useState<ConnectionInfo>();
   const [error, setError] = useState<string>();
@@ -104,7 +112,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <Round.Provider value={{ pool, setPool: selectPool }}>
+        <Round.Provider value={{ pool, setPool: selectPool, after, markMined }}>
           <Swarm.Provider
             value={{
               client,
