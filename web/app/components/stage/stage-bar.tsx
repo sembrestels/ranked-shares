@@ -26,13 +26,15 @@ export function StageBar({ snapshot: s, now, canClose, closing, onCloseBatch, cl
     switch (key) {
       case "proposals":
       case "setup":
-        return <>Submissions close on <When at={s.votingDeadline} /></>;
+        return <>Submissions close when voting opens, or on <When at={s.votingDeadline} /> at the latest</>;
       case "open":
-        return (
-          <>
-            Voting closes in <Countdown to={s.votingDeadline} now={now} />, voting closes on <When at={s.votingDeadline} />
-          </>
-        );
+        return now >= s.votingDeadline
+          ? <>Voting closed on <When at={s.votingDeadline} /></>
+          : (
+            <>
+              Voting closes in <Countdown to={s.votingDeadline} now={now} />, on <When at={s.votingDeadline} />
+            </>
+          );
       case "closing":
         if (s.kind === "plain") return "Waiting for the tally to start";
         return (

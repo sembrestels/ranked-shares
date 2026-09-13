@@ -9,7 +9,7 @@ test("RulesPanel states the all-or-nothing rule, the token, and the closing date
   render(<RulesPanel symbol="USDC" deadline={1_700_003_600} />);
   expect(screen.getByText("Funded at exactly the amount you ask for, or not at all.")).toBeTruthy();
   expect(screen.getByText(/Amounts are in USDC/)).toBeTruthy();
-  expect(screen.getByText(/Submissions close on/).textContent).toContain(new Date(1_700_003_600 * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }));
+  expect(screen.getByText(/Submissions close when voting opens/).textContent).toContain(new Date(1_700_003_600 * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }));
 });
 
 test("AddProjectForm submits the parsed cost and the recipient", () => {

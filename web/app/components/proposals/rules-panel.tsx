@@ -7,7 +7,7 @@ export function RulesPanel({ symbol, deadline }: { symbol: string; deadline: num
     <section aria-label="How funding works" className="mb-6 flex flex-col gap-3">
       <RuleLine>Funded at exactly the amount you ask for, or not at all.</RuleLine>
       <p className="text-sm text-secondary">Amounts are in {symbol}. Voters rank projects; a project is funded when the weight behind it reaches its cost.</p>
-      <p className="text-sm text-secondary">Submissions close on <time dateTime={isoDate(deadline)}>{formatDateTime(deadline)}</time>.</p>
+      <p className="text-sm text-secondary">Submissions close when voting opens, or on <time dateTime={isoDate(deadline)}>{formatDateTime(deadline)}</time> at the latest.</p>
     </section>
   );
 }

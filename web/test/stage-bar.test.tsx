@@ -19,15 +19,21 @@ test("lists the seven steps and marks open as current with the deadline", () => 
   expect(current).toHaveLength(1);
   expect(current[0].textContent).toContain("Open");
   expect(current[0].textContent).toContain("Voting closes in 1 hour");
-  expect(current[0].textContent).toContain("voting closes on");
+  expect(current[0].textContent).not.toContain("voting closes on");
   expect(current[0].querySelectorAll("time")[1].getAttribute("dateTime")).toBe(new Date(DEADLINE * 1000).toISOString());
+});
+
+test("open step reads 'Voting closed' once the deadline has passed", () => {
+  bar(openSnapshot, { now: DEADLINE });
+  expect(screen.getByText(/Voting closed on/)).toBeTruthy();
+  expect(screen.queryByText(/Voting closes in/)).toBeNull();
 });
 
 test("setup marks proposals and setup current and shows the detail once", () => {
   bar(setupSnapshot);
   const current = screen.getAllByRole("listitem").filter((li) => li.getAttribute("aria-current") === "step");
   expect(current.map((li) => li.textContent?.startsWith("Proposals") || li.textContent?.startsWith("Setup"))).toEqual([true, true]);
-  expect(screen.getAllByText(/Submissions close on/)).toHaveLength(1);
+  expect(screen.getAllByText(/Submissions close when voting opens/)).toHaveLength(1);
 });
 
 test("closing shows roster progress and the close button only when a wallet can act", () => {
