@@ -99,7 +99,10 @@ cp .env.example .env
 deno task dev
 ```
 
-Open `http://localhost:5174/submit`. A `?pool=0x…` query parameter or the round
+Open `http://localhost:5174/` for the round page (`/project/:id` for one project,
+`/proposals` for the proposals board, `/submit` to submit, `/setup` for the
+organizer). The stage bar under the header shows where the round is on every page.
+A `?pool=0x…` query parameter or the round
 picker overrides the configured pool address; the configured chain and RPC stay
 fixed. Use `/setup` with the pool owner's wallet for acceptance and rejection.
 The default configuration uses a local Anvil chain. No live contract is preselected.

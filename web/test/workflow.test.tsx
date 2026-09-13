@@ -47,7 +47,7 @@ vi.mock("../app/context/providers", () => ({
   }),
 }));
 import SubmitPage from "../app/routes/submit";
-import { ProposalBoard } from "../app/routes/board";
+import { ProposalBoard } from "../app/routes/proposals";
 
 const chain = defineChain({
   id: 31337,

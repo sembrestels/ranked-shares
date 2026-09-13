@@ -33,7 +33,7 @@ export default function SubmitPage() {
   return (
     <>
       <div className="page-heading">
-        <p className="eyebrow">A PLACE FOR YOUR IDEA</p>
+        <p className="eyebrow">A place for your idea</p>
         <h1>
           Propose something<br />
           <em>worth funding.</em>
@@ -204,7 +204,7 @@ function Submission() {
     <section className="surface submission">
       <div className="section-heading">
         <span className="eyebrow">
-          {prepared ? "02 / SUBMIT FOR REVIEW" : "01 / YOUR PROPOSAL"}
+          {prepared ? "02 / Submit for review" : "01 / Your proposal"}
         </span>
         <span className="hint">Text + any files</span>
       </div>

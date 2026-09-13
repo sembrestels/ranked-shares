@@ -34,7 +34,7 @@ function Board({ review }: { review: boolean }) {
     <>
       <div className="page-heading">
         <p className="eyebrow">
-          {review ? "THE ORGANIZER'S DESK" : "THE PROPOSAL BOARD"}
+          {review ? "The organizer's desk" : "The proposal board"}
         </p>
         <h1>
           {review
@@ -59,7 +59,7 @@ function Board({ review }: { review: boolean }) {
       </div>
       <div className="section-heading">
         <span className="eyebrow">
-          {round.data ? `${round.data.count} SUBMISSIONS` : "SUBMISSIONS"}
+          {round.data ? `${round.data.count} submissions` : "Submissions"}
         </span>
         <Button
           variant="secondary"

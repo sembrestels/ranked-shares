@@ -12,6 +12,8 @@ import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { isAddress } from "viem";
 import { chain, Providers, useRound, useSwarm } from "./context/providers";
 import { Button, ErrorPopup, Field, Input, Notice } from "./components/ui";
+import { StageBarContainer } from "./components/stage/stage-bar-container";
+import { AUDIT_LABEL, AUDIT_URL } from "./lib/copy";
 import { errorMessage } from "./lib/proposals";
 import "./app.css";
 
@@ -211,55 +213,70 @@ function RoundPicker() {
   );
 }
 
-function Shell() {
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`;
+
+export function Shell({ children }: { children: ReactNode }) {
   const { pool } = useRound();
   const search = pool ? `?pool=${pool}` : "";
   return (
-    <>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <header className="site-header">
-        <div className="header-inner">
-          <NavLink className="brand" to={`/${search}`}>
-            Ranked<span>Shares</span>
-            <small>COMMUNITY FUNDING</small>
+    <div className="min-h-screen bg-page text-primary">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:bg-surface focus:p-3"
+      >
+        Skip to content
+      </a>
+      <header className="bg-inverse text-on-inverse">
+        <div className="mx-auto flex w-[min(var(--width-page),calc(100%-var(--space-8)))] flex-wrap items-center justify-between gap-6 py-6">
+          <NavLink to={`/${search}`} className="font-heading text-lg no-underline">
+            RankedShares
           </NavLink>
-          <nav className="main-nav" aria-label="Main navigation">
-            <NavLink to={`/${search}`} end>Proposals</NavLink>
-            <NavLink to={`/submit${search}`}>Submit an idea</NavLink>
-            <NavLink to={`/vote${search}`}>Vote & results</NavLink>
-            <NavLink to={`/liquidity${search}`}>Liquidity</NavLink>
-            <NavLink to={`/setup${search}`}>Organizer</NavLink>
+          <nav aria-label="Main" className="flex flex-wrap gap-6 text-sm">
+            <NavLink to={`/${search}`} end className={navLinkClass}>Round</NavLink>
+            <NavLink to={`/proposals${search}`} className={navLinkClass}>Proposals</NavLink>
+            <NavLink to={`/vote${search}`} className={navLinkClass}>Vote</NavLink>
+            <NavLink to={`/liquidity${search}`} className={navLinkClass}>Liquidity</NavLink>
+            <NavLink to={`/submit${search}`} className={navLinkClass}>Submit an idea</NavLink>
+            <NavLink to={`/setup${search}`} className={navLinkClass}>Organizer</NavLink>
           </nav>
         </div>
       </header>
-      <div className="workspace">
+      <div className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))]">
         <div className="toolbar">
           <RoundPicker />
           <Connections />
         </div>
-        <main id="main">
-          <Outlet />
-        </main>
-        <footer>
-          <span>RankedShares</span>
-          <p>Community ideas. Shared decisions.</p>
-          <span className="hint">Content on Swarm · Decisions on-chain</span>
-        </footer>
+        <StageBarContainer />
+        <main id="main" className="py-6">{children}</main>
       </div>
-    </>
+      <footer role="contentinfo" className="mt-12 border-t border-edge py-6 text-sm text-secondary">
+        <div className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))]">
+          <p>
+            Every number on these pages is read from the chain.{" "}
+            <a href={AUDIT_URL} className="underline underline-offset-4">
+              You can {AUDIT_LABEL}
+            </a>.
+          </p>
+          <p className="mt-1">{chain.name}</p>
+        </div>
+      </footer>
+    </div>
   );
 }
 
 export default function App() {
   return (
     <Providers>
-      <Shell />
+      <Shell>
+        <Outlet />
+      </Shell>
     </Providers>
   );
 }
 export function HydrateFallback() {
   return (
-    <main className="workspace">
+    <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>RankedShares</h1>
       <Notice>Loading the proposal board…</Notice>
     </main>
@@ -268,7 +285,7 @@ export function HydrateFallback() {
 export function ErrorBoundary() {
   const error = useRouteError();
   return (
-    <main className="workspace">
+    <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>Unable to load this page.</h1>
       <Notice error>{errorMessage(error)}</Notice>
       <a href="/">Return to proposals</a>

@@ -104,52 +104,6 @@ code {
   font-size: var(--text-small);
   overflow-wrap: anywhere;
 }
-.site-header {
-  background: var(--ink);
-  color: var(--paper);
-}
-.header-inner,
-.workspace {
-  width: min(var(--page-width), calc(100% - var(--space-8)));
-  margin-inline: auto;
-}
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-block: var(--space-6);
-  gap: var(--space-6);
-}
-.brand {
-  font-family: var(--font-display);
-  font-size: var(--text-brand);
-  text-decoration: none;
-  line-height: var(--line-heading);
-}
-.brand span {
-  color: var(--brand-muted);
-}
-.brand small {
-  display: block;
-  margin-top: var(--space-2);
-  font-family: var(--font-body);
-  font-size: var(--text-tiny);
-  letter-spacing: var(--tracking-wide);
-}
-.main-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-6);
-  font-size: var(--text-small);
-}
-.main-nav a {
-  padding-block: var(--space-2);
-  text-decoration: none;
-  border-bottom: var(--rule) solid transparent;
-}
-.main-nav a[aria-current] {
-  border-color: var(--brand-muted);
-}
 .toolbar {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -218,9 +172,9 @@ code {
   max-width: var(--copy-width);
 }
 .eyebrow {
-  font-size: var(--text-tiny);
-  font-weight: 700;
-  letter-spacing: var(--tracking-wide);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  letter-spacing: 0;
 }
 .section-heading {
   display: flex;
@@ -423,31 +377,7 @@ footer > span:first-child {
   font-family: var(--font-display);
   font-size: var(--text-brand);
 }
-.skip-link {
-  position: absolute;
-  left: var(--space-4);
-  top: var(--space-2);
-  padding: var(--space-3);
-  background: var(--surface);
-  color: var(--ink);
-  transform: translateY(-200%);
-  z-index: 10;
-}
-.skip-link:focus {
-  transform: none;
-}
 @media (max-width: 700px) {
-  .header-inner,
-  .workspace {
-    width: calc(100% - var(--space-8));
-  }
-  .header-inner {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-  .main-nav {
-    gap: var(--space-4);
-  }
   .toolbar,
   .columns,
   .facts {
