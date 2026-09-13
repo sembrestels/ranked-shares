@@ -42,7 +42,7 @@ export default function RoundPage() {
   const voter = useVoter();
   const live = useArkivPublic(round.data);
   const now = useNow(10_000);
-  if (!pool) return <Notice>Choose a round above to see the board.</Notice>;
+  if (!pool) return <Notice>Open a round link to view its board.</Notice>;
   if (!round.data) {
     return round.isError ? <Notice error>Could not load the round: {errorMessage(round.error)}</Notice> : <Skeleton lines={6} />;
   }

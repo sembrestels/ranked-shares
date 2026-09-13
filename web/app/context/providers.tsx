@@ -12,17 +12,19 @@ import type { ConnectionInfo, SwarmIdClient } from "@snaha/swarm-id";
 import { errorMessage } from "../lib/proposals";
 import { initializeSwarm } from "../lib/swarm";
 import { tiramisu } from "@arkiv-network/sdk/chains";
+import { networkDefaults } from "../../network";
 
 const env = import.meta.env;
+const defaults = networkDefaults(Number(env.VITE_CHAIN_ID || 5042002));
 export const chain = defineChain({
-  id: Number(env.VITE_CHAIN_ID || 31337),
-  name: env.VITE_CHAIN_NAME || "Anvil",
+  ...defaults,
+  name: env.VITE_CHAIN_NAME || defaults.name,
   nativeCurrency: {
-    name: env.VITE_NATIVE_SYMBOL || "ETH",
-    symbol: env.VITE_NATIVE_SYMBOL || "ETH",
+    name: env.VITE_NATIVE_SYMBOL || defaults.nativeCurrency.symbol,
+    symbol: env.VITE_NATIVE_SYMBOL || defaults.nativeCurrency.symbol,
     decimals: 18,
   },
-  rpcUrls: { default: { http: [env.VITE_RPC_URL || "http://127.0.0.1:8545"] } },
+  rpcUrls: { default: { http: [env.VITE_RPC_URL || defaults.rpcUrls.default.http[0]] } },
 });
 export const config = createConfig({
   chains: [chain, tiramisu],
@@ -105,6 +107,7 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [attempt]);
   function selectPool(value: Address) {
     setPool(value);
+    setAfter(undefined);
     const url = new URL(location.href);
     url.searchParams.set("pool", value);
     history.replaceState(null, "", url);

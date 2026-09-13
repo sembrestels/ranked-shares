@@ -14,6 +14,7 @@ import { privacyAbi, proposalAbi } from "./proposals";
 import { decryptProposal, parsePrivateDescriptor, ZERO_KEY } from "./private-proposals";
 import { parseContent } from "./swarm";
 import type { ProjectMetaData, RoundMetaData } from "./meta";
+import { networkDefaults } from "../../network";
 
 const abi = parseAbi([
   "function projectCount() view returns (uint256)",
@@ -40,7 +41,7 @@ function env(name: string): string | undefined {
 export function buildPool(): BuildPool | null {
   const pool = env("VITE_POOL_ADDRESS");
   if (!pool || !isAddress(pool)) return null;
-  return { rpc: env("VITE_RPC_URL") || "http://127.0.0.1:8545", pool };
+  return { rpc: env("VITE_RPC_URL") || networkDefaults(Number(env("VITE_CHAIN_ID") || 5042002)).rpcUrls.default.http[0], pool };
 }
 
 const client = (cfg: BuildPool, transport?: Transport) =>

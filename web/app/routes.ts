@@ -7,4 +7,5 @@ export default [
   route("liquidity", "routes/liquidity.tsx"),
   route("submit", "routes/submit.tsx"),
   route("setup", "routes/setup.tsx"),
+  route("deploy", "routes/deploy.tsx"),
 ] satisfies RouteConfig;

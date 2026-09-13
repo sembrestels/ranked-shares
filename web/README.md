@@ -103,22 +103,76 @@ independent oracle. The
 [signing runbook](../docs/superpowers/notes/2026-09-13-arc-lp-demo-runbook.md)
 contains all Arc and CRE configuration.
 
-## Run
+## Deploy a contract from the browser
+
+Open `/deploy` to create a round. Arc Testnet is the
+default network for the browser, prerender and read API. Connect a browser wallet
+and get gas from the [Circle faucet](https://faucet.circle.com/). The network details
+follow the [Arc connection reference](https://docs.arc.io/arc/references/connect-to-arc).
+Explicit `VITE_` and API network overrides still work; set chain ID `31337`, the
+local RPC, name `Anvil` and symbol `ETH` for local development.
+
+The normal round form asks for **round type, funding token and voting deadline**.
+It supports public RankedShares, CRE, Noir, ZisK and liquidity CRE. Funding is limited
+to USDC/EURC, with official Arc addresses and USDC selected by default. Other chains
+use `VITE_USDC_ADDRESS` / `VITE_EURC_ADDRESS`; unavailable currencies are disabled.
+Deadlines use local date/time and become Unix seconds. **Round options** is collapsed
+and contains an organizer override and the applicable voting minimums. The organizer
+follows the connected wallet until explicitly overridden. Minimums default to zero
+and use currency amounts with up to six decimals (e.g. `1.25` USDC), not base units.
+
+All encryption, workflow, verifier and recovery settings are application-owned.
+Sealed deployment requires `VITE_TALLY_SERVICE_URL` to point to a real service
+implementing [the public provisioning protocol](docs/tally-provisioning.md). No live
+service is configured in this repository: sealed types show an unavailable message
+until setup is complete; public deployment remains available. The frontend never
+generates a replacement tallier secret or substitutes fixture authorization settings.
+
+The service supplies a per-round public key/salt pair, authenticated workflow identity
+and optional known dependency addresses. The browser checks the exact build/profile,
+validates required contracts and reuses matching runtime bytecode, or deploys the
+pinned dependencies through the wallet. Noir capacity comes from the bundled circuit
+profile (256 sealed voters / 16 projects / batch 32); recovery is one day after a
+provisional report and abandonment after seven days from the voting deadline. ZisK's
+program key must match the committed guest profile; its root is read from the verifier.
+Liquidity deployment creates and attaches LPVoting automatically. If the organizer
+differs from the deployer, ownership transfers after attachment as a fourth transaction.
+Each sealed round becomes ready only after the service confirms active monitoring.
+
+**Custom contract** accepts a Foundry/Hardhat/solc contract artifact, or a JSON ABI
+plus creation bytecode. It supports scalar constructor inputs, nested tuples, JSON
+arrays, and native payment for payable constructors. Put large integers in quotes
+inside JSON arrays. Link libraries before importing. Runtime-only bytecode and ABI
+alone are not deployable artifacts. No Solidity compiler or private key runs in the
+browser: the connected wallet signs the deployment after gas estimation.
+
+A confirmed round becomes the selected pool and offers **Set up this round**.
+Custom deployments show their address without replacing the active pool. Pending
+transaction hashes are kept in local storage so `/deploy` can resume receipt checks
+after a reload; a receipt lookup failure never automatically resends a deployment.
+
+Bundled rounds and dependency builds are lazy-loaded from `app/lib/artifacts`.
+After changing Solidity, run `npm run contracts:sync` in `web` (requires Foundry)
+and commit the generated JSON. Proof changes also require regenerating the matching
+verifiers/guest proof export before syncing; copying source hashes does not prove a
+new proof build is valid. `npm run contracts:check` checks Solidity and proof-profile
+source hashes without a compiler. Hosted builds do not require Foundry. Browser
+integration tests use local Anvil and compiled test fixtures (`forge build` first).
+
+## Run locally
 
 ```sh
 cp .env.example .env
-# Set VITE_RPC_URL, VITE_CHAIN_ID, VITE_CHAIN_NAME, VITE_NATIVE_SYMBOL,
-# and VITE_POOL_ADDRESS for a newly deployed pool with proposal support.
+# Arc Testnet is preconfigured. Deploy a round at /deploy after starting the app.
 deno task dev
 ```
 
 Open `http://localhost:5174/` for the round page (`/project/:id` for one project,
 `/proposals` for the proposals board, `/submit` to submit, `/setup` for the
 organizer). The stage bar under the header shows where the round is on every page.
-A `?pool=0x…` query parameter or the round
-picker overrides the configured pool address; the configured chain and RPC stay
+A `?pool=0x…` query parameter overrides the configured pool address; the configured chain and RPC stay
 fixed. Use `/setup` with the pool owner's wallet for acceptance and rejection.
-The default configuration uses a local Anvil chain. No live contract is preselected.
+The default configuration uses Arc Testnet. No live contract is preselected.
 
 `deno task build` prerenders `/`, `/project/:id` for every known project (a
 placeholder `/project/0` when no pool is configured yet), and the other fixed

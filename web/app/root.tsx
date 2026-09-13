@@ -7,11 +7,11 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
+  useLocation,
 } from "react-router";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import { isAddress } from "viem";
 import { chain, Providers, useRound, useSwarm } from "./context/providers";
-import { Button, ErrorPopup, Field, Input, Notice } from "./components/ui";
+import { Button, ErrorPopup, Notice } from "./components/ui";
 import { StageBarContainer } from "./components/stage/stage-bar-container";
 import { AUDIT_LABEL, AUDIT_URL } from "./lib/copy";
 import { errorMessage } from "./lib/proposals";
@@ -52,7 +52,7 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-function Connections() {
+function Connections({ showSwarm = true }: { showSwarm?: boolean }) {
   const { address, chainId } = useAccount();
   const { connectAsync, connectors, isPending } = useConnect();
   const { disconnect } = useDisconnect();
@@ -104,7 +104,7 @@ function Connections() {
             ? "Connecting wallet…"
             : "Connect wallet"}
         </Button>
-        <Button
+        {showSwarm && <Button
           variant="secondary"
           disabled={(!client && !swarmError) || swarmBusy}
           onClick={!client && swarmError ? retrySwarm : connectSwarm}
@@ -118,7 +118,7 @@ function Connections() {
             : swarmError
             ? "Retry Swarm ID"
             : "Loading Swarm ID…"}
-        </Button>
+        </Button>}
       </div>
       {address && chainId !== chain.id && (
         <div className="actions">
@@ -133,7 +133,7 @@ function Connections() {
           </Button>
         </div>
       )}
-      {info?.identity && !info.canUpload && (
+      {showSwarm && info?.identity && !info.canUpload && (
         <Notice>
           {info.uploadUnavailableReason === "stamper-failed"
             ? "Swarm ID could not prepare your storage. Reconnect or check your drive."
@@ -150,7 +150,7 @@ function Connections() {
         </Notice>
       )}
       <div className="connection-popups">
-        {swarmError && swarmError !== dismissedSwarmError && (
+        {showSwarm && swarmError && swarmError !== dismissedSwarmError && (
           <ErrorPopup
             title="Swarm ID could not load"
             onDismiss={() => setDismissedSwarmError(swarmError)}
@@ -176,54 +176,12 @@ function Connections() {
   );
 }
 
-function RoundPicker() {
-  const { pool, setPool } = useRound();
-  const [error, setError] = useState<string>();
-  return (
-    <details className="round-picker" open={!pool} key={pool}>
-      <summary>
-        <span className="eyebrow">{chain.name} / Round</span>
-        <code>
-          {pool ? `${pool.slice(0, 10)}…${pool.slice(-6)}` : "Choose a pool"}
-        </code>
-        <span>Change</span>
-      </summary>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          const value = String(
-            new FormData(event.currentTarget).get("pool") || "",
-          ).trim();
-          if (!isAddress(value)) {
-            setError("Enter a valid pool contract address.");
-            return;
-          }
-          setError(undefined);
-          setPool(value);
-        }}
-      >
-        <Field id="pool" label="Pool contract address">
-          <Input
-            id="pool"
-            name="pool"
-            required
-            defaultValue={pool}
-            placeholder="0x…"
-            spellCheck={false}
-          />
-        </Field>
-        <Button type="submit">Load round</Button>
-        {error && <Notice error>{error}</Notice>}
-      </form>
-    </details>
-  );
-}
-
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`;
 
 export function Shell({ children }: { children: ReactNode }) {
   const { pool } = useRound();
+  const { pathname } = useLocation();
   const search = pool ? `?pool=${pool}` : "";
   return (
     <div className="min-h-screen bg-page text-primary">
@@ -250,10 +208,9 @@ export function Shell({ children }: { children: ReactNode }) {
       </header>
       <div className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))]">
         <div className="toolbar">
-          <RoundPicker />
-          <Connections />
+          <Connections showSwarm={pathname !== "/deploy"} />
         </div>
-        <StageBarContainer />
+        {pathname !== "/deploy" && <StageBarContainer />}
         <main id="main" className="py-6">{children}</main>
       </div>
       <footer role="contentinfo" className="mt-12 border-t border-edge py-6 text-sm text-secondary">

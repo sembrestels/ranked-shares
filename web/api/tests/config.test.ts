@@ -4,14 +4,20 @@ import { loadConfig } from "../config.ts";
 Deno.test("loadConfig: defaults", () => {
   const c = loadConfig({});
   assertEquals(c.port, 8000);
-  assertEquals(c.rpcUrls, ["http://127.0.0.1:8545"]);
-  assertEquals(c.chainId, 31337);
+  assertEquals(c.rpcUrls, ["https://rpc.testnet.arc.io"]);
+  assertEquals(c.chainId, 5042002);
   assertEquals(c.poolAddress, null);
   assertEquals(c.webOrigins, ["http://localhost:5174"]);
   assertEquals(c.beeUrl, null);
   assertEquals(c.snapshotTtlMs, 15_000);
   assertEquals(c.rosterPage, 200);
   assertEquals(c.contentTimeoutMs, 5_000);
+});
+
+Deno.test("loadConfig: explicit Anvil chain retains the local RPC default", () => {
+  const c = loadConfig({ CHAIN_ID: "31337" });
+  assertEquals(c.chainId, 31337);
+  assertEquals(c.rpcUrls, ["http://127.0.0.1:8545"]);
 });
 
 Deno.test("loadConfig: VITE_ fallbacks, lists, checksummed pool, trailing slash trimmed", () => {

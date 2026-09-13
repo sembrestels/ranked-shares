@@ -1,8 +1,9 @@
 # Set up the round (activity 2)
 
 Organiser Ona, on `/setup`, with one story landing on `/` for the invitation link. The
-pool is deployed from the runbook's scripts before these stories start; the frontend
-takes over from the checklist onward. Tests hypotheses H7 (a checklist, not a wizard)
+pool is deployed from `/deploy` or the runbook's scripts before these stories start;
+the deployment form selects the confirmed pool and links to organizer setup.
+Tests hypotheses H7 (a checklist, not a wizard)
 and H5 (one sentence on who can decrypt, reached through the invitation link). Contract
 facts: `addProject` and `openVoting` are owner-only in the Setup phase; `openVoting` is
 irreversible; `sponsor` and `sponsorNFT` are open to anyone during the Open phase before

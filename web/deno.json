@@ -1,6 +1,8 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
+    "contracts:sync": "deno run -A scripts/export-contracts.mjs",
+    "contracts:check": "deno run --allow-read scripts/export-contracts.mjs --check",
     "dev": "deno run -A npm:@react-router/dev dev",
     "build": "deno run -A npm:@react-router/dev build",
     "preview": "deno run -A npm:vite preview --outDir build/client",
