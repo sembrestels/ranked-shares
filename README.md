@@ -6,6 +6,9 @@ Representative Participatory Budgeting with Ordinal Preferences* (AAAI-21), usin
 the uniform fractional reweighting of Aziz & Lee, *The expanding approvals rule*
 (Social Choice and Welfare, 2019). Both papers are in `docs/papers/`.
 
+Live pools and shared contracts on Arc testnet are listed in
+[`docs/deployments/arc-testnet.md`](docs/deployments/arc-testnet.md).
+
 Voters rank projects (ties allowed), projects have costs, and the outcome satisfies
 **Inclusion PSC**: any group of voters that solidly supports a set of projects gets
 funding in proportion to its share of the budget.
