@@ -63,7 +63,7 @@ test("YourBallot: not cast, sealed in the roster, public and final", () => {
     </MemoryRouter>,
   );
   expect(screen.getByText(/Your ballot: sealed, in the roster, replaceable until/).textContent).toContain(new Date(DEADLINE * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }));
-  expect(screen.getByRole("link").getAttribute("href")).toBe("/ballot");
+  expect(screen.getByRole("link").getAttribute("href")).toBe("/vote");
   rerender(
     <MemoryRouter>
       <YourBallot snapshot={openSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "300000000", seats: "0", total: "300000000" }, ballot: { public: { ranks: [2, 1] }, sealed: false }, inRoster: true }} />

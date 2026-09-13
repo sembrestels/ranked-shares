@@ -107,7 +107,8 @@ the on-the-line pitch, which is now served from Swarm by the shipped proposal fl
 - **Scenario:** a seat holder with a sealed ballot opens the round page
 - **Given** I am connected and the API voter response for my address says a sealed ballot exists and the address is in the roster
 - **When** I open `/`
-- **Then** the page shows "Your ballot: sealed, in the roster, replaceable until" followed by the deadline, with a link to `/ballot`
+- **Then** the page shows "Your ballot: sealed, in the roster, replaceable until" followed by the deadline, with a link to `/vote`
+- **Note:** `/ballot` is not a route yet; the link goes to `/vote`.
 
 ### S5.10 See that I have not cast yet
 
