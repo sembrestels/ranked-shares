@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./tokens.css";
+@import "./components/round/funding-wall.css";
 
 .site-header { background: var(--color-inverse); color: var(--color-on-inverse); }
 .site-header-inner { width: min(var(--width-page), calc(100% - var(--space-8))); margin-inline: auto; display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding-block: var(--space-6); }

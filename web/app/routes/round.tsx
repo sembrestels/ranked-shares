@@ -3,16 +3,18 @@ import { useEffect } from "react";
 import { replace } from "react-router";
 import { isAddress } from "viem";
 import type { Route } from "./+types/round";
-import { Board, projectName } from "../components/round/board";
+import { projectName } from "../components/round/board";
+import { FundingWall } from "../components/round/funding-wall";
 import { Outcome } from "../components/round/outcome";
 import { RoundHeading } from "../components/round/round-heading";
 import { SealedPanel } from "../components/round/sealed-panel";
 import { YourBallot } from "../components/round/your-ballot";
-import { Notice, Skeleton } from "../components/ui";
+import { Button, Notice, Skeleton } from "../components/ui";
 import { PublicResults } from "../components/voting";
 import { useRound } from "../context/providers";
 import { useArkivPublic } from "../hooks/use-arkiv-public";
 import { useNow } from "../hooks/use-now";
+import { useProposalTitles } from "../hooks/use-proposal-titles";
 import { useRoundSnapshot, useVoter } from "../hooks/use-snapshot";
 import { buildPool, roundFacts } from "../lib/build-chain";
 import { useRoundDirectory } from "../context/rounds";
@@ -57,6 +59,7 @@ export default function RoundPage() {
   useEffect(() => { document.title = `${name} · RankedShares`; }, [name]);
   const { address } = useAccount();
   const round = useRoundSnapshot();
+  const titles = useProposalTitles(round.data);
   const voter = useVoter();
   const live = useArkivPublic(round.data);
   const now = useNow(10_000);
@@ -64,14 +67,20 @@ export default function RoundPage() {
   if (!round.data) {
     return round.isError ? <Notice error>Could not load the round: {errorMessage(round.error)}</Notice> : <Skeleton lines={6} />;
   }
-  const s = round.data;
+  const s = titles.snapshot!;
   return (
     <>
       {round.isError && <Notice error>Showing the last snapshot; the refresh failed: {errorMessage(round.error)}</Notice>}
       <RoundHeading snapshot={s} now={now} name={name} />
       {address && <YourBallot snapshot={s} voter={voter.data} loading={voter.isPending} />}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-6">
+      {titles.loading && <p className="mt-4 text-sm text-secondary" role="status">Loading proposal titles from Swarm…</p>}
+      {titles.failed && <div className="mt-4 flex flex-wrap items-center gap-3">
+        <p className="text-sm text-secondary" role="status">Some proposal titles could not be loaded from Swarm.</p>
+        <Button variant="secondary" onClick={() => void titles.retry()}>Retry titles</Button>
+      </div>}
+      <FundingWall snapshot={s} live={live.data} liveError={live.isError} />
+      <div className={`mt-6 grid gap-6 ${s.finality || s.ballots === "arkiv" ? "lg:grid-cols-[2fr_1fr]" : ""}`}>
+        {(s.finality || s.ballots === "arkiv") && <div className="flex flex-col gap-6">
           <Outcome snapshot={s} />
           {s.ballots === "arkiv" && live.data && !s.finality && (
             <PublicResults
@@ -84,8 +93,7 @@ export default function RoundPage() {
             />
           )}
           {s.ballots === "arkiv" && live.isError && <Notice error>Could not compute public results from Arkiv: {errorMessage(live.error)}</Notice>}
-          <Board snapshot={s} commitments={s.ballots === "arkiv" ? live.data?.commitments : undefined} />
-        </div>
+        </div>}
         <SealedPanel snapshot={s} />
       </div>
     </>
