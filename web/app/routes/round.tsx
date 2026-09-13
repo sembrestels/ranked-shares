@@ -1,4 +1,7 @@
 import { useAccount } from "wagmi";
+import { useEffect } from "react";
+import { replace } from "react-router";
+import { isAddress } from "viem";
 import type { Route } from "./+types/round";
 import { Board, projectName } from "../components/round/board";
 import { Outcome } from "../components/round/outcome";
@@ -12,7 +15,8 @@ import { useArkivPublic } from "../hooks/use-arkiv-public";
 import { useNow } from "../hooks/use-now";
 import { useRoundSnapshot, useVoter } from "../hooks/use-snapshot";
 import { buildPool, roundFacts } from "../lib/build-chain";
-import { ROUND_NAME } from "../lib/copy";
+import { useRoundDirectory } from "../context/rounds";
+import { roundName } from "../lib/round-directory";
 import { roundMetaTags } from "../lib/meta";
 import { errorMessage } from "../lib/proposals";
 
@@ -27,16 +31,30 @@ export async function loader() {
     return null;
   }
 }
-export async function clientLoader() {
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  const requestedPool = new URL(request.url).searchParams.get("pool");
+  if (!isAddress(requestedPool ?? import.meta.env.VITE_POOL_ADDRESS ?? "")) {
+    return replace("/");
+  }
   return null;
 }
-clientLoader.hydrate = false as const;
-export function meta({ data }: Route.MetaArgs) {
-  return roundMetaTags(data ?? null, SITE_URL);
+clientLoader.hydrate = true as const;
+export function HydrateFallback() {
+  return <Skeleton lines={4} />;
+}
+export function meta({ data, location }: Route.MetaArgs) {
+  const pool = new URLSearchParams(location.search).get("pool") ?? import.meta.env.VITE_POOL_ADDRESS;
+  const valid = pool && isAddress(pool) ? pool : undefined;
+  // Build-time facts belong only to the configured round.
+  const facts = valid?.toLowerCase() === import.meta.env.VITE_POOL_ADDRESS?.toLowerCase() ? data : null;
+  return roundMetaTags(facts ?? null, SITE_URL, valid);
 }
 
 export default function RoundPage() {
   const { pool } = useRound();
+  const { rounds } = useRoundDirectory();
+  const name = pool ? roundName(rounds.find((entry) => entry.pool.toLowerCase() === pool.toLowerCase()) ?? { pool }) : "Funding round";
+  useEffect(() => { document.title = `${name} · RankedShares`; }, [name]);
   const { address } = useAccount();
   const round = useRoundSnapshot();
   const voter = useVoter();
@@ -50,7 +68,7 @@ export default function RoundPage() {
   return (
     <>
       {round.isError && <Notice error>Showing the last snapshot; the refresh failed: {errorMessage(round.error)}</Notice>}
-      <RoundHeading snapshot={s} now={now} name={ROUND_NAME} />
+      <RoundHeading snapshot={s} now={now} name={name} />
       {address && <YourBallot snapshot={s} voter={voter.data} loading={voter.isPending} />}
       <div className="mt-6 grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-6">

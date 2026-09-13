@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { useRound } from "../context/providers";
 import { fetchProject, fetchRound, fetchVoter } from "../lib/api";
@@ -18,7 +18,7 @@ export function useRoundSnapshot() {
     queryFn: () => fetchRound(pool, after),
     enabled: !!pool,
     refetchInterval: (query) => (behind(query.state.data?.block, after) ? CATCH_UP_MS : POLL_MS),
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === pool ? prev : undefined),
   });
 }
 
@@ -29,7 +29,7 @@ export function useProject(id: number) {
     queryFn: () => fetchProject(id, pool, after),
     enabled: !!pool && Number.isInteger(id) && id >= 0,
     refetchInterval: POLL_MS,
-    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[2] === id ? prev : undefined),
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === pool && prevQuery?.queryKey[2] === id ? prev : undefined),
   });
 }
 
@@ -41,6 +41,6 @@ export function useVoter() {
     queryFn: () => fetchVoter(address as string, pool, after),
     enabled: !!pool && !!address,
     refetchInterval: POLL_MS,
-    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[2] === address ? prev : undefined),
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === pool && prevQuery?.queryKey[2] === address ? prev : undefined),
   });
 }

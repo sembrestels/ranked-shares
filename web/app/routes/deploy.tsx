@@ -118,7 +118,7 @@ export default function DeployPage() {
       }
       const deployed = { ...pending, contractAddress: receipt.contractAddress };
       setResult(deployed); setPending(undefined); remember();
-      if (pending.round) { setPool(receipt.contractAddress); markMined(Number(receipt.blockNumber)); }
+      if (pending.round) { setPool(receipt.contractAddress); markMined(Number(receipt.blockNumber), receipt.contractAddress); }
       setProgress("Contract deployed successfully.");
     }).catch((err) => {
       if (active) { setError(errorMessage(err)); setProgress(""); }
@@ -194,7 +194,7 @@ export default function DeployPage() {
     try {
       const deployed = await runRoundDeployment({ draft, artifact, client, wallet, chain, onProgress: setProgress, onSave: setRoundDraft });
       setResult({ ...deployed, account: draft.account, name: draft.kind, round: true, chainId: chain.id });
-      setRoundDraft(undefined); setPool(deployed.contractAddress); markMined(Number(deployed.blockNumber));
+      setRoundDraft(undefined); setPool(deployed.contractAddress); markMined(Number(deployed.blockNumber), deployed.contractAddress);
       setProgress("Your round is deployed and the tally service is watching it.");
     } catch (err) { setError(errorMessage(err)); setProgress(""); }
     finally { operation.current = false; setBusy(false); }

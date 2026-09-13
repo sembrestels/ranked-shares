@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { RoundSnapshot } from "../../lib/api-types";
+import { roundHref } from "../../lib/round-directory";
 import { Badge, Money, SupportBar } from "../ui";
 
 export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id + 1}`;
@@ -19,7 +20,7 @@ export function Board({ snapshot: s, commitments }: { snapshot: RoundSnapshot; c
         {rows.map((p) => (
           <li key={p.id} className="border border-edge bg-surface p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <Link to={`/project/${p.id}`} className="font-heading text-lg">{projectName(p)}</Link>
+              <Link to={roundHref(s.pool, `/project/${p.id}`)} className="font-heading text-lg">{projectName(p)}</Link>
               {s.finality && <Badge tone={p.funded ? "success" : "neutral"}>{p.funded ? "Funded" : "Not funded"}</Badge>}
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-x-8 gap-y-2 text-sm">

@@ -23,6 +23,8 @@ The process that uses them is `docs/design/PROCESS.md`.
 
 ## Records
 
+- [Navigate between concurrent rounds](2026-09-13-navigate-between-concurrent-rounds.md) (proposed, 2026-09-13, design rationale)
+
 - [Encrypt proposals through private review](2026-09-13-encrypt-proposals-through-private-review.md) (accepted, 2026-09-13)
 
 - [Allocate LP voting weight proportionally and automate the Arc demo with CRE](2026-09-13-allocate-lp-voting-weight-proportionally-with-cre.md) (accepted, 2026-09-13)

@@ -27,7 +27,7 @@ export function projectMetaTags(data: ProjectMetaData | null, id: number, siteUr
   ];
 }
 
-export function roundMetaTags(data: RoundMetaData | null, siteUrl: string): Tag[] {
+export function roundMetaTags(data: RoundMetaData | null, siteUrl: string, pool?: string): Tag[] {
   const name = data?.name ?? "RankedShares round";
   const description = data
     ? `A live RankedShares funding round. Voting closes on ${formatDateTime(data.votingDeadline)}.`
@@ -37,6 +37,6 @@ export function roundMetaTags(data: RoundMetaData | null, siteUrl: string): Tag[
     { property: "og:title", content: name },
     { name: "description", content: description },
     { property: "og:description", content: description },
-    { tagName: "link", rel: "canonical", href: `${siteUrl.replace(/\/+$/, "")}/` },
+    { tagName: "link", rel: "canonical", href: `${siteUrl.replace(/\/+$/, "")}/round${pool ? `?pool=${pool}` : ""}` },
   ];
 }

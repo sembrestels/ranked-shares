@@ -8,6 +8,8 @@ import {
   ScrollRestoration,
   useRouteError,
   useLocation,
+  useNavigate,
+  Link,
 } from "react-router";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { chain, Providers, useRound, useSwarm } from "./context/providers";
@@ -15,6 +17,9 @@ import { Button, ErrorPopup, Notice } from "./components/ui";
 import { StageBarContainer } from "./components/stage/stage-bar-container";
 import { AUDIT_LABEL, AUDIT_URL } from "./lib/copy";
 import { errorMessage } from "./lib/proposals";
+import { useRoundDirectory } from "./context/rounds";
+import { RoundNavigation } from "./components/navigation/round-navigation";
+import { roundHref } from "./lib/round-directory";
 import "./app.css";
 
 /** Fallback for routes without their own `meta` export (e.g. /proposals,
@@ -176,13 +181,14 @@ function Connections({ showSwarm = true }: { showSwarm?: boolean }) {
   );
 }
 
-const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  `border-b py-2 no-underline ${isActive ? "border-signal" : "border-transparent"}`;
-
 export function Shell({ children }: { children: ReactNode }) {
   const { pool } = useRound();
+  const { rounds } = useRoundDirectory();
   const { pathname } = useLocation();
-  const search = pool ? `?pool=${pool}` : "";
+  const navigate = useNavigate();
+  const roundPage = pathname !== "/" && pathname !== "/deploy";
+  const selected = pool ? rounds.find((entry) => entry.pool.toLowerCase() === pool.toLowerCase()) ?? { pool } : undefined;
+  const choices = selected && !rounds.some((entry) => entry.pool === selected.pool) ? [...rounds, selected] : rounds;
   return (
     <div className="min-h-screen bg-page text-primary">
       <a
@@ -191,27 +197,26 @@ export function Shell({ children }: { children: ReactNode }) {
       >
         Skip to content
       </a>
-      <header className="bg-inverse text-on-inverse">
-        <div className="mx-auto flex w-[min(var(--width-page),calc(100%-var(--space-8)))] flex-wrap items-center justify-between gap-6 py-6">
-          <NavLink to={`/${search}`} className="font-heading text-lg no-underline">
+      <header className="site-header">
+        <div className="site-header-inner">
+          <Link to="/" className="site-wordmark">
             RankedShares
-          </NavLink>
-          <nav aria-label="Main" className="flex flex-wrap gap-6 text-sm">
-            <NavLink to={`/${search}`} end className={navLinkClass}>Round</NavLink>
-            <NavLink to={`/proposals${search}`} className={navLinkClass}>Proposals</NavLink>
-            <NavLink to={`/vote${search}`} className={navLinkClass}>Vote</NavLink>
-            <NavLink to={`/liquidity${search}`} className={navLinkClass}>Liquidity</NavLink>
-            <NavLink to={`/submit${search}`} className={navLinkClass}>Submit an idea</NavLink>
-            <NavLink to={`/setup${search}`} className={navLinkClass}>Organizer</NavLink>
+          </Link>
+          <nav aria-label="Main" className="site-links">
+            <NavLink to="/" end className="site-link">All rounds</NavLink>
+            <NavLink to="/deploy" className="site-create">Create round <span aria-hidden="true">+</span></NavLink>
           </nav>
         </div>
       </header>
       <div className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))]">
-        <div className="toolbar">
-          <Connections showSwarm={pathname !== "/deploy"} />
-        </div>
-        {pathname !== "/deploy" && <StageBarContainer />}
-        <main id="main" className="py-6">{children}</main>
+        {roundPage && selected && <RoundNavigation selected={selected} rounds={choices} pathname={pathname} onSwitch={(value) => navigate(roundHref(value))} />}
+        {pathname !== "/" && <div className="toolbar">
+          <Connections showSwarm={roundPage && !["/round", "/vote", "/liquidity"].includes(pathname)} />
+        </div>}
+        {roundPage && pool && <StageBarContainer key={pool} />}
+        <main id="main" className="py-6">
+          {roundPage && !pool ? <Notice>Choose a round to continue. <Link to="/">Find or open a round</Link>.</Notice> : <div key={roundPage ? pool : pathname}>{children}</div>}
+        </main>
       </div>
       <footer role="contentinfo" className="mt-12 border-t border-edge py-6 text-sm text-secondary">
         <div className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))]">
@@ -241,7 +246,7 @@ export function HydrateFallback() {
   return (
     <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>RankedShares</h1>
-      <Notice>Loading the round…</Notice>
+      <Notice>Loading RankedShares…</Notice>
     </main>
   );
 }
@@ -251,7 +256,7 @@ export function ErrorBoundary() {
     <main className="mx-auto w-[min(var(--width-page),calc(100%-var(--space-8)))] py-6">
       <h1>Unable to load this page.</h1>
       <Notice error>{errorMessage(error)}</Notice>
-      <a href="/">Return to the round</a>
+      <a href="/">Browse funding rounds</a>
     </main>
   );
 }

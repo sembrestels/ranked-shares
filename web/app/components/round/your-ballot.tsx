@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import type { RoundSnapshot, VoterResponse } from "../../lib/api-types";
 import { NOT_CAST } from "../../lib/copy";
+import { roundHref } from "../../lib/round-directory";
 import { formatDateTime, isoDate } from "../../lib/format";
 import { Skeleton } from "../ui";
 
@@ -15,12 +16,12 @@ export function YourBallot({ snapshot: s, voter, loading }: { snapshot: RoundSna
     <section aria-label="Your ballot" className="border-l-[length:var(--rule-width-accent)] border-signal bg-surface p-4 text-sm">
       {voter.ballot.sealed
         ? open
-          ? <p>Your ballot: sealed, {voter.inRoster ? "in the roster" : "not in the roster yet"}, replaceable until {deadline}. <Link to="/vote" className="underline underline-offset-4">See your ballot</Link></p>
+          ? <p>Your ballot: sealed, {voter.inRoster ? "in the roster" : "not in the roster yet"}, replaceable until {deadline}. <Link to={roundHref(s.pool, "/vote")} className="underline underline-offset-4">See your ballot</Link></p>
           : <p>Your ballot: sealed, in the roster.</p>
         : voter.ballot.public
-        ? <p>Your ballot: {s.kind === "plain" && open ? <>public, replaceable until {deadline}.</> : "public and final."} <Link to="/vote" className="underline underline-offset-4">See your ballot</Link></p>
+        ? <p>Your ballot: {s.kind === "plain" && open ? <>public, replaceable until {deadline}.</> : "public and final."} <Link to={roundHref(s.pool, "/vote")} className="underline underline-offset-4">See your ballot</Link></p>
         : open
-        ? <p>{NOT_CAST} <Link to="/vote" className="underline underline-offset-4">Rank the projects</Link></p>
+        ? <p>{NOT_CAST} <Link to={roundHref(s.pool, "/vote")} className="underline underline-offset-4">Rank the projects</Link></p>
         : <p>{NOT_CAST}</p>}
     </section>
   );

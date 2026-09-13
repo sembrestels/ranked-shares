@@ -21,7 +21,7 @@ test("Board lists projects by public commitment, descending, with name, cost, an
   const rows = screen.getAllByRole("listitem");
   expect(rows).toHaveLength(2);
   expect(within(rows[0]).getByRole("link").textContent).toBe("Project 2");
-  expect(within(rows[0]).getByRole("link").getAttribute("href")).toBe("/project/1");
+  expect(within(rows[0]).getByRole("link").getAttribute("href")).toBe(`/project/1?pool=${openSnapshot.pool}`);
   expect(within(rows[0]).getByTitle("1000 USDC").textContent).toBe("1,000 USDC");
   expect(within(rows[1]).getByRole("link").textContent).toBe("Formal audit of the tally");
   expect(within(rows[1]).getByTitle("4000 USDC").textContent).toBe("4,000 USDC");
@@ -59,14 +59,14 @@ test("YourBallot: not cast, sealed in the roster, public and final", () => {
     <YourBallot snapshot={openSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "300000000", seats: "0", total: "300000000" }, ballot: { public: null, sealed: false }, inRoster: true }} />,
   );
   expect(screen.getByText("Your ballot: not cast. Money without a ballot funds nothing.")).toBeTruthy();
-  expect(screen.getByRole("link").getAttribute("href")).toBe("/vote");
+  expect(screen.getByRole("link").getAttribute("href")).toBe(`/vote?pool=${openSnapshot.pool}`);
   rerender(
     <MemoryRouter>
       <YourBallot snapshot={openSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "0", seats: "500000000", total: "500000000" }, ballot: { public: null, sealed: true }, inRoster: true }} />
     </MemoryRouter>,
   );
   expect(screen.getByText(/Your ballot: sealed, in the roster, replaceable until/).textContent).toContain(new Date(DEADLINE * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }));
-  expect(screen.getByRole("link").getAttribute("href")).toBe("/vote");
+  expect(screen.getByRole("link").getAttribute("href")).toBe(`/vote?pool=${openSnapshot.pool}`);
   rerender(
     <MemoryRouter>
       <YourBallot snapshot={openSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "300000000", seats: "0", total: "300000000" }, ballot: { public: { ranks: [2, 1] }, sealed: false }, inRoster: true }} />

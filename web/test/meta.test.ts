@@ -17,5 +17,10 @@ test("round meta names the round and the deadline", () => {
   const tags = roundMetaTags({ name: "Autumn grants", votingDeadline: 1_700_003_600 }, "https://ranked.example");
   expect(tags).toContainEqual({ property: "og:title", content: "Autumn grants" });
   expect(tags.find((t): t is { name: string; content: string } => "name" in t && t.name === "description")?.content).toMatch(/Voting closes on /);
-  expect(tags).toContainEqual({ tagName: "link", rel: "canonical", href: "https://ranked.example/" });
+  expect(tags).toContainEqual({ tagName: "link", rel: "canonical", href: "https://ranked.example/round" });
+});
+
+test("round canonical links preserve the selected round", () => {
+  const pool = "0x0000000000000000000000000000000000000002";
+  expect(roundMetaTags(null, "https://ranked.example", pool)).toContainEqual({ tagName: "link", rel: "canonical", href: `https://ranked.example/round?pool=${pool}` });
 });

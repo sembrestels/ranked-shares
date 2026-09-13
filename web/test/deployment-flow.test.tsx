@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { createMemoryRouter, MemoryRouter, RouterProvider } from "react-router";
 import { spawn, type ChildProcess } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { createPublicClient, createWalletClient, defineChain, http, type Address, type Hex, keccak256, parseAbi } from "viem";
@@ -26,6 +26,7 @@ vi.mock("../app/context/providers", () => ({
   useRound: () => ({ setPool: state.setPool, markMined: state.markMined }),
 }));
 import DeployPage from "../app/routes/deploy";
+import { clientLoader as roundEntryLoader } from "../app/routes/round";
 
 const chain = defineChain({ id: 31337, name: "Anvil", nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: ["http://127.0.0.1:8576"] } } });
 const transport = http(chain.rpcUrls.default.http[0]);
@@ -53,7 +54,7 @@ beforeAll(async () => {
   vi.stubEnv("VITE_USDC_ADDRESS", token);
   vi.stubEnv("VITE_EURC_ADDRESS", eurc);
 }, 15000);
-afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); vi.stubEnv("VITE_TALLY_SERVICE_URL", ""); state.setPool.mockClear(); state.markMined.mockClear(); state.wallet = wallet; state.chainId = 31337; state.address = account.address; });
+afterEach(() => { cleanup(); localStorage.clear(); vi.unstubAllGlobals(); vi.stubEnv("VITE_TALLY_SERVICE_URL", ""); vi.stubEnv("VITE_POOL_ADDRESS", ""); state.setPool.mockClear(); state.markMined.mockClear(); state.wallet = wallet; state.chainId = 31337; state.address = account.address; });
 afterAll(() => { anvil?.kill("SIGTERM"); vi.unstubAllEnvs(); });
 
 async function fillRound(fundingToken = token) {
@@ -61,6 +62,34 @@ async function fillRound(fundingToken = token) {
   fireEvent.change(screen.getByLabelText("Funding token"), { target: { value: fundingToken } });
   fireEvent.change(screen.getByLabelText("Voting deadline"), { target: { value: "2099-06-01T12:30" } });
 }
+
+test("opening an overview without a round returns to the rounds directory", async () => {
+  vi.stubEnv("VITE_POOL_ADDRESS", "");
+  const router = createMemoryRouter([
+    { path: "/round", loader: ({ request }) => roundEntryLoader({ request } as Parameters<typeof roundEntryLoader>[0]), element: <p>Existing round</p>, hydrateFallbackElement: <p>Loading…</p> },
+    { path: "/", element: <p>Funding rounds directory</p> },
+  ], { initialEntries: ["/round"] });
+  render(<RouterProvider router={router} />);
+  await screen.findByText("Funding rounds directory");
+  expect(router.state.location.pathname).toBe("/");
+  expect(router.state.historyAction).toBe("REPLACE");
+  expect(screen.queryByRole("link", { name: "Deploy a round" })).toBeNull();
+  router.dispose();
+});
+
+test.each(["link", "configuration"])("an existing round from %s keeps the round page", async (source) => {
+  vi.stubEnv("VITE_POOL_ADDRESS", source === "configuration" ? token : "");
+  const entry = source === "link" ? `/round?pool=${token}` : "/round";
+  const router = createMemoryRouter([
+    { path: "/round", loader: ({ request }) => roundEntryLoader({ request } as Parameters<typeof roundEntryLoader>[0]), element: <p>Existing round</p>, hydrateFallbackElement: <p>Loading…</p> },
+    { path: "/deploy", element: <DeployPage /> },
+  ], { initialEntries: [entry] });
+  render(<RouterProvider router={router} />);
+  await screen.findByText("Existing round");
+  expect(router.state.location.pathname).toBe("/round");
+  expect(screen.queryByRole("combobox", { name: "Round type" })).toBeNull();
+  router.dispose();
+});
 
 test.each(["USDC", "EURC"])("rendered round form deploys with %s and selects the confirmed round", async (symbol) => {
   const fundingToken = symbol === "USDC" ? token : eurc;

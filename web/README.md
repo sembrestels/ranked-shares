@@ -6,7 +6,19 @@ The on-chain pool is the source of truth for submission revisions, terms and dec
 
 ## Round and project pages
 
-`/` shows the round page: every project with its public commitment, the sealed total
+`/` is the rounds directory, with search, active/completed filters, and an address
+lookup. Feature several rounds using `VITE_ROUNDS`, a JSON array of
+`{"pool":"0x…","name":"Community grants"}` entries on `VITE_CHAIN_ID`.
+`VITE_POOL_ADDRESS` remains a featured round; `VITE_ROUND_NAME` labels only that
+address. Opened rounds and optional labels are saved in this browser per chain.
+The directory is not a chain-wide registry. No wallet is needed to browse it.
+
+The site header contains **All rounds** and **Create round**. Inside a round,
+a named switcher and round tabs separate browsing/voting from submission and
+organizer tools. Switching rounds opens its overview and resets temporary page
+state. The URL controls selection, including browser Back/Forward.
+
+`/round?pool=0x…` shows the round page (legacy `/?pool=0x…` links redirect here): every project with its public commitment, the sealed total
 and voter count, the stage bar, and the outcome once the round is done, all read from
 the API (`GET /api/round`). `/project/:id` shows one project's pitch, cost, support,
 and recipient, read from `GET /api/project/:id`. `VITE_ROUND_NAME`, `VITE_SITE_URL`,
@@ -105,7 +117,7 @@ contains all Arc and CRE configuration.
 
 ## Deploy a contract from the browser
 
-Open `/deploy` to create a round. Arc Testnet is the
+Choose **Create round** in the site header or open `/deploy`. Arc Testnet is the
 default network for the browser, prerender and read API. Connect a browser wallet
 and get gas from the [Circle faucet](https://faucet.circle.com/). The network details
 follow the [Arc connection reference](https://docs.arc.io/arc/references/connect-to-arc).
@@ -167,9 +179,9 @@ cp .env.example .env
 deno task dev
 ```
 
-Open `http://localhost:5174/` for the round page (`/project/:id` for one project,
+Open `http://localhost:5174/` for the rounds directory (`/project/:id` for one project,
 `/proposals` for the proposals board, `/submit` to submit, `/setup` for the
-organizer). The stage bar under the header shows where the round is on every page.
+organizer). The stage bar under the round navigation shows progress on round pages.
 A `?pool=0x…` query parameter overrides the configured pool address; the configured chain and RPC stay
 fixed. Use `/setup` with the pool owner's wallet for acceptance and rejection.
 The default configuration uses Arc Testnet. No live contract is preselected.

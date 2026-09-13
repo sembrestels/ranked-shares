@@ -17,7 +17,7 @@ Each principle answers a pain point from the journey maps and is checked in revi
    byte strings, base-unit integers, or enum numbers reach a screen. (Journey pain 1.)
 2. **Nothing waits in silence.** Between any two stages there is a status that says
    what has happened, what happens next, and who does it: submitted to accepted,
-   deadline to proof, funded to paid. The stage bar is on every page. (Pain 2, H8.)
+   deadline to proof, funded to paid. The stage bar is on every round page. (Pain 2, H8.)
 3. **One sentence at the moment of choice.** The tally rule, the public-or-sealed
    trade, who can decrypt, and "deposits do not come back" are each one sentence,
    placed where the decision is made, not in a help page. (H1, H2, H3, H5.)
@@ -93,8 +93,10 @@ props, events out through callbacks; route containers and hooks do the fetching.
 
 | Name | Purpose | Exists | Notes |
 |---|---|---|---|
-| Site header | brand, navigation, connections | yes | |
-| Stage bar | all steps of the round with the current one loud | no | H8; on every page |
+| Site header | brand, All rounds, Create round | yes | global navigation |
+| Round navigation | selected round, switcher, page tabs, action and organizer groups | yes | [specification](components/round-navigation.md) |
+| Rounds directory | search, status filters, round cards, address lookup | yes | configured and browser-saved rounds |
+| Stage bar | all steps of the round with the current one loud | yes | H8; on every round page |
 | Proposal card | a proposal's content, terms, status, and actions | yes | |
 | Submit form | the proposal form | yes | |
 | Project summary | project page head: title, cost, support, recipient, status | no | H10 |
@@ -112,7 +114,7 @@ props, events out through callbacks; route containers and hooks do the fetching.
 
 | Name | Slots | Used by |
 |---|---|---|
-| Page | header, stage bar, main, footer | every route |
+| Page | site header, main, footer; round context and stage bar on round routes | every route |
 | Two-column | main and a side card (actions) | `/project/:id`, `/vote` |
 | Form page | heading, rules panel, form, status | `/submit`, `/setup` |
 
