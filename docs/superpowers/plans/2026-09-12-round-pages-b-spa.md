@@ -1130,7 +1130,7 @@ git commit -m "Add the stage bar with closing, proving, and outcome details, and
 
 **Interfaces:**
 - Consumes: fixtures, atoms, molecules, hooks.
-- Produces: `<Board snapshot commitments? />` (the optional `commitments: string[]` overrides the snapshot's, for Arkiv pools), `<SealedPanel snapshot />`, `<YourBallot snapshot voter loading />`, `<Outcome snapshot />`, `<RoundHeading snapshot now name />`; `FINALITY_SENTENCES`, `REPO_URL`, `ROUND_NAME` in `copy.ts`; `commitmentsFromEntries(entries: { weight: bigint; ballot: number[] }[], projectCount: number): bigint[]` in `lib/live.ts`; `useArkivPublic(snapshot)` returning `{ commitments: string[]; funded: number[]; ballots: number; block: number }` for Arkiv pools (disabled otherwise); the route module `routes/round.tsx` (default export `RoundPage`), not yet in `routes.ts` (Task 7 wires it).
+- Produces: `<Board snapshot commitments? />` (the optional `commitments: string[]` overrides the snapshot's, for Arkiv pools), `<SealedPanel snapshot />`, `<YourBallot snapshot voter loading />`, `<Outcome snapshot />`, `<RoundHeading snapshot now name />`; `FINALITY_SENTENCE`, `FINALITY_LABEL`, `REPO_URL`, `ROUND_NAME`, `AUDIT_URL` in `copy.ts`; `commitmentsFromEntries(entries: { weight: bigint; ballot: number[] }[], projectCount: number): bigint[]` in `lib/live.ts`; `useArkivPublic(snapshot)` returning `{ commitments: string[]; funded: number[]; ballots: number; block: number }` for Arkiv pools (disabled otherwise); the route module `routes/round.tsx` (default export `RoundPage`), not yet in `routes.ts` (Task 7 wires it).
 
 - [ ] **Step 1: Write `web/app/lib/copy.ts`**
 
