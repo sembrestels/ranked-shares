@@ -29,7 +29,7 @@ export function useProject(id: number) {
     queryFn: () => fetchProject(id, pool, after),
     enabled: !!pool && Number.isInteger(id) && id >= 0,
     refetchInterval: POLL_MS,
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[2] === id ? prev : undefined),
   });
 }
 
@@ -41,6 +41,6 @@ export function useVoter() {
     queryFn: () => fetchVoter(address as string, pool, after),
     enabled: !!pool && !!address,
     refetchInterval: POLL_MS,
-    placeholderData: keepPreviousData,
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[2] === address ? prev : undefined),
   });
 }

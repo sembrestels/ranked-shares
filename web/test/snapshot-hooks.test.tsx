@@ -8,7 +8,7 @@ vi.mock("wagmi", () => ({ useAccount: () => ({ address: "0x70997970C51812dc3A010
 vi.mock("../app/context/providers", () => ({
   useRound: () => ({ pool: "0x5FbDB2315678afecb367f032d93F642f64180aa3", after: state.after, markMined: () => {} }),
 }));
-import { useRoundSnapshot, useVoter } from "../app/hooks/use-snapshot";
+import { useProject, useRoundSnapshot, useVoter } from "../app/hooks/use-snapshot";
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -43,4 +43,24 @@ test("useVoter fetches the connected address", async () => {
   expect(String(f.mock.calls[0][0])).toBe(
     "/api/voter/0x70997970C51812dc3A010C7d01b50e0d17dc79C8?pool=0x5FbDB2315678afecb367f032d93F642f64180aa3",
   );
+});
+
+test("useProject: switching ids does not leak the previous project's data as a placeholder", async () => {
+  state.after = undefined;
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const sharedWrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  let resolveSecond!: (response: Response) => void;
+  const f = vi.fn(async (input?: string) => {
+    if (String(input).includes("/api/project/0")) return new Response(JSON.stringify({ id: 0, title: "Project 0" }), { status: 200 });
+    return new Promise<Response>((resolve) => { resolveSecond = resolve; });
+  });
+  vi.stubGlobal("fetch", f);
+  const { result, rerender } = renderHook(({ id }: { id: number }) => useProject(id), { wrapper: sharedWrapper, initialProps: { id: 0 } });
+  await waitFor(() => expect(result.current.data).toEqual({ id: 0, title: "Project 0" }));
+  rerender({ id: 1 });
+  expect(result.current.data).toBeUndefined();
+  resolveSecond(new Response(JSON.stringify({ id: 1, title: "Project 1" }), { status: 200 }));
+  await waitFor(() => expect(result.current.data).toEqual({ id: 1, title: "Project 1" }));
 });
