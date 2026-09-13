@@ -1206,12 +1206,12 @@ export function commitmentsFromEntries(entries: readonly LiveEntry[], projectCou
 `web/app/hooks/use-arkiv-public.ts` (a container hook; not unit-tested here because it reads Arkiv and the chain, the same reads `/vote` already exercises):
 
 ```ts
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { hexToBytes } from "viem";
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
 import { pbearTranscript } from "../../../shared/pbear";
-import { chain, useRound } from "../context/providers";
+import { chain } from "../context/providers";
 import type { RoundSnapshot } from "../lib/api-types";
 import { loadPayloads } from "../lib/arkiv";
 import { commitmentsFromEntries } from "../lib/live";
@@ -1229,12 +1229,14 @@ export interface ArkivPublic {
  * pool is done, where the outcome comes from the chain. */
 export function useArkivPublic(snapshot: RoundSnapshot | undefined) {
   const client = usePublicClient({ chainId: chain.id });
-  const { pool } = useRound();
+  // From the snapshot, not the round context: with keepPreviousData the two can
+  // name different pools for one fetch cycle after a round switch.
+  const pool = snapshot?.pool;
   const enabled = !!client && !!pool && !!snapshot && snapshot.ballots === "arkiv" && snapshot.phase !== "done";
   return useQuery({
     queryKey: ["arkiv-public", pool ?? "", snapshot?.block ?? 0],
     enabled,
-    refetchInterval: 15_000,
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<ArkivPublic> => {
       const s = snapshot!;
       const voters = await readArkivVoters(client!, pool!, {
@@ -1279,7 +1281,7 @@ test("Board lists projects by public commitment, descending, with name, cost, an
   inRouter(<Board snapshot={openSnapshot} />);
   const rows = screen.getAllByRole("listitem");
   expect(rows).toHaveLength(2);
-  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 1");
+  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 2");
   expect(within(rows[0]).getByRole("link").getAttribute("href")).toBe("/project/1");
   expect(within(rows[0]).getByTitle("1000 USDC").textContent).toBe("1,000 USDC");
   expect(within(rows[1]).getByRole("link").textContent).toBe("Formal audit of the tally");
@@ -1295,7 +1297,7 @@ test("Board shows the funded badge once the outcome is set", () => {
 test("Board takes browser-computed commitments for an Arkiv pool", () => {
   inRouter(<Board snapshot={arkivSnapshot} commitments={["250000000", "900000000"]} />);
   const rows = screen.getAllByRole("listitem");
-  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 1");
+  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 2");
   expect(within(rows[0]).getByTitle("900 USDC")).toBeTruthy();
   expect(within(rows[1]).getByTitle("250 USDC")).toBeTruthy();
 });
@@ -1347,7 +1349,7 @@ test("Outcome lists the funded set in order, the finality in words, and the audi
   expect(screen.getByText(/the sealed ballots were proven against their commitments/)).toBeTruthy();
   const funded = screen.getByRole("list", { name: "Funded projects" });
   expect(within(funded).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Formal audit of the tally, 4,000 USDC"]);
-  expect(screen.getByText("Project 1, not funded")).toBeTruthy();
+  expect(screen.getByText("Project 2, not funded")).toBeTruthy();
   expect(screen.getByRole("link", { name: "check this result yourself" }).getAttribute("href")).toBe("https://github.com/sembrestels/ranked-shares#sealed-pools");
   rerender(<MemoryRouter><Outcome snapshot={attestedSnapshot} /></MemoryRouter>);
   expect(screen.getByText("Provisional")).toBeTruthy();
@@ -1379,7 +1381,8 @@ import { Link } from "react-router";
 import type { RoundSnapshot } from "../../lib/api-types";
 import { Badge, Money, SupportBar } from "../ui";
 
-export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id}`;
+/** One-based for people, matching the vote page. */
+export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id + 1}`;
 
 /** Public commitments per project, most backed first. For an Arkiv pool the
  * commitments come from the browser (useArkivPublic) and override the snapshot's. */
@@ -1686,7 +1689,7 @@ import { Address, Badge, Money, SupportBar } from "../ui";
 export function ProjectSummary({ response: r }: { response: ProjectResponse }) {
   const p = r.project;
   const { symbol, decimals } = r.round.token;
-  const title = p.title ?? r.content?.title ?? `Project ${p.id}`;
+  const title = p.title ?? r.content?.title ?? `Project ${p.id + 1}`;
   return (
     <header className="py-8">
       <div className="flex flex-wrap items-center gap-3">
@@ -1997,7 +2000,7 @@ test("project meta uses the pitch title, names the cost, and sets a canonical UR
 });
 
 test("project meta without data falls back to the id", () => {
-  expect(projectMetaTags(null, 3, "https://ranked.example")).toContainEqual({ property: "og:title", content: "Project 3" });
+  expect(projectMetaTags(null, 3, "https://ranked.example")).toContainEqual({ property: "og:title", content: "Project 4" });
 });
 
 test("round meta names the round and the deadline", () => {
@@ -2032,7 +2035,7 @@ export interface RoundMetaData {
 type Tag = { title: string } | { name: string; content: string } | { property: string; content: string } | { tagName: "link"; rel: string; href: string };
 
 export function projectMetaTags(data: ProjectMetaData | null, id: number, siteUrl: string): Tag[] {
-  const name = data?.title ?? `Project ${id}`;
+  const name = data?.title ?? `Project ${id + 1}`;
   const description = data
     ? `A project asking for ${formatAmount(data.cost, data.decimals).shown} ${data.symbol} in a RankedShares funding round.`
     : "A project in a RankedShares funding round.";
