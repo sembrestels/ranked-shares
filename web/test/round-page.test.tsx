@@ -9,6 +9,9 @@ import { Outcome } from "../app/components/round/outcome";
 import { RoundHeading } from "../app/components/round/round-heading";
 import { abandonedSnapshot, arkivSnapshot, attestedSnapshot, DEADLINE, NOW, openSnapshot, provenSnapshot, provingNoirSnapshot } from "./fixtures/snapshots";
 
+const closedSnapshot = { ...openSnapshot, phase: "closing" as const };
+const plainOpenSnapshot = { ...openSnapshot, kind: "plain" as const };
+
 afterEach(cleanup);
 
 const inRouter = (ui: ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -70,6 +73,29 @@ test("YourBallot: not cast, sealed in the roster, public and final", () => {
     </MemoryRouter>,
   );
   expect(screen.getByText(/Your ballot: public and final/)).toBeTruthy();
+});
+
+test("YourBallot: a public ballot on a plain pool is replaceable while voting is open", () => {
+  inRouter(
+    <YourBallot snapshot={plainOpenSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "300000000", seats: "0", total: "300000000" }, ballot: { public: { ranks: [2, 1] }, sealed: false }, inRoster: true }} />,
+  );
+  expect(screen.getByText(/Your ballot: public, replaceable until/).textContent).toContain(new Date(DEADLINE * 1000).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }));
+});
+
+test("YourBallot: once voting is closed, a sealed ballot just says it is in the roster", () => {
+  inRouter(
+    <YourBallot snapshot={closedSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "0", seats: "500000000", total: "500000000" }, ballot: { public: null, sealed: true }, inRoster: true }} />,
+  );
+  expect(screen.getByText("Your ballot: sealed, in the roster.")).toBeTruthy();
+  expect(screen.queryByRole("link")).toBeNull();
+});
+
+test("YourBallot: once voting is closed, not cast keeps the sentence without a link", () => {
+  inRouter(
+    <YourBallot snapshot={closedSnapshot} loading={false} voter={{ address: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", block: 123, weight: { direct: "300000000", seats: "0", total: "300000000" }, ballot: { public: null, sealed: false }, inRoster: true }} />,
+  );
+  expect(screen.getByText("Your ballot: not cast. Money without a ballot funds nothing.")).toBeTruthy();
+  expect(screen.queryByRole("link")).toBeNull();
 });
 
 test("YourBallot renders nothing for an address with no weight and no ballot", () => {
