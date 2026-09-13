@@ -16,7 +16,10 @@ export function StageStep(
     ? "border-edge-strong text-secondary"
     : "border-edge text-secondary";
   return (
-    <li aria-current={state === "current" ? "step" : undefined} className={`border-t-[3px] pt-2 ${tone}`}>
+    <li
+      aria-current={state === "current" ? "step" : undefined}
+      className={`border-t-[length:var(--rule-width-accent)] pt-2 ${tone}`}
+    >
       <span className={`text-sm ${state === "current" ? "font-semibold" : ""}`}>{label}</span>
       {state === "current" && showDetail && children && <div className="mt-1 text-sm">{children}</div>}
     </li>

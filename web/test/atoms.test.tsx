@@ -1,6 +1,8 @@
-import { expect, test } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, expect, test } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
 import { Address, Badge, Countdown, Money, Skeleton } from "../app/components/ui";
+
+afterEach(cleanup);
 
 test("Money shows a rounded amount with the symbol and the exact value in the title", () => {
   render(<Money amount="1234567890" decimals={6} symbol="USDC" />);
