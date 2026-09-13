@@ -756,7 +756,7 @@ export function StageStep(
     ? "border-edge-strong text-secondary"
     : "border-edge text-secondary";
   return (
-    <li aria-current={state === "current" ? "step" : undefined} className={`border-t-[3px] pt-2 ${tone}`}>
+    <li aria-current={state === "current" ? "step" : undefined} className={`border-t-[length:var(--rule-width-accent)] pt-2 ${tone}`}>
       <span className={`text-sm ${state === "current" ? "font-semibold" : ""}`}>{label}</span>
       {state === "current" && showDetail && children && <div className="mt-1 text-sm">{children}</div>}
     </li>
@@ -771,7 +771,7 @@ import type { ReactNode } from "react";
 
 /** One sentence at the moment of choice (design principle 3). */
 export function RuleLine({ children }: { children: ReactNode }) {
-  return <p className="max-w-[var(--width-copy)] border-l-[3px] border-signal pl-3 text-sm">{children}</p>;
+  return <p className="max-w-[var(--width-copy)] border-l-[length:var(--rule-width-accent)] border-signal pl-3 text-sm">{children}</p>;
 }
 ```
 
@@ -1457,7 +1457,7 @@ export function YourBallot({ snapshot: s, voter, loading }: { snapshot: RoundSna
   if (weight === 0n && !voter.ballot.public && !voter.ballot.sealed) return null;
   const deadline = <time dateTime={isoDate(s.votingDeadline)}>{formatDateTime(s.votingDeadline)}</time>;
   return (
-    <section aria-label="Your ballot" className="border-l-[3px] border-signal bg-surface p-4 text-sm">
+    <section aria-label="Your ballot" className="border-l-[length:var(--rule-width-accent)] border-signal bg-surface p-4 text-sm">
       {voter.ballot.sealed
         ? <p>Your ballot: sealed, {voter.inRoster ? "in the roster" : "not in the roster yet"}, replaceable until {deadline}. <Link to="/ballot" className="underline underline-offset-4">See your ballot</Link></p>
         : voter.ballot.public
