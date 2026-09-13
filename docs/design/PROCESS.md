@@ -101,4 +101,5 @@ tests) is unchanged. The design process feeds it:
   package on master (proposals, Swarm ID, review, editing) predates the gate; its
   stories are marked built.
 - 2026-09-12: first Deliver slice built (round page, project page, stage bar, shell) on
-  branch round-pages; heuristic and accessibility reviews pending.
+  branch round-pages; heuristic and accessibility reviews recorded in
+  `docs/design/reviews/`, with findings routed to stories.

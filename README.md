@@ -56,7 +56,8 @@ the stage of the round, and the outcome; see `web/README.md`.
 - `/submit`: connect a wallet and Swarm ID, write any proposal text, attach any file
   types, and upload directly through `@snaha/swarm-id`. Review the saved amount,
   recipient and reference, then submit the wallet transaction.
-- `/`: browse proposals and their review status; read text and download attachments.
+- `/proposals`: browse proposals and their review status; read text and download
+  attachments. (`/` is now the round page; see above.)
 - On either board, the original proposer or current owner can choose **Edit proposal**
   for a pending submission, keep/remove attachments, add files, and save a new revision.
 - `/setup`: the current pool owner can accept or reject pending proposals. Each
