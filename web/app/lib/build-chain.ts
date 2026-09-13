@@ -56,7 +56,7 @@ export async function projectFacts(
   id: number,
   cfg: BuildPool,
   transport?: Transport,
-  beeUrl: string | undefined = env("VITE_BEE_URL"),
+  beeUrl: string | undefined = env("VITE_BEE_URL") || env("BEE_URL"),
   fetchFn: typeof fetch = fetch,
 ): Promise<ProjectMetaData> {
   const c = client(cfg, transport);
@@ -67,7 +67,7 @@ export async function projectFacts(
   ]);
   const [symbol, decimals] = await Promise.all([
     c.readContract({ address: token, abi, functionName: "symbol" }).catch(() => "tokens"),
-    c.readContract({ address: token, abi, functionName: "decimals" }),
+    c.readContract({ address: token, abi, functionName: "decimals" }).catch(() => 18),
   ]);
   return { title: await titleOf(ref, beeUrl, fetchFn), cost: cost.toString(), decimals: Number(decimals), symbol };
 }

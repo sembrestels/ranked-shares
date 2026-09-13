@@ -107,6 +107,14 @@ picker overrides the configured pool address; the configured chain and RPC stay
 fixed. Use `/setup` with the pool owner's wallet for acceptance and rejection.
 The default configuration uses a local Anvil chain. No live contract is preselected.
 
+`deno task build` prerenders `/`, `/project/:id` for every known project (a
+placeholder `/project/0` when no pool is configured yet), and the other fixed
+routes, each with `<title>`/`og:title`/description/canonical meta so shared
+links unfurl. Set `VITE_SITE_URL` to the deployed site's own URL so canonical
+links and `og:url` are correct rather than `http://localhost:5174`, and
+`VITE_BEE_URL` (or reuse the API's `BEE_URL`) so prerendered project pages can
+resolve the real pitch title instead of falling back to "Project N".
+
 The npm equivalents are `npm ci`, `npm run dev`, `npm run typecheck`, `npm test`,
 `npm run build`, and `npm run preview`. npm installs need dev dependencies included.
 

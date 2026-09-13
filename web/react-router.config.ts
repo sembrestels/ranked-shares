@@ -16,14 +16,18 @@ export default {
   async prerender() {
     const cfg = buildPool();
     if (!cfg) {
-      console.warn("prerender: VITE_POOL_ADDRESS is not set; project pages are not prerendered");
+      console.warn(
+        "prerender: VITE_POOL_ADDRESS is not set; no project ids are known, prerendering the placeholder /project/0 instead",
+      );
       return [...FIXED, FALLBACK_PROJECT];
     }
     try {
       const ids = await projectIds(cfg);
       return [...FIXED, ...(ids.length ? ids.map((id) => `/project/${id}`) : [FALLBACK_PROJECT])];
     } catch (e) {
-      console.warn(`prerender: project pages skipped, chain read failed: ${e instanceof Error ? e.message : String(e)}`);
+      console.warn(
+        `prerender: chain read failed, no project ids are known, prerendering the placeholder /project/0 instead: ${e instanceof Error ? e.message : String(e)}`,
+      );
       return [...FIXED, FALLBACK_PROJECT];
     }
   },

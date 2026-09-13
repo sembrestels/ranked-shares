@@ -17,13 +17,19 @@ import { AUDIT_LABEL, AUDIT_URL } from "./lib/copy";
 import { errorMessage } from "./lib/proposals";
 import "./app.css";
 
+/** Fallback for routes without their own `meta` export (e.g. /proposals,
+ * /vote, /liquidity, /submit, /setup); routes/round.tsx and routes/project.tsx
+ * define their own `meta` and take over the <title> for that route. */
+export function meta() {
+  return [{ title: "RankedShares" }];
+}
+
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Proposals · RankedShares</title>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

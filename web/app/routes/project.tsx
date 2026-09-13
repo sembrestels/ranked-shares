@@ -31,7 +31,8 @@ export async function clientLoader() {
 clientLoader.hydrate = false as const;
 
 export function meta({ data, params }: Route.MetaArgs) {
-  return projectMetaTags(data ?? null, Number(params.id), SITE_URL);
+  const id = /^\d+$/.test(params.id ?? "") ? Number(params.id) : 0;
+  return projectMetaTags(data ?? null, id, SITE_URL);
 }
 
 export default function ProjectPage() {
