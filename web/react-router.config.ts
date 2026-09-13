@@ -1,2 +1,30 @@
 import type { Config } from "@react-router/dev/config";
-export default { ssr: false } satisfies Config;
+import { buildPool, projectIds } from "./app/lib/build-chain";
+
+const FIXED = ["/", "/proposals", "/vote", "/liquidity", "/submit", "/setup"];
+// react-router's ssr:false build refuses to compile ANY route whose module has
+// a `loader` export unless at least one prerendered path resolves to it (see
+// https://reactrouter.com/how-to/pre-rendering#invalid-exports) — regardless
+// of clientLoader. app/routes/project.tsx always exports a build-time loader,
+// so a fallback path keeps the build valid when no real project id is known
+// yet; its loader already returns null without a pool, so this prerenders
+// with generic fallback meta rather than crashing the build.
+const FALLBACK_PROJECT = "/project/0";
+
+export default {
+  ssr: false,
+  async prerender() {
+    const cfg = buildPool();
+    if (!cfg) {
+      console.warn("prerender: VITE_POOL_ADDRESS is not set; project pages are not prerendered");
+      return [...FIXED, FALLBACK_PROJECT];
+    }
+    try {
+      const ids = await projectIds(cfg);
+      return [...FIXED, ...(ids.length ? ids.map((id) => `/project/${id}`) : [FALLBACK_PROJECT])];
+    } catch (e) {
+      console.warn(`prerender: project pages skipped, chain read failed: ${e instanceof Error ? e.message : String(e)}`);
+      return [...FIXED, FALLBACK_PROJECT];
+    }
+  },
+} satisfies Config;

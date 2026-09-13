@@ -1,4 +1,5 @@
 import { useAccount } from "wagmi";
+import type { Route } from "./+types/round";
 import { Board, projectName } from "../components/round/board";
 import { Outcome } from "../components/round/outcome";
 import { RoundHeading } from "../components/round/round-heading";
@@ -10,8 +11,29 @@ import { useRound } from "../context/providers";
 import { useArkivPublic } from "../hooks/use-arkiv-public";
 import { useNow } from "../hooks/use-now";
 import { useRoundSnapshot, useVoter } from "../hooks/use-snapshot";
+import { buildPool, roundFacts } from "../lib/build-chain";
 import { ROUND_NAME } from "../lib/copy";
+import { roundMetaTags } from "../lib/meta";
 import { errorMessage } from "../lib/proposals";
+
+const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || "http://localhost:5174";
+
+export async function loader() {
+  const cfg = buildPool();
+  if (!cfg) return null;
+  try {
+    return await roundFacts(cfg);
+  } catch {
+    return null;
+  }
+}
+export async function clientLoader() {
+  return null;
+}
+clientLoader.hydrate = false as const;
+export function meta({ data }: Route.MetaArgs) {
+  return roundMetaTags(data ?? null, SITE_URL);
+}
 
 export default function RoundPage() {
   const { pool } = useRound();

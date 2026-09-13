@@ -1,13 +1,38 @@
 import { useState } from "react";
 import { useParams } from "react-router";
+import type { Route } from "./+types/project";
 import { Pitch } from "../components/project/pitch";
 import { ProjectSummary } from "../components/project/project-summary";
 import { Notice, Skeleton } from "../components/ui";
 import { useRound, useSwarm } from "../context/providers";
 import { useProject } from "../hooks/use-snapshot";
 import type { Attachment } from "../lib/api-types";
+import { buildPool, projectFacts } from "../lib/build-chain";
+import { projectMetaTags } from "../lib/meta";
 import { errorMessage } from "../lib/proposals";
 import { saveDownload } from "../lib/swarm";
+
+const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || "http://localhost:5174";
+
+/** Build time only (prerender): the meta data for this project. */
+export async function loader({ params }: Route.LoaderArgs) {
+  const cfg = buildPool();
+  if (!cfg) return null;
+  try {
+    return await projectFacts(Number(params.id), cfg);
+  } catch {
+    return null;
+  }
+}
+/** In the browser the page reads the API; nothing to load. */
+export async function clientLoader() {
+  return null;
+}
+clientLoader.hydrate = false as const;
+
+export function meta({ data, params }: Route.MetaArgs) {
+  return projectMetaTags(data ?? null, Number(params.id), SITE_URL);
+}
 
 export default function ProjectPage() {
   const { id: raw } = useParams();
