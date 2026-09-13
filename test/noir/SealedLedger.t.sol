@@ -91,7 +91,7 @@ contract SealedLedgerTest is Test {
     function test_proposalsKeepNoirProfileLimitsAndBindContent() public {
         bytes32 ref = keccak256("Noir pitch");
         vm.prank(alice);
-        pool.propose(ref, 5, recipientA);
+        pool.propose(ref, bytes32(0), 5, recipientA);
         vm.startPrank(owner);
         pool.acceptProposal(0, 1);
         assertEq(pool.contentRefOf(0), ref);
@@ -99,7 +99,7 @@ contract SealedLedgerTest is Test {
         for (uint256 i = 1; i < pool.mMax(); i++) {
             pool.addProject(1, recipientA);
         }
-        pool.propose(ref, 5, recipientA);
+        pool.propose(ref, bytes32(0), 5, recipientA);
         vm.expectRevert(NoirRankedShares.TooManyProjects.selector);
         pool.acceptProposal(1, 1);
         pool.rejectProposal(1, 1);

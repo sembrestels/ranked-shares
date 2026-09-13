@@ -16,6 +16,8 @@ export type Attachment = {
   name: string;
   type: string;
   size: number;
+  /** Kept inside the encrypted proposal until the accepted revision is published. */
+  encryption?: { key: Hex; iv: Hex };
 };
 export type ProposalContent = {
   version: 1;
@@ -93,6 +95,9 @@ export async function uploadProposal(
   const attachments: Attachment[] = (draft.attachments || []).map(
     parseAttachment,
   );
+  if (attachments.some((file) => file.encryption)) {
+    throw new Error("Use the private proposal uploader to keep attachment keys encrypted.");
+  }
   for (const [i, file] of draft.files.entries()) {
     progress(`Uploading file ${i + 1} of ${draft.files.length}: ${file.name}`);
     const result = await storage.uploadFile(file, file.name, {
@@ -155,11 +160,19 @@ function parseAttachment(file: Record<string, unknown>): Attachment {
     typeof file.name !== "string" || typeof file.type !== "string" ||
     !Number.isSafeInteger(file.size) || Number(file.size) < 0
   ) throw new Error("Invalid attachment metadata.");
+  const encryption = file.encryption as { key?: unknown; iv?: unknown } | undefined;
+  if (
+    encryption !== undefined &&
+    (!encryption || typeof encryption.key !== "string" ||
+      !/^0x[0-9a-f]{64}$/i.test(encryption.key) || typeof encryption.iv !== "string" ||
+      !/^0x[0-9a-f]{24}$/i.test(encryption.iv))
+  ) throw new Error("Invalid encrypted attachment metadata.");
   return {
     reference: publicReference(file.reference).slice(2),
     name: file.name,
     type: file.type,
     size: Number(file.size),
+    ...(encryption ? { encryption: encryption as Attachment["encryption"] } : {}),
   };
 }
 

@@ -1,7 +1,18 @@
 /** Build-time chain reads for prerendering (react-router.config.ts and the
  * routes' loaders). Runs under Node during `deno task build`; the browser
  * never imports the loaders because the routes also define clientLoader. */
-import { type Address, createPublicClient, http, isAddress, parseAbi, type Transport } from "viem";
+import {
+  type Address,
+  createPublicClient,
+  type Hex,
+  http,
+  isAddress,
+  parseAbi,
+  type Transport,
+} from "viem";
+import { privacyAbi, proposalAbi } from "./proposals";
+import { decryptProposal, parsePrivateDescriptor, ZERO_KEY } from "./private-proposals";
+import { parseContent } from "./swarm";
 import type { ProjectMetaData, RoundMetaData } from "./meta";
 
 const abi = parseAbi([
@@ -36,17 +47,44 @@ const client = (cfg: BuildPool, transport?: Transport) =>
   createPublicClient({ transport: transport ?? http(cfg.rpc, { timeout: 5_000 }) });
 
 export async function projectIds(cfg: BuildPool, transport?: Transport): Promise<number[]> {
-  const n = await client(cfg, transport).readContract({ address: cfg.pool, abi, functionName: "projectCount" });
+  const n = await client(cfg, transport).readContract({
+    address: cfg.pool,
+    abi,
+    functionName: "projectCount",
+  });
   return Array.from({ length: Number(n) }, (_, i) => i);
 }
 
-async function titleOf(ref: string, beeUrl: string | undefined, fetchFn: typeof fetch): Promise<string | null> {
+async function titleOf(
+  ref: string,
+  beeUrl: string | undefined,
+  fetchFn: typeof fetch,
+  publishedKey?: Hex,
+): Promise<string | null> {
   if (!beeUrl || /^0x0{64}$/.test(ref)) return null;
   try {
-    const res = await fetchFn(`${beeUrl.replace(/\/+$/, "")}/bytes/${ref.slice(2)}`, { signal: AbortSignal.timeout(5_000) });
+    const res = await fetchFn(`${beeUrl.replace(/\/+$/, "")}/bytes/${ref.slice(2)}`, {
+      signal: AbortSignal.timeout(5_000),
+    });
     if (!res.ok) return null;
-    const json = JSON.parse(new TextDecoder().decode(new Uint8Array(await res.arrayBuffer()))) as { title?: unknown };
-    return typeof json.title === "string" ? json.title : null;
+    const data = new Uint8Array(await res.arrayBuffer());
+    const descriptor = parsePrivateDescriptor(data);
+    if (!descriptor) return parseContent(data).title;
+    if (!publishedKey || publishedKey === ZERO_KEY) return null;
+    const decrypted = await decryptProposal(
+      {
+        downloadData: async (reference) => {
+          const payload = await fetchFn(`${beeUrl.replace(/\/+$/, "")}/bytes/${reference}`, {
+            signal: AbortSignal.timeout(5_000),
+          });
+          if (!payload.ok) throw new Error("Proposal unavailable");
+          return new Uint8Array(await payload.arrayBuffer());
+        },
+      },
+      descriptor,
+      publishedKey,
+    );
+    return parseContent(decrypted).title;
   } catch {
     return null;
   }
@@ -69,10 +107,36 @@ export async function projectFacts(
     c.readContract({ address: token, abi, functionName: "symbol" }).catch(() => "tokens"),
     c.readContract({ address: token, abi, functionName: "decimals" }),
   ]);
-  return { title: await titleOf(ref, beeUrl, fetchFn), cost: cost.toString(), decimals: Number(decimals), symbol };
+  const privacy = await c.readContract({
+    address: cfg.pool,
+    abi: proposalAbi,
+    functionName: "proposalPrivacy",
+  }).catch(() => undefined);
+  const key = privacy
+    ? await c.readContract({
+      address: privacy,
+      abi: privacyAbi,
+      functionName: "projectKey",
+      args: [BigInt(id)],
+    })
+    : undefined;
+  return {
+    title: await titleOf(ref, beeUrl, fetchFn, key),
+    cost: cost.toString(),
+    decimals: Number(decimals),
+    symbol,
+  };
 }
 
-export async function roundFacts(cfg: BuildPool, transport?: Transport, name = env("VITE_ROUND_NAME") || "RankedShares round"): Promise<RoundMetaData> {
-  const deadline = await client(cfg, transport).readContract({ address: cfg.pool, abi, functionName: "votingDeadline" });
+export async function roundFacts(
+  cfg: BuildPool,
+  transport?: Transport,
+  name = env("VITE_ROUND_NAME") || "RankedShares round",
+): Promise<RoundMetaData> {
+  const deadline = await client(cfg, transport).readContract({
+    address: cfg.pool,
+    abi,
+    functionName: "votingDeadline",
+  });
   return { name, votingDeadline: Number(deadline) };
 }

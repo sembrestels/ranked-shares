@@ -1,5 +1,11 @@
 import { assertEquals } from "@std/assert";
 import { createContent, MAX_NEGATIVE } from "../services/content.ts";
+import {
+  type PrivateStorage,
+  uploadPrivateProposal,
+  ZERO_KEY,
+} from "../../app/lib/private-proposals.ts";
+import { type Hex, toHex } from "viem";
 
 const REF = ("0x" + "ab".repeat(32)) as `0x${string}`;
 const ZERO = ("0x" + "00".repeat(32)) as `0x${string}`;
@@ -145,4 +151,53 @@ Deno.test("content: a too-large declared length is unavailable and the body is n
   const res = await c.get(REF);
   assertEquals(res.status, "unavailable");
   assertEquals(res.reason, "content too large");
+});
+
+Deno.test("content: private review never reaches the public API; publication resolves without a stale cache or ACT identity", async () => {
+  const objects = new Map<string, Uint8Array>();
+  let key = ZERO_KEY;
+  const pk = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+  const storage = {
+    connectionInfo: { identity: { id: "test", sharingPublicKey: pk }, canUpload: true },
+    // deno-lint-ignore require-await
+    uploadData: async (data: Uint8Array) => {
+      const reference = (objects.size + 1).toString(16).padStart(64, "0");
+      objects.set(reference, new Uint8Array(data));
+      return { reference };
+    },
+    // deno-lint-ignore require-await
+    actUploadData: async (data: Uint8Array) => {
+      key = toHex(data);
+      return {
+        encryptedReference: "ab".repeat(64),
+        historyReference: "cd".repeat(32),
+        publisherPubKey: pk,
+      };
+    },
+  } as unknown as PrivateStorage;
+  const upload = await uploadPrivateProposal(storage, {
+    title: "Private pitch",
+    body: "Reviewed text",
+    files: [],
+  }, {
+    chainId: 31337,
+    pool: `0x${"ab".repeat(20)}`,
+    proposer: `0x${"cd".repeat(20)}`,
+    organizerPublicKey: pk,
+  }, () => {});
+  const { f, urls } = fetchWith((url) => {
+    const data = objects.get(url.split("/").at(-1)!);
+    return data ? new Response(new Uint8Array(data)) : new Response("Missing", { status: 404 });
+  });
+  const c = createContent({ beeUrl: "http://bee", fetch: f, timeoutMs: 100, now: () => 0 });
+  assertEquals((await c.get(upload.reference)).status, "private");
+  assertEquals(urls.length, 1); // no payload fetch or ACT call before publication
+  assertEquals((await c.get(upload.reference, ZERO_KEY)).content, null);
+  assertEquals((await c.get(upload.reference, key)).content?.title, "Private pitch");
+  assertEquals((await c.get(upload.reference)).content, null); // cannot leak through positive cache
+  assertEquals(
+    (await c.get(upload.reference, `0x${"ff".repeat(32)}` as Hex)).status,
+    "unavailable",
+  );
+  assertEquals((await c.get(upload.reference, key)).content?.body, "Reviewed text");
 });

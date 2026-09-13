@@ -38,7 +38,7 @@ contract ProposalsTest is Test {
 
     function submit() internal returns (uint256) {
         vm.prank(proposer);
-        return pool.propose(REF, 50, recipient);
+        return pool.propose(REF, bytes32(0), 50, recipient);
     }
 
     function test_anyoneCanSubmitTermsWithoutAddingProject() public {
@@ -63,7 +63,7 @@ contract ProposalsTest is Test {
         vm.expectEmit(true, true, false, true);
         emit PoolBase.ProposalEdited(0, proposer, 2, REF, secondRef, 60, recipient);
         vm.prank(proposer);
-        pool.editProposal(0, 1, secondRef, 60, recipient);
+        pool.editProposal(0, 1, secondRef, bytes32(0), 60, recipient);
         assertEq(pool.proposalRevision(0), 2);
         assertEq(pool.proposalEditor(0), proposer);
 
@@ -72,7 +72,7 @@ contract ProposalsTest is Test {
         vm.expectEmit(true, true, false, true);
         emit PoolBase.ProposalEdited(0, owner, 3, secondRef, finalRef, 75, finalRecipient);
         vm.prank(owner);
-        pool.editProposal(0, 2, finalRef, 75, finalRecipient);
+        pool.editProposal(0, 2, finalRef, bytes32(0), 75, finalRecipient);
         (address who, bytes32 ref, uint256 amount, address to, PoolBase.ProposalStatus status,) = pool.proposals(0);
         assertEq(who, proposer); // editing never changes authorship
         assertEq(ref, finalRef);
@@ -92,10 +92,10 @@ contract ProposalsTest is Test {
     function test_concurrentEditsAndStaleDecisionsCannotChangeCurrentRevision() public {
         submit();
         vm.prank(proposer);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.startPrank(owner);
         vm.expectRevert(abi.encodeWithSelector(StaleProposalRevision.selector, 1, 2));
-        pool.editProposal(0, 1, REF, 70, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 70, recipient);
         vm.expectRevert(abi.encodeWithSelector(StaleProposalRevision.selector, 1, 2));
         pool.acceptProposal(0, 1);
         vm.expectRevert(abi.encodeWithSelector(StaleProposalRevision.selector, 1, 2));
@@ -112,16 +112,16 @@ contract ProposalsTest is Test {
         submit();
         vm.prank(recipient);
         vm.expectRevert(UnauthorizedProposalEditor.selector);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.prank(owner);
         pool.transferOwnership(recipient);
         vm.prank(owner);
         vm.expectRevert(UnauthorizedProposalEditor.selector);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.prank(recipient);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.prank(proposer);
-        pool.editProposal(0, 2, REF, 70, recipient);
+        pool.editProposal(0, 2, REF, bytes32(0), 70, recipient);
         assertEq(pool.proposalRevision(0), 3);
     }
 
@@ -129,13 +129,13 @@ contract ProposalsTest is Test {
         submit();
         vm.startPrank(proposer);
         vm.expectRevert(EmptyContentReference.selector);
-        pool.editProposal(0, 1, bytes32(0), 50, recipient);
+        pool.editProposal(0, 1, bytes32(0), bytes32(0), 50, recipient);
         vm.expectRevert(ZeroProposalCost.selector);
-        pool.editProposal(0, 1, REF, 0, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 0, recipient);
         vm.expectRevert(ZeroAddress.selector);
-        pool.editProposal(0, 1, REF, 50, address(0));
+        pool.editProposal(0, 1, REF, bytes32(0), 50, address(0));
         vm.expectRevert(InvalidProposal.selector);
-        pool.editProposal(1, 1, REF, 50, recipient);
+        pool.editProposal(1, 1, REF, bytes32(0), 50, recipient);
         vm.stopPrank();
         assertEq(pool.proposalRevision(0), 1);
     }
@@ -152,7 +152,7 @@ contract ProposalsTest is Test {
             vm.startPrank(editors[i]);
             for (uint256 id; id < 2; id++) {
                 vm.expectRevert(ProposalAlreadyReviewed.selector);
-                pool.editProposal(id, 1, REF, 60, recipient);
+                pool.editProposal(id, 1, REF, bytes32(0), 60, recipient);
             }
             vm.stopPrank();
         }
@@ -164,13 +164,13 @@ contract ProposalsTest is Test {
         vm.warp(DEADLINE);
         vm.prank(proposer);
         vm.expectRevert(DeadlinePassed.selector);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.warp(DEADLINE - 1);
         vm.startPrank(owner);
         pool.addProject(50, recipient);
         pool.openVoting();
         vm.expectRevert(WrongPhase.selector);
-        pool.editProposal(0, 1, REF, 60, recipient);
+        pool.editProposal(0, 1, REF, bytes32(0), 60, recipient);
         vm.stopPrank();
     }
 
@@ -191,7 +191,7 @@ contract ProposalsTest is Test {
 
     function test_acceptanceOrderDeterminesProjectOrder() public {
         submit();
-        pool.propose(bytes32(uint256(2)), 20, address(123));
+        pool.propose(bytes32(uint256(2)), bytes32(0), 20, address(123));
         vm.startPrank(owner);
         pool.addProject(10, recipient);
         assertEq(pool.acceptProposal(1, 1), 1);
@@ -244,11 +244,11 @@ contract ProposalsTest is Test {
 
     function test_invalidSubmissionAndUnknownIds() public {
         vm.expectRevert(EmptyContentReference.selector);
-        pool.propose(bytes32(0), 50, recipient);
+        pool.propose(bytes32(0), bytes32(0), 50, recipient);
         vm.expectRevert(ZeroProposalCost.selector);
-        pool.propose(REF, 0, recipient);
+        pool.propose(REF, bytes32(0), 0, recipient);
         vm.expectRevert(ZeroAddress.selector);
-        pool.propose(REF, 50, address(0));
+        pool.propose(REF, bytes32(0), 50, address(0));
         vm.startPrank(owner);
         vm.expectRevert(InvalidProposal.selector);
         pool.acceptProposal(0, 1);
@@ -268,14 +268,14 @@ contract ProposalsTest is Test {
         pool.rejectProposal(0, 1);
         vm.stopPrank();
         vm.expectRevert(WrongPhase.selector);
-        pool.propose(REF, 50, recipient);
+        pool.propose(REF, bytes32(0), 50, recipient);
     }
 
     function test_deadlineClosesSubmissionAndReviewEvenInSetup() public {
         submit();
         vm.warp(DEADLINE);
         vm.expectRevert(DeadlinePassed.selector);
-        pool.propose(REF, 50, recipient);
+        pool.propose(REF, bytes32(0), 50, recipient);
         vm.startPrank(owner);
         vm.expectRevert(DeadlinePassed.selector);
         pool.acceptProposal(0, 1);
@@ -317,7 +317,7 @@ contract ProposalsTest is Test {
 
     function testFuzz_contentAndTermsSurviveAcceptance(bytes32 ref, uint128 amount, address to) public {
         vm.assume(ref != bytes32(0) && amount > 0 && to != address(0));
-        pool.propose(ref, amount, to);
+        pool.propose(ref, bytes32(0), amount, to);
         vm.prank(owner);
         pool.acceptProposal(0, 1);
         assertEq(pool.contentRefOf(0), ref);
@@ -338,8 +338,8 @@ contract ProposalsTest is Test {
         address[2] memory pools = [cre, zisk];
         for (uint256 i; i < pools.length; i++) {
             PoolBase other = PoolBase(pools[i]);
-            other.propose(REF, 50, recipient);
-            other.propose(REF, uint256(type(uint64).max) + 1, recipient);
+            other.propose(REF, bytes32(0), 50, recipient);
+            other.propose(REF, bytes32(0), uint256(type(uint64).max) + 1, recipient);
             vm.startPrank(owner);
             other.acceptProposal(0, 1);
             vm.expectRevert(SealedPool.CostTooLarge.selector);

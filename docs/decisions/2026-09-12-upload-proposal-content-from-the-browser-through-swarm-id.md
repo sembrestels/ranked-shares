@@ -1,10 +1,12 @@
 ---
-status: accepted
+status: superseded
 date: 2026-09-12
 decision-makers: Sem
 ---
 
 # Upload proposal content from the browser through Swarm ID
+
+Superseded on 2026-09-13 by [Encrypt proposals through private review](2026-09-13-encrypt-proposals-through-private-review.md).
 
 ## Context and Problem Statement
 

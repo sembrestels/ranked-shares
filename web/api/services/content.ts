@@ -3,14 +3,19 @@
  * reference is the content's hash. Spec decision 8. */
 import type { Hex } from "viem";
 import { parseContent, type ProposalContent } from "../../app/lib/swarm.ts";
+import {
+  decryptProposal,
+  parsePrivateDescriptor,
+  ZERO_KEY,
+} from "../../app/lib/private-proposals.ts";
 
 export interface Resolved {
-  status: "ok" | "none" | "unavailable";
+  status: "ok" | "none" | "unavailable" | "private";
   content: ProposalContent | null;
   reason: string | null;
 }
 export interface Content {
-  get(ref: Hex): Promise<Resolved>;
+  get(ref: Hex, publishedKey?: Hex): Promise<Resolved>;
 }
 
 const ZERO = "0x" + "00".repeat(32);
@@ -51,17 +56,17 @@ export function createContent(
     return result;
   };
   return {
-    async get(ref) {
+    async get(ref, publishedKey) {
       if (ref.toLowerCase() === ZERO) return { status: "none", content: null, reason: null };
       if (!opts.beeUrl) return unavailable("no gateway configured");
-      const key = ref.toLowerCase();
+      const key = `${ref.toLowerCase()}:${publishedKey ?? ZERO_KEY}`;
       const hit = cache.get(key);
       if (hit) return { status: "ok", content: hit, reason: null };
       const negHit = negative.get(key);
       if (negHit && (opts.now() - negHit.at) * 1000 < NEGATIVE_TTL_MS) return negHit.result;
       let res: Response;
       try {
-        res = await opts.fetch(`${opts.beeUrl}/bytes/${key.slice(2)}`, {
+        res = await opts.fetch(`${opts.beeUrl}/bytes/${ref.slice(2)}`, {
           headers: { Accept: "application/octet-stream" },
           signal: AbortSignal.timeout(opts.timeoutMs),
         });
@@ -78,7 +83,35 @@ export function createContent(
         return remember(key, unavailable("content too large"));
       }
       try {
-        const content = parseContent(new Uint8Array(await res.arrayBuffer()));
+        let data = new Uint8Array(await res.arrayBuffer());
+        const descriptor = parsePrivateDescriptor(data);
+        if (descriptor) {
+          if (!publishedKey || publishedKey === ZERO_KEY) {
+            return {
+              status: "private",
+              content: null,
+              reason: "This proposal is private until voting opens.",
+            };
+          }
+          data = await decryptProposal(
+            {
+              downloadData: async (reference) => {
+                const payload = await opts.fetch(`${opts.beeUrl}/bytes/${reference}`, {
+                  signal: AbortSignal.timeout(opts.timeoutMs),
+                });
+                if (!payload.ok) throw new Error(`gateway answered ${payload.status}`);
+                if (Number(payload.headers.get("content-length")) > MAX_CONTENT_BYTES) {
+                  await payload.body?.cancel();
+                  throw new Error("content too large");
+                }
+                return new Uint8Array(await payload.arrayBuffer());
+              },
+            },
+            descriptor,
+            publishedKey,
+          );
+        }
+        const content = parseContent(data);
         cache.set(key, content);
         negative.delete(key);
         return { status: "ok", content, reason: null };

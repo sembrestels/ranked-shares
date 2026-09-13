@@ -11,6 +11,7 @@ import { buildPool, projectFacts } from "../lib/build-chain";
 import { projectMetaTags } from "../lib/meta";
 import { errorMessage } from "../lib/proposals";
 import { saveDownload } from "../lib/swarm";
+import { downloadAttachment } from "../lib/private-proposals";
 
 const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || "http://localhost:5174";
 
@@ -49,8 +50,7 @@ export default function ProjectPage() {
       return;
     }
     try {
-      const result = await client.downloadFile(file.reference);
-      saveDownload(result.data, file.name);
+      saveDownload(await downloadAttachment(client, file), file.name);
     } catch (e) {
       setDownloadError(errorMessage(e));
     }

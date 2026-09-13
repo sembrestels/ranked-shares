@@ -13,7 +13,7 @@ export function projectRoutes(deps: Deps) {
     const { snapshot } = await deps.snapshots.get(pool, minBlockFrom(c.req.query("after")));
     const project = snapshot.projects[id];
     if (!project) throw new HttpError(404, "unknown project");
-    const resolved = await deps.content.get(project.contentRef);
+    const resolved = await deps.content.get(project.contentRef, project.contentKey);
     const { pool: p, kind, block, at, token, phase, finality, stage } = snapshot;
     return c.json({
       project,

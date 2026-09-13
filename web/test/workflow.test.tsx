@@ -1,14 +1,10 @@
 import { afterAll, afterEach, beforeAll, expect, test, vi } from "vitest";
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ChildProcess, spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { webcrypto } from "node:crypto";
+import { secp256k1 } from "@noble/curves/secp256k1.js";
 import {
   type Address,
   createPublicClient,
@@ -20,7 +16,9 @@ import {
   toHex,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { proposalAbi } from "../app/lib/proposals";
+import { privacyAbi, proposalAbi } from "../app/lib/proposals";
+import { mockSwarm } from "./fixtures/swarm";
+import { readProposalContent, uploadPrivateProposal, ZERO_KEY } from "../app/lib/private-proposals";
 import { assertWallet } from "../app/lib/transactions";
 
 const state = vi.hoisted(() => ({
@@ -40,7 +38,7 @@ vi.mock(
 );
 vi.mock("../app/context/providers", () => ({
   chain: { id: 31337 },
-  useRound: () => ({ pool: state.pool }),
+  useRound: () => ({ pool: state.pool, markMined: vi.fn() }),
   useSwarm: () => ({
     client: state.storage,
     info: state.storage.connectionInfo,
@@ -48,6 +46,7 @@ vi.mock("../app/context/providers", () => ({
 }));
 import SubmitPage from "../app/routes/submit";
 import { ProposalBoard } from "../app/routes/proposals";
+import SetupPage from "../app/routes/setup";
 
 const chain = defineChain({
   id: 31337,
@@ -68,7 +67,15 @@ let pool: Address;
 const query = new QueryClient({
   defaultOptions: { queries: { retry: false, gcTime: 0 } },
 });
-const content = new Map<string, Uint8Array>();
+const ownerSharingKey = toHex(secp256k1.getPublicKey(new Uint8Array(32).fill(1), true)).slice(2);
+const proposerSharingKey = toHex(secp256k1.getPublicKey(new Uint8Array(32).fill(2), true)).slice(2);
+const swarm = mockSwarm(ownerSharingKey);
+const reviewContext = () => ({
+  chainId: 31337,
+  pool,
+  proposer: proposer.address,
+  organizerPublicKey: ownerSharingKey,
+});
 const here = import.meta.url;
 function artifact(name: string) {
   return JSON.parse(
@@ -83,9 +90,11 @@ function asAccount(account: typeof owner) {
     transport,
     pollingInterval: 50,
   });
+  swarm.setIdentity(account.address === owner.address ? ownerSharingKey : proposerSharingKey);
 }
 
 beforeAll(async () => {
+  vi.stubGlobal("crypto", webcrypto);
   anvil = spawn("anvil", ["--port", "8573", "--silent"], { stdio: "pipe" });
   let spawnError: Error | undefined;
   anvil.on("error", (error) => {
@@ -115,19 +124,19 @@ beforeAll(async () => {
     block.timestamp + 3600n,
   ]);
   state.pool = pool;
-  state.storage = {
-    connectionInfo: { identity: { name: "Pau" }, canUpload: true },
-    uploadData: vi.fn(async (bytes: Uint8Array) => {
-      const reference = keccak256(toHex(bytes)).slice(2);
-      content.set(reference, bytes);
-      return { reference };
-    }),
-    downloadData: vi.fn(async (reference: string) => {
-      const bytes = content.get(reference);
-      if (!bytes) throw new Error("Unavailable");
-      return bytes;
-    }),
-  };
+  state.storage = swarm.storage;
+  const privacy = await pub.readContract({
+    address: pool,
+    abi: proposalAbi,
+    functionName: "proposalPrivacy",
+  });
+  const register = await state.wallet.writeContract({
+    address: privacy,
+    abi: privacyAbi,
+    functionName: "setOrganizerKey",
+    args: [`0x${ownerSharingKey}`],
+  });
+  await pub.waitForTransactionReceipt({ hash: register });
   asAccount(proposer);
 }, 20_000);
 
@@ -168,8 +177,13 @@ test(
     });
     fireEvent.click(screen.getByRole("button", { name: "Upload to Swarm" }));
     await screen.findByRole("button", { name: "Submit proposal" });
-    expect(state.storage.uploadData).toHaveBeenCalledTimes(1);
-    // A declined signature must keep the public upload for a later transaction.
+    expect(state.storage.uploadData).toHaveBeenCalledTimes(2);
+    const recovery = localStorage.getItem(
+      `ranked-shares:proposal:31337:${pool.toLowerCase()}:${proposer.address.toLowerCase()}`,
+    )!;
+    expect(recovery).not.toContain("Community workshop");
+    expect(recovery).not.toContain("A workshop for everyone");
+    // A declined signature keeps only the public descriptor and key commitment.
     const write = vi.spyOn(state.wallet, "writeContract").mockRejectedValueOnce(
       new Error("User rejected the request"),
     );
@@ -184,12 +198,12 @@ test(
     ).toBe(0n);
     write.mockRestore();
     view.unmount();
-    view = mountSubmit(); // reload recovery uses only the saved public content reference
+    view = mountSubmit(); // reload recovery never needs a locally persisted decryption key
     fireEvent.click(
       await screen.findByRole("button", { name: "Submit proposal" }),
     );
     await screen.findByText("Proposal received.", {}, { timeout: 10_000 });
-    expect(state.storage.uploadData).toHaveBeenCalledTimes(1);
+    expect(state.storage.uploadData).toHaveBeenCalledTimes(2);
     const pending = await pub.readContract({
       address: pool,
       abi: proposalAbi,
@@ -226,7 +240,7 @@ test(
       .mockRejectedValueOnce(new Error("Edit signature declined"));
     fireEvent.click(screen.getByRole("button", { name: "Save revision" }));
     await screen.findByText("Edit signature declined");
-    expect(state.storage.uploadData).toHaveBeenCalledTimes(2);
+    expect(state.storage.uploadData).toHaveBeenCalledTimes(4);
     editWrite.mockRestore();
     fireEvent.click(await screen.findByRole("button", { name: "Save revision" }));
     await screen.findByText(
@@ -234,7 +248,7 @@ test(
       {},
       { timeout: 10_000 },
     );
-    expect(state.storage.uploadData).toHaveBeenCalledTimes(2);
+    expect(state.storage.uploadData).toHaveBeenCalledTimes(4);
     expect(
       await pub.readContract({
         address: pool,
@@ -322,11 +336,17 @@ test(
 
     // Another proposal exercises rejection through the same rendered organizer flow.
     asAccount(proposer);
+    const rejectedUpload = await uploadPrivateProposal(
+      state.storage,
+      { title: "Rejected idea", body: "Private rejected text", files: [] },
+      reviewContext(),
+      vi.fn(),
+    );
     const hash = await state.wallet.writeContract({
       address: pool,
       abi: proposalAbi,
       functionName: "propose",
-      args: [pending[1], 1n, proposer.address],
+      args: [rejectedUpload.reference, rejectedUpload.keyHash, 1n, proposer.address],
     });
     await pub.waitForTransactionReceipt({ hash });
     await query.invalidateQueries({ queryKey: ["pool"] });
@@ -357,13 +377,11 @@ test(
   "a concurrent edit preserves the draft and requires loading the latest revision",
   async () => {
     asAccount(proposer);
-    const reference = await state.storage.uploadData(
-      new TextEncoder().encode(JSON.stringify({
-        version: 1,
-        title: "Concurrent edits",
-        body: "Original",
-        attachments: [],
-      })),
+    const reference = await uploadPrivateProposal(
+      state.storage,
+      { title: "Concurrent edits", body: "Original", files: [] },
+      reviewContext(),
+      vi.fn(),
     );
     const id = await pub.readContract({
       address: pool,
@@ -374,7 +392,7 @@ test(
       address: pool,
       abi: proposalAbi,
       functionName: "propose",
-      args: [`0x${reference.reference}`, 5n, proposer.address],
+      args: [reference.reference, reference.keyHash, 5n, proposer.address],
     });
     await pub.waitForTransactionReceipt({ hash });
     query.clear();
@@ -395,7 +413,7 @@ test(
       address: pool,
       abi: proposalAbi,
       functionName: "editProposal",
-      args: [id, 1n, `0x${reference.reference}`, 6n, proposer.address],
+      args: [id, 1n, reference.reference, reference.keyHash, 6n, proposer.address],
     });
     await pub.waitForTransactionReceipt({ hash: update });
     await query.invalidateQueries({ queryKey: ["pool"] });
@@ -435,3 +453,65 @@ test("account and network changes are rejected before any transaction", async ()
   );
   chainId.mockRestore();
 });
+
+test(
+  "organizer publishes through setup; public readers get only the accepted final revision",
+  async () => {
+    asAccount(owner);
+    query.clear();
+    const privacy = await pub.readContract({
+      address: pool,
+      abi: proposalAbi,
+      functionName: "proposalPrivacy",
+    });
+    const [accepted, rejected] = await Promise.all(
+      [0n, 1n].map((id) =>
+        pub.readContract({ address: pool, abi: proposalAbi, functionName: "proposals", args: [id] })
+      ),
+    );
+    swarm.setIdentity("");
+    await expect(readProposalContent(state.storage, accepted[1], { publicOnly: true })).rejects
+      .toThrow("private until voting");
+    asAccount(owner);
+    const view = render(
+      <QueryClientProvider client={query}>
+        <SetupPage />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Prepare voting" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Publish accepted proposals and open voting" }),
+    );
+    await screen.findByText("Voting is open. The accepted final revisions are now public.", {}, {
+      timeout: 10_000,
+    });
+    const key = await pub.readContract({
+      address: privacy,
+      abi: privacyAbi,
+      functionName: "projectKey",
+      args: [0n],
+    });
+    expect(key).not.toBe(ZERO_KEY);
+    swarm.setIdentity("");
+    const published = await readProposalContent(state.storage, accepted[1], {
+      publishedKey: key,
+      publicOnly: true,
+    });
+    expect(published.body).toBe("The organizer clarified the schedule.");
+    const rejectedKey = await pub.readContract({
+      address: privacy,
+      abi: privacyAbi,
+      functionName: "proposalKey",
+      args: [1n],
+    });
+    expect(rejectedKey).toBe(ZERO_KEY);
+    await expect(
+      readProposalContent(state.storage, rejected[1], {
+        publishedKey: rejectedKey,
+        publicOnly: true,
+      }),
+    ).rejects.toThrow("private until voting");
+    view.unmount();
+  },
+  20_000,
+);

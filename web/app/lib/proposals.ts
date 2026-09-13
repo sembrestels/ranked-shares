@@ -18,8 +18,10 @@ export const proposalAbi = parseAbi([
   "function contentRefOf(uint256) view returns (bytes32)",
   "function proposalRevision(uint256) view returns (uint256)",
   "function proposalEditor(uint256) view returns (address)",
-  "function propose(bytes32 contentRef, uint256 cost, address recipient) returns (uint256)",
-  "function editProposal(uint256 id, uint256 expectedRevision, bytes32 contentRef, uint256 cost, address recipient)",
+  "function proposalPrivacy() view returns (address)",
+  "function openVoting()",
+  "function propose(bytes32 contentRef, bytes32 keyHash, uint256 cost, address recipient) returns (uint256)",
+  "function editProposal(uint256 id, uint256 expectedRevision, bytes32 contentRef, bytes32 keyHash, uint256 cost, address recipient)",
   "function acceptProposal(uint256 id, uint256 expectedRevision) returns (uint256)",
   "function rejectProposal(uint256 id, uint256 expectedRevision)",
   "function addProject(uint256 cost, address recipient) returns (uint256)",
@@ -40,6 +42,23 @@ export const proposalAbi = parseAbi([
   "error CostTooLarge()",
   "error TooManyProjects()",
   "error OwnableUnauthorizedAccount(address account)",
+  "error PrivateProposalsRequired()",
+  "error OrganizerKeyRequired()",
+  "error InvalidPublication()",
+]);
+
+export const privacyAbi = parseAbi([
+  "function openVoting(uint256[] ids, bytes32[] keys)",
+  "function organizerPublicKey() view returns (bytes)",
+  "function started() view returns (bool)",
+  "function keyCommitment(uint256) view returns (bytes32)",
+  "function proposalKey(uint256) view returns (bytes32)",
+  "function projectKey(uint256) view returns (bytes32)",
+  "function acceptedProposals() view returns (uint256[])",
+  "function setOrganizerKey(bytes publicKey)",
+  "error Unauthorized()",
+  "error OrganizerKeyLocked()",
+  "error InvalidOrganizerKey()",
 ]);
 
 export type Proposal = {
@@ -52,6 +71,8 @@ export type Proposal = {
   projectId: bigint;
   revision: bigint;
   editor: Address;
+  keyHash?: Hex;
+  publishedKey?: Hex;
 };
 
 export const statuses = ["Pending review", "Accepted", "Rejected"] as const;

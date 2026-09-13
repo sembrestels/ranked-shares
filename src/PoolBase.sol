@@ -7,6 +7,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ArkivBallots} from "./ArkivBallots.sol";
+import {ProposalPrivacy} from "./ProposalPrivacy.sol";
 
 // ---------------------------------------------------------------- errors
 //
@@ -102,8 +103,12 @@ abstract contract PoolBase is Ownable, ArkivBallots {
     uint64 public immutable votingDeadline;
 
     bool public votingOpen;
+    // Set once in the constructor. A storage slot keeps the shared Noir runtime
+    // below EIP-170 without duplicating an immutable address at each call site.
+    ProposalPrivacy public proposalPrivacy;
     mapping(uint256 => address) public recipientOf;
-    /// @notice Public, unencrypted Swarm reference; zero for a project added without content.
+    /// @notice Swarm content/descriptor reference; private content needs the
+    /// proposalPrivacy.projectKey published when voting opens. Zero means no content.
     mapping(uint256 => bytes32) public contentRefOf;
     Proposal[] public proposals;
     mapping(uint256 => uint256) public proposalRevision;
@@ -122,6 +127,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         if (address(token_) == address(0)) revert ZeroAddress();
         token = token_;
         votingDeadline = votingDeadline_;
+        proposalPrivacy = new ProposalPrivacy();
     }
 
     // ------------------------------------------------------------- modifiers
@@ -169,7 +175,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
 
     /// @notice Submit content for review. Pending submissions do not occupy
     ///         project slots, receive funds, or appear on ballots. Content is never executed.
-    function propose(bytes32 contentRef, uint256 cost_, address recipient)
+    function propose(bytes32 contentRef, bytes32 keyHash, uint256 cost_, address recipient)
         external
         onlySetup
         beforeDeadline
@@ -179,6 +185,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         if (cost_ == 0) revert ZeroProposalCost();
         if (recipient == address(0)) revert ZeroAddress();
         id = proposals.length;
+        proposalPrivacy.record(id, keyHash);
         proposals.push(Proposal(msg.sender, contentRef, cost_, recipient, ProposalStatus.Pending, 0));
         proposalRevision[id] = 1;
         proposalEditor[id] = msg.sender;
@@ -188,16 +195,20 @@ abstract contract PoolBase is Ownable, ArkivBallots {
     /// @notice Either author or current owner may revise a pending proposal. The
     ///         expected revision prevents overwriting a concurrent edit or review.
     ///         Swarm content is immutable; each save points to a new snapshot.
-    function editProposal(uint256 id, uint256 expectedRevision, bytes32 contentRef, uint256 cost_, address recipient)
-        external
-        onlySetup
-        beforeDeadline
-    {
+    function editProposal(
+        uint256 id,
+        uint256 expectedRevision,
+        bytes32 contentRef,
+        bytes32 keyHash,
+        uint256 cost_,
+        address recipient
+    ) external onlySetup beforeDeadline {
         Proposal storage proposal = _pendingProposal(id, expectedRevision);
         if (msg.sender != proposal.proposer && msg.sender != owner()) revert UnauthorizedProposalEditor();
         if (contentRef == bytes32(0)) revert EmptyContentReference();
         if (cost_ == 0) revert ZeroProposalCost();
         if (recipient == address(0)) revert ZeroAddress();
+        proposalPrivacy.record(id, keyHash);
         bytes32 previousContentRef = proposal.contentRef;
         proposal.contentRef = contentRef;
         proposal.cost = cost_;
@@ -224,6 +235,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         proposal.status = ProposalStatus.Accepted;
         projectId = _createProject(proposal.cost, proposal.recipient, proposal.contentRef);
         proposal.projectId = projectId;
+        proposalPrivacy.accept(id, projectId);
         emit ProposalAccepted(id, projectId);
     }
 
@@ -255,8 +267,10 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         emit ArkivBallotsEnabled();
     }
 
-    function openVoting() external onlyOwner onlySetup beforeDeadline {
+    function openVoting() external onlySetup beforeDeadline {
+        if (msg.sender != address(proposalPrivacy)) _checkOwner();
         _beforeOpen();
+        proposalPrivacy.requirePublished();
         votingOpen = true;
         emit VotingOpened();
     }

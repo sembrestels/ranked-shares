@@ -5,6 +5,7 @@ import { erc20Abi, noirAbi, plainAbi, sealedAbi } from "./abi.ts";
 import { detectKind, type Kind } from "./kind.ts";
 import { commitmentsFrom, type RosterEntry } from "../services/commitments.ts";
 import type { Finality, PhaseName } from "../services/stage.ts";
+import { privacyAbi, proposalAbi } from "../../app/lib/proposals.ts";
 
 const ZERO32 = "0x" + "00".repeat(32);
 
@@ -13,6 +14,7 @@ export interface ProjectView {
   cost: string;
   recipient: Address;
   contentRef: Hex;
+  contentKey?: Hex;
   commitment: string;
   funded: boolean;
   claimed: boolean;
@@ -208,6 +210,12 @@ export async function readRound(
     throw new PoolTooLargeError(`pool too large: ${m} projects, ${n} voters`);
   }
   const roster = await readRoster(call, kind, n, opts.rosterPage, arkiv);
+  const privacy = await client.readContract({
+    address: pool,
+    abi: proposalAbi,
+    functionName: "proposalPrivacy",
+    blockNumber,
+  }).catch(() => undefined);
   const commitments = kind === "noir" || arkiv
     ? Array.from({ length: m }, () => 0n)
     : commitmentsFrom(roster.entries, m);
@@ -220,11 +228,21 @@ export async function readRound(
       call("funded", [BigInt(id)]),
       call("claimed", [BigInt(id)]),
     ]) as [bigint, Address, Hex, boolean, boolean];
+    const contentKey = privacy
+      ? await client.readContract({
+        address: privacy,
+        abi: privacyAbi,
+        functionName: "projectKey",
+        args: [BigInt(id)],
+        blockNumber,
+      })
+      : undefined;
     return {
       id,
       cost: cost.toString(),
       recipient: getAddress(recipient),
       contentRef,
+      ...(contentKey ? { contentKey } : {}),
       commitment: commitments[id].toString(),
       funded,
       claimed,

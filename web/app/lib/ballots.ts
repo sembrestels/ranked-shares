@@ -19,13 +19,9 @@ import { Q } from "../../../cre/src/lib/field";
 import { validate } from "../../../shared/ranks";
 import { pbearTranscript } from "../../../shared/pbear";
 import { ballotAbi } from "../../../cre/src/lib/arkiv";
-import {
-  loadPayloads,
-  type PublishedBallot,
-  savePending,
-  verifyPublished,
-} from "./arkiv";
+import { loadPayloads, type PublishedBallot, savePending, verifyPublished } from "./arkiv";
 import { assertWallet } from "./transactions";
+import { privacyAbi, proposalAbi } from "./proposals";
 
 export const votingAbi = parseAbi([
   "function phase() view returns (uint8)",
@@ -155,10 +151,24 @@ export async function readVoting(
     throw new Error("Unsupported pool implementation.");
   }
   const kind = kindValue as PoolKind;
+  const privacy = await client.readContract({
+    ...at,
+    abi: proposalAbi,
+    functionName: "proposalPrivacy",
+  }).catch(() => undefined);
   if (m > 255n) throw new Error("Invalid project count.");
   const projects = await Promise.all(
     Array.from({ length: Number(m) }, async (_, id) => ({
       id,
+      publishedKey: privacy
+        ? await client.readContract({
+          address: privacy,
+          abi: privacyAbi,
+          functionName: "projectKey",
+          args: [BigInt(id)],
+          blockNumber: block.number,
+        })
+        : undefined,
       cost: await client.readContract({
         ...at,
         functionName: "cost",

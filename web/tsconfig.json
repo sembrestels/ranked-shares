@@ -25,6 +25,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "rootDirs": [
       ".",
       "./.react-router/types"

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { erc20Abi } from "viem";
 import { chain, useRound } from "../context/providers";
-import { type Proposal, proposalAbi } from "../lib/proposals";
+import { privacyAbi, type Proposal, proposalAbi } from "../lib/proposals";
 
 export const PAGE_SIZE = 12n;
 export function usePool(page = 0) {
@@ -27,6 +27,19 @@ export function usePool(page = 0) {
         client.readContract({ ...at, functionName: "votingDeadline" }),
         client.readContract({ ...at, functionName: "proposalCount" }),
       ]);
+      // Older deployments remain readable; the submit page requires a configured
+      // privacy contract and never falls back to uploading a public proposal.
+      const privacy = await client.readContract({ ...at, functionName: "proposalPrivacy" }).catch(
+        () => undefined,
+      );
+      const organizerPublicKey = privacy
+        ? await client.readContract({
+          address: privacy,
+          abi: privacyAbi,
+          functionName: "organizerPublicKey",
+          blockNumber: block.number,
+        })
+        : undefined;
       const [decimals, symbol] = await Promise.all([
         client.readContract({
           address: token,
@@ -64,6 +77,24 @@ export function usePool(page = 0) {
               args: [id],
             }),
           ]);
+          const [keyHash, publishedKey] = privacy
+            ? await Promise.all([
+              client.readContract({
+                address: privacy,
+                abi: privacyAbi,
+                functionName: "keyCommitment",
+                args: [id],
+                blockNumber: block.number,
+              }),
+              client.readContract({
+                address: privacy,
+                abi: privacyAbi,
+                functionName: "proposalKey",
+                args: [id],
+                blockNumber: block.number,
+              }),
+            ])
+            : [undefined, undefined];
           return {
             id,
             proposer,
@@ -74,11 +105,15 @@ export function usePool(page = 0) {
             projectId,
             revision,
             editor,
+            keyHash,
+            publishedKey,
           };
         }),
       );
       return {
         owner,
+        privacy,
+        organizerPublicKey,
         token,
         votingOpen,
         deadline,

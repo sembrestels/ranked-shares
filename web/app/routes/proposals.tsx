@@ -4,12 +4,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { chain, useRound, useSwarm } from "../context/providers";
 import { PAGE_SIZE, usePool } from "../hooks/use-pool";
 import { errorMessage, type Proposal } from "../lib/proposals";
+import { type Attachment, saveDownload } from "../lib/swarm";
 import {
-  type Attachment,
-  type ProposalContent,
-  readContent,
-  saveDownload,
-} from "../lib/swarm";
+  downloadAttachment,
+  readProposal,
+  readProposalContent,
+  type ReviewedContent,
+  ZERO_KEY,
+} from "../lib/private-proposals";
 import { sendProposalTransaction } from "../lib/transactions";
 import { ProposalCard } from "../components/proposals/proposal-card";
 import { Button, Notice } from "../components/ui";
@@ -28,6 +30,7 @@ function Board({ review }: { review: boolean }) {
   const round = usePool(page);
   const { pool } = useRound();
   const { address } = useAccount();
+  const { info } = useSwarm();
   const owner = !!address &&
     address.toLowerCase() === round.data?.owner.toLowerCase();
   return (
@@ -54,7 +57,7 @@ function Board({ review }: { review: boolean }) {
         <p>
           {review
             ? "Review submissions and choose the projects that will go to a vote."
-            : "Explore proposals, read the pitches, and follow the organizer's decisions."}
+            : "Follow submissions and the organizer's decisions. Private pitches become readable when voting opens."}
         </p>
       </div>
       <div className="section-heading">
@@ -79,9 +82,7 @@ function Board({ review }: { review: boolean }) {
       )}
       {review && round.data && !owner && (
         <Notice>
-          Connect the organizer wallet to accept or reject proposals. Organizer:
-          {" "}
-          {round.data.owner}
+          Connect the organizer wallet to accept or reject proposals. Organizer: {round.data.owner}
         </Notice>
       )}
       {round.data && !round.data.canSubmit && (
@@ -98,12 +99,13 @@ function Board({ review }: { review: boolean }) {
       <div className="stack">
         {round.data?.proposals.map((proposal) => (
           <ProposalEntry
-            key={`${proposal.id}-${address}`}
+            key={`${proposal.id}-${address}-${info?.identity?.id}-${info?.appKey?.publicKey}`}
             proposal={proposal}
             symbol={round.data.symbol}
             decimals={round.data.decimals}
+            organizerPublicKey={round.data.organizerPublicKey}
             canReview={review && owner && round.data.canSubmit}
-            canEdit={round.data.canSubmit &&
+            canEdit={round.data.canSubmit && !!proposal.keyHash && proposal.keyHash !== ZERO_KEY &&
               (owner ||
                 proposal.proposer.toLowerCase() === address?.toLowerCase())}
           />
@@ -136,12 +138,13 @@ function Board({ review }: { review: boolean }) {
 }
 
 function ProposalEntry(
-  { proposal, symbol, decimals, canReview, canEdit }: {
+  { proposal, symbol, decimals, canReview, canEdit, organizerPublicKey }: {
     proposal: Proposal;
     symbol: string;
     decimals: number;
     canReview: boolean;
     canEdit: boolean;
+    organizerPublicKey?: string;
   },
 ) {
   const { pool } = useRound();
@@ -151,18 +154,26 @@ function ProposalEntry(
   const { data: wallet } = useWalletClient();
   const queryClient = useQueryClient();
   const [loaded, setLoaded] = useState<
-    { revision: bigint; content: ProposalContent }
+    { revision: bigint; content: ReviewedContent }
   >();
   const content = loaded?.revision === proposal.revision
     ? loaded.content
     : undefined;
   const [editing, setEditing] = useState<
-    { base: Proposal; content: ProposalContent }
+    { base: Proposal; content: ReviewedContent }
   >();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState<`0x${string}`>();
+  const privateReview = !!proposal.keyHash && proposal.keyHash !== ZERO_KEY;
+  const readOptions = {
+    keyHash: proposal.keyHash,
+    publishedKey: proposal.publishedKey,
+    ...(privateReview && pool && organizerPublicKey
+      ? { context: { chainId: chain.id, pool, proposer: proposal.proposer, organizerPublicKey } }
+      : {}),
+  };
 
   async function act(action: () => Promise<void>) {
     setError(undefined);
@@ -185,8 +196,7 @@ function ProposalEntry(
     return client;
   }
   async function attachment(file: Attachment) {
-    const result = await storage().downloadFile(file.reference);
-    saveDownload(result.data, file.name);
+    saveDownload(await downloadAttachment(storage(), file), file.name);
   }
   async function confirm(hash: `0x${string}`) {
     if (!publicClient) throw new Error("Connect to the round network first.");
@@ -209,6 +219,10 @@ function ProposalEntry(
     if (!wallet || !publicClient || !address || !pool) {
       throw new Error("Connect the organizer wallet first.");
     }
+    if (accept && privateReview) {
+      setMessage("Checking access to the exact revision being accepted…");
+      await readProposal(storage(), proposal.contentRef, { ...readOptions, preview: false });
+    }
     setMessage(
       `Confirm ${accept ? "acceptance" : "rejection"} in your wallet…`,
     );
@@ -227,7 +241,7 @@ function ProposalEntry(
     await confirm(hash);
   }
   async function edit() {
-    const data = content || await readContent(storage(), proposal.contentRef);
+    const data = content || await readProposalContent(storage(), proposal.contentRef, readOptions);
     setLoaded({ revision: proposal.revision, content: data });
     setEditing({ base: proposal, content: data });
     setMessage("");
@@ -237,6 +251,8 @@ function ProposalEntry(
       <ProposalCard
         proposal={proposal}
         content={content}
+        privateReview={privateReview &&
+          (!proposal.publishedKey || proposal.publishedKey === ZERO_KEY)}
         symbol={symbol}
         decimals={decimals}
         canReview={canReview && chainId === chain.id && !pending && !editing}
@@ -248,13 +264,16 @@ function ProposalEntry(
           act(async () =>
             setLoaded({
               revision: proposal.revision,
-              content: await readContent(storage(), proposal.contentRef),
+              content: await readProposalContent(storage(), proposal.contentRef, readOptions),
             })
           )}
         onDownload={() =>
           act(async () =>
             saveDownload(
-              await storage().downloadData(proposal.contentRef.slice(2)),
+              (await readProposal(storage(), proposal.contentRef, {
+                ...readOptions,
+                preview: false,
+              })).data,
               `proposal-${proposal.id + 1n}.json`,
             )
           )}

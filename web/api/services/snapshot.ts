@@ -32,7 +32,7 @@ const MAX_ENTRIES = 64;
 export function createSnapshots(opts: {
   read: (pool: Address) => Promise<{ facts: RoundFacts; roster: Set<string> }>;
   /** A project's pitch title by content reference; null when there is none or it fails. */
-  titleOf: (ref: Hex) => Promise<string | null>;
+  titleOf: (ref: Hex, publishedKey?: Hex) => Promise<string | null>;
   ttlMs: number;
   now: () => number;
 }): Snapshots {
@@ -78,7 +78,9 @@ export function createSnapshots(opts: {
           // that rejects) is also swallowed to null.
           title: p.contentRef.toLowerCase() === ZERO_REF
             ? null
-            : await Promise.resolve().then(() => opts.titleOf(p.contentRef)).catch(() => null),
+            : await Promise.resolve().then(() => opts.titleOf(p.contentRef, p.contentKey)).catch(
+              () => null,
+            ),
         })));
         const at = opts.now();
         const value = { snapshot: { ...facts, projects, at, stage: stageOf(facts, at) }, roster };

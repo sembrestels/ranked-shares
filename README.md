@@ -62,11 +62,18 @@ the stage of the round, and the outcome; see `web/README.md`.
   for a pending submission, keep/remove attachments, add files, and save a new revision.
 - `/setup`: the current pool owner can accept or reject pending proposals. Each
   decision is an on-chain transaction; Swarm ID is not the organizer authorization.
+  Before inviting submissions, choose **Enable private review** with the organizer's
+  Swarm ID connected. After reviewing, **Prepare voting** checks accepted revisions;
+  **Publish accepted proposals and open voting** releases their keys and opens the round.
 
-The public Swarm manifest contains `{version: 1, title, body, attachments}`. Each
-attachment has `{reference, name, type, size}` and is uploaded with `uploadFile`.
-The manifest is uploaded with `uploadData`, unencrypted, so its 64-hex-character
-reference fits in `bytes32`. Text and files have no content or MIME allowlist.
+Proposal JSON `{version: 1, title, body, attachments}` and attachments are encrypted
+in the browser with fresh AES-GCM keys. Swarm ACT shares each revision's document
+key with the proposer and organizer. A public version-2 descriptor contains only
+encrypted-content references, public keys, nonce, context and a key commitment;
+its 64-hex-character Swarm address fits in `bytes32`. The original proposer key lives
+in this metadata. The organizer key is registered on-chain in the per-round
+`ProposalPrivacy` contract, available through `proposalPrivacy()`. Text and files
+have no content or MIME allowlist.
 The UI displays text literally and downloads files as binary; it never executes
 uploaded HTML. Automatic text previews are limited to 1 MB and 100 attachments;
 larger or unfamiliar content can still be downloaded.
@@ -87,17 +94,21 @@ receive funding. Pending submissions cannot stop the owner opening voting; once
 voting opens or its deadline passes, submissions and review close. Decisions are final.
 The existing two-argument `addProject` remains available, with a zero content reference.
 
-This revision changes the review-call ABI and requires a new pool deployment.
-Encrypted private review and revealing content when voting opens have been discussed
-but are not implemented: the current upload path and all saved revisions are public.
+This revision requires a new pool deployment. `propose` and `editProposal` now take a
+`bytes32 keyHash` immediately after `contentRef`. Acceptance keeps content private.
+`ProposalPrivacy.openVoting(ids, keys)` verifies and publishes only accepted final
+revision keys and opens the pool atomically. The ordinary pool opening method cannot
+bypass this publication. Publication starts when keys are sent in the transaction:
+pending and reverted transaction data can expose them too. Earlier revisions and
+rejected proposals retain their own keys. Previously public uploads remain public.
 
 Swarm ID holds the storage credentials in its trusted domain. No server postage
 secret or upload API is required. Uploading requires an identity with `canUpload`;
 the proposer supplies storage through Swarm ID. Storage availability and supported
-file sizes depend on that storage and browser resources. Public uploads can remain
+file sizes depend on that storage and browser resources. Encrypted uploads can remain
 on Swarm even if the proposal is rejected. The frontend retains only public upload
 details and any pending transaction hash locally, allowing submission retries without
-another upload. It does not persist wallet secrets.
+another upload. It does not persist private titles, drafts, encryption keys or wallet secrets.
 
 These changes require new pool deployments: existing immutable deployed contracts
 do not gain proposal methods. The browser prover remains a separate app because its

@@ -1,18 +1,13 @@
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  useAccount,
-  usePublicClient,
-  useSwitchChain,
-  useWalletClient,
-} from "wagmi";
+import { useAccount, usePublicClient, useSwitchChain, useWalletClient } from "wagmi";
 import { getWalletClient } from "wagmi/actions";
 import { chain, config, useRound, useSwarm } from "../context/providers";
 import { Button, Notice } from "../components/ui";
 import { BallotForm, BallotReview, PublicResults } from "../components/voting";
 import { useBallotReview } from "../hooks/use-ballot-review";
-import { ballotRetentionUntil, BALLOT_RETENTION_SECONDS } from "../lib/ballot-retention";
+import { BALLOT_RETENTION_SECONDS, ballotRetentionUntil } from "../lib/ballot-retention";
 import { errorMessage } from "../lib/proposals";
 import {
   arkivChain,
@@ -22,14 +17,9 @@ import {
   resumePublication,
   savePending,
 } from "../lib/arkiv";
-import {
-  ballotPayload,
-  commitBallot,
-  publicResults,
-  readVoting,
-} from "../lib/ballots";
+import { ballotPayload, commitBallot, publicResults, readVoting } from "../lib/ballots";
 import { assertWallet } from "../lib/transactions";
-import { readContent } from "../lib/swarm";
+import { readProposalContent } from "../lib/private-proposals";
 import { ballotAbi } from "../../../cre/src/lib/arkiv";
 
 export default function VotePage() {
@@ -87,14 +77,17 @@ export default function VotePage() {
     queryKey: [
       "voting-project-names",
       pool,
-      r?.projects.map((p) => p.contentRef).join(","),
+      r?.projects.map((p) => `${p.contentRef}:${p.publishedKey}`).join(","),
     ],
     enabled: !!swarm && !!r,
     staleTime: Infinity,
     queryFn: () =>
       Promise.all(r!.projects.map(async (p) => {
         try {
-          return (await readContent(swarm!, p.contentRef)).title;
+          return (await readProposalContent(swarm!, p.contentRef, {
+            publishedKey: p.publishedKey,
+            publicOnly: true,
+          })).title;
         } catch {
           return `Project ${p.id + 1}`;
         }
@@ -287,8 +280,7 @@ export default function VotePage() {
       )}
       {r && (
         <p>
-          Voting deadline:{" "}
-          {new Date(Number(r.deadline) * 1000).toLocaleString()}
+          Voting deadline: {new Date(Number(r.deadline) * 1000).toLocaleString()}
         </p>
       )}
       {r?.enabled && r.grace > BALLOT_RETENTION_SECONDS && (
@@ -302,8 +294,7 @@ export default function VotePage() {
         <section className="voting-pending">
           <h2>Finish your ballot</h2>
           <p>
-            Pool <code>{pending.pool}</code> · voter{" "}
-            <code>{pending.account}</code>
+            Pool <code>{pending.pool}</code> · voter <code>{pending.account}</code>
           </p>
           <p>
             {pending.entityKey
@@ -319,8 +310,7 @@ export default function VotePage() {
           )}
           {pending.entityKey && (
             <p>
-              Entity: <code>{pending.entityKey}</code> · expiry block{" "}
-              {pending.expiresAt}
+              Entity: <code>{pending.entityKey}</code> · expiry block {pending.expiresAt}
             </p>
           )}
           {pending.voteTx && (
@@ -380,8 +370,7 @@ export default function VotePage() {
       )}
       {results.error && (
         <Notice error>
-          Results are unavailable: {errorMessage(results.error)}{" "}
-          No partial tally is shown.
+          Results are unavailable: {errorMessage(results.error)} No partial tally is shown.
         </Notice>
       )}
       {results.isFetching && !results.data && r?.enabled && r.phase > 0 && (

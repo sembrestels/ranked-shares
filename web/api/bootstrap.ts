@@ -22,7 +22,7 @@ export function createServer(env: Record<string, string | undefined> = Deno.env.
   const snapshots = createSnapshots({
     read: (pool) =>
       readRound(client, pool, { rosterPage: config.rosterPage, chainId: config.chainId }),
-    titleOf: async (ref) => (await content.get(ref)).content?.title ?? null,
+    titleOf: async (ref, key) => (await content.get(ref, key)).content?.title ?? null,
     ttlMs: config.snapshotTtlMs,
     now,
   });

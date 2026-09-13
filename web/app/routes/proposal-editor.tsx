@@ -3,18 +3,10 @@ import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { decodeEventLog, formatUnits, type Hex } from "viem";
 import { chain, useRound, useSwarm } from "../context/providers";
-import {
-  errorMessage,
-  type Proposal,
-  proposalAbi,
-  proposalTerms,
-} from "../lib/proposals";
-import { type ProposalContent, uploadProposal } from "../lib/swarm";
+import { errorMessage, type Proposal, proposalAbi, proposalTerms } from "../lib/proposals";
+import { type ReviewedContent, uploadPrivateProposal } from "../lib/private-proposals";
 import { assertWallet, sendProposalTransaction } from "../lib/transactions";
-import {
-  type FormValues,
-  SubmitForm,
-} from "../components/proposals/submit-form";
+import { type FormValues, SubmitForm } from "../components/proposals/submit-form";
 import { Button, Fact, Notice } from "../components/ui";
 
 export function ProposalEditor(
@@ -31,7 +23,7 @@ export function ProposalEditor(
   }: {
     base: Proposal;
     current: Proposal;
-    content: ProposalContent;
+    content: ReviewedContent;
     symbol: string;
     decimals: number;
     canEdit: boolean;
@@ -56,6 +48,7 @@ export function ProposalEditor(
   });
   const [prepared, setPrepared] = useState<{
     reference: Hex;
+    keyHash: Hex;
     title: string;
     cost: bigint;
     recipient: `0x${string}`;
@@ -94,8 +87,19 @@ export function ProposalEditor(
     }
     const terms = proposalTerms(value.amount, value.recipient, decimals);
     await assertWallet(publicClient, wallet, address);
-    const reference = await uploadProposal(client, value, setMessage);
-    setPrepared({ reference, title: value.title, ...terms });
+    if (!content.review || !pool) {
+      throw new Error(
+        "This proposal was uploaded publicly. It cannot be made private retroactively; submit a new private proposal.",
+      );
+    }
+    const uploaded = await uploadPrivateProposal(
+      client,
+      value,
+      content.review,
+      setMessage,
+      content.review,
+    );
+    setPrepared({ ...uploaded, title: value.title, ...terms });
     setMessage(
       "Revision uploaded. Review the details, then save it to the proposal.",
     );
@@ -122,6 +126,7 @@ export function ProposalEditor(
             base.id,
             base.revision,
             prepared.reference,
+            prepared.keyHash,
             prepared.cost,
             prepared.recipient,
           ],
@@ -175,9 +180,9 @@ export function ProposalEditor(
         <span className="hint">Based on revision {String(base.revision)}</span>
       </div>
       <p className="hint">
-        You and the organizer can update the text, attachments, amount, and
-        recipient while review is pending. Acceptance locks the reviewed
-        revision. Earlier uploads remain on Swarm.
+        You and the organizer can update the text, attachments, amount, and recipient while review
+        is pending. Acceptance locks the reviewed revision. Earlier revisions remain encrypted on
+        Swarm.
       </p>
       {stale && (
         <Notice error>

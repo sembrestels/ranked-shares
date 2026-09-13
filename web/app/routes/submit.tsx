@@ -1,27 +1,21 @@
 import { useEffect, useState } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  type Address,
-  decodeEventLog,
-  formatUnits,
-  type Hex,
-  isAddress,
-} from "viem";
+import { type Address, decodeEventLog, formatUnits, type Hex, isAddress } from "viem";
 import { chain, useRound, useSwarm } from "../context/providers";
 import { usePool } from "../hooks/use-pool";
-import { errorMessage, proposalAbi, proposalTerms } from "../lib/proposals";
-import { publicReference, uploadProposal } from "../lib/swarm";
+import { errorMessage, privacyAbi, proposalAbi, proposalTerms } from "../lib/proposals";
+import { publicReference } from "../lib/swarm";
+import { uploadPrivateProposal, ZERO_KEY } from "../lib/private-proposals";
 import { assertWallet, sendProposalTransaction } from "../lib/transactions";
-import {
-  type FormValues,
-  SubmitForm,
-} from "../components/proposals/submit-form";
+import { type FormValues, SubmitForm } from "../components/proposals/submit-form";
 import { RulesPanel } from "../components/proposals/rules-panel";
 import { Button, Fact, Notice } from "../components/ui";
 
 type Prepared = {
   reference: Hex;
+  keyHash: Hex;
+  organizerPublicKey: Hex;
   cost: string;
   recipient: Address;
   title: string;
@@ -76,10 +70,16 @@ function Submission() {
       const item = JSON.parse(stored);
       if (
         typeof item.cost !== "string" || !/^\d+$/.test(item.cost) ||
-        !isAddress(item.recipient) || typeof item.title !== "string" ||
+        !/^0x[0-9a-fA-F]{64}$/.test(item.keyHash ?? "") || item.keyHash === ZERO_KEY ||
+        !/^0x(02|03)[0-9a-fA-F]{64}$/.test(item.organizerPublicKey ?? "") ||
+        !isAddress(item.recipient) ||
         (item.hash && !/^0x[0-9a-fA-F]{64}$/.test(item.hash))
       ) return;
-      setPrepared({ ...item, reference: publicReference(item.reference) });
+      setPrepared({
+        ...item,
+        title: "Encrypted proposal",
+        reference: publicReference(item.reference),
+      });
     } catch {
       /* Storage may be unavailable; in-memory recovery still works. */
     }
@@ -88,8 +88,10 @@ function Submission() {
   function keep(item?: Prepared) {
     setPrepared(item);
     try {
-      if (item) localStorage.setItem(storageKey, JSON.stringify(item));
-      else localStorage.removeItem(storageKey);
+      if (item) {
+        const { title: _privateTitle, ...recovery } = item;
+        localStorage.setItem(storageKey, JSON.stringify(recovery));
+      } else localStorage.removeItem(storageKey);
     } catch { /* optional recovery */ }
   }
 
@@ -114,15 +116,24 @@ function Submission() {
         round.data.decimals,
       );
       await assertWallet(publicClient, wallet, address);
-      const reference = await uploadProposal(client, value, setStatus);
+      if (!round.data.organizerPublicKey || round.data.organizerPublicKey === "0x") {
+        throw new Error("The organizer must enable private review before you can upload.");
+      }
+      const uploaded = await uploadPrivateProposal(client, value, {
+        chainId: chain.id,
+        pool,
+        proposer: address,
+        organizerPublicKey: round.data.organizerPublicKey,
+      }, setStatus);
       keep({
-        reference,
+        ...uploaded,
+        organizerPublicKey: round.data.organizerPublicKey,
         cost: terms.cost.toString(),
         recipient: terms.recipient,
         title: value.title,
       });
       setStatus(
-        "Uploaded to Swarm. Review the details, then submit for organizer review.",
+        "Encrypted on Swarm for you and the organizer. Review the details, then submit.",
       );
     } catch (err) {
       setError(errorMessage(err));
@@ -139,6 +150,17 @@ function Submission() {
     try {
       let hash = prepared.hash;
       if (!hash) {
+        if (!round.data?.privacy) throw new Error("Private review is unavailable for this round.");
+        const key = await publicClient.readContract({
+          address: round.data.privacy,
+          abi: privacyAbi,
+          functionName: "organizerPublicKey",
+        });
+        if (key.toLowerCase() !== prepared.organizerPublicKey.toLowerCase()) {
+          throw new Error(
+            "The organizer changed their sharing key. Upload the proposal again for the current key.",
+          );
+        }
         setStatus("Confirm the proposal submission in your wallet…");
         hash = await sendProposalTransaction(
           publicClient,
@@ -149,6 +171,7 @@ function Submission() {
             functionName: "propose",
             args: [
               prepared.reference,
+              prepared.keyHash,
               BigInt(prepared.cost),
               prepared.recipient,
             ],
@@ -212,12 +235,25 @@ function Submission() {
       {!pool && <Notice>Choose a round above to start your proposal.</Notice>}
       {round.isError && (
         <Notice error>
-          Could not load this round. Check its address and network, and that it
-          supports proposals. {errorMessage(round.error)}
+          Could not load this round. Check its address and network, and that it supports proposals.
+          {" "}
+          {errorMessage(round.error)}
         </Notice>
       )}
       {round.data && !round.data.canSubmit && (
         <Notice>Submissions and review are closed for this round.</Notice>
+      )}
+      {round.data && !round.data.privacy && (
+        <Notice>
+          This deployment does not support private review. The organizer needs to deploy an updated
+          round.
+        </Notice>
+      )}
+      {round.data?.privacy &&
+        (!round.data.organizerPublicKey || round.data.organizerPublicKey === "0x") && (
+        <Notice>
+          The organizer needs to enable private review before proposals can be uploaded.
+        </Notice>
       )}
       {!address && (
         <Notice>
@@ -317,6 +353,7 @@ function Submission() {
               busy={busy}
               symbol={round.data?.symbol || "tokens"}
               disabled={!round.data?.canSubmit || !address ||
+                !round.data?.organizerPublicKey || round.data.organizerPublicKey === "0x" ||
                 chainId !== chain.id || !client || !info?.identity ||
                 !info.canUpload}
             />

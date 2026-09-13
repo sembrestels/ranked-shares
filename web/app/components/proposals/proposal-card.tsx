@@ -18,6 +18,7 @@ export function ProposalCard(
     onReview,
     canEdit = false,
     onEdit,
+    privateReview = false,
   }: {
     proposal: Proposal;
     content?: ProposalContent;
@@ -32,6 +33,7 @@ export function ProposalCard(
     onReview: (accept: boolean) => void;
     canEdit?: boolean;
     onEdit?: () => void;
+    privateReview?: boolean;
   },
 ) {
   return (
@@ -45,6 +47,12 @@ export function ProposalCard(
         </Badge>
       </div>
       <h2>{content?.title || `Proposal #${proposal.id + 1n}`}</h2>
+      {privateReview && (
+        <p className="hint">
+          Private review · only the proposer and organizer can read this revision. Acceptance keeps
+          it private until voting opens.
+        </p>
+      )}
       <dl className="facts">
         <Fact label="Requested">
           {formatUnits(proposal.cost, decimals)} {symbol}
@@ -62,9 +70,7 @@ export function ProposalCard(
         <Fact label="Swarm reference">
           <code>{proposal.contentRef.slice(2)}</code>
         </Fact>
-        {proposal.status === 1 && (
-          <Fact label="Voting project">#{proposal.projectId + 1n}</Fact>
-        )}
+        {proposal.status === 1 && <Fact label="Voting project">#{proposal.projectId + 1n}</Fact>}
       </dl>
       {content && <div className="proposal-body">{content.body}</div>}
       {content && content.attachments.length > 0 && (

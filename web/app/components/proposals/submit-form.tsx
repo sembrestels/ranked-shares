@@ -129,8 +129,9 @@ export function SubmitForm(
         </div>
       </fieldset>
       <p className="hint">
-        The proposal and attachments will be public on Swarm. Submitting sends
-        the proposal to the organizer for review.
+        Your text and attachments are encrypted for you and the organizer during review. The
+        accepted revision becomes public when voting opens. Your wallet, requested amount, and
+        recipient are visible on-chain.
       </p>
       <Button type="submit" disabled={disabled || busy}>
         {busy ? "Preparing proposal…" : submitLabel}

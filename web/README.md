@@ -1,6 +1,7 @@
 # RankedShares proposals and voting
 
-A React Router SPA for public proposal uploads through Swarm ID and owner review.
+A React Router SPA for encrypted proposal uploads through Swarm ID, private review,
+and publication of accepted revisions when voting opens.
 The on-chain pool is the source of truth for submission revisions, terms and decisions.
 
 ## Round and project pages
@@ -180,7 +181,8 @@ The default identity service is `https://swarm-id.snaha.net`; set
 `VITE_SWARM_ID_ORIGIN` for a compatible development deployment. The library initializes
 in the browser, then the Connect Swarm ID button opens the identity popup directly
 from the user's click. The upload button requires both an identity and `canUpload`.
-Downloads work without an identity. The user manages postage/storage in Swarm ID;
+Published proposal downloads work without an identity. Private review requires the
+proposer's or registered organizer's Swarm ID. The user manages postage/storage in Swarm ID;
 never configure postage credentials as `VITE_` variables.
 
 Serve `build/client/` as static files, with unknown app paths falling back to
@@ -190,12 +192,34 @@ the prover's `Cross-Origin-Opener-Policy: same-origin` or
 `Cross-Origin-Embedder-Policy: require-corp` headers to this app. If you configure CSP,
 allow the configured identity origin in `frame-src`.
 
-Both proposal text and file attachments are public. Encrypted private review and
-publication at voting start are not implemented yet. The organizer accepts the exact
+Enable **Private review** in `/setup` before inviting proposals. The organizer signs
+the registration of their Swarm ID sharing public key in the round's fixed
+`ProposalPrivacy` companion contract (`pool.proposalPrivacy()`). The first proposal
+locks that key. Keep that identity available after any organizer wallet transfer.
+The proposer's key lives in public Swarm metadata bound by the submission transaction.
+
+Text and attachments are AES-GCM encrypted in the browser. Each revision has a fresh
+key shared through ACT with the original proposer and organizer. The public descriptor
+contains the ACT-protected access information, ciphertext reference, context and
+`keccak256(key)`; it contains no plaintext pitch or raw key. Attachment names and keys
+stay inside the encrypted document. The organizer accepts the exact
 on-chain revision, reference, cost and recipient; they can reject any pending submission. No
 content restrictions are imposed during upload. The UI treats all resolved content
 as untrusted: React text rendering, validated attachment references, binary downloads,
 and no raw HTML or embedded attachments. Preview limits do not restrict uploads.
+
+After review, choose **Prepare voting**, then **Publish accepted proposals and open
+voting**. Preparation checks all accepted final revisions locally. The second action
+sends their keys to `ProposalPrivacy.openVoting(ids, keys)`, which verifies the entire
+ordered acceptance list and key commitments before opening the pool atomically.
+Only accepted final revisions become public, along with attachments retained in them.
+Rejected proposals and previous drafts remain encrypted. Public project pages, API
+snapshots and ballot titles resolve released keys from the chain, without ACT credentials.
+
+Publication cannot be undone: keys are visible once sent to an RPC or broadcast,
+including in pending/reverted transactions. This is an explicit organizer action,
+not a timed release service. Readers can copy any content they were allowed to read.
+Previously public Markdown uploads cannot be made private retroactively.
 
 ## Editing during review
 
@@ -218,11 +242,15 @@ again while the editor stays open. Drafts are held in memory and are lost on nav
 reload or wallet change. Acceptance/rejection locks the proposal; opening voting or
 reaching the deadline closes all pending edits as well.
 
-Deploy a new pool for the revised API: `acceptProposal(id, expectedRevision)` and
-`rejectProposal(id, expectedRevision)` now require the version being reviewed.
+Deploy a new pool for the revised API: `propose(contentRef, keyHash, cost, recipient)`
+and `editProposal(id, expectedRevision, contentRef, keyHash, cost, recipient)` now bind
+a revision key commitment. `acceptProposal(id, expectedRevision)` and
+`rejectProposal(id, expectedRevision)` retain their revision guard. Old deployments
+remain readable, but the frontend blocks new uploads when private review is unavailable.
 
-The integration was verified with SDK mocks and a local chain. A funded Swarm ID and
-a browser wallet are needed to validate a live upload and its retrieval on Swarm.
+The integration is tested with real AES-GCM, an ACT transport/identity test double,
+and a local chain, including edits by both participants and public release through
+the setup page. These tests do not claim to validate the live Swarm ID service.
 
 ## Component structure
 

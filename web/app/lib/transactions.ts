@@ -28,12 +28,12 @@ export async function sendProposalTransaction(
   wallet: WalletClient,
   account: Address,
   pool: Address,
-  action: { functionName: "propose"; args: readonly [Hex, bigint, Address] } | {
+  action: { functionName: "propose"; args: readonly [Hex, Hex, bigint, Address] } | {
     functionName: "acceptProposal" | "rejectProposal";
     args: readonly [bigint, bigint];
   } | {
     functionName: "editProposal";
-    args: readonly [bigint, bigint, Hex, bigint, Address];
+    args: readonly [bigint, bigint, Hex, Hex, bigint, Address];
   },
 ) {
   await assertWallet(publicClient, wallet, account);

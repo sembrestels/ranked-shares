@@ -10,6 +10,7 @@ export interface SnapshotProject {
   cost: string;
   recipient: `0x${string}`;
   contentRef: `0x${string}`;
+  contentKey?: `0x${string}`;
   commitment: string;
   funded: boolean;
   claimed: boolean;
@@ -49,6 +50,7 @@ export interface Attachment {
   name: string;
   type: string;
   size: number;
+  encryption?: { key: `0x${string}`; iv: `0x${string}` };
 }
 export interface ProposalContent {
   version: number;
@@ -58,8 +60,11 @@ export interface ProposalContent {
 }
 export interface ProjectResponse {
   project: SnapshotProject;
-  round: Pick<RoundSnapshot, "pool" | "kind" | "block" | "at" | "token" | "phase" | "finality" | "stage">;
-  contentStatus: "ok" | "none" | "unavailable";
+  round: Pick<
+    RoundSnapshot,
+    "pool" | "kind" | "block" | "at" | "token" | "phase" | "finality" | "stage"
+  >;
+  contentStatus: "ok" | "none" | "unavailable" | "private";
   content: ProposalContent | null;
   reason: string | null;
 }

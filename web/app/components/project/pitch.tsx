@@ -13,6 +13,14 @@ export function Pitch(
   },
 ) {
   if (r.contentStatus === "none") return <Notice>{NO_PITCH}</Notice>;
+  if (r.contentStatus === "private") {
+    return (
+      <Notice>
+        This pitch is private until voting opens. The proposer and organizer can read it from the
+        proposal board using their Swarm ID.
+      </Notice>
+    );
+  }
   if (r.contentStatus === "unavailable" || !r.content) {
     return (
       <Notice error>

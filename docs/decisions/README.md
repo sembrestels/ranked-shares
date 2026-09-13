@@ -23,6 +23,8 @@ The process that uses them is `docs/design/PROCESS.md`.
 
 ## Records
 
+- [Encrypt proposals through private review](2026-09-13-encrypt-proposals-through-private-review.md) (accepted, 2026-09-13)
+
 - [Allocate LP voting weight proportionally and automate the Arc demo with CRE](2026-09-13-allocate-lp-voting-weight-proportionally-with-cre.md) (accepted, 2026-09-13)
 
 - [Store ballots in Arkiv and calculate live results in the browser](2026-09-13-store-ballots-in-arkiv-and-calculate-live-results-in-the-browser.md) (accepted, 2026-09-13)
@@ -32,5 +34,5 @@ The process that uses them is `docs/design/PROCESS.md`.
 - [Serve the site and a Deno API from one Deno Deploy app](2026-09-12-serve-the-site-and-a-deno-api-from-one-deno-deploy-app.md) (accepted, 2026-09-12)
 - [Connect wallets with wagmi and viem and the site's own connect button](2026-09-12-connect-wallets-with-wagmi-and-viem-and-the-sites-own-connect-button.md) (accepted, 2026-09-12)
 - [Store proposal content in Swarm through the API and bind its reference on-chain](2026-09-12-store-proposal-content-in-swarm-through-the-api-and-bind-its-reference-on-chain.md) (superseded, 2026-09-12)
-- [Upload proposal content from the browser through Swarm ID](2026-09-12-upload-proposal-content-from-the-browser-through-swarm-id.md) (accepted, 2026-09-12)
+- [Upload proposal content from the browser through Swarm ID](2026-09-12-upload-proposal-content-from-the-browser-through-swarm-id.md) (superseded, 2026-09-12)
 - [Visual direction for the frontend](2026-09-12-visual-direction-for-the-frontend.md) (accepted, 2026-09-12, design rationale)
