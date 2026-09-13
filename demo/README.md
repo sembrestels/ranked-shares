@@ -7,8 +7,57 @@ For a completed result, open the [short EURC demo](short-round.md): pool
 voting window. [Arkiv submission evidence](../arkiv/submission.md) maps its storage
 transactions and those of the earlier rounds to their creator wallets.
 
-The current demo uses the combined contribution-and-vote flow. See
-[new-flow.md](new-flow.md) for the replacement pools, commands, and receipts:
+The currently **open** round is a second run of the short demo with a six hour
+window: pool `0xc1e005c69ff5b26eb21d8d64980387800f4f4501`, 15 Urbe Hub proposals
+with requests divided by 1,000, and the same 20 demo ballots (2 public, 18
+encrypted) against a 20 test EURC budget. It opened on 13 September 2026 at
+16:39:03 Madrid and closes at **22:36:30 Madrid / 20:36:30 UTC**. Open
+`/round?pool=0xc1e005c69ff5b26eb21d8d64980387800f4f4501` to see the live projection;
+[open-round-deployment.json](open-round-deployment.json) records its transactions.
+It was created with `--run open-round --open-seconds 21600` (see
+[short-round.md](short-round.md#run-or-resume)); a storage worker for that pool
+runs from `demo/.local/open-round-arkiv-worker.pid`.
+
+A CRE Liquidity companion round with the same 15 proposals and the same
+deadline is open at pool `0x20cb7d0c8ca90d0518834adac2ff9062230313d0` (LP module
+`0xb6ad0ef6d25ff6c280e55c9d02590164193208c4`, 20 USDC seat budget, requests divided
+by 1,000). It was created with `bun cre/scripts/open-cre-round-demo.ts prepare
+--deadline 1789331790`, then `deploy-vote` and `sync`; its receipt is
+[open-cre-round-deployment.json](open-cre-round-deployment.json). One storage
+worker covers both open pools with the merged `demo/.local/open-round-arkiv.json`
+journal.
+
+## Demo DAO token and LP seats
+
+`cre/scripts/dao-seats-demo.ts` deployed the permissionless demo token
+`0xf66a6d64301279c62833fd8677a97e27076895ff` ("RankedShares Demo DAO", DAO, six
+decimals, open `mint`, no economic value) and initialized DAO/USDC and DAO/EURC
+pairs on the shared Uniswap v4 PoolManager (fee 3000, tick spacing 60, no hook,
+initial price 1:1). The open CRE Liquidity round sponsored both pairs with 5 test
+USDC each (sponsorships 0 and 1, minimum position value 0.01 of the pair's
+stablecoin). Each of the 20 demo wallets received one DAO/USDC position
+(token IDs 1 to 20, liquidity 2,000,000 across ticks -600 to 600, about 0.06 DAO
+and 0.06 USDC) and registered it with the LP module from its own wallet, so its
+value accrues weight until the deadline. The DAO/EURC positions follow once the
+organizer holds test EURC again. [dao-seats-deployment.json](dao-seats-deployment.json)
+records every transaction.
+
+```sh
+bun cre/scripts/dao-seats-demo.ts deploy
+bun cre/scripts/dao-seats-demo.ts positions --pair USDC
+bun cre/scripts/dao-seats-demo.ts subscribe --pair USDC
+# After funding the organizer with about 1.5 test EURC:
+bun cre/scripts/dao-seats-demo.ts positions --pair EURC
+bun cre/scripts/dao-seats-demo.ts subscribe --pair EURC
+```
+
+After the deadline, `finalizeLP(id, 25)` on the LP module (permissionless, or the
+CRE report) converts accrued value into voting weight before the ballots close.
+These positions belong to operator-controlled wallets and do not represent
+independent liquidity providers.
+
+The previous version 2 demo used the combined contribution-and-vote flow. See
+[new-flow.md](new-flow.md) for those pools, commands, and receipts:
 
 | Round | Current pool | Accepted proposals | Confirmed votes |
 | --- | --- | --- | --- |

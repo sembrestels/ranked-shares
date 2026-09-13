@@ -1,0 +1,415 @@
+{
+  "version": 1,
+  "demo": true,
+  "chainId": 5042002,
+  "createdAt": "2026-09-13T15:07:58.876Z",
+  "organizer": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+  "description": "Permissionless demo DAO token with no economic value, two Uniswap v4 pairs at an initial 1:1 price, LP sponsorships of 5 test USDC each on the open CRE Liquidity round, and one small position per pair for each of the 20 operator-controlled demo wallets. Positions are registered with the LP voting module so their value accrues weight over time.",
+  "round": {
+    "run": "open-cre-round",
+    "pool": "0x20cb7d0c8ca90d0518834adac2ff9062230313d0",
+    "lpModule": "0xb6ad0ef6d25ff6c280e55c9d02590164193208c4",
+    "deadline": "1789331790"
+  },
+  "sharedContracts": {
+    "poseidon": "0x70cef785dacba0d030abaade23f295bcd33b0b7e",
+    "ingestVerifier": "0xd75085951a67f615a9a9bd61b0277e3b66569785",
+    "tallyVerifier": "0xc30804d65ddee5a1a8532a5dfb8958a1558d02ac",
+    "poolManager": "0xa9860932d9ecd8c6d1889ee42220221dc72e60e6",
+    "positionDescriptor": "0xd1a3d29679d83a2f31b8ffd01d172685ac087558",
+    "positionManager": "0x52074d82f3076e2290f5dca881d6ef4e2b553056",
+    "stateView": "0x2c517696911ef8ea8e68368ff58b9f3253d12c3f"
+  },
+  "contracts": {
+    "daoToken": "0xf66a6d64301279c62833fd8677a97e27076895ff"
+  },
+  "pairs": {
+    "USDC": {
+      "key": {
+        "currency0": "0x3600000000000000000000000000000000000000",
+        "currency1": "0xf66a6d64301279c62833fd8677a97e27076895ff",
+        "fee": 3000,
+        "tickSpacing": 60,
+        "hooks": "0x0000000000000000000000000000000000000000"
+      },
+      "poolId": "0x576f736c39cb83e34e419c038be464af1175352ec270dffd30506879562c99d2",
+      "stable": "0x3600000000000000000000000000000000000000",
+      "sponsorshipId": 0,
+      "sponsorAmountBaseUnits": "5000000"
+    },
+    "EURC": {
+      "key": {
+        "currency0": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+        "currency1": "0xf66a6d64301279c62833fd8677a97e27076895ff",
+        "fee": 3000,
+        "tickSpacing": 60,
+        "hooks": "0x0000000000000000000000000000000000000000"
+      },
+      "poolId": "0x5c11d2ac78f717f53d8a3222bdd5e9a3b52b759d7243b681651b5acec22d9bd1",
+      "stable": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+      "sponsorshipId": 1,
+      "sponsorAmountBaseUnits": "5000000"
+    }
+  },
+  "positions": {
+    "USDC": [
+      {
+        "number": 1,
+        "owner": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+        "tokenId": "1",
+        "transactionHash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+        "subscribeTransactionHash": "0xa71ec3daa2c384de23d68f8e7be0865753d92466a01e192606bebeb3190fc045",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 2,
+        "owner": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+        "tokenId": "2",
+        "transactionHash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+        "subscribeTransactionHash": "0xae78d67f80a51cf69e991f7285f47b2a7317e62536285c0782ba863eca3056c8",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 3,
+        "owner": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+        "tokenId": "3",
+        "transactionHash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+        "subscribeTransactionHash": "0x07827c49c305d66136b47d7ee84ec3afadd76717d0c90fe1683973fb4b00de12",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 4,
+        "owner": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+        "tokenId": "4",
+        "transactionHash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+        "subscribeTransactionHash": "0x873354f1357e4932e7831df4b34388408087762c7caa48c8359ed58d26ae80cc",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 5,
+        "owner": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+        "tokenId": "5",
+        "transactionHash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+        "subscribeTransactionHash": "0x2ae2ec824b69d549a8d807efa628bf0e36a5f12c0ed33b0599c4308eda480523",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 6,
+        "owner": "0x9ed33420546F45544f3f081778F298251be75f44",
+        "tokenId": "6",
+        "transactionHash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+        "subscribeTransactionHash": "0xfb5621d6720e43e833594d1772f8a6ce0e079bb59e9814a44be2982c1b215a58",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 7,
+        "owner": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+        "tokenId": "7",
+        "transactionHash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+        "subscribeTransactionHash": "0x8e8da9f1545b70d2506413f734dff293e9cd93050dd505a68ff169e3beb05b8c",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 8,
+        "owner": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+        "tokenId": "8",
+        "transactionHash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+        "subscribeTransactionHash": "0xb31413037d5acde529bcd6dcbc56fc861bd06af5e0e64fc96b507d274b8c38d8",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 9,
+        "owner": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+        "tokenId": "9",
+        "transactionHash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+        "subscribeTransactionHash": "0x82705b3788674739e415cf7434a9dc36b204cbdba70f231f95e80c160e929bcc",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 10,
+        "owner": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+        "tokenId": "10",
+        "transactionHash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+        "subscribeTransactionHash": "0xfeab76859321c46875765be4adbbaf41c0654309826fb4e82d2b864573ce1796",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 11,
+        "owner": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+        "tokenId": "11",
+        "transactionHash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+        "subscribeTransactionHash": "0x003e8e064c2b3e9760540a5cbf2f7d32d4f4e3d19811a380aaa66f89ad853cd5",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 12,
+        "owner": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+        "tokenId": "12",
+        "transactionHash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+        "subscribeTransactionHash": "0xc82035514c0595ce3b19e5766a8c073cb2b15b4a924dabc42a6168c38d1a288a",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 13,
+        "owner": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+        "tokenId": "13",
+        "transactionHash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+        "subscribeTransactionHash": "0x2ea71fdccccec393eaa6af50c9b4186a66db31aadf9369d9332715ee717b9fd8",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 14,
+        "owner": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+        "tokenId": "14",
+        "transactionHash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+        "subscribeTransactionHash": "0x6199d24348429766ff96a79a85f1373c4830f7800efdc62615e0cd990e12825c",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 15,
+        "owner": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+        "tokenId": "15",
+        "transactionHash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+        "subscribeTransactionHash": "0xb0e94e9fa8060d6f87a89314db2750379149ebdbd750d387a3c37bde876f05d9",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 16,
+        "owner": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+        "tokenId": "16",
+        "transactionHash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+        "subscribeTransactionHash": "0xad3d777ca0b6e4d833af99bd63c991fa7e05bdd7e3f466ffcb23136b94e38bd8",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 17,
+        "owner": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+        "tokenId": "17",
+        "transactionHash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+        "subscribeTransactionHash": "0x0f01c145caa5d57a035b6226f6d27917727332c54d8bdce5386b556efd179ee2",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 18,
+        "owner": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+        "tokenId": "18",
+        "transactionHash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+        "subscribeTransactionHash": "0xfe8c62fcb406ce93fba9cb70efe969536819aac043fdc6973cfc6ec0800c6850",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 19,
+        "owner": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+        "tokenId": "19",
+        "transactionHash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+        "subscribeTransactionHash": "0x139317749f2e190ece337b624798aa14e1852bd89c207c57cf24d21d0154de6e",
+        "sponsorshipId": 0
+      },
+      {
+        "number": 20,
+        "owner": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+        "tokenId": "20",
+        "transactionHash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+        "subscribeTransactionHash": "0x0bc2cbb76d0b0c0066a0670ac11ba46498cc2cf98d73a95eafbdd03fce9f9201",
+        "sponsorshipId": 0
+      }
+    ],
+    "EURC": []
+  },
+  "gifts": [
+    {
+      "pair": "USDC",
+      "owner": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "tokenId": "21",
+      "sponsorshipId": 0,
+      "transactionHash": "0x6dbfc41a88b175cc06fa8252fa0d178dc229d231d1f2e58ba5ae608de1308eee"
+    }
+  ],
+  "liquidityPerPosition": "2000000",
+  "tickRange": [
+    -600,
+    600
+  ],
+  "transactions": {
+    "daoToken": {
+      "hash": "0xaf2da059178f6d9b936889bd9c8b3e6f708df989a0700514c1f0e32c82cf9593",
+      "blockNumber": "61916986",
+      "contractAddress": "0xf66a6d64301279c62833fd8677a97e27076895ff"
+    },
+    "mintDao": {
+      "hash": "0xf4abd7e631ad869861c67d2c52d3021366708a8fa47175d7944dc840f30368ee",
+      "blockNumber": "61916997",
+      "contractAddress": null
+    },
+    "init:USDC": {
+      "hash": "0x0e2ae53889508612d6da70b17d0e5042f6a479cccc853dac4386f3c25e7a3767",
+      "blockNumber": "61917004",
+      "contractAddress": null
+    },
+    "init:EURC": {
+      "hash": "0x8b1524bb963e36d57e93b266fc5cd7ea6486169f632d7b14dae323ff62c44a08",
+      "blockNumber": "61917013",
+      "contractAddress": null
+    },
+    "approveSponsorLP": {
+      "hash": "0x5fc6e203dfad1033ca1b8eb77d1fbec80c81be017aba51924385b559a3b52d5c",
+      "blockNumber": "61917021",
+      "contractAddress": null
+    },
+    "sponsorLP:USDC": {
+      "hash": "0x3e69cc1f84031a1b0a8b903bbae16778fafff8720a9a6ebcb6adece7035121eb",
+      "blockNumber": "61917030",
+      "contractAddress": null
+    },
+    "sponsorLP:EURC": {
+      "hash": "0x8a61b38cfd21848fd9dcf2f086bf248515e84a56d98ca1a412fd1d611b91e2ce",
+      "blockNumber": "61917039",
+      "contractAddress": null
+    },
+    "approvePermit2:dao:USDC": {
+      "hash": "0xf66d97c5744ebc959e37c236e9967bed81afa0262bb4e03b7554f1cc5ff3cf52",
+      "blockNumber": "61917071",
+      "contractAddress": null
+    },
+    "permit2:dao:USDC": {
+      "hash": "0x5c33fab1253b5060491e94f008fc1d4e6cee619a48dd5cfcf48059df414e4c0d",
+      "blockNumber": "61917080",
+      "contractAddress": null
+    },
+    "approvePermit2:USDC:USDC": {
+      "hash": "0x87d2dda9cc68f9d3e8423afc1fcceabd060a7a2ce170313a51656e38510db61f",
+      "blockNumber": "61917088",
+      "contractAddress": null
+    },
+    "permit2:USDC:USDC": {
+      "hash": "0x2c98cc9a01affb4f0b6c79b71907bc74960112aa6fc5b3b8342818997339847b",
+      "blockNumber": "61917097",
+      "contractAddress": null
+    },
+    "mint:USDC:0": {
+      "hash": "0x6fdcd083225b9e1940ff894c43a52640cdaf692d45acd5939a0405ff47ab1854",
+      "blockNumber": "61917105",
+      "contractAddress": null
+    },
+    "mint:USDC:5": {
+      "hash": "0x6fd65f8aedb10fc62bb40ea8a81eb6dea989e001dbc534124fb3a75e62a3771a",
+      "blockNumber": "61917114",
+      "contractAddress": null
+    },
+    "mint:USDC:10": {
+      "hash": "0x9a7bd0dd1eabb091b9f811feb928d1af42b37e7803f27404a056caba7967dc8f",
+      "blockNumber": "61917125",
+      "contractAddress": null
+    },
+    "mint:USDC:15": {
+      "hash": "0x2a2bc09fce5d27bf5d78d8d3c7de8ba870ffc25fc046658284a3559a0aeb5eee",
+      "blockNumber": "61917134",
+      "contractAddress": null
+    },
+    "subscribe:USDC:0": {
+      "hash": "0xa71ec3daa2c384de23d68f8e7be0865753d92466a01e192606bebeb3190fc045",
+      "blockNumber": "61917153"
+    },
+    "subscribe:USDC:1": {
+      "hash": "0xae78d67f80a51cf69e991f7285f47b2a7317e62536285c0782ba863eca3056c8",
+      "blockNumber": "61917161"
+    },
+    "subscribe:USDC:2": {
+      "hash": "0x07827c49c305d66136b47d7ee84ec3afadd76717d0c90fe1683973fb4b00de12",
+      "blockNumber": "61917169"
+    },
+    "subscribe:USDC:3": {
+      "hash": "0x873354f1357e4932e7831df4b34388408087762c7caa48c8359ed58d26ae80cc",
+      "blockNumber": "61917178"
+    },
+    "subscribe:USDC:4": {
+      "hash": "0x2ae2ec824b69d549a8d807efa628bf0e36a5f12c0ed33b0599c4308eda480523",
+      "blockNumber": "61917186"
+    },
+    "subscribe:USDC:5": {
+      "hash": "0xfb5621d6720e43e833594d1772f8a6ce0e079bb59e9814a44be2982c1b215a58",
+      "blockNumber": "61917195"
+    },
+    "subscribe:USDC:6": {
+      "hash": "0x8e8da9f1545b70d2506413f734dff293e9cd93050dd505a68ff169e3beb05b8c",
+      "blockNumber": "61917203"
+    },
+    "subscribe:USDC:7": {
+      "hash": "0xb31413037d5acde529bcd6dcbc56fc861bd06af5e0e64fc96b507d274b8c38d8",
+      "blockNumber": "61917211"
+    },
+    "subscribe:USDC:8": {
+      "hash": "0x82705b3788674739e415cf7434a9dc36b204cbdba70f231f95e80c160e929bcc",
+      "blockNumber": "61917220"
+    },
+    "subscribe:USDC:9": {
+      "hash": "0xfeab76859321c46875765be4adbbaf41c0654309826fb4e82d2b864573ce1796",
+      "blockNumber": "61917229"
+    },
+    "subscribe:USDC:10": {
+      "hash": "0x003e8e064c2b3e9760540a5cbf2f7d32d4f4e3d19811a380aaa66f89ad853cd5",
+      "blockNumber": "61917237"
+    },
+    "subscribe:USDC:11": {
+      "hash": "0xc82035514c0595ce3b19e5766a8c073cb2b15b4a924dabc42a6168c38d1a288a",
+      "blockNumber": "61917246"
+    },
+    "subscribe:USDC:12": {
+      "hash": "0x2ea71fdccccec393eaa6af50c9b4186a66db31aadf9369d9332715ee717b9fd8",
+      "blockNumber": "61917255"
+    },
+    "subscribe:USDC:13": {
+      "hash": "0x6199d24348429766ff96a79a85f1373c4830f7800efdc62615e0cd990e12825c",
+      "blockNumber": "61917264"
+    },
+    "subscribe:USDC:14": {
+      "hash": "0xb0e94e9fa8060d6f87a89314db2750379149ebdbd750d387a3c37bde876f05d9",
+      "blockNumber": "61917272"
+    },
+    "subscribe:USDC:15": {
+      "hash": "0xad3d777ca0b6e4d833af99bd63c991fa7e05bdd7e3f466ffcb23136b94e38bd8",
+      "blockNumber": "61917281"
+    },
+    "subscribe:USDC:16": {
+      "hash": "0x0f01c145caa5d57a035b6226f6d27917727332c54d8bdce5386b556efd179ee2",
+      "blockNumber": "61917290"
+    },
+    "subscribe:USDC:17": {
+      "hash": "0xfe8c62fcb406ce93fba9cb70efe969536819aac043fdc6973cfc6ec0800c6850",
+      "blockNumber": "61917298"
+    },
+    "subscribe:USDC:18": {
+      "hash": "0x139317749f2e190ece337b624798aa14e1852bd89c207c57cf24d21d0154de6e",
+      "blockNumber": "61917306"
+    },
+    "subscribe:USDC:19": {
+      "hash": "0x0bc2cbb76d0b0c0066a0670ac11ba46498cc2cf98d73a95eafbdd03fce9f9201",
+      "blockNumber": "61917315"
+    },
+    "approvePermit2:dao:USDC:0xf632ce27ea72dea30d30c1a9700b6b3bceaa05cf": {
+      "hash": "0x714503cbcdee5c8753607d5cafe7eba83da2e7d10ac12aeac05049382c7da0c0",
+      "blockNumber": "61917777",
+      "contractAddress": null
+    },
+    "permit2:dao:USDC:0xf632ce27ea72dea30d30c1a9700b6b3bceaa05cf": {
+      "hash": "0x1c1124b8b9b6135365ba3d8c4482528e8b0c841791a07f15f8eea5c4ffe7d2c3",
+      "blockNumber": "61917786",
+      "contractAddress": null
+    },
+    "approvePermit2:USDC:USDC:0xf632ce27ea72dea30d30c1a9700b6b3bceaa05cf": {
+      "hash": "0x4f3db1b7a38524f60428dcbf1f3975a10646b0ea5c590d97daa3d55c7fcced00",
+      "blockNumber": "61917794",
+      "contractAddress": null
+    },
+    "permit2:USDC:USDC:0xf632ce27ea72dea30d30c1a9700b6b3bceaa05cf": {
+      "hash": "0x42cb46411305dc58bb0df444418b4e8d244944631b8b13aacec9825641910ca9",
+      "blockNumber": "61917803",
+      "contractAddress": null
+    },
+    "gift:USDC:0xf632ce27ea72dea30d30c1a9700b6b3bceaa05cf": {
+      "hash": "0x6dbfc41a88b175cc06fa8252fa0d178dc229d231d1f2e58ba5ae608de1308eee",
+      "blockNumber": "61917812",
+      "contractAddress": null
+    }
+  }
+}

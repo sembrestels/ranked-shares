@@ -1,0 +1,802 @@
+{
+  "version": 1,
+  "demo": true,
+  "simulationOnly": true,
+  "chainId": 5042002,
+  "run": "open-cre-round",
+  "description": "20 controlled demo voters in a CRE Liquidity pool: 2 public contribution votes and 18 encrypted sponsored-seat votes. Original Urbe Hub texts; on-chain requests divided by 1000 for a 20 test USDC budget. No LP positions are represented. Voting window 20429 seconds.",
+  "organizer": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+  "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+  "createdAt": "2026-09-13T14:56:01.458Z",
+  "pool": "0x20cb7d0c8ca90d0518834adac2ff9062230313d0",
+  "round": {
+    "id": "urbehub",
+    "token": "0x3600000000000000000000000000000000000000",
+    "kind": "lp-cre",
+    "keySalt": "0xfac6382b541c5ebef628a089547f16d2bff5f3710d6b724e0c87f650fa43b0cc",
+    "tallierPk": "0x027f0e26b6f27e4f5d23a40692681b0e5f1b8aab8c6c1a56f51adbe1a38cfa046d",
+    "pool": "0x20cb7d0c8ca90d0518834adac2ff9062230313d0",
+    "lpModule": "0xb6ad0ef6d25ff6c280e55c9d02590164193208c4",
+    "privacy": "0x2BE28838161cf24542823a3bA58c9cbC9afd35D2"
+  },
+  "contracts": {
+    "usdcPool": "0x20cb7d0c8ca90d0518834adac2ff9062230313d0",
+    "lpModule": "0xb6ad0ef6d25ff6c280e55c9d02590164193208c4"
+  },
+  "deadline": "1789331790",
+  "deadlineUtc": "2026-09-13T20:36:30.000Z",
+  "openedAt": 1789311623,
+  "verifiedAt": "2026-09-13T15:04:07.443Z",
+  "requestsScaleDivisor": 1000,
+  "budgetBaseUnits": "20000000",
+  "proposals": [
+    {
+      "proposalId": 0,
+      "projectId": 0,
+      "title": "3D printing station",
+      "source": "content/proposals/urbehub/3d-printing-station.md",
+      "sourceSha256": "2ca91e88f2982ca97c0f23bca7070ab4a80336b8082408a52e96b4a9054550de",
+      "contentRef": "0xaa4090b07b27b90d75d4728a1140be912288c1acc4672c4ac5f438cff58e3be9",
+      "originalAmountBaseUnits": "1400000000",
+      "amountBaseUnits": "1400000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x60ce1f9655080aba6b85d2e178c3db843bb67b5091d37a071dc8e6f5f4528605",
+      "acceptanceTransactionHash": "0xc73f8424f20a9aab414aafb7afa00de3eb742427420d373def1731b719dc5e90"
+    },
+    {
+      "proposalId": 1,
+      "projectId": 1,
+      "title": "Urbe Hub anniversary party",
+      "source": "content/proposals/urbehub/anniversary-party.md",
+      "sourceSha256": "6942b720582ef10f9e31ff528882b98cd8eacf3fb811db536da3d738d981e1fc",
+      "contentRef": "0xe57962f5ced1f24fdef3a3fcdfb4295230fc29c931dbb906040e56893b64b1b7",
+      "originalAmountBaseUnits": "2800000000",
+      "amountBaseUnits": "2800000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xbce553834fb0d60265564059afa2e36d4ccd92496d495f54527d206b363dfd1c",
+      "acceptanceTransactionHash": "0xc5ecf5b7bb4eb7d1350e1459a165d295b9b7a00eaed47541719d4718016d70d4"
+    },
+    {
+      "proposalId": 2,
+      "projectId": 2,
+      "title": "Cooling for summer",
+      "source": "content/proposals/urbehub/cooling-for-summer.md",
+      "sourceSha256": "cc3edbe1f5a4de3fbd188ad7073ed59ad63515674ab4bdcdbc797710414188e3",
+      "contentRef": "0x58c9ec75db2c919a4b1151e305e0496b8a18f27212df1ffb098e7c36b8740234",
+      "originalAmountBaseUnits": "2300000000",
+      "amountBaseUnits": "2300000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x80b78a52ea80033f00dd79609e386b00bfef11f125ed34dc501883a4c993f26c",
+      "acceptanceTransactionHash": "0x9756e4f51e0b6507c8928ef516e8eea51520b8c7b3cbf7e57a82f3da6d443256"
+    },
+    {
+      "proposalId": 3,
+      "projectId": 3,
+      "title": "Electronics bench",
+      "source": "content/proposals/urbehub/electronics-bench.md",
+      "sourceSha256": "0fc0ebdceeaf617e31c41925268640d51604a2765cc014b4c9975adab57c9780",
+      "contentRef": "0xa78cce3e8141c3aea314cad78e151b72328302c2ef7864b259120ea670e081cc",
+      "originalAmountBaseUnits": "1100000000",
+      "amountBaseUnits": "1100000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xccaf741ff647484ddca6ff6af8b41804ca44e5f4d1febf70f2b07fbfcaa4de78",
+      "acceptanceTransactionHash": "0xfb341accda14d0a3d1947546231a6e0f989b2b83291d7badfc70c8bf1901c354"
+    },
+    {
+      "proposalId": 4,
+      "projectId": 4,
+      "title": "Ergonomic seating and desks",
+      "source": "content/proposals/urbehub/ergonomic-seating-and-desks.md",
+      "sourceSha256": "773753d38e8639874b9ff232c24043131a31c35bdbe75d52be128e5c08d0fc35",
+      "contentRef": "0x7c6a7b856be474a512fbdf9d3651a23303a3e1482d8e7ed0de03458112108b9b",
+      "originalAmountBaseUnits": "3600000000",
+      "amountBaseUnits": "3600000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x27d2632cd5b205843da834424db74471b68f74d3a1010d6c84c30243fb9ab3b3",
+      "acceptanceTransactionHash": "0x0adecf387a64b42aedbb54a8e0dae84a16b61de2856ad480b3745a5ab61fefcc"
+    },
+    {
+      "proposalId": 5,
+      "projectId": 5,
+      "title": "Focus and call room",
+      "source": "content/proposals/urbehub/focus-and-call-room.md",
+      "sourceSha256": "0e0cd4fc8e302bd64078bb6ea8174dead97f423c82165c37a68a04a473ec3f05",
+      "contentRef": "0xa6a81211a0717b4e62f710ea017a67330089f066c4521b956cfa5751f08f33d3",
+      "originalAmountBaseUnits": "1800000000",
+      "amountBaseUnits": "1800000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xd5711113b149bb3cc32fda6eb17949dd3007a7de70ca4508d10b2decd887ad8f",
+      "acceptanceTransactionHash": "0x4e431ce8b06fbda9e816f67bd3e235cbe957cb804456e3526a61c059fd808b6b"
+    },
+    {
+      "proposalId": 6,
+      "projectId": 6,
+      "title": "Hub node rack",
+      "source": "content/proposals/urbehub/hub-node-rack.md",
+      "sourceSha256": "d6316f0b8dff1a832219f198655328f755862b05fba564a610bcabaa84d062b0",
+      "contentRef": "0x5a6118f375988109021a44d28f50a2f03b3ca53c7b44c517bb2dcbb65be91f2c",
+      "originalAmountBaseUnits": "2300000000",
+      "amountBaseUnits": "2300000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xbc3240894432d74899806ab0010c2ea6a75f22187464e09ee94e53cc8d4fce01",
+      "acceptanceTransactionHash": "0x7217d3dc46df4136af302cae066785b1c746101301fa3219f234ea0275556156"
+    },
+    {
+      "proposalId": 7,
+      "projectId": 7,
+      "title": "Kitchen corner",
+      "source": "content/proposals/urbehub/kitchen-corner.md",
+      "sourceSha256": "d6ae9af62c45a5973e3202ece2e5fc71177a9b70b7f9f0130a088fb2f43d1185",
+      "contentRef": "0x266403bcc91b0dec861dddab8217cbb965f5c1dfd1be6e4e7907222f76e11948",
+      "originalAmountBaseUnits": "1400000000",
+      "amountBaseUnits": "1400000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x3811fdfe0bf7e530c78d9ff91a8202fd960ffbaa095373289eb73e41196238ab",
+      "acceptanceTransactionHash": "0xb8725eba6a863a3fa5988b76ef60d7590bd688dc7e8653fdf0bfa35d8d60a9f2"
+    },
+    {
+      "proposalId": 8,
+      "projectId": 8,
+      "title": "Laser cutter",
+      "source": "content/proposals/urbehub/laser-cutter.md",
+      "sourceSha256": "cffcb89784d98e49ac935dcac7b816fe32e44b3491aedcb199ac1fb45ace4c20",
+      "contentRef": "0x595096e5ce94f01a1f7ae9694fea977ce86635197807b65bf69d78aaed194f5a",
+      "originalAmountBaseUnits": "3200000000",
+      "amountBaseUnits": "3200000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x7f73b80df85f7a247a6b88294d7c7418960f4186019c923d3f770e7c7f0f248e",
+      "acceptanceTransactionHash": "0x8b2c74dfc7ca450a0826c3692cebd105b8d9630f0d82e96c017eefa2df4bc3b8"
+    },
+    {
+      "proposalId": 9,
+      "projectId": 9,
+      "title": "Library and study corner",
+      "source": "content/proposals/urbehub/library-and-study-corner.md",
+      "sourceSha256": "bf01f311f3286ca4318dde8dfb45fbfbebefce249b9c5c86083711176f1791d0",
+      "contentRef": "0x821faadeefceb31739606bfc3707c48a8f747a668f8a3142de2c883bc381789a",
+      "originalAmountBaseUnits": "750000000",
+      "amountBaseUnits": "750000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xe51209f40c4db68648c92957df214acb8a271e55c10d77306d60e11903b07209",
+      "acceptanceTransactionHash": "0x5ae79e7b137b7ce354e87727dbdaedd81134981956dcad5b9fba8da3c7561afd"
+    },
+    {
+      "proposalId": 10,
+      "projectId": 10,
+      "title": "Lighting, signage and mural",
+      "source": "content/proposals/urbehub/lighting-signage-and-mural.md",
+      "sourceSha256": "0552415fd0620a9bac7b23dafc6917bff04ac652d04816b0bed216a3a37ba08b",
+      "contentRef": "0x086bfacbb4bdc1568eca55175acf599435f375cd1b5df75855293880406a8a0d",
+      "originalAmountBaseUnits": "1600000000",
+      "amountBaseUnits": "1600000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x178622b21bf8a70400a2433edda06c660322c0a06f5bfcb5f923bcde18be6950",
+      "acceptanceTransactionHash": "0x413c613ea30859d91b57436b5a27dcd05bf0edaa221e107c351d036dbf8dc09c"
+    },
+    {
+      "proposalId": 11,
+      "projectId": 11,
+      "title": "Open hardware member badge",
+      "source": "content/proposals/urbehub/open-hardware-member-badge.md",
+      "sourceSha256": "b6743cdec8ce49d37b81727072087e675beb7f4a842f915d579d0dd19f50e023",
+      "contentRef": "0xe2b8fcae613e0b1886439035c6f414292251c4a0ae5874644b5b433c72a0cd75",
+      "originalAmountBaseUnits": "1400000000",
+      "amountBaseUnits": "1400000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x5fd662327fe7444b3700494b7531b8cdcd89d3a09ef45bcd7644a85e7682027d",
+      "acceptanceTransactionHash": "0x744ad0ef0e744515803981a12cb29dcf7d97348c82c0cc29755a5cbd74586f4f"
+    },
+    {
+      "proposalId": 12,
+      "projectId": 12,
+      "title": "Visiting hacker residency",
+      "source": "content/proposals/urbehub/visiting-hacker-residency.md",
+      "sourceSha256": "ac95beb3378f33cbe76bd034e17c9ad5714ffdbfbce720e3715c90637e811c43",
+      "contentRef": "0xf82326ccce950d927aece075f9e9e2432ee267ac0684c99a3a29001ddc546a43",
+      "originalAmountBaseUnits": "2800000000",
+      "amountBaseUnits": "2800000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xedeecace78f355d4179fd769fb7f0366e78602a52ed62f49ba35bc9765b4be4a",
+      "acceptanceTransactionHash": "0x1da3675097e91d4643e31a541e3ad0b7ad35043dc77ac7139e2f839aa1ea7f82"
+    },
+    {
+      "proposalId": 13,
+      "projectId": 13,
+      "title": "Weekend hackathon",
+      "source": "content/proposals/urbehub/weekend-hackathon.md",
+      "sourceSha256": "e64e4c478f20677281231501b09b401a44042c2243d3ab6a9ea14627dde53af0",
+      "contentRef": "0x6b01083bf9e56fd54f534f7592a2e658b139d58d6374e051379c4f14885b4065",
+      "originalAmountBaseUnits": "3600000000",
+      "amountBaseUnits": "3600000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0xa46337007ee5e3c410d5708f602faa92aac6389d5a102416b99d9b27847cafee",
+      "acceptanceTransactionHash": "0xfb920d06d260bf83621442adab8fda583e7754bf0553558f1e7d82f7a49addcc"
+    },
+    {
+      "proposalId": 14,
+      "projectId": 14,
+      "title": "Workshop series",
+      "source": "content/proposals/urbehub/workshop-series.md",
+      "sourceSha256": "67a543c3d070294fab20c05b44762d0504f37ec98921c6d4ab4c1e24ccff27cb",
+      "contentRef": "0xf257daabfa64638036ce617104da4e0076bc447050e7be3966fb0c8b67a37fff",
+      "originalAmountBaseUnits": "2200000000",
+      "amountBaseUnits": "2200000",
+      "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+      "transactionHash": "0x2ee49897c03c93815c5809d47229b38f045bbc053025c3c25444ac832756ba22",
+      "acceptanceTransactionHash": "0x71921f7df59390a0fe8e19bf2dd3c4d3d75085620f008961ba228756f24cf3c2"
+    }
+  ],
+  "ballots": [
+    {
+      "number": 1,
+      "address": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "mode": "public",
+      "contributionBaseUnits": "1000000",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x85db2c88307b922b859863968fe6d4afddf8e0e753eada1161afff46826c1b4f",
+      "transactionHash": "0xaac8518a6fe1070657cb79b1324f6457dd3ecac69305e7714d74364ad3fa80a6",
+      "blockNumber": "61916126",
+      "ranks": [
+        5,
+        11,
+        7,
+        3,
+        11,
+        9,
+        7,
+        1,
+        11,
+        1,
+        5,
+        3,
+        14,
+        14,
+        9
+      ],
+      "arkivEntityKey": "0x1e0cad0b3d532b0ec2a552f1797d2d5cfe36bfedbad7de4a905cf46b1d72554d",
+      "arkivTransactionHash": "0xf35f5af120e986ed7b1db75272650c7984b01ed0529846019b604e2a62ca915f",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 2,
+      "address": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "mode": "public",
+      "contributionBaseUnits": "1000000",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x6162d6990030673b396b45b5b7024057abf944c951d158ac0f9e631367755437",
+      "transactionHash": "0xb9c462ff6f335d97e3f236c22ce962c6dfff576cc79db11044f59c458a82e416",
+      "blockNumber": "61916144",
+      "ranks": [
+        1,
+        13,
+        7,
+        5,
+        15,
+        7,
+        10,
+        1,
+        11,
+        3,
+        6,
+        3,
+        13,
+        11,
+        7
+      ],
+      "arkivEntityKey": "0xf0c9b9732237a6a46ce13c9a0d261436ae62a04ff206b866ccb694a5fc47fc0f",
+      "arkivTransactionHash": "0xe271cf1c7d4aba9add771e3f7f8d308a0c85d975a371b94bc9a48b9faaf3d851",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 3,
+      "address": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xee09c38c1aac1e47dc3cfeb0abd3e828259a970a894c9a6a8115f340b7eedd53",
+      "transactionHash": "0x682637ec60d8e5103fa13f03f861877a9056ac1ab5e085a9e2a4cd44689ab73e",
+      "blockNumber": "61916153",
+      "arkivEntityKey": "0x7d770a31b67d2a9f088de8b4fcaab4898a3d8d5779fd00d7a4b7568daa46f03d",
+      "arkivTransactionHash": "0x70a3872f1f707587183c6effec0f065c97f435d5ddff23c0a93e21198676e65c",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 4,
+      "address": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xa394bcae16f4bac97e6027a7d294652c4e28ea465e6bfff17c7002e210b58e95",
+      "transactionHash": "0x53375737c64900f7988b0f0c8bdf8f5019a6f43a000e42a634e7be80c17e3b43",
+      "blockNumber": "61916161",
+      "arkivEntityKey": "0x7841d12e1f9d7fd31a46829349141656ecc75bb0086d7e60ccfe4d8110122e15",
+      "arkivTransactionHash": "0x2b260b0f395de217d2080fc6bab5bc7066ac931f0d10ae5c7ee173abde47349c",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 5,
+      "address": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xa909cfcc5560e645af2efa3f0bd10ed8b1bc656b7af25c48443d41cb6cfe8be1",
+      "transactionHash": "0x1f9bdf7c399525793c1dd8e84dd70035446a56dd32354cd75f9b352fa57182de",
+      "blockNumber": "61916170",
+      "arkivEntityKey": "0x5c8a0fafe66dff873594ec87c6f34e67fb0e187426b3fac594c3b8aef0152e6d",
+      "arkivTransactionHash": "0x7ae0256bfd1bea72786e39a785c393e83910f0388ac92aa2562b1ac9d2900c32",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 6,
+      "address": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x7c71963366129ea7305d3ff3a6eb4873238ce47384347122e64d74304757a58e",
+      "transactionHash": "0xfe2940cb4a056578ded8585b06b90b347acc3b8fcbf4ec375c7446514ecf7f0e",
+      "blockNumber": "61916180",
+      "arkivEntityKey": "0x9df16a8b5ee6dc6010a1987b36041eac7eb883a3f3a4d6c3ff52713429ef83e3",
+      "arkivTransactionHash": "0x4ce383d61e10f0e817cce03bbec7d3e0b5984faf2abb694d988b9428dd341c7a",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 7,
+      "address": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x9f6205a8191a404ebd9c44d18d006ff044da2090e5e3b35d131c1ea521388854",
+      "transactionHash": "0x1b839c7683e220f3a0ebb9d6bafc4f0aab31ac7c12dacbce9d0bcaa285473aed",
+      "blockNumber": "61916188",
+      "arkivEntityKey": "0xba21a82597fa7591b6083a9b84018634d27605d9227fc4b31f9f3d54c8b090ed",
+      "arkivTransactionHash": "0x39db7ee31f5cac49ceb8c2b55ce2a93ab2325c353c1e4dae508e68be5270c9fe",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 8,
+      "address": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xe3197925d4e8506ac51a90e6baff4fc4f7315c64b15ce4a8a8ad4bd23e81ddc9",
+      "transactionHash": "0x5b2238b8e2c2cc78979cac71ca02be7cbc5b886294be28c263b4ee861111ccf4",
+      "blockNumber": "61916199",
+      "arkivEntityKey": "0xe1989c1410141b25b7d6e643b755a4b5d6296e67820b435b59abd5bad6a8bb1c",
+      "arkivTransactionHash": "0x137283362b21cfcbab5cfb2c44d98481945a52725bed8394123f8a76d20f1cad",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 9,
+      "address": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xb8805ade9f5f80fe14689b3f9e4e954b26a15687574bb452840698056e550437",
+      "transactionHash": "0xaa45a3c60e7d7f847d8ac592e8e3808bce49c270aa8a17935801adba06a339f2",
+      "blockNumber": "61916208",
+      "arkivEntityKey": "0x75b8e5ecb7e01e7450c7d4a847193ee47cc75165cfd0aeadb4d514af13f4c5ce",
+      "arkivTransactionHash": "0xfe98cc17c3b64a7144bb3449ac50657d7c9d998b5422d09fdecf1cb5e73a862d",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 10,
+      "address": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x35f543857545b17e711fb22a7c9535231457f49e9ec81d144cdc283005ef05c7",
+      "transactionHash": "0x41dbe1845f6ded5e375bc007824b1eaa120a07316f3a70dc078c212b854ebfed",
+      "blockNumber": "61916217",
+      "arkivEntityKey": "0x3377023a418381e0ceaf3e0408054fcf31c36532b32f13f1eb8abc749242edb1",
+      "arkivTransactionHash": "0xc54d0806bcdfb25fb06566e548366d9cf935a079978507529c4e21561a329a6a",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 11,
+      "address": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x89bdb66a195fab103cbc5abb4910305e1bb2e0fb388ed4948bf9da82e307c35d",
+      "transactionHash": "0x81b0982c823e2926d48024e7b8d54b3a91b0a6115d4f4063042353f6f4260b6f",
+      "blockNumber": "61916226",
+      "arkivEntityKey": "0x04192553a48c69f3fac67b23c50d5ecf1dbde74ae675e5a963538299984a6f87",
+      "arkivTransactionHash": "0x16fcb636b9f658db531a5f5e9124d307b739889a34cb6814aa357694d1742c59",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 12,
+      "address": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xac2672f1f30f95141479aa3b0dee5a5d2d0f0a6479a4f56aea6c15b47ca777ff",
+      "transactionHash": "0xac76ebb5a4dfa71b560c392010224fd96aa0dc6a784d4d8a83026d798e19af96",
+      "blockNumber": "61916235",
+      "arkivEntityKey": "0x619e9529bbe7ee5c7c6fd7143e0fe1e0ba0af94039908f1962f879ede822948b",
+      "arkivTransactionHash": "0xbb793882e5cf2a79ed122d6ab252e884135be09cfc7d6c5cbe47d4fc6324bdb6",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 13,
+      "address": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x125c0d7710c407e14b91cdf48fe834d73dc0414c5b59a5a7cfc27b2109bc3e30",
+      "transactionHash": "0x58292fec9aef5f05e0a604436cf1f91eb57954f97e8b1438564740064e3415c4",
+      "blockNumber": "61916243",
+      "arkivEntityKey": "0x0e054f3e1ac3b79b850713fc1f79da5668a8f9fb8cce2423e7ba7a03a0ee60a0",
+      "arkivTransactionHash": "0xb6d20ffd9fae90c717aa60530d3c695371eab24f725e6b779c1571ed29adcb74",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 14,
+      "address": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x8e889334349aa17366df52306a61b51d0e664019ee828d25bb3fc2448254f4c6",
+      "transactionHash": "0x9badfc3f39861573c3786c21d1e8facb3a149a5ce8cccb1a6826cc39dcb7f440",
+      "blockNumber": "61916251",
+      "arkivEntityKey": "0x8e55026bc38d7d0963a918727a313cef4ed160784592b05f1babd670b97aa391",
+      "arkivTransactionHash": "0x16026158eaf8db5d1023590b0a2a6476f43e76a0fd896566112fcf5a7640aa80",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 15,
+      "address": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xecb016b1276148e6c1ce1de5f9ab11f77d0aaadbb035d5c61db9ef19840a0deb",
+      "transactionHash": "0xebcabbfe576c020bdbca6ac94962ac952e1e56fe1bc167de4fd79cf0cfb45e92",
+      "blockNumber": "61916260",
+      "arkivEntityKey": "0xe81b78fa446a57a4ba330c1437d51d5fa4f56b380985946fea1158f869e2c849",
+      "arkivTransactionHash": "0x2b1ca58fd0f19561570c52c09384f5a4bedbd8eaf46e6a508d45ac686dcb164a",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 16,
+      "address": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x784e952732879be848d0d237e29871e464ea5f2fa3be4202df52bba1e2ad72b5",
+      "transactionHash": "0x0f748c62fb54f5f751f4857e9c291d050d36637f32f1c1f689d2475d04ba5414",
+      "blockNumber": "61916269",
+      "arkivEntityKey": "0x9c6b9d9f6bbfb4b0f1aade621852920c7c20f3b8f573635e68fd3d3bdc226a6f",
+      "arkivTransactionHash": "0x32a8956d0ea7f6f14749443ce552f30ff564397aac83454bcc341d7a6e6dded1",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 17,
+      "address": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x77aa883a13c1e489e6076b21b1662c679af570eac87b9353eb7ae6370b4ac941",
+      "transactionHash": "0xbb9d94e8b2c5fafaeefa706c5a13728f3757bccfc56bf2195640ef473888d494",
+      "blockNumber": "61916278",
+      "arkivEntityKey": "0x47cab2720b78ff0ce8f9fb19feb31938cb53695b7cb9dc74684317679c8007ce",
+      "arkivTransactionHash": "0xb1678002925ee1201091496e49ed9662184e9b52ffdeff910e38ec1cff1412f3",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 18,
+      "address": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x3301495282289dcdd76ca4638724d10f71fe997cbbc6cd91cf0c06efa169d065",
+      "transactionHash": "0x0607219906ae226b08c2eb2f28886466f5b8e840218f2bd1aa2385cbc3410643",
+      "blockNumber": "61916286",
+      "arkivEntityKey": "0xe216bd0e874f3ab6e0415556ac3b1e1ba39ed97ca7ebf88f133bc5eadc5875a6",
+      "arkivTransactionHash": "0xe584a39c8bf5b63c5608d07569e7a67772049bba2e1ab0ad199d18399eedd843",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 19,
+      "address": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0x220491527b015808eae485623565cf6606f231d4ae7e74a9bfc7b07172e7a24a",
+      "transactionHash": "0xb5da71b37d15624e5857ca3eab1283df83ff981277d9dcbe6ae0a17b6b6f9c7a",
+      "blockNumber": "61916295",
+      "arkivEntityKey": "0x06a1cc7fd2d0437bea203eca353424bd160897fffb36b936ab2366af48c2e3aa",
+      "arkivTransactionHash": "0x2028ce8664c5fe69b6effe1e3c7f45a2b2badf750fee0f6fa0e38da8382456ee",
+      "expiresAtBlock": "1059718"
+    },
+    {
+      "number": 20,
+      "address": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "mode": "encrypted",
+      "contributionBaseUnits": "0",
+      "weightBaseUnits": "1000000",
+      "ballotId": "0xf9449157678a36736328f3ae19d47518e2d9e85de4657d9d40c166214e21262e",
+      "transactionHash": "0x31946b8c3ba45cca597ee3627fc47abcdf6f9186141ce3373c258b8cdad9205c",
+      "blockNumber": "61916304",
+      "arkivEntityKey": "0xd063c2ba8f3a7a9b43568277d741d02e3b9a2e07123d737e11d7a875d74e5f3f",
+      "arkivTransactionHash": "0xa1a4a955362eab27aa5765c77d8c6ec844b072382deeef982d3fd319d6c048f1",
+      "expiresAtBlock": "1059718"
+    }
+  ],
+  "transactions": {
+    "usdcPool": {
+      "hash": "0xf29532cc869047fe1e4863da1724b0aac1b89d89c16582a3b331d03d1e31db1b",
+      "blockNumber": "61915792",
+      "contractAddress": "0x20cb7d0c8ca90d0518834adac2ff9062230313d0"
+    },
+    "lpModule": {
+      "hash": "0x5a4d700520b8ba3df48e2f3d2b6614b559db631be679685b97c02fb3358bb082",
+      "blockNumber": "61915801",
+      "contractAddress": "0xb6ad0ef6d25ff6c280e55c9d02590164193208c4"
+    },
+    "attachLP": {
+      "hash": "0x21081dfe3fe7773d8fa0ebc07976ac1613b7d4ce3590d28b61714e5bf233180d",
+      "blockNumber": "61915809",
+      "contractAddress": null
+    },
+    "propose:0": {
+      "hash": "0x60ce1f9655080aba6b85d2e178c3db843bb67b5091d37a071dc8e6f5f4528605",
+      "blockNumber": "61915817",
+      "contractAddress": null
+    },
+    "accept:0": {
+      "hash": "0xc73f8424f20a9aab414aafb7afa00de3eb742427420d373def1731b719dc5e90",
+      "blockNumber": "61915826",
+      "contractAddress": null
+    },
+    "propose:1": {
+      "hash": "0xbce553834fb0d60265564059afa2e36d4ccd92496d495f54527d206b363dfd1c",
+      "blockNumber": "61915835",
+      "contractAddress": null
+    },
+    "accept:1": {
+      "hash": "0xc5ecf5b7bb4eb7d1350e1459a165d295b9b7a00eaed47541719d4718016d70d4",
+      "blockNumber": "61915843",
+      "contractAddress": null
+    },
+    "propose:2": {
+      "hash": "0x80b78a52ea80033f00dd79609e386b00bfef11f125ed34dc501883a4c993f26c",
+      "blockNumber": "61915851",
+      "contractAddress": null
+    },
+    "accept:2": {
+      "hash": "0x9756e4f51e0b6507c8928ef516e8eea51520b8c7b3cbf7e57a82f3da6d443256",
+      "blockNumber": "61915860",
+      "contractAddress": null
+    },
+    "propose:3": {
+      "hash": "0xccaf741ff647484ddca6ff6af8b41804ca44e5f4d1febf70f2b07fbfcaa4de78",
+      "blockNumber": "61915869",
+      "contractAddress": null
+    },
+    "accept:3": {
+      "hash": "0xfb341accda14d0a3d1947546231a6e0f989b2b83291d7badfc70c8bf1901c354",
+      "blockNumber": "61915877",
+      "contractAddress": null
+    },
+    "propose:4": {
+      "hash": "0x27d2632cd5b205843da834424db74471b68f74d3a1010d6c84c30243fb9ab3b3",
+      "blockNumber": "61915887",
+      "contractAddress": null
+    },
+    "accept:4": {
+      "hash": "0x0adecf387a64b42aedbb54a8e0dae84a16b61de2856ad480b3745a5ab61fefcc",
+      "blockNumber": "61915896",
+      "contractAddress": null
+    },
+    "propose:5": {
+      "hash": "0xd5711113b149bb3cc32fda6eb17949dd3007a7de70ca4508d10b2decd887ad8f",
+      "blockNumber": "61915905",
+      "contractAddress": null
+    },
+    "accept:5": {
+      "hash": "0x4e431ce8b06fbda9e816f67bd3e235cbe957cb804456e3526a61c059fd808b6b",
+      "blockNumber": "61915913",
+      "contractAddress": null
+    },
+    "propose:6": {
+      "hash": "0xbc3240894432d74899806ab0010c2ea6a75f22187464e09ee94e53cc8d4fce01",
+      "blockNumber": "61915922",
+      "contractAddress": null
+    },
+    "accept:6": {
+      "hash": "0x7217d3dc46df4136af302cae066785b1c746101301fa3219f234ea0275556156",
+      "blockNumber": "61915932",
+      "contractAddress": null
+    },
+    "propose:7": {
+      "hash": "0x3811fdfe0bf7e530c78d9ff91a8202fd960ffbaa095373289eb73e41196238ab",
+      "blockNumber": "61915941",
+      "contractAddress": null
+    },
+    "accept:7": {
+      "hash": "0xb8725eba6a863a3fa5988b76ef60d7590bd688dc7e8653fdf0bfa35d8d60a9f2",
+      "blockNumber": "61915950",
+      "contractAddress": null
+    },
+    "propose:8": {
+      "hash": "0x7f73b80df85f7a247a6b88294d7c7418960f4186019c923d3f770e7c7f0f248e",
+      "blockNumber": "61915958",
+      "contractAddress": null
+    },
+    "accept:8": {
+      "hash": "0x8b2c74dfc7ca450a0826c3692cebd105b8d9630f0d82e96c017eefa2df4bc3b8",
+      "blockNumber": "61915967",
+      "contractAddress": null
+    },
+    "propose:9": {
+      "hash": "0xe51209f40c4db68648c92957df214acb8a271e55c10d77306d60e11903b07209",
+      "blockNumber": "61915976",
+      "contractAddress": null
+    },
+    "accept:9": {
+      "hash": "0x5ae79e7b137b7ce354e87727dbdaedd81134981956dcad5b9fba8da3c7561afd",
+      "blockNumber": "61915985",
+      "contractAddress": null
+    },
+    "propose:10": {
+      "hash": "0x178622b21bf8a70400a2433edda06c660322c0a06f5bfcb5f923bcde18be6950",
+      "blockNumber": "61915993",
+      "contractAddress": null
+    },
+    "accept:10": {
+      "hash": "0x413c613ea30859d91b57436b5a27dcd05bf0edaa221e107c351d036dbf8dc09c",
+      "blockNumber": "61916003",
+      "contractAddress": null
+    },
+    "propose:11": {
+      "hash": "0x5fd662327fe7444b3700494b7531b8cdcd89d3a09ef45bcd7644a85e7682027d",
+      "blockNumber": "61916012",
+      "contractAddress": null
+    },
+    "accept:11": {
+      "hash": "0x744ad0ef0e744515803981a12cb29dcf7d97348c82c0cc29755a5cbd74586f4f",
+      "blockNumber": "61916021",
+      "contractAddress": null
+    },
+    "propose:12": {
+      "hash": "0xedeecace78f355d4179fd769fb7f0366e78602a52ed62f49ba35bc9765b4be4a",
+      "blockNumber": "61916029",
+      "contractAddress": null
+    },
+    "accept:12": {
+      "hash": "0x1da3675097e91d4643e31a541e3ad0b7ad35043dc77ac7139e2f839aa1ea7f82",
+      "blockNumber": "61916037",
+      "contractAddress": null
+    },
+    "propose:13": {
+      "hash": "0xa46337007ee5e3c410d5708f602faa92aac6389d5a102416b99d9b27847cafee",
+      "blockNumber": "61916046",
+      "contractAddress": null
+    },
+    "accept:13": {
+      "hash": "0xfb920d06d260bf83621442adab8fda583e7754bf0553558f1e7d82f7a49addcc",
+      "blockNumber": "61916055",
+      "contractAddress": null
+    },
+    "propose:14": {
+      "hash": "0x2ee49897c03c93815c5809d47229b38f045bbc053025c3c25444ac832756ba22",
+      "blockNumber": "61916065",
+      "contractAddress": null
+    },
+    "accept:14": {
+      "hash": "0x71921f7df59390a0fe8e19bf2dd3c4d3d75085620f008961ba228756f24cf3c2",
+      "blockNumber": "61916074",
+      "contractAddress": null
+    },
+    "enableArkiv": {
+      "hash": "0x9b02d3bb07f2dfcdead68a2bca4601b59b857529ba5b2ebf9b044c204c141fb7",
+      "blockNumber": "61916083",
+      "contractAddress": null
+    },
+    "openVoting": {
+      "hash": "0x7ccbbed6475202cc8cc06c5ca4ba5e535f71f7843d76b3ceb385d70583384ada",
+      "blockNumber": "61916092",
+      "contractAddress": null
+    },
+    "USDC:approveSponsor": {
+      "hash": "0x61bcef4fb64b1bcc723d9b7c801d30a23c49fe6eaf09f8c7bcea5c6db514fc46",
+      "blockNumber": "61916100",
+      "contractAddress": null
+    },
+    "USDC:sponsor": {
+      "hash": "0x705dab1ede6c7336a03e0f37d43d95dd1a3546eb8bc7617f4a24148deaa74f62",
+      "blockNumber": "61916109",
+      "contractAddress": null
+    },
+    "USDC:fundPublic:0": {
+      "hash": "0x1227d30abe3e1448be264bedeac345d62d751410b608cdf118dfd20b591519ef",
+      "blockNumber": "61916117",
+      "contractAddress": null
+    },
+    "USDC:cast:0": {
+      "hash": "0xaac8518a6fe1070657cb79b1324f6457dd3ecac69305e7714d74364ad3fa80a6",
+      "blockNumber": "61916126"
+    },
+    "USDC:fundPublic:1": {
+      "hash": "0xed5b4422ded489773c899c213dc3f70ff0c5bc56ef1d268602a00647cb274194",
+      "blockNumber": "61916135",
+      "contractAddress": null
+    },
+    "USDC:cast:1": {
+      "hash": "0xb9c462ff6f335d97e3f236c22ce962c6dfff576cc79db11044f59c458a82e416",
+      "blockNumber": "61916144"
+    },
+    "USDC:cast:2": {
+      "hash": "0x682637ec60d8e5103fa13f03f861877a9056ac1ab5e085a9e2a4cd44689ab73e",
+      "blockNumber": "61916153"
+    },
+    "USDC:cast:3": {
+      "hash": "0x53375737c64900f7988b0f0c8bdf8f5019a6f43a000e42a634e7be80c17e3b43",
+      "blockNumber": "61916161"
+    },
+    "USDC:cast:4": {
+      "hash": "0x1f9bdf7c399525793c1dd8e84dd70035446a56dd32354cd75f9b352fa57182de",
+      "blockNumber": "61916170"
+    },
+    "USDC:cast:5": {
+      "hash": "0xfe2940cb4a056578ded8585b06b90b347acc3b8fcbf4ec375c7446514ecf7f0e",
+      "blockNumber": "61916180"
+    },
+    "USDC:cast:6": {
+      "hash": "0x1b839c7683e220f3a0ebb9d6bafc4f0aab31ac7c12dacbce9d0bcaa285473aed",
+      "blockNumber": "61916188"
+    },
+    "USDC:cast:7": {
+      "hash": "0x5b2238b8e2c2cc78979cac71ca02be7cbc5b886294be28c263b4ee861111ccf4",
+      "blockNumber": "61916199"
+    },
+    "USDC:cast:8": {
+      "hash": "0xaa45a3c60e7d7f847d8ac592e8e3808bce49c270aa8a17935801adba06a339f2",
+      "blockNumber": "61916208"
+    },
+    "USDC:cast:9": {
+      "hash": "0x41dbe1845f6ded5e375bc007824b1eaa120a07316f3a70dc078c212b854ebfed",
+      "blockNumber": "61916217"
+    },
+    "USDC:cast:10": {
+      "hash": "0x81b0982c823e2926d48024e7b8d54b3a91b0a6115d4f4063042353f6f4260b6f",
+      "blockNumber": "61916226"
+    },
+    "USDC:cast:11": {
+      "hash": "0xac76ebb5a4dfa71b560c392010224fd96aa0dc6a784d4d8a83026d798e19af96",
+      "blockNumber": "61916235"
+    },
+    "USDC:cast:12": {
+      "hash": "0x58292fec9aef5f05e0a604436cf1f91eb57954f97e8b1438564740064e3415c4",
+      "blockNumber": "61916243"
+    },
+    "USDC:cast:13": {
+      "hash": "0x9badfc3f39861573c3786c21d1e8facb3a149a5ce8cccb1a6826cc39dcb7f440",
+      "blockNumber": "61916251"
+    },
+    "USDC:cast:14": {
+      "hash": "0xebcabbfe576c020bdbca6ac94962ac952e1e56fe1bc167de4fd79cf0cfb45e92",
+      "blockNumber": "61916260"
+    },
+    "USDC:cast:15": {
+      "hash": "0x0f748c62fb54f5f751f4857e9c291d050d36637f32f1c1f689d2475d04ba5414",
+      "blockNumber": "61916269"
+    },
+    "USDC:cast:16": {
+      "hash": "0xbb9d94e8b2c5fafaeefa706c5a13728f3757bccfc56bf2195640ef473888d494",
+      "blockNumber": "61916278"
+    },
+    "USDC:cast:17": {
+      "hash": "0x0607219906ae226b08c2eb2f28886466f5b8e840218f2bd1aa2385cbc3410643",
+      "blockNumber": "61916286"
+    },
+    "USDC:cast:18": {
+      "hash": "0xb5da71b37d15624e5857ca3eab1283df83ff981277d9dcbe6ae0a17b6b6f9c7a",
+      "blockNumber": "61916295"
+    },
+    "USDC:cast:19": {
+      "hash": "0x31946b8c3ba45cca597ee3627fc47abcdf6f9186141ce3373c258b8cdad9205c",
+      "blockNumber": "61916304"
+    }
+  }
+}

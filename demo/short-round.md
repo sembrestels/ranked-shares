@@ -58,6 +58,14 @@ node --import tsx scripts/prove-short-demo.ts
 
 These commands resume this specific pool. Private state, encrypted voter backups,
 storage journals and proof caches use separate `demo/.local/short-round-*` files.
+
+To create another round of the same shape instead of resuming this one, add
+`--run NAME` to every command; `--open-seconds N` (600 to 604800) sets the voting
+window when `prepare` first creates that run. Each run keeps its own
+`demo/.local/NAME-*` files and writes `demo/NAME-deployment.json`. The organizer
+needs 20 test EURC from the [Circle faucet](https://faucet.circle.com/) per run.
+The open six hour round `0xc1e005c69ff5b26eb21d8d64980387800f4f4501` was created
+this way with `--run open-round --open-seconds 21600` on 13 September 2026.
 Signed operator and voter transactions are persisted before broadcast. Keep those
 files backed up privately and run only one instance of each operator at a time.
 

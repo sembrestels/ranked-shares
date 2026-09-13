@@ -46,7 +46,7 @@ export function encodeVault(path: string, aad: string, value: unknown) {
   const data = Buffer.concat([c.update(json(value)), c.final()]);
   save(path, { version: 2, cipher: "aes-256-gcm", kdf: "scrypt", salt: salt.toString("hex"), iv: iv.toString("hex"), tag: c.getAuthTag().toString("hex"), data: data.toString("hex") });
 }
-function encryptCre(pk: Hex, address: Address, ranks: number[]): Hex {
+export function encryptCre(pk: Hex, address: Address, ranks: number[]): Hex {
   const sk = toHex(scalar(secp256k1.Point.Fn.ORDER), { size: 32 });
   const ephemeral = secp256k1.getPublicKey(hexToBytes(sk), true);
   const shared = secp256k1.getSharedSecret(hexToBytes(sk), hexToBytes(pk), true).slice(1);

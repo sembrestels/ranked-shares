@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { hexToBytes, toHex } from "viem";
 import { artifact, local, master, operator, save } from "../../cre/scripts/demo";
-import { loadShort, publishShort, shortStatePath } from "../../cre/scripts/short-round-demo";
+import { loadShort, publishShort, runName, shortStatePath } from "../../cre/scripts/short-round-demo";
 import { deriveSk } from "../src/core/key";
 import { read, readPoolSnapshot } from "../src/core/chain";
 import { rebuild } from "../src/core/state";
@@ -26,7 +26,7 @@ async function main() {
     const plan = rebuild(snapshot, deriveSk(master(), hexToBytes(snapshot.keySalt)));
     if (plan.tallyError) throw Error(plan.tallyError);
     const jobId = `${snapshot.inputsRoot}:${snapshot.transcriptHash}:${plan.profile.name}`;
-    const cachePath = resolve(local, "short-round-proofs.json");
+    const cachePath = resolve(local, `${runName}-proofs.json`);
     const cache = existsSync(cachePath) ? JSON.parse(readFileSync(cachePath, "utf8")) : { jobId, proofs: {} };
     if (cache.jobId !== jobId) throw Error("Saved proofs belong to different committed inputs.");
     const prover = await Prover.create(plan.profile.name as "default", 4);

@@ -32,6 +32,35 @@ The product includes round, project, proposal, voting and liquidity pages on top
 
 **Frontend.** A React Router 7 single-page app with React 19, Tailwind 4, wagmi and viem, served with a small Deno read API. It covers rounds, projects, proposals, voting and a liquidity page for registering positions and watching accrued weight.
 
+## Architecture diagram
+
+`docs/design/brand/architecture.png` (3200×2240), source `architecture.html` beside it.
+Required by the Arc DeFi prize together with the frontend, backend and video.
+
 ## Slides
 
 Pitch canvas: https://claude.ai/code/artifact/423e112e-2e25-478b-a81c-0501107f2e74
+
+## How AI was used
+
+RankedShares was built by one person working with Claude Code over ten days, from the first Foundry scaffold on 2026-09-04 to the submission on 2026-09-13. The agent wrote most of the code and documents. The human chose the sponsors and the voting rule, accepted or rejected every design decision, held every key, and ran every live transaction.
+
+**Spec, plan, then subagents.** Every feature followed the same path, and the artifacts are in the repo under `docs/superpowers/`. A brainstorm note captured the problem and the options. A design spec fixed what would be built. An implementation plan broke it into tasks with tests. Subagents then executed the plan task by task while the human slept, each task ending in passing tests and a review pass, and the branch was fast-forward merged into master the next morning. Seven specs and nine plans cover the PB-EAR contract, the three sealed-ballot verifiers, the round pages and the Uniswap LP module.
+
+**Verification instead of trust.** The tally is an implementation of a published algorithm (Aziz and Lee, AAAI 2021), and an agent can misread a paper as easily as a person. So the agent first wrote a Python reference implementation of PB-EAR that mirrors the contract's integer arithmetic, then a differential fuzz test that calls it through Foundry's ffi and compares every tally step, plus a brute-force checker for the paper's proportionality guarantee. The same discipline applies to the sealed ballots: the CRE enclave, the Noir circuits and the ZisK guest all consume one encrypted ballot format and must agree on the same transcript, so each verifier checks the others.
+
+**A design process the agent can follow.** The frontend was designed with a Double Diamond process and a Lean UX inner loop, adopted by a decision record on 2026-09-05. Sixteen open-source agent skills for proto-personas, jobs to be done, journey maps, story mapping, user stories with Gherkin criteria, design tokens, atomic design, Nielsen heuristics and WCAG 2.2 audits were vendored into the repo, pinned by hash and audited for prompt injection before use. The agent drafted personas, jobs, journeys, hypotheses, a story map and eight story files, then a design system and token set, and the human closed each gate. Before a screen was called done the agent ran heuristic and accessibility reviews against it, and the findings became new stories.
+
+**Decisions stay with the human.** Twelve records in `docs/decisions/` cover the framework, hosting, wallet library, Swarm storage, CRE weighting, Arkiv ballots and the navigation model. The agent writes a record as proposed. Only the decision-maker sets it to accepted, and accepted records are never edited, so the reasoning behind the build is readable without the chat history.
+
+**Everything that touches money is manual.** The runbooks for the Arc deployment and the CRE demo say which commands the agent has not run. Private keys, CRE registry writes, secret uploads and testnet deployments were executed by the human from the runbook.
+
+**Also drafted with AI.** The brand logo and cover, the pitch canvas, the Uniswap feedback report and this submission text were drafted by the agent and edited by the human.
+
+## AI usage (short form)
+
+Built by one person with Claude Code in ten days. The agent wrote most of the code and docs; the human chose the sponsors and the voting rule, accepted every decision, held the keys and ran every live transaction. Each feature went brainstorm, spec, plan, then subagent implementation with tests. The paper trail is in the repo: brainstorms, specs and plans in `docs/superpowers/`; twelve decision records in `docs/decisions/` that the agent proposes and only the human accepts; personas, journeys, story map, stories, design system, tokens and the heuristic and WCAG reviews in `docs/design/`, produced with sixteen vendored agent skills pinned in `skills-lock.json`. The PB-EAR tally is checked by an AI-written Python reference through a differential fuzz, and the three sealed-ballot verifiers cross-check each other. Runbooks in `docs/superpowers/notes/` list what the agent did not run.
+
+## Arc integration (short form)
+
+Arc is the settlement chain for every round. The pool keeps one invariant, total voting weight equals the stablecoin balance, and on Arc the budget, the voting weight, each proposal's cost and the gas are all USDC, so a round runs in one unit from the first proposal to the last claim with no conversion anywhere. A second pool runs the same flow in EURC. Rounds are created from the browser at `/deploy`, where Arc Testnet (chain 5042002) is the default and the official USDC and EURC addresses from the Arc contract directory are preselected; funded projects claim directly from the contract. Because Arc has no official Uniswap deployment, the LP voting demo ships forge scripts that deploy the pinned v4 core and periphery on Arc against Arc's existing Permit2 and seed DAO/USDC and DAO/EURC pools, and the Chainlink CRE price and tally workflows target the Arc RPC and write their reports to receivers on Arc. The ZisK verifier was also exercised against the Arc testnet EVM with a `cast call --create` probe before the receivers were built. The Arc addresses, funding amounts and deployment order are in `docs/superpowers/notes/2026-09-13-arc-lp-demo-runbook.md`; the web configuration is in `web/README.md`.

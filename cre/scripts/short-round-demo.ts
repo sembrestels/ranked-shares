@@ -13,10 +13,16 @@ import { ARKIV_RPC, ballotAbi, payloadQuery, payloadReply, rosterPage } from "..
 import { recoverPayload } from "../../prover/src/core/arkiv";
 import { ballotStorageWorker, type StorageJournal } from "./lib/ballot-storage";
 
-export const shortStatePath = resolve(local, "short-round-state.json");
-const vaultPath = resolve(local, "short-round-voters.encrypted.json");
-const storagePath = resolve(local, "short-round-arkiv.json");
-const receiptPath = resolve(root, "demo/short-round-deployment.json");
+// `--run NAME` selects an independent run (state, vault, journal, receipt); the
+// default resumes the original short round. `--open-seconds N` only applies to a
+// run whose deadline has not been fixed yet.
+const flag = (name: string) => { const i = process.argv.indexOf(name); return i > 0 ? process.argv[i + 1] : undefined; };
+export const runName = flag("--run") ?? "short-round";
+if (!/^[a-z0-9-]{1,40}$/.test(runName)) throw Error("Run names use lowercase letters, digits and dashes.");
+export const shortStatePath = resolve(local, `${runName}-state.json`);
+const vaultPath = resolve(local, `${runName}-voters.encrypted.json`);
+const storagePath = resolve(local, `${runName}-arkiv.json`);
+const receiptPath = resolve(root, `demo/${runName}-deployment.json`);
 const unit = 1_000_000n;
 const abi = artifact("NoirRankedShares").abi;
 const digest = (value: string | Uint8Array) => createHash("sha256").update(value).digest("hex");
@@ -30,7 +36,7 @@ function shuffle<T>(items: T[]): T[] {
   for (let i = result.length - 1; i > 0; i--) { const j = randomInt(i + 1); [result[i], result[j]] = [result[j], result[i]]; }
   return result;
 }
-function randomRanking() {
+export function randomRanking() {
   // Broad agreement on affordable shared equipment and facilities, with varied
   // ordering and ties inside each priority group. Competition ranks stay valid.
   const priorities = [shuffle([9, 3, 0, 7, 10, 11]), shuffle([5, 2, 6, 14]), shuffle([1, 4, 8, 12, 13])];
@@ -49,7 +55,8 @@ function randomRanking() {
 export function publishShort(state: any) {
   save(receiptPath, {
     version: 1, demo: true, simulationOnly: true, chainId: ARC,
-    description: "20 controlled demo voters: 2 public contribution votes and 18 encrypted sponsored-seat votes. Original Urbe Hub texts; on-chain requests divided by 1000 for a 20 test EURC budget.",
+    description: `20 controlled demo voters: 2 public contribution votes and 18 encrypted sponsored-seat votes. Original Urbe Hub texts; on-chain requests divided by 1000 for a 20 test EURC budget. Voting window ${state.openSeconds ?? 600} seconds.`,
+    run: runName, openSeconds: state.openSeconds ?? 600,
     organizer: state.organizer, recipient: state.recipient, createdAt: state.createdAt,
     pool: state.rounds.EURC.pool, round: state.rounds.EURC,
     deadline: state.deadline, deadlineUtc: state.deadline ? new Date(Number(state.deadline) * 1000).toISOString() : undefined,
@@ -63,7 +70,7 @@ export function publishShort(state: any) {
   });
 }
 export function loadShort() { return readJson(shortStatePath); }
-function voters(state: any): DemoVoter[] { return decodeVault(vaultPath, `${ARC}:${state.createdAt}:short-round`); }
+function voters(state: any): DemoVoter[] { return decodeVault(vaultPath, `${ARC}:${state.createdAt}:${runName}`); }
 
 function prepare() {
   if (existsSync(shortStatePath)) return loadShort();
@@ -73,9 +80,11 @@ function prepare() {
   const originals = readJson(resolve(root, "swarm/pool-import-plan.json")).rounds.find((r: any) => r.currency === "EURC").proposals;
   const costs = originals.map((p: any) => BigInt(p.amountBaseUnits) / 1000n) as bigint[];
   if (costs.length !== 15 || costs.reduce((a, b) => a + b, 0n) !== 32_250_000n) throw Error("Unexpected source budgets.");
+  const openSeconds = Number(flag("--open-seconds") ?? 600);
+  if (!Number.isInteger(openSeconds) || openSeconds < 600 || openSeconds > 7 * 86400) throw Error("--open-seconds must be between 600 and 604800.");
   const keySalt = toHex(randomBytes(32));
   const key = pubkey(deriveSk(master(), hexToBytes(keySalt)));
-  const state: any = { version: 1, demo: true, chainId: ARC, createdAt: new Date().toISOString(), deployer: account.address, organizer: account.address,
+  const state: any = { version: 1, demo: true, chainId: ARC, run: runName, openSeconds, createdAt: new Date().toISOString(), deployer: account.address, organizer: account.address,
     recipient: previous.recipient, rpc: previous.rpc, sharedContracts: previous.sharedContracts,
     rounds: { EURC: { token: EURC, kind: "noir", keySalt, tallierPkX: String(key.x), tallierPkY: String(key.y) }, USDC: previous.rounds.USDC },
     contracts: {}, transactions: {}, proposals: { EURC: [] }, ballots: { EURC: [] }, costs: costs.map(String),
@@ -94,7 +103,7 @@ function prepare() {
   if (result.funded.length < 8) throw Error("The generated demo does not fund enough proposals.");
   state.expectedFunded = result.funded;
   state.expectedSpent = String(result.funded.reduce((total, id) => total + costs[id], 0n));
-  encodeVault(vaultPath, `${ARC}:${state.createdAt}:short-round`, list);
+  encodeVault(vaultPath, `${ARC}:${state.createdAt}:${runName}`, list);
   save(shortStatePath, state); publishShort(state);
   console.log(`Prepared 20 distinct rankings; expected ${result.funded.length} funded proposals, ${Number(state.expectedSpent) / 1e6} EURC allocated.`);
   return state;
@@ -120,7 +129,7 @@ async function deployAndVote(state: any, list: DemoVoter[]) {
     if (!response.ok || await response.text() !== JSON.stringify({ version: 1, title: row.title, body: row.body, attachments: [] })) throw Error("Public proposal verification failed.");
   }
   if (!state.transactions["EURC:sponsor"] && await op.pub.readContract({ address: EURC, abi: erc20Abi, functionName: "balanceOf", args: [op.account.address] }) < 20n * unit) throw Error("Organizer needs 20 test EURC.");
-  if (!state.deadline) { state.deadline = String((await op.pub.getBlock()).timestamp + 600n); op.remember(); }
+  if (!state.deadline) { state.deadline = String((await op.pub.getBlock()).timestamp + BigInt(state.openSeconds ?? 600)); op.remember(); }
   const helpers = state.sharedContracts;
   round.pool = await op.deploy("eurcPool", "NoirRankedShares", [EURC, state.organizer, BigInt(state.deadline), {
     forwarder: MOCK_FORWARDER, workflowOwner: zeroAddress, workflowName: "0x00000000000000000000", coordinator: state.deployer,
@@ -191,7 +200,7 @@ async function close(state: any) {
 }
 async function report(state: any) {
   const op = operator(state, state.rpc, shortStatePath), pool = state.rounds.EURC.pool;
-  if (!await op.pub.readContract({ address: pool, abi, functionName: "resultReported" })) await simulate(state, state.rpc, "EURC", true, resolve(local, "short-round-cre"));
+  if (!await op.pub.readContract({ address: pool, abi, functionName: "resultReported" })) await simulate(state, state.rpc, "EURC", true, resolve(local, `${runName}-cre`));
   if (!await op.pub.readContract({ address: pool, abi, functionName: "resultReported" })) throw Error("CRE result not reported yet.");
   const funded = await op.pub.readContract({ address: pool, abi, functionName: "provisionalResult" }) as bigint[];
   const reports = await op.pub.getContractEvents({ address: pool, abi, eventName: "ProvisionalResult", fromBlock: BigInt(state.transactions.eurcPool.blockNumber), toBlock: "latest" });
@@ -201,7 +210,7 @@ async function report(state: any) {
 }
 async function main() {
   const command = process.argv[2];
-  if (!["prepare", "deploy-vote", "sync", "verify", "close", "report", "status"].includes(command)) throw Error("Use prepare|deploy-vote|sync|verify|close|report|status.");
+  if (!["prepare", "deploy-vote", "sync", "verify", "close", "report", "status"].includes(command)) throw Error("Use prepare|deploy-vote|sync|verify|close|report|status [--run NAME] [--open-seconds N].");
   const state = prepare(), list = voters(state); verifyBackup(state, list);
   if (command === "deploy-vote") await deployAndVote(state, list);
   if (command === "sync") { await sync(state); await verify(state, list); }
