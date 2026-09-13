@@ -1,0 +1,14 @@
+{
+  "testedAt": "2026-09-13T04:31:09.152Z",
+  "environment": "local Anvil, simulated CRE TEE",
+  "chainId": 5042002,
+  "eurcPool": "0x2c517696911ef8ea8e68368ff58b9f3253d12c3f",
+  "usdcPool": "0xbf9fb566bf173de1d585cf1b4166e4bffa2c20c4",
+  "encryptedBallots": 1,
+  "resultReported": true,
+  "provisionalFundedProjects": [
+    "0",
+    "1"
+  ],
+  "note": "Real Noir verifiers deployed; this CLI rehearsal checks CRE reporting. The separate prover E2E test checks Proven finality."
+}

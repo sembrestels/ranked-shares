@@ -35,12 +35,20 @@ test("private upload shares only with both reviewers and exposes no text or atta
     vi.fn(),
   );
   const descriptor = parsePrivateDescriptor(objects.get(uploaded.reference.slice(2))!)!;
+  expect(uploaded.reference).toMatch(/^0x[0-9a-f]{64}$/);
+  expect(descriptor.access.encryptedReference).toHaveLength(128);
+  expect(descriptor.access.historyReference).toHaveLength(128);
   expect(descriptor.proposerPublicKey).toBe(proposerKey);
   expect(storage.actUploadData).toHaveBeenCalledWith(expect.any(Uint8Array), [
     proposerKey,
     organizerKey,
   ], { publisher: "identity" });
   const key = await reviewKey(storage, descriptor);
+  expect(storage.actDownloadData).toHaveBeenLastCalledWith(
+    descriptor.access.encryptedReference,
+    descriptor.access.historyReference,
+    descriptor.access.publisherPubKey,
+  );
   for (const object of objects.values()) {
     const raw = new TextDecoder().decode(object);
     expect(raw).not.toContain(draft.title);
@@ -74,6 +82,57 @@ test("private upload shares only with both reviewers and exposes no text or atta
       publicOnly: true,
     })).body,
   ).toBe(draft.body);
+});
+
+test("ACT metadata accepts full references without allowing encrypted on-chain or payload references", async () => {
+  const { storage, objects } = mockSwarm(proposerKey);
+  const uploaded = await uploadPrivateProposal(storage, draft, context, vi.fn());
+  const descriptor = JSON.parse(
+    new TextDecoder().decode(objects.get(uploaded.reference.slice(2))!),
+  );
+  const parse = (value: unknown) =>
+    parsePrivateDescriptor(new TextEncoder().encode(JSON.stringify(value)));
+  for (const length of [64, 128]) {
+    const ref = "Ab".repeat(length / 2);
+    const parsed = parse({
+      ...descriptor,
+      access: {
+        ...descriptor.access,
+        encryptedReference: `0x${ref}`,
+        historyReference: `0x${ref}`,
+      },
+    })!;
+    expect(parsed.access.encryptedReference).toBe(ref.toLowerCase());
+    expect(parsed.access.historyReference).toBe(ref.toLowerCase());
+  }
+  for (
+    const bad of [
+      undefined,
+      null,
+      123,
+      "",
+      "ab".repeat(33),
+      "ab".repeat(63),
+      "ab".repeat(65),
+      "zz".repeat(64),
+    ]
+  ) {
+    expect(() => parse({ ...descriptor, access: { ...descriptor.access, historyReference: bad } }))
+      .toThrow("Invalid ACT history reference");
+    expect(() =>
+      parse({ ...descriptor, access: { ...descriptor.access, encryptedReference: bad } })
+    )
+      .toThrow("Invalid ACT encrypted reference");
+  }
+  expect(() =>
+    parse({
+      ...descriptor,
+      payload: { ...descriptor.payload, reference: "ab".repeat(64) },
+    })
+  ).toThrow("Expected a public 64-character");
+  await expect(readProposalContent(storage, `0x${"ab".repeat(64)}`)).rejects.toThrow(
+    "Expected a public 64-character",
+  );
 });
 
 test("organizer edits preserve the proposer key; publishing the latest key cannot reveal an earlier draft", async () => {

@@ -63,6 +63,14 @@ function hexValue(value: unknown, length: number): Hex {
   return value.toLowerCase() as Hex;
 }
 
+function actReference(value: unknown, field: "encrypted reference" | "history reference"): string {
+  const reference = typeof value === "string" ? value.replace(/^0x/, "").toLowerCase() : "";
+  if (!/^(?:[0-9a-f]{64}|[0-9a-f]{128})$/.test(reference) || /^0+$/.test(reference)) {
+    throw new Error(`Invalid ACT ${field}.`);
+  }
+  return reference;
+}
+
 export function parsePrivateDescriptor(data: Uint8Array): PrivateDescriptor | undefined {
   if (data.byteLength > PREVIEW_BYTES) {
     throw new Error("This proposal is too large to preview. Download its content to review it.");
@@ -74,11 +82,7 @@ export function parsePrivateDescriptor(data: Uint8Array): PrivateDescriptor | un
     !Number.isSafeInteger(d.chainId) || d.chainId <= 0 || !isAddress(d.pool) ||
     !isAddress(d.proposer)
   ) throw new Error("Invalid private proposal descriptor.");
-  const encryptedReference = String(d.access?.encryptedReference ?? "").replace(/^0x/, "")
-    .toLowerCase();
-  if (!/^(?:[0-9a-f]{64}|[0-9a-f]{128})$/.test(encryptedReference)) {
-    throw new Error("Invalid ACT reference.");
-  }
+  const encryptedReference = actReference(d.access?.encryptedReference, "encrypted reference");
   const keyHash = hexValue(d.keyHash, 32);
   if (keyHash === ZERO_KEY) throw new Error("Missing proposal key commitment.");
   return {
@@ -96,7 +100,9 @@ export function parsePrivateDescriptor(data: Uint8Array): PrivateDescriptor | un
     },
     access: {
       encryptedReference,
-      historyReference: publicReference(d.access?.historyReference).slice(2),
+      // SDK 0.4.0 encrypts the history manifest by default (128 hex characters).
+      // Its key opens ACT metadata, not the proposal key wrapped for the reviewers.
+      historyReference: actReference(d.access?.historyReference, "history reference"),
       publisherPubKey: publicKey(d.access?.publisherPubKey),
     },
   };
@@ -253,8 +259,8 @@ export async function uploadPrivateProposal(
       publisherPubKey: access.publisherPubKey,
     },
   };
-  // This descriptor contains public metadata and an ACT-wrapped reference, never
-  // the ordinary encrypted Swarm reference that includes a plaintext key.
+  // Preserve the complete ACT references, including the history manifest key.
+  // They cannot reveal the ACT-protected document key without a reviewer's key.
   const encoded = encoder.encode(JSON.stringify(descriptor));
   parsePrivateDescriptor(encoded);
   const stored = await storage.uploadData(encoded, { encrypt: false });

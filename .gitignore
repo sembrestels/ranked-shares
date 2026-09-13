@@ -3,6 +3,7 @@ out/
 broadcast/
 .env
 .env.lp-demo
+demo/.local/
 __pycache__/
 reference/noir/tools/node_modules/
 reference/noir/tools/package-lock.json

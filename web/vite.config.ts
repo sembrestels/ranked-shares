@@ -35,7 +35,10 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
-    fs: { allow: [new URL("..", import.meta.url).pathname] },
+    fs: {
+      allow: [new URL("..", import.meta.url).pathname],
+      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/demo/.local/**"],
+    },
   },
   // The Noble packages are inlined so the resolver above sees their nested
   // imports too; externalised, Deno would load them from cre/node_modules.

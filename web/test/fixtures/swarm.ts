@@ -7,7 +7,12 @@ import type { PrivateStorage } from "../../app/lib/private-proposals";
 export function mockSwarm(initialPublicKey: string) {
   let identity = initialPublicKey;
   const objects = new Map<string, Uint8Array>();
-  const access = new Map<string, { key: Uint8Array; publisher: string; grantees: string[] }>();
+  const access = new Map<string, {
+    key: Uint8Array;
+    publisher: string;
+    grantees: string[];
+    historyReference: string;
+  }>();
   const storage = {
     get connectionInfo() {
       return {
@@ -40,24 +45,29 @@ export function mockSwarm(initialPublicKey: string) {
       return { name: "attachment.enc", data: new Uint8Array(data) };
     }),
     actUploadData: vi.fn(async (key: Uint8Array, grantees: string[]) => {
-      const encryptedReference = keccak256(toHex(`act-${access.size}`)).slice(2);
+      // Swarm ID 0.4.0 encrypts ACT manifests and history by default, producing
+      // 64-byte (128 hex character) references, unlike ordinary public uploads.
+      const encryptedReference = keccak256(toHex(`act-${access.size}`)).slice(2) + "ef".repeat(32);
+      const historyReference = keccak256(toHex(`history-${access.size}`)).slice(2) +
+        "ab".repeat(32);
       access.set(encryptedReference, {
         key: new Uint8Array(key),
         publisher: identity,
         grantees: [...grantees],
+        historyReference,
       });
       return {
         encryptedReference,
-        historyReference: "ab".repeat(32),
+        historyReference,
         publisherPubKey: identity,
-        actReference: "bc".repeat(32),
-        granteeListReference: "cd".repeat(32),
+        actReference: "bc".repeat(64),
+        granteeListReference: "cd".repeat(64),
       };
     }),
-    actDownloadData: vi.fn(async (ref: string, _history: string, publisher: string) => {
+    actDownloadData: vi.fn(async (ref: string, history: string, publisher: string) => {
       const item = access.get(ref);
       if (
-        !item || publisher !== item.publisher ||
+        !item || history !== item.historyReference || publisher !== item.publisher ||
         (identity !== item.publisher && !item.grantees.includes(identity))
       ) throw new Error("Access denied");
       return new Uint8Array(item.key);

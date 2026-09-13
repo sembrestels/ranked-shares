@@ -1,0 +1,118 @@
+{
+  "verifiedAt": "2026-09-13T04:36:26.101Z",
+  "chainId": 5042002,
+  "organizer": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+  "recipient": "0xf632Ce27Ea72deA30d30C1A9700B6b3bCeAA05cF",
+  "deadline": "1789295132",
+  "deadlineUtc": "2026-09-13T10:25:32.000Z",
+  "simulationOnly": true,
+  "forwarder": "0x6E9EE680ef59ef64Aa8C7371279c27E496b5eDc1",
+  "workflowOwner": "0x0000000000000000000000000000000000000000",
+  "rounds": {
+    "EURC": {
+      "id": "urbehub",
+      "token": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+      "keySalt": "0xfc105e7f172fb173596b6fdd8dfcdd9e5f270e0eea4d6d0a4b1abf160a53693b",
+      "tallierPkX": "18481511355285921945802396604814714866899799012110650882698733939615574950047",
+      "tallierPkY": "964398012071138575462909389644042032806560447441919419892998390210915611709",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "privacy": "0xDC45eCf3C574bd30756F2064Ba3E155452aa2F4f",
+      "owner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "votingOpen": false,
+      "proposalCount": "0"
+    },
+    "USDC": {
+      "id": "golem",
+      "token": "0x3600000000000000000000000000000000000000",
+      "keySalt": "0x9b3a5c532f8e01c095b9d013dd2b1164e14b743135b57a531e60dfa6d607b6c4",
+      "tallierPk": "0x023dfc6b8e02350484b0c8b173828050081e34b6845ffd124f96a965ac5b669128",
+      "pool": "0x2bf2515baf13444a4c91d9135172a4a632fa440c",
+      "lpModule": "0x6722459adb67f35bfff3b576cb82988f8f189891",
+      "privacy": "0xd39d2e5a6FC8A80632B07cD5075350bEe68Fd3C8",
+      "owner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "votingOpen": false,
+      "proposalCount": "0"
+    }
+  },
+  "contracts": {
+    "poseidon": "0x70cef785dacba0d030abaade23f295bcd33b0b7e",
+    "ingestVerifier": "0xd75085951a67f615a9a9bd61b0277e3b66569785",
+    "tallyVerifier": "0xc30804d65ddee5a1a8532a5dfb8958a1558d02ac",
+    "eurcPool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+    "poolManager": "0xa9860932d9ecd8c6d1889ee42220221dc72e60e6",
+    "positionDescriptor": "0xd1a3d29679d83a2f31b8ffd01d172685ac087558",
+    "positionManager": "0x52074d82f3076e2290f5dca881d6ef4e2b553056",
+    "stateView": "0x2c517696911ef8ea8e68368ff58b9f3253d12c3f",
+    "usdcPool": "0x2bf2515baf13444a4c91d9135172a4a632fa440c",
+    "lpModule": "0x6722459adb67f35bfff3b576cb82988f8f189891"
+  },
+  "transactions": [
+    {
+      "label": "poseidon",
+      "hash": "0xb030c2b7ee99c2a914bca865932444a6247fc7d0ea9cc20ee0be21287ecca01f",
+      "blockNumber": "61842693",
+      "contractAddress": "0x70cef785dacba0d030abaade23f295bcd33b0b7e"
+    },
+    {
+      "label": "ingestVerifier",
+      "hash": "0x6be1f639321760d3410187a76154e1dd0e7859066b639b6cc3e60561d5640672",
+      "blockNumber": "61842697",
+      "contractAddress": "0xd75085951a67f615a9a9bd61b0277e3b66569785"
+    },
+    {
+      "label": "tallyVerifier",
+      "hash": "0xc46fefc326faa0870181097708709fc1a3bb8d22f6cf6605c0505bb1733262b6",
+      "blockNumber": "61842701",
+      "contractAddress": "0xc30804d65ddee5a1a8532a5dfb8958a1558d02ac"
+    },
+    {
+      "label": "eurcPool",
+      "hash": "0xc413e9a7cbe7a3b5c0f4c3992168bc5647154f59571f9e1159d477a4790e3fe5",
+      "blockNumber": "61842705",
+      "contractAddress": "0x35a7915dc29c67805b7323e5a0384f919c9cf210"
+    },
+    {
+      "label": "poolManager",
+      "hash": "0xcd703309947a53c8a49c9550bc4d93015202499620652a2e6522c8f5091ea8f9",
+      "blockNumber": "61842708",
+      "contractAddress": "0xa9860932d9ecd8c6d1889ee42220221dc72e60e6"
+    },
+    {
+      "label": "positionDescriptor",
+      "hash": "0x78aa3bd67228134f69328474048e7173bd247ae3a42fedab116dae798b1b642f",
+      "blockNumber": "61842712",
+      "contractAddress": "0xd1a3d29679d83a2f31b8ffd01d172685ac087558"
+    },
+    {
+      "label": "positionManager",
+      "hash": "0x1310318cb1535eb85698ae3f9b20d54ad50164ebc282dbbda69a47286ddc80b5",
+      "blockNumber": "61842717",
+      "contractAddress": "0x52074d82f3076e2290f5dca881d6ef4e2b553056"
+    },
+    {
+      "label": "stateView",
+      "hash": "0xbfc5f5bee7d7c4ef8143c68398c9742c0c1f504d8ce24feb80170e5344ee0f92",
+      "blockNumber": "61842721",
+      "contractAddress": "0x2c517696911ef8ea8e68368ff58b9f3253d12c3f"
+    },
+    {
+      "label": "usdcPool",
+      "hash": "0x8390533d784cc618b2852d3a30c9750d7cd7397cace8e60f3d9773fba0aded26",
+      "blockNumber": "61842726",
+      "contractAddress": "0x2bf2515baf13444a4c91d9135172a4a632fa440c"
+    },
+    {
+      "label": "lpModule",
+      "hash": "0xce25432302ad304425bda1ac2532bdd9e648ab1deddff2821201464f5c889609",
+      "blockNumber": "61842731",
+      "contractAddress": "0x6722459adb67f35bfff3b576cb82988f8f189891"
+    },
+    {
+      "label": "attachLP",
+      "hash": "0xec3bcf9f6ac19683cd3af1eab9cfe155aaf372d27c3b3fd50e65f4f27019b5a4",
+      "blockNumber": "61842734",
+      "contractAddress": null
+    }
+  ],
+  "remainingGasBalance": "19161024140000000000"
+}

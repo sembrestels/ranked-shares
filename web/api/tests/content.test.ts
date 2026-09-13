@@ -170,7 +170,7 @@ Deno.test("content: private review never reaches the public API; publication res
       key = toHex(data);
       return {
         encryptedReference: "ab".repeat(64),
-        historyReference: "cd".repeat(32),
+        historyReference: "cd".repeat(64),
         publisherPubKey: pk,
       };
     },

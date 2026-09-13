@@ -28,7 +28,8 @@ Access Control Trie) encrypts that revision key for the proposer and organizer.
 The public descriptor is version 2 and contains the ciphertext reference, nonce,
 chain/pool/proposer, both sharing public keys, `keccak256(key)`, and the ACT-protected
 reference, history reference and publisher public key. It contains no proposal text,
-file names, raw document key or ordinary key-bearing encrypted Swarm reference.
+file names, raw document key or ordinary key-bearing encrypted Swarm reference to
+the proposal or its document key.
 
 An ordinary public 32-byte Swarm address identifies the descriptor and fits the pool's
 `contentRef`. `propose(contentRef, keyHash, cost, recipient)` authenticates its binding
@@ -120,6 +121,26 @@ use real Web Crypto encryption with a simulated Swarm transport and ACT access
 checks. A live Swarm ID upload/share/download round trip has not been run; these
 checks do not establish production service availability or replace that integration
 check before deployment.
+
+## Integration correction — 2026-09-13
+
+Swarm ID 0.4.0 encrypts ACT history manifests by default and returns a 128-character
+`historyReference`. Applying the 64-character on-chain reference validator to this
+field incorrectly rejected successful ACT uploads. Both ACT references now retain
+their full 64- or 128-character values in descriptor metadata; only the public
+descriptor address is constrained to `bytes32`. The history reference's embedded
+key opens ACT metadata, whose access keys remain encrypted for the reviewers. It
+does not reveal the proposal's document key.
+
+The transport test double now models the SDK's default encrypted references and
+requires the complete history reference on download. Regression coverage includes
+encrypted upload, both reviewers' access, outsider denial, publication, legacy
+64-character ACT metadata, malformed metadata, and keeping 128-character references
+out of the on-chain and proposal payload address fields.
+
+The updated fixture reproduced the reported frontend error before the fix. After
+the fix, 21 targeted frontend/workflow tests and 9 API content tests passed, along
+with the frontend typecheck and production build.
 
 Sources: [Swarm ACT](https://docs.ethswarm.org/docs/concepts/access-control/) and
 [Swarm ID API](https://swarm.snaha.net/docs/api/#act-methods).

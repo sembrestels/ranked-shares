@@ -8,4 +8,5 @@ export default [
   route("submit", "routes/submit.tsx"),
   route("setup", "routes/setup.tsx"),
   route("deploy", "routes/deploy.tsx"),
+  route("import", "routes/import.tsx"),
 ] satisfies RouteConfig;
