@@ -16,6 +16,7 @@ Then is the acceptance test.
 | `05-follow-the-round.md` | 5 | everyone |
 | `06-close-and-prove.md` | 6 | Ona, everyone |
 | `07-get-paid-and-close-out.md` | 7 | Pau, Ona |
+| `08-review-findings.md` | 5, 6 follow-ups | Dani, Sol, Pau |
 
 Status values: `built` (in `web/` on master with tests), `planned`. A story's status
 changes to `built` in the commit that lands it. Findings from heuristic and
