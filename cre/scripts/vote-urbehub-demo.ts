@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { createCipheriv, createDecipheriv, randomBytes, randomInt, scryptSync } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import {
   createPublicClient, createWalletClient, custom, encodeAbiParameters, encodeFunctionData, erc20Abi,
   formatEther, hexToBytes, http, keccak256, parseEther, toHex,
@@ -269,7 +270,7 @@ async function main() {
   try {
     const check = createPublicClient({ transport: http(rpc, { retryCount: 0 }) });
     for (let i = 0; ; i++) {
-      try { await check.getChainId(); break; } catch { if (i === 100) throw Error("Rehearsal fork did not start."); await Bun.sleep(100); }
+      try { await check.getChainId(); break; } catch { if (i === 100) throw Error("Rehearsal fork did not start."); await sleep(100); }
     }
     await run(state, p, rpc, true, true);
     await run(state, p, rpc, true);

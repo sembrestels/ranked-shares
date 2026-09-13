@@ -6,6 +6,7 @@ export function PrivateReviewSettings(
     registered,
     locked,
     matches,
+    swarmReady,
     busy,
     votingOpen,
     preparedCount,
@@ -17,6 +18,7 @@ export function PrivateReviewSettings(
     registered: boolean;
     locked: boolean;
     matches: boolean;
+    swarmReady: boolean;
     busy: boolean;
     votingOpen: boolean;
     preparedCount?: number;
@@ -47,7 +49,9 @@ export function PrivateReviewSettings(
               <Notice>
                 {locked
                   ? "This round already has public submissions. Create a new round to enable private review."
-                  : "Connect your Swarm ID and register its sharing key before inviting proposals."}
+                  : swarmReady
+                  ? "Register your Swarm ID sharing key before inviting proposals."
+                  : "Your round is deployed. Connect Swarm ID to enable private review. You can return to this page to finish setup."}
               </Notice>
             )}
             {registered && (
@@ -58,7 +62,7 @@ export function PrivateReviewSettings(
               </Notice>
             )}
             {!votingOpen && !locked && (
-              <Button disabled={busy} onClick={onRegister}>
+              <Button disabled={busy || !swarmReady} onClick={onRegister}>
                 {registered ? "Replace organizer sharing key" : "Enable private review"}
               </Button>
             )}

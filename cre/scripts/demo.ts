@@ -3,6 +3,7 @@ import { execFileSync, spawn } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   createPublicClient, createWalletClient, defineChain, encodeDeployData,
   encodeFunctionData, erc20Abi, getAddress, hexToBytes, http, keccak256,
@@ -26,7 +27,7 @@ function publicKey(key: string) {
   return value;
 }
 
-export const root = resolve(import.meta.dir, "../..");
+export const root = fileURLToPath(new URL("../../", import.meta.url));
 export const local = resolve(root, "demo/.local");
 const statePath = resolve(local, "state.json");
 export const ARC = 5042002;
@@ -46,7 +47,18 @@ export function save(path: string, data: unknown) {
   renameSync(next, path);
 }
 export function artifact(name: string, v4 = false) {
-  return JSON.parse(readFileSync(resolve(root, v4 ? "v4/out" : "out", `${name}.sol/${name}.json`), "utf8"));
+  let path = `${name}.sol/${name}.json`;
+  if (!v4 && ["NoirRankedShares", "LPCreRankedShares"].includes(name)) {
+    // Foundry may keep older/default artifacts at the unsuffixed path. Resolve
+    // the deployment profile through its cache instead of guessing the filename.
+    const cache = JSON.parse(readFileSync(resolve(root, "cache/solidity-files-cache.json"), "utf8"));
+    const source: any = Object.values(cache.files).find((f: any) => f.sourceName === (name === "NoirRankedShares" ? "src/noir/NoirRankedShares.sol" : "src/uniswap/LPCreRankedShares.sol"));
+    path = source?.artifacts?.[name]?.["0.8.28"]?.["noir-ir"]?.path;
+    if (!path) throw Error(`Build the noir-ir deployment artifact for ${name} first.`);
+  }
+  const result = JSON.parse(readFileSync(resolve(root, v4 ? "v4/out" : "out", path), "utf8"));
+  if ((result.deployedBytecode.object.length - 2) / 2 > 24576) throw Error(`${name} exceeds the EIP-170 deployment limit.`);
+  return result;
 }
 function unlockKey(): Hex {
   // Foundry's output is captured, never forwarded to logs or a shell command line.
@@ -272,8 +284,7 @@ export async function importProposals(state: any, rpc: string, file: string, cur
   }
 }
 
-export function configure(state: any, rpc: string) {
-  const dir = resolve(local, "cre");
+export function configure(state: any, rpc: string, dir = resolve(local, "cre")) {
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   writeFileSync(resolve(dir, "project.yaml"), `demo:\n  rpcs:\n    - chain-name: arc-testnet\n      url: ${JSON.stringify(rpc)}\n`);
   for (const currency of ["EURC", "USDC"]) {
@@ -287,9 +298,9 @@ export function configure(state: any, rpc: string) {
   return dir;
 }
 
-export async function simulate(state: any, rpc: string, currency: string, broadcast: boolean) {
+export async function simulate(state: any, rpc: string, currency: string, broadcast: boolean, configDirectory?: string) {
   if (!["EURC", "USDC"].includes(currency)) throw new Error("Choose EURC or USDC.");
-  const dir = configure(state, rpc), lp = currency === "USDC";
+  const dir = configure(state, rpc, configDirectory), lp = currency === "USDC";
   // The generated account supplies simulation transaction signing only.
   const privateKey = unlockKey();
   if (privateKeyToAccount(privateKey).address.toLowerCase() !== state.deployer.toLowerCase()) throw new Error("Signer mismatch.");

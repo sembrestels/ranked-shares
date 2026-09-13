@@ -100,7 +100,7 @@ props, events out through callbacks; route containers and hooks do the fetching.
 | Proposal card | a proposal's content, terms, status, and actions | yes | |
 | Submit form | the proposal form | yes | |
 | Project summary | project page head: title, cost, support, recipient, status | no | H10 |
-| Ranking list | drag-to-order list with ties and unranked, plus the rule line | no | H1; the product's core |
+| Tier list | proposal boxes, three funding-priority rows, and an unplaced group | yes | H1; equal priority within each tier, drag or select-to-move; [specification](components/tier-list.md) |
 | Cast panel | ballot mode choice, privacy sentence, cast action, confirmation | no | H2, H5 |
 | Your ballot | current ballot, cast time, final or replaceable, replace action | no | H6 |
 | Contribute panel | amount, one-step approve and contribute, finality sentence, weight after | no | H3 |

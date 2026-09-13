@@ -6,41 +6,40 @@ Donor Dani and Seat-holder Sol on `/vote` (rank, choose the mode, cast) and `/ba
 (the current ballot is visible). Source: R1 tasks of activity 4 in
 `docs/design/story-map.md`.
 
-### S4.1 Rank projects by dragging, with the tally rule in one sentence
+### S4.1 Group proposals into funding tiers
 
 - **As a** Donor Dani
-- **I want to** put the projects in the order I prefer by dragging them
+- **I want to** place proposal boxes in Must fund, Should fund, or Nice to have
 - **so that** my money follows my preference without my having to learn the ballot encoding
-- **Release:** R1 | **Tests:** H1 | **Status:** planned
-- **Scenario:** a donor with weight orders three of four projects
+- **Release:** R1 | **Tests:** H1 | **Status:** built
+- **Scenario:** a donor with weight places three of four projects
 - **Given** I am connected on `/vote` with contributed weight at or above minDirectVote
-- **and Given** the page lists every project of the round in an unranked list and shows the sentence "Your money goes to the highest-ranked project that still needs it; whatever is left over moves down your ranking."
-- **When** I drag three projects into the ranked list in the order B, A, D
-- **Then** the ranked list shows B first, A second, D third, C stays under "Not ranked", and the ballot preview encodes B as 1, A as 2, D as 3, C as 0
+- **and Given** every project starts under "Unplaced proposals" above the three tier rows
+- **When** I drag B to Must fund, A to Should fund, and D to Nice to have
+- **Then** each proposal appears once in its tier, C remains unplaced, and the submitted ballot encodes B as 1, A as 2, D as 3, C as 0
 
-### S4.2 Tie two projects at the same rank
+### S4.2 Give proposals in the same tier equal priority
 
 - **As a** Donor Dani
 - **I want to** mark two projects as equally preferred
 - **so that** I do not have to invent an order between projects I value the same
-- **Release:** R1 | **Tests:** H1 | **Status:** planned
-- **Scenario:** a donor ties second place
-- **Given** I am on `/vote` with A ranked first and B ranked second
-- **and Given** each ranked project has a "Tie with the one above" control and the helper text "Tied projects share a rank; unranked projects get no money from you."
-- **When** I choose "Tie with the one above" on B
-- **Then** A and B both show rank 1 and the ballot preview encodes both as 1
+- **Release:** R1 | **Tests:** H1 | **Status:** built
+- **Scenario:** a donor ties the highest priority
+- **Given** I am on `/vote` with A in Must fund and C in Should fund
+- **and Given** the helper text explains that proposals in the same row have equal priority
+- **When** I move B into Must fund
+- **Then** A and B are tied, the ballot encodes A and B as 1 and C as 3, and horizontal position within a row has no effect
 
-### S4.3 Leave a project unranked on purpose
+### S4.3 Leave a proposal below the funding tiers
 
 - **As a** Seat-holder Sol
-- **I want to** leave a project out of my ranking
-- **so that** none of my weight ever goes to it
-- **Release:** R1 | **Tests:** H1 | **Status:** planned
-- **Scenario:** a seat holder removes a project from the ranked list
-- **Given** I am on `/vote` with A, B, and C ranked
-- **and Given** each ranked project has a "Remove from ranking" control
-- **When** I choose "Remove from ranking" on C
-- **Then** C moves under "Not ranked" and the ballot preview encodes C as 0
+- **I want to** leave a proposal unplaced
+- **so that** it ranks below every proposal I placed in a funding tier
+- **Release:** R1 | **Tests:** H1 | **Status:** built
+- **Scenario:** a seat holder returns a proposal to the starting group
+- **Given** I am on `/vote` with A, B, and C in funding tiers
+- **When** I select C and activate "Move here" in Unplaced proposals
+- **Then** C moves to that group and encodes as 0, tied below placed proposals rather than excluded from funding
 
 ### S4.4 Choose public or sealed with one line each
 
@@ -148,3 +147,19 @@ Donor Dani and Seat-holder Sol on `/vote` (rank, choose the mode, cast) and `/ba
 - **Given** I am connected and have a direct ballot on chain
 - **When** I open `/ballot`
 - **Then** it shows "Public and final" with no "Replace ballot" control, and the text "Final ballots cannot be changed."
+
+### S4.13 Move proposals without dragging
+
+- **As a** voter using touch or a keyboard
+- **I want to** select a proposal and choose its destination
+- **so that** I can build the same ballot without a dragging gesture
+- **Release:** R1 | **Tests:** H1 | **Status:** built
+- **Scenario:** a keyboard user moves a proposal
+- **Given** I focus a proposal button and activate it with Enter or Space
+- **When** I activate a destination's "Move here" button
+- **Then** the proposal moves, selection clears, focus follows it, and a polite status announces its title and destination
+
+Escape or selecting the same proposal again cancels without moving it. While a
+ballot is being stored, selection is cleared and all movement is disabled. Empty
+tiers remain usable, title updates preserve assignments, and all-unplaced ballots
+remain valid. See the [tier list specification](../components/tier-list.md).

@@ -19,12 +19,11 @@ organizer tools. Switching rounds opens its overview and resets temporary page
 state. The URL controls selection, including browser Back/Forward.
 
 `/round?pool=0x…` shows the round page (legacy `/?pool=0x…` links redirect here): every project with its public commitment, the sealed total
-and voter count, the stage bar, and the outcome once the round is done, all read from
+and voter count, and the outcome once the round is done, all read from
 the API (`GET /api/round`). `/project/:id` shows one project's pitch, cost, support,
 and recipient, read from `GET /api/project/:id`. `VITE_ROUND_NAME`, `VITE_SITE_URL`,
-`VITE_REPO_URL`, and `VITE_CLOSE_CHUNK` shape the copy and links on these pages (the
-round's display name, the canonical site URL used in shared links, the linked
-repository, and the roster chunk size the close-and-prove flow suggests). Project
+and `VITE_REPO_URL` shape the copy and links on these pages (the round's display
+name, the canonical site URL used in shared links, and the linked repository). Project
 pages are prerendered at build time when `VITE_POOL_ADDRESS` is set, one page per
 known project (see `deno task build` below).
 
@@ -186,9 +185,14 @@ cp .env.example .env
 deno task dev
 ```
 
+`deno task dev` (also `npm run dev`, which requires Deno) starts both the frontend
+and read API. The frontend proxies `/api/*` and `/healthz` to the local API on
+`PORT` (default 8000), so newly deployed round links work without a separate launch.
+Use `deno task dev:web` only when running the API separately.
+
 Open `http://localhost:5174/` for the rounds directory (`/project/:id` for one project,
 `/proposals` for the proposals board, `/submit` to submit, `/setup` for the
-organizer). The stage bar under the round navigation shows progress on round pages.
+organizer).
 A `?pool=0x…` query parameter overrides the configured pool address; the configured chain and RPC stay
 fixed. Use `/setup` with the pool owner's wallet for acceptance and rejection.
 The default configuration uses Arc Testnet. No live contract is preselected.
@@ -227,7 +231,7 @@ The fake transport's references are test identifiers, not actual Swarm content h
 
 `api/` is a Deno + Hono API that reads one consistent snapshot of a pool (every
 view pinned to one block) and serves it as JSON: `GET /api/round` (projects with
-their public commitment, the sealed total and count, the stage bar's steps, the
+their public commitment, the sealed total and count, the round's stage steps, the
 outcome), `GET /api/project/:id` (a project with its pitch resolved from Swarm by
 reference through `BEE_URL`), `GET /api/voter/:address` (weight, ballot presence,
 roster membership), and `GET /healthz`. `?pool=0x…` overrides `POOL_ADDRESS`;

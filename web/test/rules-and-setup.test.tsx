@@ -2,6 +2,7 @@ import { afterEach, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { RulesPanel } from "../app/components/proposals/rules-panel";
 import { AddProjectForm } from "../app/components/setup/add-project-form";
+import { PrivateReviewSettings } from "../app/components/setup/private-review-settings";
 
 afterEach(cleanup);
 
@@ -29,4 +30,30 @@ test("AddProjectForm refuses a bad address or amount without submitting", () => 
   fireEvent.click(screen.getByRole("button", { name: "Add project" }));
   expect(onSubmit).not.toHaveBeenCalled();
   expect(screen.getByRole("alert").textContent).toMatch(/address/i);
+});
+
+test("private review setup can resume after Swarm ID connects", () => {
+  const onRegister = vi.fn();
+  const props = {
+    supported: true,
+    registered: false,
+    locked: false,
+    matches: false,
+    busy: false,
+    votingOpen: false,
+    onRegister,
+    onPrepare: vi.fn(),
+    onPublish: vi.fn(),
+  };
+  const { rerender } = render(<PrivateReviewSettings {...props} swarmReady={false} />);
+  expect(screen.getByText(/Your round is deployed/)).toBeTruthy();
+  const enable = screen.getByRole("button", { name: "Enable private review" }) as HTMLButtonElement;
+  expect(enable.disabled).toBe(true);
+  fireEvent.click(enable);
+  expect(onRegister).not.toHaveBeenCalled();
+
+  rerender(<PrivateReviewSettings {...props} swarmReady />);
+  expect(enable.disabled).toBe(false);
+  fireEvent.click(enable);
+  expect(onRegister).toHaveBeenCalledOnce();
 });

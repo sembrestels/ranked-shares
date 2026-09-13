@@ -14,7 +14,6 @@ import {
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { chain, Providers, useRound, useSwarm } from "./context/providers";
 import { Button, ErrorPopup, Notice } from "./components/ui";
-import { StageBarContainer } from "./components/stage/stage-bar-container";
 import { AUDIT_LABEL, AUDIT_URL } from "./lib/copy";
 import { errorMessage } from "./lib/proposals";
 import { useRoundDirectory } from "./context/rounds";
@@ -215,7 +214,6 @@ export function Shell({ children }: { children: ReactNode }) {
         {pathname !== "/" && <div className="toolbar">
           <Connections showSwarm={roundPage && !["/round", "/vote", "/liquidity"].includes(pathname)} />
         </div>}
-        {roundPage && pool && <StageBarContainer key={pool} />}
         <main id="main" className="py-6">
           {roundPage && !pool ? <Notice>Choose a round to continue. <Link to="/">Find or open a round</Link>.</Notice> : <div key={roundPage ? pool : pathname}>{children}</div>}
         </main>

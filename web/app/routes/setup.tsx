@@ -33,10 +33,14 @@ export default function SetupPage() {
   const owner = !!address && !!round.data &&
     address.toLowerCase() === round.data.owner.toLowerCase();
   const registered = !!round.data?.organizerPublicKey && round.data.organizerPublicKey !== "0x";
+  let swarmReady = false;
   let matches = false;
   try {
-    matches = registered && !!storage &&
-      sharingKey(storage) === publicKey(round.data!.organizerPublicKey);
+    if (storage) {
+      const key = sharingKey(storage);
+      swarmReady = true;
+      matches = registered && key === publicKey(round.data!.organizerPublicKey);
+    }
   } catch { /* connect Swarm ID */ }
   const ready = prepared?.pool === pool && prepared?.account === address &&
       prepared?.identity === info?.identity?.id
@@ -44,7 +48,11 @@ export default function SetupPage() {
     : undefined;
 
   async function privateAction(action: "register" | "prepare" | "publish") {
-    if (!wallet || !publicClient || !address || !pool || !round.data?.privacy || !storage) return;
+    if (!wallet || !publicClient || !address || !pool || !round.data?.privacy) return;
+    if (!storage || !swarmReady) {
+      setError("Connect Swarm ID to continue private review setup. Your round is already deployed.");
+      return;
+    }
     setBusy(true);
     setError(undefined);
     setAdded(undefined);
@@ -149,6 +157,7 @@ export default function SetupPage() {
             registered={registered}
             locked={round.data.count > 0n}
             matches={matches}
+            swarmReady={swarmReady}
             busy={busy}
             votingOpen={round.data.votingOpen}
             preparedCount={ready?.ids.length}

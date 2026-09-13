@@ -1,5 +1,27 @@
 # Arc Testnet proposal demo
 
+For a completed result, open the [short EURC demo](short-round.md): pool
+`0x70387e2963bc7fd796545988edb8ea08449f9b96` is **closed and Proven**, with 11 of
+15 Urbe Hub proposals funded and **19.05 test EURC** allocated from 20. It received
+20 distinct demo ballots (2 public, 18 encrypted) during a 7 minute 36 second
+voting window. [Arkiv submission evidence](../arkiv/submission.md) maps its storage
+transactions and those of the earlier rounds to their creator wallets.
+
+The current demo uses the combined contribution-and-vote flow. See
+[new-flow.md](new-flow.md) for the replacement pools, commands, and receipts:
+
+| Round | Current pool | Accepted proposals | Confirmed votes |
+| --- | --- | --- | --- |
+| EURC / Noir | `0x1fb1595b7330296e4d55e759209a2783ce4cfd36` | 15 Urbe Hub | 2 public, 18 encrypted |
+| USDC / CRE Liquidity | `0x56e4c0836f694bbbcf705c440feafea22dbfd18f` | 6 Golem | 2 public, 18 encrypted |
+
+Both pools are open until **13 September 2026, 12:25:32 Madrid**. Public voters
+contribute and vote in one transaction; the organizer's storage worker syncs
+accepted ballots to Arkiv afterwards. The sections below preserve the original
+deployment and its earlier storage flow for reference.
+
+## Historical deployment
+
 Two pools were deployed and verified on 13 September 2026, chain ID 5042002.
 All 11 deployment transactions succeeded. The EURC pool now has all 15 Urbe Hub
 proposals submitted publicly and accepted. Arkiv ballot storage is enabled and

@@ -1,0 +1,5270 @@
+{
+  "version": 1,
+  "checkedAt": "2026-09-13T07:12:36.037Z",
+  "arkivChainId": 7738577,
+  "arcChainId": 5042002,
+  "arkivBlock": "387597",
+  "publicRpc": "https://rpc.tiramisu.db-chain.testnet.arkiv.network",
+  "records": [
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0xadaee0fda285665e1e2e262f4af8688e49da7171682ae1e59b0756b5e4e6ac22",
+      "creationTransactionHash": "0x6189f1ba078ced3fc72ad7ba5d6c2bfbe8fe55016de83cdade87d71cda771f9c",
+      "voteTransactionHash": "0x07b7bb0d4b83a3ca736d3925982a8d0a5b6e656f368de142da43b5e677c01d3d",
+      "ballotId": "0x8f3ad3957e4b246fcd47093aea75af98d97d9220662af4e6e06994042d60904b",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386112",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xf54ca265ddac735cc82e5176bd87fd2aa72367b2e1bb305568deac7887d3e02a",
+      "payloadBytes": 15,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x8f3ad3957e4b246fcd47093aea75af98d97d9220662af4e6e06994042d60904b"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf54ca265ddac735cc82e5176bd87fd2aa72367b2e1bb305568deac7887d3e02a"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0d74F572b14A25D623C29F476AFd544C9673fc96"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0xe4d4e2b6927a07b64a4fc63a38aec58c41da21a26efc71343b4ab6ecab1cd3ec",
+      "creationTransactionHash": "0xa8fc96fabe5697a27f9cd5b76c9afc60d8f0faae52ee7ab1a1759ec8a091a7c5",
+      "voteTransactionHash": "0x6fd65024f270af823becda9d59cc320e66220fd8135b083a7987efda0c1ab634",
+      "ballotId": "0xe4894e0b9084ff7d5726ded539f9990008a4c118d9898102810d945e4fc17dee",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386114",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x680f7e2182edf64ca86e28a26a3bf29cd222180c145a3b5c1f32a45e5b491453",
+      "payloadBytes": 15,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xe4894e0b9084ff7d5726ded539f9990008a4c118d9898102810d945e4fc17dee"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x680f7e2182edf64ca86e28a26a3bf29cd222180c145a3b5c1f32a45e5b491453"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x9bb0f39383ad3fde5b26c2e46d67d4eb8bfdd11fdd181d20f34f25028c09903a",
+      "creationTransactionHash": "0x6c470bb186aa8e1da943afcbe9211d2a68e09d45b36efdeeb8a7d2dbae240184",
+      "voteTransactionHash": "0x657627ff88a45e0ffec67226e386b36eff708ed82922b55db0aa012733b86be4",
+      "ballotId": "0x330ed4c5767ff23e9dde7d7b8bc6407ad2df4a141a77df165c17af96fff3fb03",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386069",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x9712ee3861b190927f3279a2d9a062a4de95d6860c294ed2ec48400bb2f8b918",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x330ed4c5767ff23e9dde7d7b8bc6407ad2df4a141a77df165c17af96fff3fb03"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x9712ee3861b190927f3279a2d9a062a4de95d6860c294ed2ec48400bb2f8b918"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xc329cc12ec01878f4eb5bdbeb294e179eb57f92c025d074dead5e62cc08bd5ae",
+      "creationTransactionHash": "0x8b6f5f7171137982b081271face7362442a26fe27cf687b165e678854d07a243",
+      "voteTransactionHash": "0x9c478d04f6053d3946ad0eb06ef4a4729d8ab44594649cf42db10ea2ba13ce13",
+      "ballotId": "0xea82704bb97e6e4a7ff6f7904d166149667abe762f948ef47cf5b5e93f6188bc",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386071",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x8826114490b29b6343596c433e3840415285fe09e6515f6e91d137f279cfb32d",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xea82704bb97e6e4a7ff6f7904d166149667abe762f948ef47cf5b5e93f6188bc"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x8826114490b29b6343596c433e3840415285fe09e6515f6e91d137f279cfb32d"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x8184112f3d0afe3be783d624ce28431c747f2061bea405352cb8d9b60a2452b9",
+      "creationTransactionHash": "0xf71a0a9208e11fb06bfc6121acec5a2ede031b8253a9a82193cc96ab686f71ac",
+      "voteTransactionHash": "0x00638f04962a0637657bd51d1ce177c49e083ddf98d5ff2b0fcc9c91a7ae97a1",
+      "ballotId": "0xf134e61bd200d2ccff7b1557f912ccb5d39b34486d752f626f2fabc013f8174c",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386073",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x01600a4c49576b283439f7af8cc6732dcad31fb8ced6b583775814d382e4e018",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xf134e61bd200d2ccff7b1557f912ccb5d39b34486d752f626f2fabc013f8174c"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x01600a4c49576b283439f7af8cc6732dcad31fb8ced6b583775814d382e4e018"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x3894f969ef5c4857815e0b39e6f63c6a65f46a6a1d5d4df2ba7e045139b1faa4",
+      "creationTransactionHash": "0x99470e53023a0271858edf17c0c4a8fabab4c96d1ee2070ba04de682f535f041",
+      "voteTransactionHash": "0xa65c113bd2ed1fdfa9c0b3711d64314d3a3b5dd586c3a924b1e405416f60aca0",
+      "ballotId": "0x8ba6c0c0a138660c08e47c5fca4bf10dff3dcb7a203fab9cc07698386d8e9aa6",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386076",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xcacfb94a8f81cf1cce346f0c20b0069da24c5960d20c8aa5575eab184a59b683",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x8ba6c0c0a138660c08e47c5fca4bf10dff3dcb7a203fab9cc07698386d8e9aa6"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xcacfb94a8f81cf1cce346f0c20b0069da24c5960d20c8aa5575eab184a59b683"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x9ed33420546F45544f3f081778F298251be75f44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xcb875beb8768039dd82e4d03c2517aa7eff9525cf29ab81e15b8f05b165226ca",
+      "creationTransactionHash": "0x4f8d10499075dbe1094f81d8df7d681c3fc761af4048f907d2c42b14cb990a57",
+      "voteTransactionHash": "0x3ec07e24ce710b9009a1e13dbc68a9c5ea022e0ec00af9f555e6da38d68396f1",
+      "ballotId": "0xe92652f4395f80e509bc8a584fb183a9c5159c168eb90dfe24a39db7c58df49f",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386078",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x5a114692861846dcb28f967e4cb42aef1caf8cfb908f30c17f4a86b96032de42",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xe92652f4395f80e509bc8a584fb183a9c5159c168eb90dfe24a39db7c58df49f"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x5a114692861846dcb28f967e4cb42aef1caf8cfb908f30c17f4a86b96032de42"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x6f7382acd22c9f58c95852e8198c449152a83d6e63b0caf8cc4ebefa8581b4cd",
+      "creationTransactionHash": "0x25d192313d5f61ff6a1b3151419a9f452a272c8dcd79791495d3f17ec88c173e",
+      "voteTransactionHash": "0xdf672117bc19fe2688213d8ffc9fd244a8febb8fdb6a157e5b3bc204e35e3956",
+      "ballotId": "0xcfefcfdf5f0ecfa9836d241290edc2632a50ff31060b44b4f278bd5317b7fe14",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386081",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x85467f002afd2b635d5892d489b012f92c543f34ac7d0b8af661b9b2623b727e",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xcfefcfdf5f0ecfa9836d241290edc2632a50ff31060b44b4f278bd5317b7fe14"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x85467f002afd2b635d5892d489b012f92c543f34ac7d0b8af661b9b2623b727e"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xea4ba491c5480489403535023745b060c2c67083e3c1421ed5b73024af434a87",
+      "creationTransactionHash": "0xbf2d2fb09a91674d2d2d959dafee9fee51c77fc436cc9d7899005c5695a237d3",
+      "voteTransactionHash": "0x64f98c0f7e58485d6c7fbd7b80b0c16176fe7d891eb02920fbe497139083c369",
+      "ballotId": "0x8675e704913e4decd88de172e30ac6a9d2ec952090231a08bd6aaa0211b79517",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386083",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x8785387776969e603909dcfa8688c38d41f431ff71f2485bcf4d7a1933fd7090",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x8675e704913e4decd88de172e30ac6a9d2ec952090231a08bd6aaa0211b79517"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x8785387776969e603909dcfa8688c38d41f431ff71f2485bcf4d7a1933fd7090"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xdaf7c3d549e8747ae8028ed1f09ebf1dcfb8da7d2795af283bbc4338e9aeb8fa",
+      "creationTransactionHash": "0x5938aec52101779031e29bf1e012e0f2c84fb00f9af925e18269304f2b77f590",
+      "voteTransactionHash": "0x2ef3dc3b7321461c94005e30b47d19cacc09eedc983163f7b316bf58ddfe9d62",
+      "ballotId": "0xf65fe3c74590a74303464cf5785238e9acd024cf49fe4329de3390ccd1cd4f41",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386085",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x88ecb3ab8d32ce3e4b4ee27db796b9b489962f43d11c5ac82ee533afbbb60dee",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xf65fe3c74590a74303464cf5785238e9acd024cf49fe4329de3390ccd1cd4f41"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x88ecb3ab8d32ce3e4b4ee27db796b9b489962f43d11c5ac82ee533afbbb60dee"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xe305fbD98ec178f971915D918cfDFec8852D14BC"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x8809236b750089f6283e960b0d398cbdb59dba39f9e56b364c38eaaf5e5a99e7",
+      "creationTransactionHash": "0x2a30a01869653d21d964853ff69a3835222438c7db5632a92a974861bace2217",
+      "voteTransactionHash": "0x71d4504392868cd936d105498e51f18bdfeea37e8883c7d9d43c57a82c58aa33",
+      "ballotId": "0x6140dc5597307955ec8e8b62299d239b3aac0df8b47e17ff286cb571836ed02e",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386088",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x16954c19c8971eb38ff00487600a91444f028bf8d603115e4cb31daa78bf0da0",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x6140dc5597307955ec8e8b62299d239b3aac0df8b47e17ff286cb571836ed02e"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x16954c19c8971eb38ff00487600a91444f028bf8d603115e4cb31daa78bf0da0"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x83dbaf0f9b9e09526b783c13dfef26225743e13d4315b7d383077d2a754bedb5",
+      "creationTransactionHash": "0x5a751bfea95866d4d25fb8391a415bef91634632ab08eb405e07ffaf17f697ef",
+      "voteTransactionHash": "0xb836402ff0fbde0d49d9fce311cfc1196f2f32e6da0dfd695f7ac27839d48bd8",
+      "ballotId": "0x264f7178411ca455401547cdce2f56de9a3348cf141c81ee2ff0de784233ac67",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386090",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xf87815d352fe912d521fc3388d35bbc8464e1b2d773770dffc6a176588de085c",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x264f7178411ca455401547cdce2f56de9a3348cf141c81ee2ff0de784233ac67"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf87815d352fe912d521fc3388d35bbc8464e1b2d773770dffc6a176588de085c"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb9413869857827F5252aDad7673Dae1206B3bbD4"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x3bf1242c29e35b3abd44cf103b0a34288803ea7dca6ca7765357f576b43f919c",
+      "creationTransactionHash": "0x72297089464a45bbafd5dd863f98f84852fa69cd8fafd5102913e8a4ac943ef7",
+      "voteTransactionHash": "0x9c9bf472d1eaff8ab13bb620820d7b5ff5eb1c445d7f83cf8f2dd709008a558b",
+      "ballotId": "0x90a36fedb3633bb52ee45feb603bdd718d00bdf13c45b2e07eb8cc295dbe70b0",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386093",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x23604acb3dcf104ad63f70081f3ee1d918b4e9a48229063037ce86707f0de3cd",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x90a36fedb3633bb52ee45feb603bdd718d00bdf13c45b2e07eb8cc295dbe70b0"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x23604acb3dcf104ad63f70081f3ee1d918b4e9a48229063037ce86707f0de3cd"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x13216880e143cb45192f89ddc2eace3d12d7b80d330a143493f65944cdc40ef8",
+      "creationTransactionHash": "0x22823bef66fe289c98f192483bb7c2c5c25a3676aa5356311eb689c814de5eb1",
+      "voteTransactionHash": "0x3c455fbeebe736e0695c19842766efd894ab66c2f89674bdfd98c7759f2ed78a",
+      "ballotId": "0xb09ce5c74a0bec8bbece8a2886f2992dfaeee2972981c19fa258829b7e526309",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386095",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x274a5afb550f8fc21406c7857a5e77e59d1e88da1f98ac424b68fbf9f22c7096",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xb09ce5c74a0bec8bbece8a2886f2992dfaeee2972981c19fa258829b7e526309"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x274a5afb550f8fc21406c7857a5e77e59d1e88da1f98ac424b68fbf9f22c7096"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x8da7e138f28882dc1faad734ccbc961a01d406df53750a5edff12d869dfe77fa",
+      "creationTransactionHash": "0x797c80b5fc073db7dca902af551841639630b7992d0cd7ed19e87a81de0a27a4",
+      "voteTransactionHash": "0x85ab9be085974ba65e93841415aa8abffbd49ab39825ea8ae4759a642aafcea2",
+      "ballotId": "0xb18b96873ae64a5b5c0ee04a7302dea4c28ab02d7bb96c3ae41ae521911858ec",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386097",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x324f2c7317b726168cfb22f3cb537053ca04a515b53ad385befd290d60911803",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xb18b96873ae64a5b5c0ee04a7302dea4c28ab02d7bb96c3ae41ae521911858ec"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x324f2c7317b726168cfb22f3cb537053ca04a515b53ad385befd290d60911803"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x8c4ce909f986e9fd6c5e9ecb054ad065cc9537aa63c7d5e2c6cb7f26f71f8f38",
+      "creationTransactionHash": "0x9aa21d40d017ef3a5e33c99e80e8672ff1fecdb728f3dcd3e557dfe488742b91",
+      "voteTransactionHash": "0x7ecf4312204ed16be3c309afca61ddfe68b8e391d697e9abf623031d94d73fdc",
+      "ballotId": "0xcecb3964189a0a0270a0e1177495a9348f83537efbe04c99c99fdcb690626e6a",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386100",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x5190c0bf2d0e349f755057e576e69913ad092a5484e42e07c05611507f986793",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xcecb3964189a0a0270a0e1177495a9348f83537efbe04c99c99fdcb690626e6a"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x5190c0bf2d0e349f755057e576e69913ad092a5484e42e07c05611507f986793"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x86942d8614b7a44059f68da9ea8e53c9eaf424500eaaa6da67c6dce78282b0f8",
+      "creationTransactionHash": "0x65e22b965f2da766cf33d70c436643003a37757bbed9d3f07c346cf7cddeed42",
+      "voteTransactionHash": "0xf2eb5cfa2812c0e2ca67d81c1b9cdba9d1c7b99e969ffabc9e79f435cbbfd25e",
+      "ballotId": "0xd269e30fb8e86a1133fbbe5b1f0808070c0753d3f9195041e39f485d3438c007",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386102",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x0f7162a2063e64a8bc1943388514f6feda0f95549f94f239e54a3fd5a9808dbf",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xd269e30fb8e86a1133fbbe5b1f0808070c0753d3f9195041e39f485d3438c007"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x0f7162a2063e64a8bc1943388514f6feda0f95549f94f239e54a3fd5a9808dbf"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x4487daa3059749eedf727fdde713809b21d933d528e63200efc23c8e47fa1223",
+      "creationTransactionHash": "0x6d6d315a2fbf74eca84b72a21789ce86f174cbb191a402908c95026b60522d3b",
+      "voteTransactionHash": "0x126f4584db4ae10b9804f5f8c640dc804dab0b8c69d093dbd315860560e41aa2",
+      "ballotId": "0x0db00e0f8aeac8b5f96f55edad9427b6c83513a412c25fd113ee553c57ab9e37",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386105",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xb5cdbd7b0d1315fb0bd674565d400ab78966953a3246f219b6a23cf63d61db51",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x0db00e0f8aeac8b5f96f55edad9427b6c83513a412c25fd113ee553c57ab9e37"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb5cdbd7b0d1315fb0bd674565d400ab78966953a3246f219b6a23cf63d61db51"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x1963cdc28ee8593f946b805675859286069195eeaf2fd71e0cd25c43823b0d17",
+      "creationTransactionHash": "0x29382da57a9e8d4b3b9275096df794222e00bc694dc85c85061b9eb7448ffb1d",
+      "voteTransactionHash": "0x48e9681b303c129fdac88b1ae053d1f61a79ed3f999634e6e2c474dd6ee6e60f",
+      "ballotId": "0x49c0765a5f0145494e0cbe7b85b21c1ff12cc1b6f29b4cb57a938526cfcf7db6",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386107",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xf1b464e59ac0601a4e302646b06eec53c4d14d6297c87cbd53d9306653a3531b",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x49c0765a5f0145494e0cbe7b85b21c1ff12cc1b6f29b4cb57a938526cfcf7db6"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf1b464e59ac0601a4e302646b06eec53c4d14d6297c87cbd53d9306653a3531b"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-v2",
+      "pool": "0x1fb1595b7330296e4d55e759209a2783ce4cfd36",
+      "voter": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xbf54adcfa7811c17ec782e227ed216c1487d071bba31029a54b538f245704cbb",
+      "creationTransactionHash": "0x27448ab143770ed187ddd8e8583e0ade02f21a1b88cbde05cbf40324c5b414f1",
+      "voteTransactionHash": "0x24febb6113bd73c60c50dfce3885c7cb9ba8485a5ef9e7958f0e8a3bae125a43",
+      "ballotId": "0xfba4ec414e7fc63a46ce74c647571b2c57498b65463981c8ca7db9c795c620ef",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386109",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x6f39283d21debba76203e2338639bd07484579cfcaa8a77431ec02497c4c76b4",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xfba4ec414e7fc63a46ce74c647571b2c57498b65463981c8ca7db9c795c620ef"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x6f39283d21debba76203e2338639bd07484579cfcaa8a77431ec02497c4c76b4"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x1fB1595b7330296e4d55e759209a2783ce4CfD36"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0xfc82ad6e793e88bf594a8a791f90e4d30fccf17a11d37d2a0c33ff563d4a8676",
+      "creationTransactionHash": "0xca8f8af391707cd698545d1c06b816a1dcbda1f29ea8d9d0b1bd4b3238667783",
+      "voteTransactionHash": "0x9a5ee558c430f62470d96d94e1cb58943a13ff27fcd99b83daaf3b4107451f0c",
+      "ballotId": "0x8d6a48b212ba77c684d41d3d50a039cf1b812939d701e7890399cd187d2a4e27",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386161",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xd5bd78374e989fbb6a08a907fb77d12c830b60d0df2745f7ad97626f11a18208",
+      "payloadBytes": 6,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x8d6a48b212ba77c684d41d3d50a039cf1b812939d701e7890399cd187d2a4e27"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xd5bd78374e989fbb6a08a907fb77d12c830b60d0df2745f7ad97626f11a18208"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0d74F572b14A25D623C29F476AFd544C9673fc96"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0x43fc68a62fe54a9547f09632c0568da383308c286a9fc686aeaee1f0e89daa09",
+      "creationTransactionHash": "0x09c13ef9c209b2ffb3d0266b129712472c0da511bb0f71161c8b65d36c822f0a",
+      "voteTransactionHash": "0xb3c7a00f25a7b454b310e625b11a546246eb8e066bc1ab7af902964871c977e7",
+      "ballotId": "0x8b4d79659c02ce9f5f98ebfc17fb3143ef5690cace63b296a60b89b89c56dc30",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386163",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x0be4e75bcdf014e6f16dfe75b831e8bdd9b5c70a2e64f1795517db89548e1e11",
+      "payloadBytes": 6,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x8b4d79659c02ce9f5f98ebfc17fb3143ef5690cace63b296a60b89b89c56dc30"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x0be4e75bcdf014e6f16dfe75b831e8bdd9b5c70a2e64f1795517db89548e1e11"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x6d7231b2379474fc5f07c73e1b5dbf28398f68815e7527ed14965d378b8b420a",
+      "creationTransactionHash": "0x7a7d35467008c0655e5a7bb96eb5a7e6a25b35bb7f9985378d435da6b271375d",
+      "voteTransactionHash": "0x1765017876b551dca13605527bee9b461a262a4749da5918f1277c3372275556",
+      "ballotId": "0xac9b1d6779e4a21d192ae23e38ea9d12349207fb7ec613c83beccd77a551982d",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386117",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xda6fcfd12777450dc94c1e179e180b174d0a89454f6937491d85dca234cd0cb8",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xac9b1d6779e4a21d192ae23e38ea9d12349207fb7ec613c83beccd77a551982d"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xda6fcfd12777450dc94c1e179e180b174d0a89454f6937491d85dca234cd0cb8"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xe3673cca0dcfc529d5d9c6046c0c617001a5ddc1c53137befe65ed4860c2a326",
+      "creationTransactionHash": "0x91bbbb77daf87cb2463dfbc4df62ec611c6c0aec94327c2550c55ba121b10ace",
+      "voteTransactionHash": "0x49e383dc87396da02722f30cde79ede3fa7841ed1d2c3bdf683adbafa865971a",
+      "ballotId": "0x46616950f639569018ced7d5f19a3357a11579d405f1eaa1cd8ffc60c5288a62",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386119",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x067c3a31f5101e80fe4a5ea6c80a9fe7dd3c49ce8b0e302014dfc8d92efe9318",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x46616950f639569018ced7d5f19a3357a11579d405f1eaa1cd8ffc60c5288a62"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x067c3a31f5101e80fe4a5ea6c80a9fe7dd3c49ce8b0e302014dfc8d92efe9318"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x6bc299e6b237ce2a1a8f824ad8ef271a54ee3e43249ae560dfbffbb647776faa",
+      "creationTransactionHash": "0xc25bb3b21f54eef08afd471b8e5d70e03cfd5439097fb0dcbd03dce53bc9b64d",
+      "voteTransactionHash": "0x31649ffe8c697fc7a437a3b3e199800f5b62c25598ba3998a97e90a75d0e79d9",
+      "ballotId": "0xe237b8ff0210c98475e4ed05b49b289ba39ea5e5a69da0344512f9ded15d5679",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386122",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x0c139aa95ab92dd09b209793aae1d4e7198f2999b4073a317a785ec820e0ef4d",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xe237b8ff0210c98475e4ed05b49b289ba39ea5e5a69da0344512f9ded15d5679"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x0c139aa95ab92dd09b209793aae1d4e7198f2999b4073a317a785ec820e0ef4d"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xc3ed7ffb87309afe7435c83d87416a4b5d451ef176de8a7292f48739ec708931",
+      "creationTransactionHash": "0x9af860bce5500b31821a7aaf121332d5692795091a779274a74db9adc4d0e5c2",
+      "voteTransactionHash": "0x8b3ec5586ebb55e5931ffc8993dbe483cc49a4e6fcbeedc257f776e78d1e0faf",
+      "ballotId": "0x92eb3831f8da28e041d09d7072c7931a640b3d63f9ac909b01a19a71a65766a2",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386124",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x5499af6277357b842e40ce21417ed5dd1a38864924a411182da96a8c030b7639",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x92eb3831f8da28e041d09d7072c7931a640b3d63f9ac909b01a19a71a65766a2"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x5499af6277357b842e40ce21417ed5dd1a38864924a411182da96a8c030b7639"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x9ed33420546F45544f3f081778F298251be75f44"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xa60273aebdd37440ea3f76fbbb6bd0d73caa12eb17fb671c229fb9ae0977c3c0",
+      "creationTransactionHash": "0x04d761073fd1de260e6a1c8e2ecac50420e59ffd869570bb61c87dff7be49cba",
+      "voteTransactionHash": "0xdf708168f9347e263bf1cb66ce5a984db1a8f6835c22c8ec67c862bb92ca1e2b",
+      "ballotId": "0xb988560888d8cf19954327cda21d08542ba652b42e13d5144fb3dba29d76856c",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386126",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x89da8ac5c54b2016fa443583d95015b86f4325bf3bc703e9ec4e137576330083",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xb988560888d8cf19954327cda21d08542ba652b42e13d5144fb3dba29d76856c"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x89da8ac5c54b2016fa443583d95015b86f4325bf3bc703e9ec4e137576330083"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x25f76cffa36c26ac9f059da7abb359bf30d34bf975dfed5b87dca11c81249dfb",
+      "creationTransactionHash": "0x8e6547991f61301124b3177a2a6a1fbfc6b7689bc281767641ec709022b4485c",
+      "voteTransactionHash": "0xad996412f8707d2a4c0ef6b4a7ca88890f61dd1087e06188768c377e61199228",
+      "ballotId": "0x9f21bedee256817d05f6e03647cf73cde031925a36634e6e71547dc4166b8e21",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386129",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x35c96cfebd83e3227ea0c30d346b3b91c68b7c0ab87c9a0714aaae5233498e2e",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x9f21bedee256817d05f6e03647cf73cde031925a36634e6e71547dc4166b8e21"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x35c96cfebd83e3227ea0c30d346b3b91c68b7c0ab87c9a0714aaae5233498e2e"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xa84433d2284e6a9dd4150f0dd235803f5c10f5158afd9abea5eb3a4b0706b0ed",
+      "creationTransactionHash": "0x7f47021dbdb1bac47853a88a0f09b5d8d6c695b7d6f80bd40cf1a1bd1c302318",
+      "voteTransactionHash": "0x13dbd601b088ef593959f5b0eeb5536441ed6a700c40ceab47f08c422f697888",
+      "ballotId": "0x77aac77100bfc761620382b990f086997bb56b8ff7789317e370d229e8417404",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386131",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xde2eb948d982210b522e66d475c3590ff3517b0d5874ee11009a4a4337f14ad8",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x77aac77100bfc761620382b990f086997bb56b8ff7789317e370d229e8417404"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xde2eb948d982210b522e66d475c3590ff3517b0d5874ee11009a4a4337f14ad8"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x69d0387a4833789d1aa9ac391e66e979185d84fe4f370ddcff67db45457786d9",
+      "creationTransactionHash": "0x46cdc344e48d88a66875e91365891877859937da5e2f1b4bc74704725dbf58df",
+      "voteTransactionHash": "0xa4d7da34a1c943b5969d94426c503e17e683dbe500f6df6f2ddd9cde90a128e1",
+      "ballotId": "0x7dd18e09b3d3ea107fdfbb2a6ddd77ee36fb60ce3306fef9fa5e154a2ce2b294",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386134",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xad3c6f62ba5b499dd63a5cbb7bc361f2b830a6068ec88c0c8a2da6737b4045e9",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x7dd18e09b3d3ea107fdfbb2a6ddd77ee36fb60ce3306fef9fa5e154a2ce2b294"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xad3c6f62ba5b499dd63a5cbb7bc361f2b830a6068ec88c0c8a2da6737b4045e9"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xe305fbD98ec178f971915D918cfDFec8852D14BC"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x754d8215dda849d8408f925fdf0bfd37c0dd2593c55f03af18655da4de97e410",
+      "creationTransactionHash": "0x7a5a0db1557e6fcc46740ef64886fa3a1c27c3843cbc4a5d67b474cc6ff15d9a",
+      "voteTransactionHash": "0xf5117a58f95ec706bc2c425507ddd7a21c3883ff4ab17f65de66a4858bb60f91",
+      "ballotId": "0x48a4572c2fb96826009c36d3c47dc01d072a377ed7a441a27c6c8312e707eb41",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386136",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xb28a6c3d38c80874171a30e7adbeda29dc7abf0d8247ab0098b0d7923c8f37ef",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x48a4572c2fb96826009c36d3c47dc01d072a377ed7a441a27c6c8312e707eb41"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb28a6c3d38c80874171a30e7adbeda29dc7abf0d8247ab0098b0d7923c8f37ef"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xd10ae06d69c2de8ffe7545d3c3fbaabd34e12e42e9e5dfd713ae403cf78c1f4f",
+      "creationTransactionHash": "0xdb52723e5c36aeacca09714c82cf769d316b4d4c577f976b0c737da740088761",
+      "voteTransactionHash": "0x398ac07ee5bb6bc61066b34d29bbe5b0e9bb168bf84fe6f9578062741a29801a",
+      "ballotId": "0x0c84d3fb5de56b8c52ab42d0b9da24da3a075dd0f7263dc44644427dee309b6c",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386139",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xc910095f04e5c7b46de1b8d3353a3c9dc83d201aa2a732d8134a60028a8c0131",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x0c84d3fb5de56b8c52ab42d0b9da24da3a075dd0f7263dc44644427dee309b6c"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xc910095f04e5c7b46de1b8d3353a3c9dc83d201aa2a732d8134a60028a8c0131"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb9413869857827F5252aDad7673Dae1206B3bbD4"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xf2c83ffb5249c35ae39efefa5d6bfcc475d3518afbdbc9fc9dfe697f9cba296c",
+      "creationTransactionHash": "0x50b00c15261d441a21de403b212439399c546afb8ad62ac3d3c230053115b934",
+      "voteTransactionHash": "0x43717853677981617992bacdb3c05eed2260fc50e8ba44a085aaa63728f9d588",
+      "ballotId": "0x3f071a77762809a997ff63478857d95c8d6288766edd4ca441bb2a39ad6ca140",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386141",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xb41ca1a65f2d37bfe4528a891425556652365584651183fc70dceef340160505",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x3f071a77762809a997ff63478857d95c8d6288766edd4ca441bb2a39ad6ca140"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb41ca1a65f2d37bfe4528a891425556652365584651183fc70dceef340160505"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xd464df4a01e2ed9b09390eacd2fa30d78631c01918427572b8d248cb55a54f62",
+      "creationTransactionHash": "0x84ef9b0cd3f1be501344239251f8bde03ba2948026dd7e2d200c60dfd686b347",
+      "voteTransactionHash": "0xa6ab5be9073ffb99b8ddd18511cf38af8d489bad100e98cac1d3b6f944a53cc2",
+      "ballotId": "0xa4a267da5522eb48dc244bcbaf8e5c32ac51517c485af99e1ac0f93ef1a24801",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386143",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xdd2a0cb8d6d887ff68736ac7ce6ee43c2271726349f9a432c1bdfbd8ef9498fb",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xa4a267da5522eb48dc244bcbaf8e5c32ac51517c485af99e1ac0f93ef1a24801"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xdd2a0cb8d6d887ff68736ac7ce6ee43c2271726349f9a432c1bdfbd8ef9498fb"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x2dda431fa639934babfbd12df303d92770647755b49a1ee3cb3a8de88ab121a2",
+      "creationTransactionHash": "0x4316339dcb05002adfa81b5396150f7ef35e0fbfb5712fcc03d5c8ea8f57a79e",
+      "voteTransactionHash": "0x992d5c0dbe3d1036b04f9148bac86010816396de873157975a83ebeca2959153",
+      "ballotId": "0xc2a3ce3173bf667df7d2b0c22ed5fe655160001b5b8fc5d8093f95fa372966de",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386146",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xc6cbae403663a6a11f7c058e2327c63a0e04111e4fe97c7c16c1d378b598d315",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xc2a3ce3173bf667df7d2b0c22ed5fe655160001b5b8fc5d8093f95fa372966de"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xc6cbae403663a6a11f7c058e2327c63a0e04111e4fe97c7c16c1d378b598d315"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x242dddcf1d2e5b5e49cdcdb7aaff1e31bec15f8915eae8f22b9f2d34fcf9f91c",
+      "creationTransactionHash": "0x9a5de0e4031cdabd25c3574ea3090c02f94cf592c06842c1265a2145beff0cdb",
+      "voteTransactionHash": "0x13193896aa7925b50d2614c056c86beefddab3523f63fe52842203bbe39b77f5",
+      "ballotId": "0x05cf7e9e925336250fc5b292a9f224217c74e9a99102cc813b77f7fc69de03b8",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386148",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xf106065316aa731b2aa1a8a910bc355fc2248d45b1d1463b18c5e4eb9d68af8d",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x05cf7e9e925336250fc5b292a9f224217c74e9a99102cc813b77f7fc69de03b8"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf106065316aa731b2aa1a8a910bc355fc2248d45b1d1463b18c5e4eb9d68af8d"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x54c179616e85fe2c7cb8acb766a3b49f893fb0cbfffeb9f4187f66a9ca2468ae",
+      "creationTransactionHash": "0x2d82056af17d4b245af6dad715cc9c7381d134cd483151b589e930a0373382ad",
+      "voteTransactionHash": "0x460ef88728e1ffda97f0cf2015707cf08fdfaa6ea98f9cec1ee594239d4feb51",
+      "ballotId": "0x6aafc1e8ae146e321289f0a07ec807dbe7642d703fd5433bae8d82728bb4fc5b",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386151",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x9bd6225faa579dd7f77d8902894526211c3dea290c0bbfee3efc4c95b246b6f3",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x6aafc1e8ae146e321289f0a07ec807dbe7642d703fd5433bae8d82728bb4fc5b"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x9bd6225faa579dd7f77d8902894526211c3dea290c0bbfee3efc4c95b246b6f3"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x83c115d8b326e11683006236052f38b84b11260ccfae2890c8dcdca0dd023b98",
+      "creationTransactionHash": "0x97c813238d5a3e950666b07993bb3d801ca5eea2823731072f27976bb5385379",
+      "voteTransactionHash": "0xdf8b24cfac3be48f26045bc3158e8fc8c00e687f564f0d39b6da2b6267951420",
+      "ballotId": "0x75d20b8fc955514d24df1e4635456cf4ab414712212141ba3ff323333c00cbde",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386154",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xbbd00447d0f01f442a7f6730b5ddb9bb1ea907bab400f11c7d62d3b2eed7f098",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x75d20b8fc955514d24df1e4635456cf4ab414712212141ba3ff323333c00cbde"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xbbd00447d0f01f442a7f6730b5ddb9bb1ea907bab400f11c7d62d3b2eed7f098"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xc8fbe9700a3e708bfddbe6cd17a160be0db96730adf2f40a95b3b8fde6e3547f",
+      "creationTransactionHash": "0x9cb0e2158741167d60cddf1153d42f2810d6566903cb7e7ea031d99329ddd50c",
+      "voteTransactionHash": "0xe3be9723d274bab41055d94c7c64b5fe14e4bfe75aef2aa8d081c271ecfcb775",
+      "ballotId": "0xd6bde439063c2a9b6abea03e5af551566534ede7fe7d58bbd90f28fbef28ba7d",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386156",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xa590812214e79e36be4f9de1387d524106481b5f07b151be1240e82d740df82e",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xd6bde439063c2a9b6abea03e5af551566534ede7fe7d58bbd90f28fbef28ba7d"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xa590812214e79e36be4f9de1387d524106481b5f07b151be1240e82d740df82e"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164"
+        }
+      }
+    },
+    {
+      "dataset": "USDC-v2",
+      "pool": "0x56e4c0836f694bbbcf705c440feafea22dbfd18f",
+      "voter": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x58a9ca9dfba75264ce34a670802306b8b144fce4458735ca528f63ab91002e34",
+      "creationTransactionHash": "0x39aecc68824860fb2b4a1fe32cd552ee734ca92d94d0be1109762cc7e3f2538d",
+      "voteTransactionHash": "0x7f03fcccbb98d8aee934c80383cd31add48dce0e1f2475301a250040e9bf43e1",
+      "ballotId": "0xa59bd43fe3358b42cda13f06684a9998b911fe77a93ec81d55db8c6085f27434",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "386158",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x4fc1862a6f64c0f61d9d706ce09844fa4095fa811a57f8e5d151efa240d5c69b",
+      "payloadBytes": 39,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xa59bd43fe3358b42cda13f06684a9998b911fe77a93ec81d55db8c6085f27434"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x4fc1862a6f64c0f61d9d706ce09844fa4095fa811a57f8e5d151efa240d5c69b"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x56e4C0836F694BBbcF705C440feaFeA22dbFd18f"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "cre"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "6"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0x2a9a9fca49139183c1e0b7537f4d00b433d41ac4768a63729c27c2291242ad28",
+      "creationTransactionHash": "0x773d76177dd0bda5382128d73ff66b69abc05b8f8620bf23f45478b9836b8f56",
+      "voteTransactionHash": "0xd40390a796c519df3d8e2cd9fcd50fce26135d1bf035f86fca7379cdb1ef677b",
+      "ballotId": "0x642514de27701b76d59360863cfa375808224ac20d539d828fc473e126cc56ce",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387401",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x1667ea1f877e3c6aab6a533371598a99b7dccc2a2ab07ef4a8bbafaa809e9c8f",
+      "payloadBytes": 15,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x642514de27701b76d59360863cfa375808224ac20d539d828fc473e126cc56ce"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x1667ea1f877e3c6aab6a533371598a99b7dccc2a2ab07ef4a8bbafaa809e9c8f"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0d74F572b14A25D623C29F476AFd544C9673fc96"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "public",
+      "entityKey": "0xb51b494a94cce6617d363e369e6d9d2079c87c46f8641ab3b2f5cd4b6686ba13",
+      "creationTransactionHash": "0x9074a09af17826acaa6b01a6def9ba19cc8f858ca37f544b0bb5dde3035e5012",
+      "voteTransactionHash": "0xbb3f9bd8258e563c1fd3c4ba211ccdea91de17a86cae1081f83d9098f0d65ef0",
+      "ballotId": "0x9208dca2cd0bc9945823d77cbac383c7be4b67fa213577b807db2f0debba4f56",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387403",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xc411ea1668efbee8fc0cbd0e8b0f485e8640529aa75c2ebf4c335f2529697ecb",
+      "payloadBytes": 15,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x9208dca2cd0bc9945823d77cbac383c7be4b67fa213577b807db2f0debba4f56"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "public"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xc411ea1668efbee8fc0cbd0e8b0f485e8640529aa75c2ebf4c335f2529697ecb"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x2993538e397eb1db0ac27613128c44cab0317508fe7eb146f6a39c2ccc39f910",
+      "creationTransactionHash": "0xa3adc2295b3c07c9344420e4b92dead24dbfed8ad90eaf841a6b3f69b62d8d3f",
+      "voteTransactionHash": "0xd0f1e2837d7418db7686187616967097adef90279099e5d5bc6b8489a672f6e6",
+      "ballotId": "0xf8152573c2b911048e1ea4c4859f2af649b23f60ae966f94ca8621caf519b9c5",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387356",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x91d1a2d77dc628cf9bd9a8aad5f6a65b652b3283ea77895d3f9bd4b65b696526",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xf8152573c2b911048e1ea4c4859f2af649b23f60ae966f94ca8621caf519b9c5"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x91d1a2d77dc628cf9bd9a8aad5f6a65b652b3283ea77895d3f9bd4b65b696526"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x2e01f590458240d214cbb008a4cbbd101e1f14fc522a303b292a43ff361b846b",
+      "creationTransactionHash": "0x338eb28f0c8c1aa5700e5fce45c9b882f2a85d6318d163301f4ae0dc24804c3e",
+      "voteTransactionHash": "0xa850c1077a9978b00a5341eeff78cb30fdbd56d6db60f37f3ea5855b2041e89d",
+      "ballotId": "0x3b840ef880ae4af95946165abacb6a818214de19ee6e631ba9fb775a56850366",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387359",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x01bfe11849e1617bca4549310bf5fdb44e8052503bf77063238c17de2c4191e7",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x3b840ef880ae4af95946165abacb6a818214de19ee6e631ba9fb775a56850366"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x01bfe11849e1617bca4549310bf5fdb44e8052503bf77063238c17de2c4191e7"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x73a469a9acce1ba7703df53dc7764367aef17c1fd74664d14c817b6b4532d503",
+      "creationTransactionHash": "0xb30d71fbfc71251aa898cd6147428526a73a2b938584ee529730170078430dcf",
+      "voteTransactionHash": "0x4b681099b75a9220d00d4cd9ea6584743e67282d10348c8fa073f1be285ee9a8",
+      "ballotId": "0xac8ac666b783c78fe24db946dfb4b880654e3367c6ce26583b430b78f4813736",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387361",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x5f6b79fca9534b4766082f1db36b6b539e994ac80c4d73388f6d8b4e1669d3f1",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xac8ac666b783c78fe24db946dfb4b880654e3367c6ce26583b430b78f4813736"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x5f6b79fca9534b4766082f1db36b6b539e994ac80c4d73388f6d8b4e1669d3f1"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x166e8bf205312f0bf00585e5a847542658b1e5366ba471f1034570f717483d33",
+      "creationTransactionHash": "0xd3b20d04611251526333912b5d36b20809d2a3e544155f79ed8d9718ce57630c",
+      "voteTransactionHash": "0xe868a6ebfba40b10665a951748aa445ccfd80a8a778dc48ff50d699b035554b2",
+      "ballotId": "0xbab7b2c75f4f47a548d8cc581effbf8b2482ce9d14ecc8264a33c5dd871a7027",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387364",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xf7112be1a56b8f70cb7a7bc23c7e3d0d7c652132e88608c2d387c0b99dc3b38a",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xbab7b2c75f4f47a548d8cc581effbf8b2482ce9d14ecc8264a33c5dd871a7027"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf7112be1a56b8f70cb7a7bc23c7e3d0d7c652132e88608c2d387c0b99dc3b38a"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x9ed33420546F45544f3f081778F298251be75f44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xd66391fc631aa89b75538a3e57a037b898d4323d4a555c14a9e1843bb1c825d5",
+      "creationTransactionHash": "0x8101a2e70886d9af796c83d46630c7301536a85948327714a44567e8438dde9f",
+      "voteTransactionHash": "0xffac23197c037432a84613565e74b359db62fb213f6154bf2cebe59eed16c2e3",
+      "ballotId": "0x6cd918deae95472eb2edb597709d6e511e359eee7eb35a6fbecd107e46ef116d",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387366",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x0a28d94333632a4e80446d487e5dad3d40ea395980130391959bbdc390d37213",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x6cd918deae95472eb2edb597709d6e511e359eee7eb35a6fbecd107e46ef116d"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x0a28d94333632a4e80446d487e5dad3d40ea395980130391959bbdc390d37213"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x5fac46acc18ad0def2d62dc7b7ae4fccf77194e21904a858712e5ee2606a341c",
+      "creationTransactionHash": "0x02642365f5e2bcb0e81d9421ad839ea870220e20eb06eebf0f8a7c6806062dda",
+      "voteTransactionHash": "0xfa4b45bc0d69d0ba6321c161b7849170324277274025c34754ad201cfcc210ff",
+      "ballotId": "0x5e93e388f7100ebc7bc1573e1e3c5ef8b46cfd76d4317235e2e93022ef0e4451",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387369",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x343386feabbc5d79ef18abda81cefbd5018e9fb4fdbcb092ba28b933c676a641",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x5e93e388f7100ebc7bc1573e1e3c5ef8b46cfd76d4317235e2e93022ef0e4451"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x343386feabbc5d79ef18abda81cefbd5018e9fb4fdbcb092ba28b933c676a641"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xbadccd690772b00267a8e8217ffec4ec7f17687814e51728d2d30f6a8493f02f",
+      "creationTransactionHash": "0xe9c954e8638f6c44bab90b06d707a33a1a27dfecec294e8ac1705dc8cf30084e",
+      "voteTransactionHash": "0xb7185cc701a54c53b7017ddbe22dcd4bc79e4683af2705889ec1c8b7eb8b672d",
+      "ballotId": "0xa6599c849c2a9d94dd74141102201f31104611d4cb876cf137d0b7d5c20d6f6c",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387371",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x3fdd7110980f2e4f65646b8a1219a522af2578db8a0973a3ba4bfd6b04acdbbe",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xa6599c849c2a9d94dd74141102201f31104611d4cb876cf137d0b7d5c20d6f6c"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x3fdd7110980f2e4f65646b8a1219a522af2578db8a0973a3ba4bfd6b04acdbbe"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x0649eb0767067eefbd3749f665b7d9f82511707e7de0ef1ecf80cb59ae005008",
+      "creationTransactionHash": "0x53436a53a55bd3648f6d8b3df6032a2634caa949577af7808cd55baa82f5d927",
+      "voteTransactionHash": "0xf9e3a3d0732458230a163071210ec7038889a98e1d637dbf7037c3d0915eb802",
+      "ballotId": "0x1c435267d5945dc39d82e026ed04b3b2364076904116fdd7a42191b34e75cfde",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387374",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xb88b6d43df1d25bd2bc8d524f531b2eab37eb865993793bb6d22a2e8dd6e4ea4",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x1c435267d5945dc39d82e026ed04b3b2364076904116fdd7a42191b34e75cfde"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb88b6d43df1d25bd2bc8d524f531b2eab37eb865993793bb6d22a2e8dd6e4ea4"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xe305fbD98ec178f971915D918cfDFec8852D14BC"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x49d6ecb55d491e5879146c8a3681bb5e8b6e6ca232e22af3d3f24c6ef82a8948",
+      "creationTransactionHash": "0x746acc84d15f0bfc20c92e85bbdf386b374217fefcd2bccb57a8ae9b23c42d8a",
+      "voteTransactionHash": "0x255c6979c6039c532469a6e6459d0a3335268f4f8e295489adabe0ebf53c3c36",
+      "ballotId": "0x1a6afa41b60e30e8b5067699fd0362137dc9e0b15a0766f0256ebd811245ff84",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387376",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x9c9bd905454ffe5183d544d7192a9477f070c5c79cb158ac54322cf304dbda8e",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x1a6afa41b60e30e8b5067699fd0362137dc9e0b15a0766f0256ebd811245ff84"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x9c9bd905454ffe5183d544d7192a9477f070c5c79cb158ac54322cf304dbda8e"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xa9e455e138765d90df8ed377322dd9406ca62bf245642d5ea52c172b0b63252a",
+      "creationTransactionHash": "0x37db369eb52c2fa9b73aba7b5fc527e49977b8f96aa16fa29ef9d8540f6857c9",
+      "voteTransactionHash": "0x581fb5fb27a64e920a59a10879b81a3055e54859575d8bc9aacabeceaf38f8eb",
+      "ballotId": "0x05aaf0c657069e2e22c884fd31e0d9c276352bc8183fd3f4c8becd9b1ee08c49",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387379",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x490787c24d1f9d15b290439979981f0a7df2ba4c667d70c199fd28a20e03bd70",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x05aaf0c657069e2e22c884fd31e0d9c276352bc8183fd3f4c8becd9b1ee08c49"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x490787c24d1f9d15b290439979981f0a7df2ba4c667d70c199fd28a20e03bd70"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb9413869857827F5252aDad7673Dae1206B3bbD4"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x17bbbd57650d709e079f4d608839a6fc7352acead40058e25c5987dae5aabd8f",
+      "creationTransactionHash": "0x69d1d26be7394187fcb1af9fdef22018b6522343c2d6860b3f6f3e0214578be8",
+      "voteTransactionHash": "0x0de2f3ad07381306be6b4651fa59ebff30b682807031d3b88d9d4879884a9bae",
+      "ballotId": "0x6dcd89a7c326aa1775553bf092f108717face44aa1707a964c97cb4367c6bad4",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387381",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x938526eb8aa092b987f1c9be3774d0fcd61bc450049984d1205ad2b04b444fb0",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x6dcd89a7c326aa1775553bf092f108717face44aa1707a964c97cb4367c6bad4"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x938526eb8aa092b987f1c9be3774d0fcd61bc450049984d1205ad2b04b444fb0"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x70ce8279735faae80c17e07390855d70a594c3ccf8ece890f8d3192eb0478a49",
+      "creationTransactionHash": "0xba5b3296426201677a0c31be0c7621fdfec1d4f9192bcc7022f9031adb894cfe",
+      "voteTransactionHash": "0xc47afbfe490a016fdf60b483aa093a1b5c743a4683195546ab75df0a8e3d50b5",
+      "ballotId": "0x4647f39f37a109a1388b93cf769f69653ce6b7037500fc6bf0a8cc38f473ce5f",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387384",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x85e1338cca94eb987656486139f913a1084bd727a76003dabb9942ea2488fed8",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x4647f39f37a109a1388b93cf769f69653ce6b7037500fc6bf0a8cc38f473ce5f"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x85e1338cca94eb987656486139f913a1084bd727a76003dabb9942ea2488fed8"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xa32209846dbdda54e437aacd3350cb3d8412f1157e8f7cfade98d356be89eb1b",
+      "creationTransactionHash": "0x35f1b60023fda6383836f0df201d5b12a67d868d2fd2b80a86067d4d9a99b1b2",
+      "voteTransactionHash": "0x80269659eec4cf5f1417d341e480cd6a7330729e09ffb6a4defd750108fa20d8",
+      "ballotId": "0x448ddbed5455c7d5545b4de7a5fac1e71f2a373dc2689302ab7dce6230774b70",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387386",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xb8663e8562ba082237dc9fe056f1409590b7fdd95f42c30a6f0cb8e412724d60",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x448ddbed5455c7d5545b4de7a5fac1e71f2a373dc2689302ab7dce6230774b70"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb8663e8562ba082237dc9fe056f1409590b7fdd95f42c30a6f0cb8e412724d60"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0xfa650c9b8e602bbec48d4336c8e15bc8ce004c17ddb5c02559c7e0012b2583e9",
+      "creationTransactionHash": "0x8102da40300c04f12c272ffb5c2f16565cfc867e64da9d554c1780dd849157ba",
+      "voteTransactionHash": "0x27eae8e87699f3efcf29f82615c5e220f96a609d935329f0a4ac993cdd15ea5b",
+      "ballotId": "0x90694807f0f15dcc5c1c5fd8f570d38d83170aaf83eaa8a47ff287be0a41b6cc",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387389",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xdf17eb60096c5c9277e5dccb914a0bd3ae255ea546d4a5848778148aff75af82",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x90694807f0f15dcc5c1c5fd8f570d38d83170aaf83eaa8a47ff287be0a41b6cc"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xdf17eb60096c5c9277e5dccb914a0bd3ae255ea546d4a5848778148aff75af82"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x500ff9512b8aff0c3a624b5e8bf6814cbaa654a273f99aeac60055823204f371",
+      "creationTransactionHash": "0x0b2e4b142bb45c78c6fad77b279202b9dddd9b287f16f60fde0ae01a67bfa7cd",
+      "voteTransactionHash": "0x26dbfcf14f6cec48136ec6247e7ae9a4d19713053dce5babcb28bd914c10b29f",
+      "ballotId": "0xc4f430d0c5c32bb19364975f60d83d98732e58f811f12793d8277799e1f8c76c",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387391",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xcb406087c046e09ac995eb8fb90e28977891f21196ead19d5035107a3f554366",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xc4f430d0c5c32bb19364975f60d83d98732e58f811f12793d8277799e1f8c76c"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xcb406087c046e09ac995eb8fb90e28977891f21196ead19d5035107a3f554366"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x7f267a95ccb9bd65f9ac7c3f14850d6f22fddc171f5a7e5eac3372d0f08c7230",
+      "creationTransactionHash": "0xa33fa326684fb58b1673e28dd1ee192af8c26c19a25abc7b45e3c6c3874e188d",
+      "voteTransactionHash": "0xfbfae56207896f313f288b58e03dbfed867d3e14b7bf46394b7d3a47627dfbe8",
+      "ballotId": "0x3059e94d963b8b44603ca0a16b6fbe61c915b6904bc56cf743209d237c9cf182",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387394",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xa1d6620a99393e79545d39795e736e54e6c1cbe6507d19f85c8ac015d9f3aa4a",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0x3059e94d963b8b44603ca0a16b6fbe61c915b6904bc56cf743209d237c9cf182"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xa1d6620a99393e79545d39795e736e54e6c1cbe6507d19f85c8ac015d9f3aa4a"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x10ef9a6f667829c97621676a04815f1a7dd88901b2b7129733c3233ea1270c52",
+      "creationTransactionHash": "0x2fb44d799e5164d00009969d26af1fce6552a9f5cfa3cf971948b2e4aec83d34",
+      "voteTransactionHash": "0x3ed8620fc09e4623aa4ccbf3551c932e895705593904beba21125c4f19c4a868",
+      "ballotId": "0xd4711369ce303a7a54f073cd825c8d9757d43f90e245824d471b7c34e7bebb76",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387396",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0x67ffd5681fdd16b12ca85ad5872e08338979de92fa3e82959fd00a36131b7623",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xd4711369ce303a7a54f073cd825c8d9757d43f90e245824d471b7c34e7bebb76"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x67ffd5681fdd16b12ca85ad5872e08338979de92fa3e82959fd00a36131b7623"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-short",
+      "pool": "0x70387e2963bc7fd796545988edb8ea08449f9b96",
+      "voter": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "creator": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "mode": "encrypted",
+      "entityKey": "0x5f3a99f1938a547a9430472407f39c132719a6e80835a63711ca7db0878397dc",
+      "creationTransactionHash": "0x9c2782990c5feeda61dd2a02c9cf14d07d47f7d0e8d105b6608e55f85e1f89a1",
+      "voteTransactionHash": "0x97f31ff6db8297d4d7c886ee8e930f098d9a3b6528bb9bb851933351d96008ac",
+      "ballotId": "0xf40a6816ea131ca4f165287672bc9d2383dccf1fbe1fa066d737e72badb0d29b",
+      "currentOwner": "0x5A57DB3F5c9469534f76EF279193B502F77F2860",
+      "creationBlock": "387398",
+      "creationExpiresAtBlock": "1035512",
+      "expiresAtBlock": "1035512",
+      "payloadHash": "0xd7747fd3f642e0d2fefa57537bd88475c120d7634ee2bfc04412ddd3b01794c5",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_id": {
+          "type": "bytes32",
+          "value": "0xf40a6816ea131ca4f165287672bc9d2383dccf1fbe1fa066d737e72badb0d29b"
+        },
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xd7747fd3f642e0d2fefa57537bd88475c120d7634ee2bfc04412ddd3b01794c5"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x70387e2963BC7FD796545988edb8Ea08449f9b96"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790579378"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "creator": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "mode": "encrypted",
+      "entityKey": "0x3be460fa6b48c5fadc0dd95db77f69ba8405b8aec259dac710f1f4023aad8d49",
+      "creationTransactionHash": "0xc73e448e7697cc0620c9ed7b2bd5fc8b0eeb8c5ddaa784b984d3bb8367215d1a",
+      "voteTransactionHash": "0xe9614dbd245d85ca74fe8899d5ac24ff34f9fa8fa86660ccd23dd52336cc7d9c",
+      "currentOwner": "0x0d74F572b14A25D623C29F476AFd544C9673fc96",
+      "creationBlock": "384371",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xef1f876751161eee61bd03acbba873f6e8eabd62e4eab22810f53698f4b86473",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xef1f876751161eee61bd03acbba873f6e8eabd62e4eab22810f53698f4b86473"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0d74F572b14A25D623C29F476AFd544C9673fc96"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "creator": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "mode": "encrypted",
+      "entityKey": "0xaa81441d5c42fe5aacbaaf04354a8dafe6d26e74c2e32fb7702047ef1adefbfc",
+      "creationTransactionHash": "0x9f128b2ff0ba67398484d37884c530896b4bb6eb31e6473f77c509cc8e2593f8",
+      "voteTransactionHash": "0xef9ee00e9325559609f952df56b8434f728ebd1fdf9a25127587efe0a5252c52",
+      "currentOwner": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F",
+      "creationBlock": "384377",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xb3b8583dfd09e90e9213d5cbca889a99d15de771e0317d79c152254f050b09c7",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb3b8583dfd09e90e9213d5cbca889a99d15de771e0317d79c152254f050b09c7"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x288c7E888d389dDdF22aeb059F37BddAcbeEF60F"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "creator": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "mode": "encrypted",
+      "entityKey": "0x58fcc7abaa50ef368a408fe5b77ec1d154cec995d9fe5af8e23a42575742eaa9",
+      "creationTransactionHash": "0x55080e249d16e816a450bc4e50940bf747f51051c0a78353bf603a5f56d26ac5",
+      "voteTransactionHash": "0xccf19d6b5ec48112f9659a6eee1a8052b51a9afdab78780c4b5b3d224cdd1ce0",
+      "currentOwner": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093",
+      "creationBlock": "384384",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xc14b42e07e1416070674fe65355f1775358f988877ad91b7b777874add14b0de",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xc14b42e07e1416070674fe65355f1775358f988877ad91b7b777874add14b0de"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xCa028CF96d0174D3412B21081bF2FC7f4D52D093"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "creator": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "mode": "encrypted",
+      "entityKey": "0x7cf56c410e59e695ff5ccf2532042cb8b82fd73bb885e98b93f4920bb740ba4f",
+      "creationTransactionHash": "0x9e9c20952046b10139d61ffc3d066e592c2458322eb285d8a0b44c79941da187",
+      "voteTransactionHash": "0x0574df61f7a9b6fa1a3f8ce3b5a43d0800a49965935015636834560a0bdeb9d8",
+      "currentOwner": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610",
+      "creationBlock": "384390",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x0d56cec184220c7f8c27f1425729baaee916f5c4de4647455fad6b17ac615b19",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x0d56cec184220c7f8c27f1425729baaee916f5c4de4647455fad6b17ac615b19"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x1e0E45cF8A4dc4872Fd38144bfc05FD206153610"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "creator": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "mode": "encrypted",
+      "entityKey": "0x083ac37806b58cb441d36e30d8139831951c634f34ddbe97a557284369f4ca1d",
+      "creationTransactionHash": "0x5400488f714a30eb0744b924fef1b971477686f3b0fdfa42d3d6c2d476283edb",
+      "voteTransactionHash": "0xb92419eb3d0aa9bd7942bfed57ad44776047ef6e93a4971779f4e2104085e325",
+      "currentOwner": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0",
+      "creationBlock": "384396",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x639ad989b88e057a25f89d4f82df86c106af83ac1ab56cf9edcf5e1321e709c5",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x639ad989b88e057a25f89d4f82df86c106af83ac1ab56cf9edcf5e1321e709c5"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xEA45704b0C0d9c5405778245E1c68CFE39b21dC0"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "creator": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "mode": "encrypted",
+      "entityKey": "0x03f75b43fc0099762f19c5516e21804953815897bad858984259d141b57ecb57",
+      "creationTransactionHash": "0xefcc246842d4e222397981812deb69548e244d753e9f5fbaf744ea1e6055e066",
+      "voteTransactionHash": "0x0b1de1348b1a81f88b39c446ad50af471aa65d621f5544ffcd80dd9565bee00a",
+      "currentOwner": "0x9ed33420546F45544f3f081778F298251be75f44",
+      "creationBlock": "384403",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xa72e426719dfb92b74f119df65c9e0224c2f6b77e61a04b33a09550b6160b0fb",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xa72e426719dfb92b74f119df65c9e0224c2f6b77e61a04b33a09550b6160b0fb"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x9ed33420546F45544f3f081778F298251be75f44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "creator": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "mode": "encrypted",
+      "entityKey": "0x7deecd4f42eb2345608465a26f5fa1797944d1f3729b4067e6125253dc2af7d9",
+      "creationTransactionHash": "0x5d98dfb9c7a92134e67a8b53e4516d13b3da4d35645b442a4f586936b3abebcc",
+      "voteTransactionHash": "0x9f4f0b948fdf80c4f6eff11a69ff5c0acdc68500cbdd08b4ffb34f8b25163682",
+      "currentOwner": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C",
+      "creationBlock": "384409",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xf276745080d86a3f34ddd44ab8dee5920a260a9aef75f79e5ea9a5b89adc5794",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xf276745080d86a3f34ddd44ab8dee5920a260a9aef75f79e5ea9a5b89adc5794"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xd81A85B5Aa3be5A8f31D386C2e2C65e8E10E858C"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "creator": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "mode": "encrypted",
+      "entityKey": "0x8effcfef190e6a72e26334d97fa355e3625977e3d04cf34780e637d2d9bf71ad",
+      "creationTransactionHash": "0xe007752b641c4b95c392edf1c3a6fa41190ac1f1ef450af7396ce3255d7f959d",
+      "voteTransactionHash": "0x7f1f3850c8f93719b78cb8393f38ac9dfe708c1e9f937f1e0b1a8c6f375b2ade",
+      "currentOwner": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44",
+      "creationBlock": "384415",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x90b3adba2c854473871c559ca718fad66ba9ebccb653362a238a429de936ef59",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x90b3adba2c854473871c559ca718fad66ba9ebccb653362a238a429de936ef59"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xbbE0b6685154d64109404A094CCb1f1b33E0ee44"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "creator": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "mode": "encrypted",
+      "entityKey": "0xb869554dc90137e23bd6731e4b7bf5b7a1449243909a21833bd3d6e9014d010f",
+      "creationTransactionHash": "0x6996394a84b11a732f68dc821c8a35c8f45bd3e759be69e40f929ad9e4bf9cd3",
+      "voteTransactionHash": "0xca661141fa2bf7965aacc9ecd8f4f0332740a8f9df7c5f8c7d9d06e78f7e7626",
+      "currentOwner": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184",
+      "creationBlock": "384421",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x417039a284b4ee1b2413d7a68e1cd01f55a12106ecdd921967d5f5091aeb1b72",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x417039a284b4ee1b2413d7a68e1cd01f55a12106ecdd921967d5f5091aeb1b72"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xD75Bc06b5e31a19AC981C666b5F2EA504e0f7184"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "creator": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "mode": "encrypted",
+      "entityKey": "0xb550b10ca4a47a7b429567b08264ff73bf31fc64e8c3cf8e4c88fcd453337c05",
+      "creationTransactionHash": "0xf80864ede8378d2537bdf0ed2f1adb3fa6b8682bd4108b92c37bba7ee196fdd7",
+      "voteTransactionHash": "0xf7b56f1e7570e4649ad766b31243007513da108e21abe5ea879e119028d95d9f",
+      "currentOwner": "0xe305fbD98ec178f971915D918cfDFec8852D14BC",
+      "creationBlock": "384427",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xea09f2a014259c75ea088630100350611b828a4ddd9b755d48f9effdab54957c",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xea09f2a014259c75ea088630100350611b828a4ddd9b755d48f9effdab54957c"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xe305fbD98ec178f971915D918cfDFec8852D14BC"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "creator": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "mode": "encrypted",
+      "entityKey": "0xa1676ea8f8bbdfc0c32e3f22303a309e041cf5b8764ec6746567c43dda5e1e52",
+      "creationTransactionHash": "0x18ea72ba34742b445dd9b20dfbe6f7525ad2a2ff210eeed85a2c088acaa1338b",
+      "voteTransactionHash": "0xd2bc496f6d42c43af3aa07f0e2e2da3860cc634b84b541c2fd67acce6f459d2a",
+      "currentOwner": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5",
+      "creationBlock": "384434",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x294592c501aa17076d02b2709cd12bcdfbd86b3168ed94bcb48a4d01883253e5",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x294592c501aa17076d02b2709cd12bcdfbd86b3168ed94bcb48a4d01883253e5"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xADc705D10B9bDb59f17Ca6970CC0AE46EF1D90c5"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "creator": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "mode": "encrypted",
+      "entityKey": "0xeca19bc45ea3a21495e571bc59e9b38306c90649535552f5a10ec932e87ca3de",
+      "creationTransactionHash": "0xcb23bfaabd61ecdeffb800f5977d61a0d2e181643e400e6d6a9891458cba7cff",
+      "voteTransactionHash": "0x461046bb7cc91d6f72511cd05ca14989259f28e33ae5d77d77109e40f16ff979",
+      "currentOwner": "0xb9413869857827F5252aDad7673Dae1206B3bbD4",
+      "creationBlock": "384440",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xb5acdc22668e03a8f57c13b2238a92d366f2bf5b188eb8d0e387b09136e321aa",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xb5acdc22668e03a8f57c13b2238a92d366f2bf5b188eb8d0e387b09136e321aa"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb9413869857827F5252aDad7673Dae1206B3bbD4"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "creator": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "mode": "encrypted",
+      "entityKey": "0x57d1c4f6b6ba3d28ed8013659ab30b9772026fcaf1b76fd37d7e0798d0478174",
+      "creationTransactionHash": "0x9ea5bf6aa09124b6dc33766911873ef9991d1845edbf5d0d9b9645545b113ac0",
+      "voteTransactionHash": "0xad264170c230ff9f9ea2b668b6c03dcbde8db04202f79435932dd01b0e1acd14",
+      "currentOwner": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090",
+      "creationBlock": "384447",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xe169301a05fd7dc0d10389d40bcca846f9023a42ced63a3b9672b6105f35900a",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xe169301a05fd7dc0d10389d40bcca846f9023a42ced63a3b9672b6105f35900a"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6bB3117d1E95d4977a7d7Be145a153a094a1C090"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "creator": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "mode": "encrypted",
+      "entityKey": "0x76829c5175072751d013e1845186e73d5ebffd35d7c8ed28bf1deb29d44ef8c3",
+      "creationTransactionHash": "0x204e61650e671e29ff288ab544ad1e77baff47dd5c4f4014f263528bd1312544",
+      "voteTransactionHash": "0x0599a7de54b8599f45888ff1b4a53886cf5a2aa85f98ae1d6e1df31619ca5178",
+      "currentOwner": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe",
+      "creationBlock": "384453",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xbb5f40ab4951d4909efca53b5a840dd953957de52c1ce44d42095ec698ee9623",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xbb5f40ab4951d4909efca53b5a840dd953957de52c1ce44d42095ec698ee9623"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x0C64C9bd2641D928e009542e3FA4A828DEa49DFe"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "creator": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "mode": "encrypted",
+      "entityKey": "0x80a8caebd51e9ff61cfbc6e6c171ab91baa44b3baa5b425479fada7e5455935a",
+      "creationTransactionHash": "0xb433525424ebcc61a0e5198f5c2e60fda437fc60069a3668c827c042c495f408",
+      "voteTransactionHash": "0x87db2a71877cb8b86a17309383490386cabbbbba75003e5f59d95d64db6044a9",
+      "currentOwner": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49",
+      "creationBlock": "384459",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xce4ad94c6a2f11a4c2a47024f22857e2b28a0fefaca6eb4d022db5ece8c2178a",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xce4ad94c6a2f11a4c2a47024f22857e2b28a0fefaca6eb4d022db5ece8c2178a"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xb75dCd8e57b7dA63C964b8783e1b4Bae679D4A49"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "creator": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "mode": "encrypted",
+      "entityKey": "0xffca2fd8e1a8d14a6ecc175201b28ad524e41cc17e5a72784fc20a225dc700cf",
+      "creationTransactionHash": "0xd8400c836f76160b6a6008e2cbe46d8fb549b3fd954b8eaa54c0dbf20c5df319",
+      "voteTransactionHash": "0x3dbd8d393fff779c3ea7be3d945e81db0b68d96aefd32dd47624cf7f811cad56",
+      "currentOwner": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8",
+      "creationBlock": "384465",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x5b236d1bc21065ebfe747ad86af445d921e6c57ce7e609901cdeeddb6986d711",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x5b236d1bc21065ebfe747ad86af445d921e6c57ce7e609901cdeeddb6986d711"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xF3E76B3112d77FabB6D0D20e7262BB721E790Fe8"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "creator": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "mode": "encrypted",
+      "entityKey": "0x68047f6e68255ddeaa7ebd463b5c4ff57812cb1c3d1e246d4862e13328e921b5",
+      "creationTransactionHash": "0x49ce0b5847fe47cb91ba817f3df3fe31ae556f3eb1f6502b3cfd083faea18f6f",
+      "voteTransactionHash": "0xfb0290a3f812f9fda1fe5b286da1770f9def40afbd80be4c9e66ddc8b91b6cc3",
+      "currentOwner": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241",
+      "creationBlock": "384472",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0xc7ad3f717b53852265fcb9b08a58879e9e36bdf201180152d573427bafad4e46",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0xc7ad3f717b53852265fcb9b08a58879e9e36bdf201180152d573427bafad4e46"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x4D63E8A84B1DB26F3Ffb1CAA583390A6f5d6B241"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "creator": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "mode": "encrypted",
+      "entityKey": "0x21ed220b4d93174ae52002fbfb5da2e7de939f84eb81d94fdf1d733f3eb07430",
+      "creationTransactionHash": "0x51f537319db2063289e58e3bcd2e8c0c5d5e51bd077ec180aa89c11fbeeddee1",
+      "voteTransactionHash": "0x2af4660a3180136b290e2bdf41e0a652fcd1f1057d5b4bb7439eae57d554f750",
+      "currentOwner": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622",
+      "creationBlock": "384478",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x3e29cae6e473e55028e8e1271e0b6ddf339b50bd316fc9502ce5b043841a2af0",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x3e29cae6e473e55028e8e1271e0b6ddf339b50bd316fc9502ce5b043841a2af0"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xB79deEEe18F941115C0cE7Fd5727fF569d50D622"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "creator": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "mode": "encrypted",
+      "entityKey": "0x16622863d23410b734651d6bd49535651e065f7dbfb0c6c2b12c9c5de60425fd",
+      "creationTransactionHash": "0xf6f935d304a11106ead46fe554d3e266426b8e7c4955ba1c1beab802da183078",
+      "voteTransactionHash": "0xd5b4db23827d5c01db9090b4db09cfe1d863552c9908d2c5c8ed944d6c17db28",
+      "currentOwner": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164",
+      "creationBlock": "384484",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x82eeaa1bcc19c818c07a0d13ec7c12ffe1fa233b9901fe2211c49d94c68792ed",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x82eeaa1bcc19c818c07a0d13ec7c12ffe1fa233b9901fe2211c49d94c68792ed"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0xf73BAa22e3cd01B4f42fe6cE63303b96E19A0164"
+        }
+      }
+    },
+    {
+      "dataset": "EURC-legacy",
+      "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+      "voter": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "creator": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "mode": "encrypted",
+      "entityKey": "0xd068ac36a2d05cf833f107681db83ecd646476880b1248f866817690e75aea6f",
+      "creationTransactionHash": "0xe7aab5b45786e1e1285b6f27773194e4ea5a6dd3d963499bdfd6cf311a8dc036",
+      "voteTransactionHash": "0x0792df6c8cc0e3934e55f438dda6fcc93c5d265b7e9cd12ce504c159057cec76",
+      "currentOwner": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32",
+      "creationBlock": "384490",
+      "creationExpiresAtBlock": "1041389",
+      "expiresAtBlock": "1041389",
+      "payloadHash": "0x28806b7c65e83f662843be1feb02cf8bce46fd324269d547d157f21dde2af1ff",
+      "payloadBytes": 96,
+      "readonly": true,
+      "permissionlessExtension": false,
+      "queryMatchedAtBlock": "387597",
+      "acceptedArcRevision": "1",
+      "attributes": {
+        "ballot_mode": {
+          "type": "str",
+          "value": "sealed"
+        },
+        "payload_hash": {
+          "type": "bytes32",
+          "value": "0x28806b7c65e83f662843be1feb02cf8bce46fd324269d547d157f21dde2af1ff"
+        },
+        "pool": {
+          "type": "addr",
+          "value": "0x35A7915DC29C67805B7323E5A0384f919c9cF210"
+        },
+        "pool_chain": {
+          "type": "u64",
+          "value": "5042002"
+        },
+        "pool_kind": {
+          "type": "str",
+          "value": "noir"
+        },
+        "projects": {
+          "type": "u64",
+          "value": "15"
+        },
+        "retention_until": {
+          "type": "u64",
+          "value": "1790591132"
+        },
+        "revision": {
+          "type": "u256",
+          "value": "1"
+        },
+        "schema": {
+          "type": "str",
+          "value": "ranked-shares.ballot.v1"
+        },
+        "voter": {
+          "type": "addr",
+          "value": "0x6f8b00cD16B95D03cf138711979520ef2fcB8B32"
+        }
+      }
+    }
+  ]
+}

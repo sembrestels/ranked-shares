@@ -9,24 +9,34 @@ const names = ["RankedShares", "CreRankedShares", "NoirRankedShares", "ZiskRanke
 const check = process.argv.includes("--check");
 if (!check) execFileSync("forge", ["build"], { cwd: root, stdio: "inherit" });
 if (!check) mkdirSync(output, { recursive: true });
+const cache = !check ? JSON.parse(readFileSync(`${root}cache/solidity-files-cache.json`, "utf8")) : undefined;
 for (const name of names) {
   const target = new URL(`${name}.json`, output);
   if (check) {
     const saved = JSON.parse(readFileSync(target, "utf8"));
+    if (!Number.isInteger(saved.runtimeBytecodeSize) || saved.runtimeBytecodeSize > 24576) throw new Error(`${name} has no deployable runtime-size record. Run npm run contracts:sync.`);
     for (const [path, expected] of Object.entries(saved.sourceHashes)) {
       const actual = createHash("sha256").update(readFileSync(new URL(path, `file://${root}`))).digest("hex");
       if (actual !== expected) throw new Error(`${name} is stale (${path}). Run npm run contracts:sync in web.`);
     }
     continue;
   }
-  const artifact = JSON.parse(readFileSync(new URL(`out/${name}.sol/${name}.json`, `file://${root}`), "utf8"));
+  let artifactPath = `${name}.sol/${name}.json`;
+  if (["NoirRankedShares", "LPCreRankedShares"].includes(name)) {
+    const source = Object.values(cache.files).find(f => f.sourceName === (name === "NoirRankedShares" ? "src/noir/NoirRankedShares.sol" : "src/uniswap/LPCreRankedShares.sol"));
+    artifactPath = source?.artifacts?.[name]?.["0.8.28"]?.["noir-ir"]?.path;
+    if (!artifactPath) throw new Error(`Missing noir-ir deployment artifact for ${name}.`);
+  }
+  const artifact = JSON.parse(readFileSync(new URL(`out/${artifactPath}`, `file://${root}`), "utf8"));
+  const runtimeBytecodeSize = (artifact.deployedBytecode.object.length - 2) / 2;
+  if (runtimeBytecodeSize > 24576) throw new Error(`${name} exceeds EIP-170 (${runtimeBytecodeSize} bytes).`);
   const metadata = typeof artifact.metadata === "string" ? JSON.parse(artifact.metadata) : artifact.metadata;
   const sourceHashes = Object.fromEntries([...Object.keys(metadata.sources), "foundry.toml"].sort().map((path) => [
     path, createHash("sha256").update(readFileSync(new URL(path, `file://${root}`))).digest("hex"),
   ]));
   const dependency = ["Poseidon2", "IngestVerifier", "TallyVerifier", "ZiskVerifier"].includes(name);
   if (dependency && Object.keys(artifact.deployedBytecode.immutableReferences || {}).length) throw new Error(`${name}: runtime contains immutables; cannot compare it directly.`);
-  writeFileSync(target, JSON.stringify({ contractName: name, abi: artifact.abi, bytecode: artifact.bytecode.object,
+  writeFileSync(target, JSON.stringify({ contractName: name, abi: artifact.abi, bytecode: artifact.bytecode.object, runtimeBytecodeSize,
     ...(dependency ? { runtimeBytecode: artifact.deployedBytecode.object } : {}), sourceHashes }) + "\n");
   console.log(`Exported ${name}`);
 }

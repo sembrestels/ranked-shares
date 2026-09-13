@@ -21,7 +21,6 @@ vi.mock("../app/context/providers", async () => ({
   useRound: (await import("../app/context/rounds")).useRound,
   useSwarm: () => ({ client: undefined, info: undefined, ...swarm }),
 }));
-vi.mock("../app/components/stage/stage-bar-container", () => ({ StageBarContainer: () => <p>Round stage</p> }));
 import { Shell } from "../app/root";
 
 const A = "0x0000000000000000000000000000000000000001";
@@ -42,7 +41,6 @@ test("global navigation has hierarchy and the directory never selects a default 
   const nav = screen.getByRole("navigation", { name: "Main" });
   expect(within(nav).getAllByRole("link").map((a) => a.getAttribute("href"))).toEqual(["/", "/deploy"]);
   expect(screen.queryByRole("navigation", { name: "Round pages" })).toBeNull();
-  expect(screen.queryByText("Round stage")).toBeNull();
   expect(screen.queryByText("Connect wallet")).toBeNull();
   expect(screen.getByTestId("pool").textContent).toBe("none");
 });
@@ -73,14 +71,12 @@ test("management exposes import, and global Create round leaves round navigation
   fireEvent.click(within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: /Create round/ }));
   expect(screen.getByTestId("location").textContent).toBe("/deploy");
   expect(screen.queryByRole("navigation", { name: "Round pages" })).toBeNull();
-  expect(screen.queryByText("Round stage")).toBeNull();
 });
 
 test("an invalid round never falls back to a different configured pool", () => {
   mount("/vote?pool=invalid");
   expect(screen.getByRole("link", { name: "Find or open a round" })).toBeTruthy();
   expect(screen.queryByRole("navigation", { name: "Round pages" })).toBeNull();
-  expect(screen.queryByText("Round stage")).toBeNull();
 });
 
 test("background Swarm ID failure leaves public browsing usable and explicit retries show errors", () => {
