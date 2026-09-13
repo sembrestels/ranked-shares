@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { hexToBytes } from "viem";
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
@@ -26,7 +26,10 @@ export function useArkivPublic(snapshot: RoundSnapshot | undefined) {
   return useQuery({
     queryKey: ["arkiv-public", pool ?? "", snapshot?.block ?? 0],
     enabled,
-    placeholderData: keepPreviousData,
+    // keepPreviousData ignores the key: on a pool switch it would carry the old
+    // pool's commitments onto the new one's board until its own read resolves.
+    // Keep the previous data only when the previous query was for this pool.
+    placeholderData: (prev, prevQuery) => (prevQuery?.queryKey[1] === pool ? prev : undefined),
     queryFn: async (): Promise<ArkivPublic> => {
       const s = snapshot!;
       const voters = await readArkivVoters(client!, pool!, {
