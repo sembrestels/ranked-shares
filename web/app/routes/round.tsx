@@ -1,5 +1,5 @@
 import { useAccount } from "wagmi";
-import { Board } from "../components/round/board";
+import { Board, projectName } from "../components/round/board";
 import { Outcome } from "../components/round/outcome";
 import { RoundHeading } from "../components/round/round-heading";
 import { SealedPanel } from "../components/round/sealed-panel";
@@ -12,7 +12,6 @@ import { useNow } from "../hooks/use-now";
 import { useRoundSnapshot, useVoter } from "../hooks/use-snapshot";
 import { ROUND_NAME } from "../lib/copy";
 import { errorMessage } from "../lib/proposals";
-import { projectName } from "../components/round/board";
 
 export default function RoundPage() {
   const { pool } = useRound();

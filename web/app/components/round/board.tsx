@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import type { RoundSnapshot } from "../../lib/api-types";
 import { Badge, Money, SupportBar } from "../ui";
 
-export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id}`;
+export const projectName = (p: { id: number; title: string | null }) => p.title ?? `Project ${p.id + 1}`;
 
 /** Public commitments per project, most backed first. For an Arkiv pool the
  * commitments come from the browser (useArkivPublic) and override the snapshot's. */
@@ -15,7 +15,7 @@ export function Board({ snapshot: s, commitments }: { snapshot: RoundSnapshot; c
     <section aria-labelledby="board-heading">
       <h2 id="board-heading" className="font-heading text-xl">Public commitments</h2>
       {computing && <p className="mt-2 text-sm text-secondary">Public commitments are being computed from Arkiv in your browser.</p>}
-      <ul className="mt-4 flex flex-col gap-4">
+      <ul aria-labelledby="board-heading" className="mt-4 flex flex-col gap-4">
         {rows.map((p) => (
           <li key={p.id} className="border border-edge bg-surface p-6">
             <div className="flex flex-wrap items-baseline justify-between gap-3">

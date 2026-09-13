@@ -17,7 +17,7 @@ test("Board lists projects by public commitment, descending, with name, cost, an
   inRouter(<Board snapshot={openSnapshot} />);
   const rows = screen.getAllByRole("listitem");
   expect(rows).toHaveLength(2);
-  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 1");
+  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 2");
   expect(within(rows[0]).getByRole("link").getAttribute("href")).toBe("/project/1");
   expect(within(rows[0]).getByTitle("1000 USDC").textContent).toBe("1,000 USDC");
   expect(within(rows[1]).getByRole("link").textContent).toBe("Formal audit of the tally");
@@ -33,7 +33,7 @@ test("Board shows the funded badge once the outcome is set", () => {
 test("Board takes browser-computed commitments for an Arkiv pool", () => {
   inRouter(<Board snapshot={arkivSnapshot} commitments={["250000000", "900000000"]} />);
   const rows = screen.getAllByRole("listitem");
-  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 1");
+  expect(within(rows[0]).getByRole("link").textContent).toBe("Project 2");
   expect(within(rows[0]).getByTitle("900 USDC")).toBeTruthy();
   expect(within(rows[1]).getByTitle("250 USDC")).toBeTruthy();
 });
@@ -85,7 +85,7 @@ test("Outcome lists the funded set in order, the finality in words, and the audi
   expect(screen.getByText(/the sealed ballots were proven against their commitments/)).toBeTruthy();
   const funded = screen.getByRole("list", { name: "Funded projects" });
   expect(within(funded).getAllByRole("listitem").map((li) => li.textContent)).toEqual(["Formal audit of the tally, 4,000 USDC"]);
-  expect(screen.getByText("Project 1, not funded")).toBeTruthy();
+  expect(screen.getByText("Project 2, not funded")).toBeTruthy();
   expect(screen.getByRole("link", { name: "check this result yourself" }).getAttribute("href")).toBe("https://github.com/sembrestels/ranked-shares#sealed-pools");
   rerender(<MemoryRouter><Outcome snapshot={attestedSnapshot} /></MemoryRouter>);
   expect(screen.getByText("Provisional")).toBeTruthy();
