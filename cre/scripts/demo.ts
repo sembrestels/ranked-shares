@@ -66,7 +66,8 @@ export function master(): Uint8Array { return hexToBytes(readFileSync(MASTER, "u
 export function loadState() { return JSON.parse(readFileSync(statePath, "utf8")); }
 export function clients(rpc: string, account = unlock()) {
   const chain = defineChain({ id: ARC, name: "Arc Testnet demo", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: { default: { http: [rpc] } } });
-  return { account, chain, pub: createPublicClient({ chain, transport: http(rpc), pollingInterval: 500 }), wallet: createWalletClient({ account, chain, transport: http(rpc) }) };
+  const transport = () => http(rpc, { retryCount: 3, retryDelay: 1000 });
+  return { account, chain, pub: createPublicClient({ chain, transport: transport(), pollingInterval: rpc.startsWith("http://127.0.0.1:") ? 500 : 4000 }), wallet: createWalletClient({ account, chain, transport: transport() }) };
 }
 export function prepare(organizer: Address, deadline?: bigint) {
   if (existsSync(statePath)) return loadState();
@@ -182,15 +183,31 @@ export async function deployRounds(state: any, rpc: string, persist?: string) {
   return state;
 }
 
-export function exportPlan(state: any, path = resolve(root, "demo/import-plan.json")) {
+function selectedCurrency(currency?: string) {
+  if (currency && !["EURC", "USDC"].includes(currency)) throw new Error("Choose EURC or USDC.");
+  return currency;
+}
+export function exportPlan(state: any, path = resolve(root, "demo/import-plan.json"), currency?: string) {
+  selectedCurrency(currency);
   const plan = JSON.parse(readFileSync(resolve(root, "swarm/pool-import-plan.json"), "utf8"));
   delete plan.organizerAndProposerAndRecipient;
   plan.demo = true; plan.organizer = state.organizer; plan.proposer = state.deployer; plan.recipient = state.recipient;
+  if (currency) plan.rounds = plan.rounds.filter((round: any) => round.currency === currency);
   for (const round of plan.rounds) {
     const deployed = state.rounds[round.currency];
     if (!deployed.pool) throw new Error("Deploy both pools before exporting their import plan.");
     Object.assign(round, { pool: deployed.pool, organizer: state.organizer, votingDeadline: state.deadline,
       organizerSharingPublicKey: deployed.organizerSharingPublicKey ?? null, status: "awaiting_encrypted_upload" });
+    const receiptPath = "demo/urbehub-proposal-receipts.json";
+    if (round.currency === "EURC" && existsSync(resolve(root, receiptPath))) {
+      const receipt = JSON.parse(readFileSync(resolve(root, receiptPath), "utf8"));
+      if (receipt.pool?.toLowerCase() === deployed.pool.toLowerCase() && receipt.encryption === false) {
+        round.reviewMode = "public";
+        round.publicReceiptFile = receiptPath;
+        round.status = receipt.verifiedAt ? "accepted_publicly" : "public_import_in_progress";
+        plan.privacy = "EURC uses the explicitly approved public demo import; USDC retains encrypted review. Original Markdown copies are already public.";
+      }
+    }
     for (const row of round.proposals) {
       const actual = createHash("sha256").update(readFileSync(resolve(root, row.source))).digest("hex");
       if (actual !== row.sha256) throw new Error(`Source changed: ${row.source}`);
@@ -201,28 +218,33 @@ export function exportPlan(state: any, path = resolve(root, "demo/import-plan.js
   return plan;
 }
 
-export async function registerKey(state: any, rpc: string, key: string) {
+export async function registerKey(state: any, rpc: string, key: string, currency?: string) {
+  const selected = selectedCurrency(currency);
   const normalized = `0x${publicKey(key)}` as Hex;
   const op = operator(state, rpc);
   for (const [currency, round] of Object.entries(state.rounds) as [string, any][]) {
+    if (selected && currency !== selected) continue;
     if (!round.privacy) throw new Error("Deploy both pools first.");
     const previous = await op.pub.readContract({ address: round.privacy, abi: privacyAbi, functionName: "organizerPublicKey" });
     if (previous.toLowerCase() !== normalized) await op.write(`${currency}:review-key:${normalized}`, round.privacy, privacyAbi, "setOrganizerKey", [normalized]);
     round.organizerSharingPublicKey = normalized;
     op.remember();
   }
-  exportPlan(state);
+  exportPlan(state, selected ? resolve(root, `demo/import-plan-${selected.toLowerCase()}.json`) : undefined, selected);
 }
 
-export async function importProposals(state: any, rpc: string, file: string) {
+export async function importProposals(state: any, rpc: string, file: string, currency?: string) {
+  selectedCurrency(currency);
   const uploaded = JSON.parse(readFileSync(file, "utf8"));
-  const expected = exportPlan(state);
-  if (uploaded.version !== 1 || uploaded.chainId !== ARC || uploaded.rounds?.length !== 2) throw new Error("Invalid upload receipt file.");
+  const expected = exportPlan(state, currency ? resolve(root, `demo/import-plan-${currency.toLowerCase()}.json`) : undefined, currency);
+  if (uploaded.version !== 1 || uploaded.chainId !== ARC || !Array.isArray(uploaded.rounds) || uploaded.rounds.length < expected.rounds.length || uploaded.rounds.length > 2) throw new Error("Invalid upload receipt file.");
   const op = operator(state, rpc);
   // Validate every row before the first transaction. No plaintext/public fallback.
   const queue: any[] = [];
   for (const round of expected.rounds) {
-    const got = uploaded.rounds.find((r: any) => r.currency === round.currency);
+    const candidates = uploaded.rounds.filter((r: any) => r.currency === round.currency);
+    if (candidates.length !== 1) throw new Error("Missing or duplicated round in upload receipts.");
+    const got = candidates[0];
     if (!got || got.pool?.toLowerCase() !== round.pool.toLowerCase() || got.proposals?.length !== round.proposals.length) throw new Error("Upload receipt targets do not match the prepared pools.");
     for (const row of round.proposals) {
       const match = got.proposals.filter((p: any) => p.source === row.source);
@@ -282,21 +304,30 @@ export async function simulate(state: any, rpc: string, currency: string, broadc
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
+  if (!command || command === "--help") {
+    console.log("Arc Testnet demo operator. See demo/README.md for account setup and simulation limitations.\nCommands:\n  prepare --organizer <address> [--deadline <unix-seconds>]\n  status\n  deploy\n  register-key --key <Swarm-sharing-public-key> [--round EURC|USDC]\n  export [--round EURC|USDC]\n  import --file <encrypted-upload-receipts.json> [--round EURC|USDC]\n  simulate --round EURC|USDC [--broadcast]\nOptional: --rpc <url>. Existing operations resume from the private transaction journal.");
+    return;
+  }
   const value = (name: string) => { const i = args.indexOf(`--${name}`); return i < 0 ? undefined : args[i + 1]; };
-  const rpc = value("rpc") ?? "https://rpc.testnet.arc.io";
+  let rpc = value("rpc") ?? "https://rpc.testnet.arc.io";
   if (command === "prepare") {
     const owner = value("organizer"); if (!owner) throw new Error("Pass the approved demo organizer with --organizer.");
     const state = prepare(getAddress(owner), value("deadline") ? BigInt(value("deadline")!) : undefined);
     console.log(json({ deployer: state.deployer, organizer: state.organizer, recipient: state.recipient, deadline: state.deadline })); return;
   }
   const state = loadState();
+  rpc = value("rpc") ?? state.rpc ?? rpc;
   if (command === "status") {
     const op = operator(state, rpc); await op.guard();
     console.log(json({ ...state, transactions: Object.fromEntries(Object.entries(state.transactions).map(([k, v]: any) => [k, { hash: v.hash, blockNumber: v.blockNumber }])), nativeGasBalance: (await op.pub.getBalance({ address: state.deployer })).toString() }));
   } else if (command === "deploy") { await deployRounds(state, rpc); exportPlan(state); console.log("Both demo pools deployed in review. Import plan: demo/import-plan.json"); }
-  else if (command === "register-key") { await registerKey(state, rpc, value("key") ?? ""); console.log("Organizer sharing key registered in both pools."); }
-  else if (command === "import") await importProposals(state, rpc, value("file") ?? "");
-  else if (command === "export") { exportPlan(state); console.log("demo/import-plan.json"); }
+  else if (command === "register-key") { await registerKey(state, rpc, value("key") ?? "", value("round")); console.log("Organizer sharing key registered in the selected pools."); }
+  else if (command === "import") await importProposals(state, rpc, value("file") ?? "", value("round"));
+  else if (command === "export") {
+    const currency = selectedCurrency(value("round"));
+    const path = currency ? `demo/import-plan-${currency.toLowerCase()}.json` : "demo/import-plan.json";
+    exportPlan(state, resolve(root, path), currency); console.log(path);
+  }
   else if (command === "simulate") await simulate(state, rpc, value("round") ?? "", args.includes("--broadcast"));
   else throw new Error("Commands: prepare --organizer <address>; status; deploy; register-key --key <public-key>; export; import --file <receipt.json>; simulate --round EURC|USDC [--broadcast]. Optional --rpc.");
 }

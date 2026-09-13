@@ -4,7 +4,7 @@
   "network": "Arc Testnet",
   "replacesImportTarget": "0x5faa1e4128a5284e860188cc9dfa8ec5e3ef97c6",
   "createdAt": "2026-09-13T04:11:10.107301+00:00",
-  "privacy": "Encrypted review; accepted final revisions published only when opening voting. Original Markdown copies already public.",
+  "privacy": "EURC uses the explicitly approved public demo import; USDC retains encrypted review. Original Markdown copies are already public.",
   "rounds": [
     {
       "id": "urbehub",
@@ -20,7 +20,7 @@
       "suggestedVotingDeadline": "1789788900",
       "suggestedDeadlineSource": "Existing pool supplied by the user; confirm before deploying.",
       "organizerSharingPublicKey": null,
-      "status": "awaiting_encrypted_upload",
+      "status": "accepted_publicly",
       "proposals": [
         {
           "source": "content/proposals/urbehub/3d-printing-station.md",
@@ -262,7 +262,9 @@
           "transactionHash": null,
           "proposalId": null
         }
-      ]
+      ],
+      "reviewMode": "public",
+      "publicReceiptFile": "demo/urbehub-proposal-receipts.json"
     },
     {
       "id": "golem",

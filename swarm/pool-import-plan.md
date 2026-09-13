@@ -3,8 +3,9 @@
 Original import plan for Arc Testnet (chain ID 5042002). The two pools have since
 been deployed with the approved demo organizer and deadline; see the current
 [demo instructions](../demo/README.md), [deployment receipts](../demo/deployment.json),
-and [deployed import plan](../demo/import-plan.json). Encrypted uploads and on-chain
-proposal submissions are still pending Swarm ID connection.
+and [deployed import plan](../demo/import-plan.json). The 15 Urbe Hub proposals have since been submitted publicly and accepted in the
+EURC pool; see [their receipts](../demo/urbehub-proposal-receipts.json). The six
+USDC proposals still await encrypted upload and submission.
 
 The remaining sections record the original planning inputs. The deployed demo plan
 supersedes their organizer, proposer, deadline, and deployment-status assumptions.

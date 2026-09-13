@@ -1,12 +1,13 @@
 # Arc Testnet proposal demo
 
 Two pools were deployed and verified on 13 September 2026, chain ID 5042002.
-All 11 deployment transactions succeeded. Both pools remain in review with zero
-proposals; encrypted uploads and proposal submissions await Swarm ID connection.
+All 11 deployment transactions succeeded. The EURC pool now has all 15 Urbe Hub
+proposals submitted publicly and accepted, with voting still closed. The USDC
+pool has no proposals yet and awaits Swarm ID connection for encrypted imports.
 
-| Round | Pool | Planned proposals |
+| Round | Pool | Proposals |
 | --- | --- | --- |
-| EURC / Sealed Noir | `0x35a7915dc29c67805b7323e5a0384f919c9cf210` | 15 Urbe Hub proposals, requesting 32,250 EURC |
+| EURC / Sealed Noir | `0x35a7915dc29c67805b7323e5a0384f919c9cf210` | 15 Urbe Hub proposals accepted, requesting 32,250 EURC |
 | USDC / CRE Liquidity | `0x2bf2515baf13444a4c91d9135172a4a632fa440c` | 6 Golem proposals, requesting 88,000 USDC |
 
 Organizer and proposer: `0x5A57DB3F5c9469534f76EF279193B502F77F2860`.
@@ -34,27 +35,27 @@ The USDC deployment includes the real Uniswap v4 manager, position manager,
 descriptor, state view, and attached LP voting module. It does not yet include
 seeded trading pairs, LP positions, sponsorships, or cast ballots.
 
-## Finish the encrypted import
+## Finish the USDC encrypted import
 
 Run these commands from the repository root. They use the existing encrypted
 Foundry demo account and private local configuration in `demo/.local/`.
 
 1. Open the frontend at `/import` and connect the organizer's Swarm ID. The page
    displays its **sharing public key**. Keep recovery phrases and passwords private.
-2. Register that public key for both pools:
+2. Register that public key for the remaining USDC pool:
 
    ```sh
-   bun cre/scripts/demo.ts register-key --key 0xYOUR_SHARING_PUBLIC_KEY
+   bun cre/scripts/demo.ts register-key --round USDC --key 0xYOUR_SHARING_PUBLIC_KEY
    ```
 
-3. Choose `demo/import-plan.json` on `/import`. Select **Upload and verify
+3. Choose the generated `demo/import-plan-usdc.json` on `/import`. Select **Upload and verify
    proposals**. Each proposal is encrypted through the existing private-review
    flow, downloaded, and checked against its source. Browser checkpoints retain
    public references so an interrupted upload can resume.
 4. Download `encrypted-proposal-uploads.json`, then submit it:
 
    ```sh
-   bun cre/scripts/demo.ts import --file /absolute/path/to/encrypted-proposal-uploads.json
+   bun cre/scripts/demo.ts import --round USDC --file /absolute/path/to/encrypted-proposal-uploads.json
    ```
 
    The operator verifies every receipt before submitting and saves mined proposal
@@ -66,6 +67,70 @@ Foundry demo account and private local configuration in `demo/.local/`.
 The original Markdown files already have public Swarm copies, recorded in
 [proposal-uploads.md](../swarm/proposal-uploads.md). Encrypting new copies cannot
 make those earlier public copies private.
+
+## Deployment scripts
+
+`cre/scripts/demo.ts` deploys both pool variants and their required contracts from
+the local Foundry artifacts. It records each signed transaction before sending,
+checks receipts, and resumes completed steps without redeploying them.
+
+```sh
+bun cre/scripts/demo.ts --help
+bun cre/scripts/demo.ts prepare --organizer 0xYOUR_ORGANIZER_ADDRESS --deadline UNIX_SECONDS
+bun cre/scripts/demo.ts deploy
+bun cre/scripts/demo.ts status
+```
+
+`prepare` uses the locally provisioned `ethonline-demo` encrypted Foundry account
+in `demo/.local/keystores/`, its password file `demo/.local/keystore-password`, and
+the generated tally master secret. Existing state is preserved; these commands
+resume this demo, not a fresh second deployment. The organizer must match that
+account. Deployment does not submit proposals or open voting.
+
+## Public Urbe Hub upload and automatic acceptance
+
+The organizer explicitly approved public import and automatic acceptance of all
+15 Urbe Hub proposals in the EURC pool. This choice leaves that pool without
+private-review enforcement; the USDC pool is unaffected. The following scripts
+are restricted to this exact pool and its original 15 proposal documents.
+
+```sh
+# Prepare frontend-compatible public JSON documents and deterministic references.
+node cre/scripts/upload-public-urbehub.cjs --prepare
+
+# Prompt for the existing Swarm batch signer without echoing it or storing it.
+python3 cre/scripts/upload-public-urbehub.py
+
+# Rehearse on a disposable Arc fork before the first live import.
+bun cre/scripts/import-public-urbehub.ts --rehearse
+
+# Submit and accept all 15; completed transactions are reused on restart.
+bun cre/scripts/import-public-urbehub.ts --broadcast
+```
+
+The uploader reuses the existing stamp counters under `cache/swarm/`, reserves
+each stamp before sending, and checks downloaded bytes. It fails if those saved
+counters are missing or behind the public receipt file. It writes
+`demo/urbehub-public-uploads.json`; submission writes
+`demo/urbehub-proposal-receipts.json`. Keep both files and the private transaction
+journal when resuming. Do not rerun `--prepare` during a partially completed upload.
+
+The importer verifies all documents, original amounts and recipients, organizer,
+deadline, public-review setting, available project slots, and any existing
+proposals before continuing. It calls `propose` and `acceptProposal` for each
+document and leaves voting closed. It backs off after transient RPC errors.
+
+All 30 live submission and acceptance transactions succeeded. The final receipt
+check at 2026-09-13 04:58:44 UTC confirmed 15 accepted proposals, project IDs 0–14,
+and voting closed. [urbehub-proposal-receipts.json](urbehub-proposal-receipts.json)
+contains the terms, Swarm references, and both transaction hashes per proposal.
+
+If the saved Arc endpoint is unavailable, use `--rpc` with an
+[official Arc Testnet endpoint](https://docs.arc.io/arc/references/rpc-endpoints).
+The importer verifies the existing deployment receipt on the new provider before
+rebinding its journal, preserving every signed transaction. A local fork rehearsal
+expects the target pool to be empty; after a partial live import, resume the live
+journal instead.
 
 ## Rehearsal and operation
 
