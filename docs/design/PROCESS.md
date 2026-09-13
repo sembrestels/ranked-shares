@@ -100,6 +100,10 @@ tests) is unchanged. The design process feeds it:
   in progress, first slice: app shell, stage bar, round page, project page. The `web/`
   package on master (proposals, Swarm ID, review, editing) predates the gate; its
   stories are marked built.
-- 2026-09-12: first Deliver slice built (round page, project page, stage bar, shell) on
-  branch round-pages; heuristic and accessibility reviews recorded in
-  `docs/design/reviews/`, with findings routed to stories.
+- 2026-09-13: first Deliver slice merged to master (read API in `web/api/`, then the
+  round page, project page, stage bar, shell, prerendered meta, rules panel, and direct
+  project add); heuristic and accessibility reviews recorded in `docs/design/reviews/`,
+  with the serious findings fixed and the rest routed to
+  `docs/design/stories/08-review-findings.md`. Open before the demo: S8.12 (ballot panel
+  and stage bar on the same clock past the deadline). Next slice: contribute, seats,
+  rank and cast (activities 3 and 4).
