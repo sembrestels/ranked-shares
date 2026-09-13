@@ -5,12 +5,15 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    // Shared CRE crypto source is bundled by this app. Resolve its dependencies
-    // from web so a web-only install works, without deduping Swarm's older Noble.
+    // Shared CRE, prover, and shared/ source is bundled by this app. Resolve their
+    // bare imports (and the bare imports of anything they pull from cre/node_modules
+    // or prover/node_modules) from web, so a web-only install works under Deno as
+    // well as Node, without deduping Swarm's older Noble.
     {
       name: "shared-ballot-dependencies",
       async resolveId(source, importer) {
-        if (importer?.includes("/cre/src/lib/") && !source.startsWith(".")) {
+        const bare = !source.startsWith(".") && !source.startsWith("/") && !source.startsWith("\0");
+        if (importer && bare && !importer.includes("/web/") && !importer.startsWith("\0")) {
           return this.resolve(source, new URL("./app/lib/ballots.ts", import.meta.url).pathname, { skipSelf: true });
         }
       },
@@ -34,7 +37,11 @@ export default defineConfig({
     strictPort: true,
     fs: { allow: [new URL("..", import.meta.url).pathname] },
   },
+  // The Noble packages are inlined so the resolver above sees their nested
+  // imports too; externalised, Deno would load them from cre/node_modules.
+  ssr: { noExternal: ["@noble/curves", "@noble/hashes"] },
   test: {
+    server: { deps: { inline: ["@noble/curves", "@noble/hashes"] } },
     environment: "jsdom",
     include: ["test/**/*.test.ts", "test/**/*.test.tsx"],
   },
