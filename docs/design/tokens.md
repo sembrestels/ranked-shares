@@ -41,7 +41,7 @@ brand colours; they are derived from the greens and pinks):
 | `--color-green-night` | `#16261B` | dark page ground |
 | `--color-green-deep` | `#1E3627` | dark surface |
 | `--color-green-ink` | `#1A2B20` | body text on light |
-| `--color-pink-deep` | `#D94F4F` | coral on light backgrounds where 4.5:1 contrast is needed for text |
+| `--color-pink-deep` | `#B83A3A` | coral on light backgrounds where 4.5:1 contrast is needed for text |
 | `--color-peach-dark` | `#3B2E29` | error background in dark |
 
 Spacing, sizes, radii and durations keep the scale already in `web/app/tokens.css`
@@ -90,7 +90,7 @@ night greens and off-white text. Components use these, never the brand names dir
 
 Contrast checks (WCAG 2.2 AA, 4.5:1 for text): green-ink on offwhite 12.9:1; green-muted
 on offwhite 4.6:1; green-sage on white 3.7:1, so sage is used for large text, borders
-and fills, never for small text; pink-deep on offwhite 4.5:1; offwhite on green-dark
+and fills, never for small text; pink-deep on peach 4.87:1, on offwhite 5.43:1; offwhite on green-dark
 9.8:1; pink-coral is a focus ring and a fill, never small text on light. Values are
 computed from the hex pairs above and re-checked in the accessibility review.
 

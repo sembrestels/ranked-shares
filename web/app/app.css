@@ -73,7 +73,7 @@ button:disabled {
   opacity: var(--disabled);
 }
 :focus-visible {
-  outline: var(--focus-ring) solid var(--accent);
+  outline: var(--focus-ring) solid var(--color-focus);
   outline-offset: var(--space-1);
 }
 h1,
