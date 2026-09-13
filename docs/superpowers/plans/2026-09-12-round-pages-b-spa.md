@@ -1607,7 +1607,7 @@ git commit -m "Add the round page: heading, your ballot, board, sealed panel, ou
 - Test: `web/test/project-page.test.tsx`
 
 **Interfaces:**
-- Consumes: `ProjectResponse`, atoms, `useProject`, `useSwarm()` (for attachment downloads via `readContent` and `saveDownload` from `app/lib/swarm.ts`), `NO_PITCH`, `PITCH_FAILED`.
+- Consumes: `ProjectResponse`, atoms, `useProject`, `useSwarm()` (for attachment downloads via the client's `downloadFile` and `saveDownload` from `app/lib/swarm.ts`), `NO_PITCH`, `PITCH_FAILED`.
 - Produces: `<ProjectSummary response />`, `<Pitch response onRetry onDownload />`, route module `routes/project.tsx` (default export `ProjectPage`), not yet in `routes.ts`.
 
 - [ ] **Step 1: Write the failing tests `web/test/project-page.test.tsx`**
@@ -1771,7 +1771,7 @@ import { useRound, useSwarm } from "../context/providers";
 import { useProject } from "../hooks/use-snapshot";
 import type { Attachment } from "../lib/api-types";
 import { errorMessage } from "../lib/proposals";
-import { readContent, saveDownload } from "../lib/swarm";
+import { saveDownload } from "../lib/swarm";
 
 export default function ProjectPage() {
   const { id: raw } = useParams();
@@ -1787,8 +1787,8 @@ export default function ProjectPage() {
       return;
     }
     try {
-      const bytes = await readContent(client, `0x${file.reference}`);
-      saveDownload(bytes, file.name);
+      const result = await client.downloadFile(file.reference);
+      saveDownload(result.data, file.name);
     } catch (e) {
       setDownloadError(errorMessage(e));
     }
@@ -1809,7 +1809,7 @@ export default function ProjectPage() {
 }
 ```
 
-Check `readContent`'s signature in `app/lib/swarm.ts` (it takes the storage client and a `0x`-prefixed reference in the proposals board); match how `app/routes/board.tsx` calls it.
+This is how `app/routes/board.tsx`'s `attachment()` downloads a file: `storage().downloadFile(file.reference)` then `saveDownload(result.data, file.name)`. Do not use `readContent` for attachments: it parses a proposal manifest, not a raw file.
 
 - [ ] **Step 4: Run the tests, suite, and type check**
 
