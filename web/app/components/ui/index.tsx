@@ -4,6 +4,7 @@ import type {
   ReactNode,
   TextareaHTMLAttributes,
 } from "react";
+import { Badge } from "./badge";
 
 export function Button(
   { variant = "primary", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -57,10 +58,13 @@ export function Notice(
     </p>
   );
 }
+/** Kept as a thin wrapper over Badge: still imported by voting/ and liquidity/
+ * components owned by other sessions. New code should use Badge directly. */
 export function Status(
   { children, status = 0 }: { children: ReactNode; status?: number },
 ) {
-  return <span className={`badge status-${status}`}>{children}</span>;
+  const tone = (["info", "success", "error"] as const)[status] ?? "neutral";
+  return <Badge tone={tone}>{children}</Badge>;
 }
 
 export function ErrorPopup(
@@ -94,3 +98,9 @@ export function Fact(
     </div>
   );
 }
+
+export { Money } from "./money";
+export { Address } from "./address";
+export { Countdown } from "./countdown";
+export { Badge, type BadgeTone } from "./badge";
+export { Skeleton } from "./skeleton";

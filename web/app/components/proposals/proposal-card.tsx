@@ -1,5 +1,5 @@
 import { formatUnits } from "viem";
-import { Button, Fact, Notice, Status } from "../ui";
+import { Badge, Button, Fact, Notice } from "../ui";
 import { type Proposal, statuses } from "../../lib/proposals";
 import type { Attachment, ProposalContent } from "../../lib/swarm";
 
@@ -40,9 +40,9 @@ export function ProposalCard(
         <span className="eyebrow">
           PROPOSAL {String(proposal.id + 1n).padStart(2, "0")}
         </span>
-        <Status status={proposal.status}>
+        <Badge tone={(["info", "success", "error"] as const)[proposal.status] ?? "neutral"}>
           {statuses[proposal.status] ?? "Unknown status"}
-        </Status>
+        </Badge>
       </div>
       <h2>{content?.title || `Proposal #${proposal.id + 1n}`}</h2>
       <dl className="facts">
