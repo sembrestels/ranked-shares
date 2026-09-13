@@ -104,3 +104,6 @@ export { Address } from "./address";
 export { Countdown } from "./countdown";
 export { Badge, type BadgeTone } from "./badge";
 export { Skeleton } from "./skeleton";
+export { SupportBar } from "./support-bar";
+export { StageStep } from "./stage-step";
+export { RuleLine } from "./rule-line";
