@@ -1,7 +1,7 @@
 /** Environment into a typed config. Pure, so tests build their own. API
  * variables win; the VITE_ ones are read as fallbacks so one .env serves both. */
 import { type Address, getAddress, isAddress } from "viem";
-import { networkDefaults } from "../network.ts";
+import { rpcUrlsFor } from "../network.ts";
 
 export interface Config {
   port: number;
@@ -27,8 +27,7 @@ function positive(name: string, v: string | undefined, fallback: number): number
 
 export function loadConfig(env: Record<string, string | undefined>): Config {
   const chainId = positive("CHAIN_ID", env.CHAIN_ID || env.VITE_CHAIN_ID, 5042002);
-  const rpcUrls = list(env.RPC_URL || env.VITE_RPC_URL);
-  if (rpcUrls.length === 0) rpcUrls.push(networkDefaults(chainId).rpcUrls.default.http[0]);
+  const rpcUrls = rpcUrlsFor(chainId, env.RPC_URL || env.VITE_RPC_URL);
   const pool = env.POOL_ADDRESS || env.VITE_POOL_ADDRESS || "";
   if (pool && !isAddress(pool)) throw new Error(`POOL_ADDRESS is not an address: ${pool}`);
   const origins = list(env.WEB_ORIGIN);

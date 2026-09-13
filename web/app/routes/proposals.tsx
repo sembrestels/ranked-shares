@@ -16,6 +16,9 @@ import { sendProposalTransaction } from "../lib/transactions";
 import { ProposalCard } from "../components/proposals/proposal-card";
 import { Button, Notice } from "../components/ui";
 import { ProposalEditor } from "./proposal-editor";
+import { publicSwarmStorage } from "../lib/public-swarm";
+
+const publicStorage = publicSwarmStorage();
 
 export default function BoardPage() {
   return <ProposalBoard />;
@@ -188,12 +191,7 @@ function ProposalEntry(
     }
   }
   function storage() {
-    if (!client) {
-      throw new Error(
-        "Swarm ID is not ready. Wait for it to load, or retry its connection above.",
-      );
-    }
-    return client;
+    return client ?? publicStorage;
   }
   async function attachment(file: Attachment) {
     saveDownload(await downloadAttachment(storage(), file), file.name);

@@ -4,7 +4,7 @@ import { loadConfig } from "../config.ts";
 Deno.test("loadConfig: defaults", () => {
   const c = loadConfig({});
   assertEquals(c.port, 8000);
-  assertEquals(c.rpcUrls, ["https://rpc.testnet.arc.io"]);
+  assertEquals(c.rpcUrls, ["https://rpc.blockdaemon.testnet.arc.network", "https://rpc.drpc.testnet.arc.network", "https://rpc.testnet.arc.network"]);
   assertEquals(c.chainId, 5042002);
   assertEquals(c.poolAddress, null);
   assertEquals(c.webOrigins, ["http://localhost:5174"]);

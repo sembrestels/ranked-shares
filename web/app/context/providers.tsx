@@ -12,7 +12,7 @@ import type { ConnectionInfo, SwarmIdClient } from "@snaha/swarm-id";
 import { errorMessage } from "../lib/proposals";
 import { initializeSwarm } from "../lib/swarm";
 import { tiramisu } from "@arkiv-network/sdk/chains";
-import { networkDefaults } from "../../network";
+import { networkDefaults, rpcTransport, rpcUrlsFor } from "../../network";
 import { RoundProvider } from "./rounds";
 export { useRound } from "./rounds";
 
@@ -26,12 +26,13 @@ export const chain = defineChain({
     symbol: env.VITE_NATIVE_SYMBOL || defaults.nativeCurrency.symbol,
     decimals: 18,
   },
-  rpcUrls: { default: { http: [env.VITE_RPC_URL || defaults.rpcUrls.default.http[0]] } },
+  rpcUrls: { default: { http: rpcUrlsFor(defaults.id, env.VITE_RPC_URL) } },
 });
 export const config = createConfig({
   chains: [chain, tiramisu],
   connectors: [injected()],
-  transports: { [chain.id]: http(), [tiramisu.id]: http(env.VITE_ARKIV_RPC_URL) },
+  batch: { multicall: { wait: 16, batchSize: 8192 } },
+  transports: { [chain.id]: rpcTransport(chain.rpcUrls.default.http), [tiramisu.id]: http(env.VITE_ARKIV_RPC_URL) },
   ssr: true,
 });
 

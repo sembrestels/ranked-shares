@@ -36,3 +36,15 @@ Deno.test("CORS allows a configured origin on GET", async () => {
   );
   assertEquals(res.headers.get("access-control-allow-origin"), "http://localhost:5174");
 });
+
+Deno.test("a wrapped RPC rate limit returns an unavailable response, not an internal error", async () => {
+  const app = createApp({
+    ...deps,
+    snapshots: {
+      get: () => Promise.reject(new Error("contract read failed", { cause: { code: -32005 } })),
+    },
+  });
+  const res = await app.fetch(new Request("http://x/api/round?pool=0x0000000000000000000000000000000000000001"));
+  assertEquals(res.status, 502);
+  assertEquals(await res.json(), { error: "rpc unavailable" });
+});

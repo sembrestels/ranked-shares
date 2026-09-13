@@ -3,24 +3,18 @@
 import {
   createPublicClient,
   defineChain,
-  fallback,
-  http,
   type PublicClient,
   type Transport,
 } from "viem";
+import { networkDefaults, rpcTransport } from "../../network.ts";
 
 export function createClient(
   opts: { rpcUrls: string[]; chainId: number; transport?: Transport },
 ): PublicClient {
   const chain = defineChain({
-    id: opts.chainId,
-    name: `chain-${opts.chainId}`,
-    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+    ...networkDefaults(opts.chainId),
     rpcUrls: { default: { http: opts.rpcUrls } },
   });
-  const transport = opts.transport ??
-    (opts.rpcUrls.length === 1
-      ? http(opts.rpcUrls[0], { timeout: 10_000 })
-      : fallback(opts.rpcUrls.map((u) => http(u, { timeout: 10_000 }))));
-  return createPublicClient({ chain, transport });
+  const transport = opts.transport ?? rpcTransport(opts.rpcUrls);
+  return createPublicClient({ chain, transport, batch: { multicall: { wait: 16, batchSize: 8192 } } });
 }

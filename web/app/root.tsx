@@ -66,7 +66,9 @@ function Connections({ showSwarm = true }: { showSwarm?: boolean }) {
   const [error, setError] = useState<string>();
   const [swarmBusy, setSwarmBusy] = useState(false);
   const [dismissedSwarmError, setDismissedSwarmError] = useState<string>();
+  const [requestedSwarm, setRequestedSwarm] = useState(false);
   function retrySwarm() {
+    setRequestedSwarm(true);
     setDismissedSwarmError(undefined);
     retry();
   }
@@ -155,7 +157,7 @@ function Connections({ showSwarm = true }: { showSwarm?: boolean }) {
         </Notice>
       )}
       <div className="connection-popups">
-        {showSwarm && swarmError && swarmError !== dismissedSwarmError && (
+        {showSwarm && requestedSwarm && swarmError && swarmError !== dismissedSwarmError && (
           <ErrorPopup
             title="Swarm ID could not load"
             onDismiss={() => setDismissedSwarmError(swarmError)}
