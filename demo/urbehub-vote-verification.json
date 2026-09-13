@@ -1,0 +1,12 @@
+{
+  "verifiedAt": "2026-09-13T05:29:27.045Z",
+  "chainId": 5042002,
+  "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+  "blockNumber": "61849119",
+  "voters": 20,
+  "arkivPayloadsVerified": 20,
+  "transactionFallbacks": 0,
+  "distinctDecryptedBallots": 20,
+  "seatWeightBaseUnits": "1000000",
+  "totalWeightBaseUnits": "20000000"
+}

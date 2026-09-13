@@ -9,6 +9,7 @@
     "sync-abi": "bash scripts/sync-abi.sh"
   },
   "dependencies": {
+    "@arkiv-network/sdk": "0.8.0",
     "@chainlink/cre-sdk": "1.19.1",
     "@noble/curves": "2.4.0",
     "@noble/hashes": "2.4.0",

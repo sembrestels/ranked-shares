@@ -5,6 +5,7 @@
     "": {
       "name": "ranked-shares-cre",
       "dependencies": {
+        "@arkiv-network/sdk": "0.8.0",
         "@chainlink/cre-sdk": "1.19.1",
         "@noble/curves": "2.4.0",
         "@noble/hashes": "2.4.0",
@@ -19,6 +20,8 @@
   },
   "packages": {
     "@adraffy/ens-normalize": ["@adraffy/ens-normalize@1.11.1", "", {}, "sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ=="],
+
+    "@arkiv-network/sdk": ["@arkiv-network/sdk@0.8.0", "", { "dependencies": { "brotli-wasm": "^3.0.1" }, "peerDependencies": { "typescript": ">=5.0.0", "viem": "^2.0.0" }, "optionalPeers": ["typescript"] }, "sha512-OnCrCfJqbnqrNtCIw6LaDrjh8mee03BSHz4naNRDjV43LjqEnhrfqCRura6GrbFx75Zzc0y3mfGupxn2oj6Hlg=="],
 
     "@bufbuild/protobuf": ["@bufbuild/protobuf@2.6.3", "", {}, "sha512-w/gJKME9mYN7ZoUAmSMAWXk4hkVpxRKvEJCb3dV5g9wwWdxTJJ0ayOJAVcNxtdqaxDyFuC0uz4RSGVacJ030PQ=="],
 
@@ -75,6 +78,8 @@
     "@zkpassport/poseidon2": ["@zkpassport/poseidon2@0.6.2", "", {}, "sha512-6sFHX9kAcrmDmBEEndvjZ8DA9FomunirQ5oCV6oD7bqr/lP0n0OBSRn86SZgQBXwRR+vq7sk16y31OgRBIOJ5Q=="],
 
     "abitype": ["abitype@1.2.3", "", { "peerDependencies": { "typescript": ">=5.0.4", "zod": "^3.22.0 || ^4.0.0" }, "optionalPeers": ["typescript", "zod"] }, "sha512-Ofer5QUnuUdTFsBRwARMoWKOH1ND5ehwYhJ3OJ/BQO+StkwQjHw0XyVh4vDttzHB7QOFhPHa/o413PJ82gU/Tg=="],
+
+    "brotli-wasm": ["brotli-wasm@3.0.1", "", {}, "sha512-U3K72/JAi3jITpdhZBqzSUq+DUY697tLxOuFXB+FpAE/Ug+5C3VZrv4uA674EUZHxNAuQ9wETXNqQkxZD6oL4A=="],
 
     "bun-types": ["bun-types@1.4.1", "", { "dependencies": { "@types/node": "*" } }, "sha512-loKuVrAFZKfEv+JvWkHRS9GW5IqLuLRjVXN9p+vZvBN86O5hf/pBZQ5hSoyipsrMmWObZBDvWnlmKvjKTM0PdA=="],
 

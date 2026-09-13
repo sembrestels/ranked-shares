@@ -2,7 +2,8 @@
 
 Two pools were deployed and verified on 13 September 2026, chain ID 5042002.
 All 11 deployment transactions succeeded. The EURC pool now has all 15 Urbe Hub
-proposals submitted publicly and accepted, with voting still closed. The USDC
+proposals submitted publicly and accepted. Arkiv ballot storage is enabled and
+voting is open with 20 distinct encrypted ballots accepted from the demo wallets. The USDC
 pool has no proposals yet and awaits Swarm ID connection for encrypted imports.
 
 | Round | Pool | Proposals |
@@ -67,6 +68,52 @@ Foundry demo account and private local configuration in `demo/.local/`.
 The original Markdown files already have public Swarm copies, recorded in
 [proposal-uploads.md](../swarm/proposal-uploads.md). Encrypting new copies cannot
 make those earlier public copies private.
+
+## Twenty demo voters with Arkiv storage
+
+The EURC runner creates 20 operator-controlled wallets and gives each 1 test EURC
+of sponsored voting weight, 0.05 test USDC for Arc gas, and 0.02 test GLM for
+Tiramisu gas. These wallets represent simulated voters, not independent participants.
+The sponsorship deposits 20 test EURC into the pool. This budget is below the
+cheapest proposal's 750 EURC request; additional sponsorship is needed for a
+nonempty funding result.
+
+```sh
+cd cre
+bun scripts/vote-urbehub-demo.ts --prepare
+# Before the first live opening: exercise the Arc contracts and restart handling.
+bun scripts/vote-urbehub-demo.ts --rehearse
+# Open, sponsor, fund gas on both chains, store, verify, and vote.
+bun scripts/vote-urbehub-demo.ts --broadcast
+```
+
+The runner is restricted to this EURC pool, its 15 accepted projects, the generated
+organizer, and the two testnets. `--setup` can separately open voting, sponsor the
+seats, and fund Arc gas while Tiramisu funding is pending. Arkiv must be enabled
+before opening; [urbehub-arkiv.json](urbehub-arkiv.json) records that transaction.
+
+Every ranking differs. Ballots include complete rankings, partial rankings, and
+ties, and are encrypted to the pool's existing Noir tallier key. Each voter owns
+its Arkiv entity. Entities use the frontend's typed ballot schema, readonly
+payloads, and an expiry approximately 15 days after the voting deadline. The
+runner checks payload bytes, attributes, creator, flags, expiry, indexing, and
+the exact Arc reference/hash/revision before recording success.
+
+Private keys and rankings are stored with AES-256-GCM and scrypt in
+`demo/.local/urbehub-voters.encrypted.json`, protected by the existing local
+keystore password. Keep that file and password backed up. The gitignored
+transaction journal saves each signed transaction before broadcast, so repeating
+`--broadcast` resumes the same transactions without duplicate sponsorship or gas
+transfers. [urbehub-vote-receipts.json](urbehub-vote-receipts.json) lists public
+wallet addresses, gas transfers, Arkiv entity keys, and confirmed vote hashes.
+[urbehub-vote-verification.json](urbehub-vote-verification.json) records the
+independent check of all 20 current Arc references against their Arkiv payloads:
+all decrypted to distinct valid rankings, with no transaction-history fallback.
+
+The local rehearsal disables Arkiv network access and uses placeholder entity
+keys to exercise the actual Arc reference-voting contracts. Real Arkiv storage
+is verified during the live testnet run. Rehearsal expects the pool's initial,
+unsponsored state; after the live run starts, use `--broadcast` to resume it.
 
 ## Deployment scripts
 

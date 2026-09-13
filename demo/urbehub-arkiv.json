@@ -1,0 +1,8 @@
+{
+  "chainId": 5042002,
+  "pool": "0x35a7915dc29c67805b7323e5a0384f919c9cf210",
+  "arkivBallots": true,
+  "transactionHash": "0x0b193e1f0680088ff3cf4239fdf4e6946ed2c25c986658598d76704817caf19c",
+  "verifiedAt": "2026-09-13T05:19:56.304Z",
+  "votingOpen": false
+}

@@ -108,7 +108,7 @@ export function operator(state: any, rpc: string, persist = statePath) {
     if (tx && tx.intent !== intent) throw new Error(`Configuration changed for ${label}; inspect the existing receipt before continuing.`);
     if (!tx) {
       const request = await wallet.prepareTransactionRequest({ account, chain, data, to, value });
-      const raw = await account.signTransaction(request);
+      const raw = await wallet.signTransaction(request);
       tx = state.transactions[label] = { intent, hash: keccak256(raw), raw };
       // Persist the signed transaction before submitting; retries reuse the same nonce/hash.
       remember();
