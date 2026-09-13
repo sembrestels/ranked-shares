@@ -38,3 +38,5 @@ The process that uses them is `docs/design/PROCESS.md`.
 - [Store proposal content in Swarm through the API and bind its reference on-chain](2026-09-12-store-proposal-content-in-swarm-through-the-api-and-bind-its-reference-on-chain.md) (superseded, 2026-09-12)
 - [Upload proposal content from the browser through Swarm ID](2026-09-12-upload-proposal-content-from-the-browser-through-swarm-id.md) (superseded, 2026-09-12)
 - [Visual direction for the frontend](2026-09-12-visual-direction-for-the-frontend.md) (accepted, 2026-09-12, design rationale)
+
+- [Cast contributions and ballots together; sync Arkiv afterwards](2026-09-13-cast-contributions-and-ballots-together.md)

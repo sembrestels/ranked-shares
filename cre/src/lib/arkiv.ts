@@ -3,6 +3,7 @@
 import {
   type Address,
   decodeAbiParameters,
+  encodeAbiParameters,
   type Hex,
   hexToBytes,
   keccak256,
@@ -16,9 +17,12 @@ export const ARKIV_CHAIN_ID = 7738577;
 export const BALLOT_SCHEMA = "ranked-shares.ballot.v1";
 export const MAX_VOTERS = 100_000;
 export const ballotAbi = parseAbi([
+  "struct Permit { uint256 deadline; uint8 v; bytes32 r; bytes32 s; }",
   "struct BallotRef { bytes32 entityKey; bytes32 payloadHash; uint256 revision; uint256 blockNumber; }",
   "struct BallotData { bytes publicBallot; bytes sealedBallot; }",
   "function arkivBallots() view returns (bool)",
+  "function ballotFlowVersion() view returns (uint256)",
+  "function castBallot(uint256 amount,bool isSealed,bytes payload,uint256 expectedRevision,Permit permit)",
   "function enableArkivBallots()",
   "function kind() view returns (string)",
   "function voterCount() view returns (uint256)",
@@ -31,7 +35,31 @@ export const ballotAbi = parseAbi([
   "function startTally()",
   "function runArkiv(uint256 maxSteps,bytes[] ballots)",
   "event BallotStored(address indexed voter,bool indexed isSealed,bytes32 indexed entityKey,bytes32 payloadHash,uint256 revision)",
+  "event BallotPublished(address indexed voter,bool indexed isSealed,bytes32 indexed ballotId,uint256 revision,bytes payload)",
 ]);
+
+/** V2 references identify an accepted ballot before its Arkiv entity exists. */
+export function ballotId(chainId: bigint, pool: Address, voter: Address, sealed: boolean, revision: bigint, payload: Hex): Hex {
+  return keccak256(encodeAbiParameters(
+    [{ type: "uint256" }, { type: "address" }, { type: "address" }, { type: "bool" }, { type: "uint256" }, { type: "bytes32" }],
+    [chainId, pool, voter, sealed, revision, keccak256(payload)],
+  ));
+}
+
+/** An uploader cannot assign arbitrary content to someone else's ballot ID. */
+export function ballotAlias(attributes: Record<string, { type: string; value: unknown }> | undefined, payload: Hex): Hex | undefined {
+  if (!attributes?.ballot_id) return;
+  const a = attributes;
+  const types = { ballot_id: "bytes32", pool_chain: "u64", pool: "addr", voter: "addr", ballot_mode: "str", revision: "u256", payload_hash: "bytes32" };
+  if (Object.entries(types).some(([name, type]) => a[name]?.type !== type)) return;
+  try {
+    if (!["public", "sealed"].includes(String(a.ballot_mode.value))) return;
+    if (String(a.payload_hash.value).toLowerCase() !== keccak256(payload)) return;
+    const id = ballotId(BigInt(String(a.pool_chain.value)), String(a.pool.value) as Address, String(a.voter.value) as Address,
+      a.ballot_mode.value === "sealed", BigInt(String(a.revision.value)), payload);
+    return id === String(a.ballot_id.value).toLowerCase() ? id : undefined;
+  } catch { return; }
+}
 export type BallotRef = {
   entityKey: Hex;
   payloadHash: Hex;
@@ -92,8 +120,8 @@ export function payloadQuery(keys: readonly Hex[]) {
     jsonrpc: "2.0",
     id: 1,
     method: "arkiv_query",
-    params: [keys.map((k) => `$key = key(${k})`).join(" OR "), {
-      select: { key: true, payload: true },
+    params: [keys.map((k) => `($key = key(${k}) OR ballot_id = bytes32(${k}))`).join(" OR "), {
+      select: { key: true, payload: true, attributes: true },
       limit: "0xc8",
     }],
   };
@@ -101,7 +129,7 @@ export function payloadQuery(keys: readonly Hex[]) {
 export function payloadReply(reply: unknown): Map<string, Hex> {
   const body = reply as {
     error?: unknown;
-    result?: { data?: { key?: string; payload?: string }[]; cursor?: string };
+    result?: { data?: { key?: string; payload?: string; attributes?: { name: string; type: string; value: unknown }[] }[]; cursor?: string };
   };
   if (body?.error || !Array.isArray(body?.result?.data) || body.result.cursor) {
     throw new Error("Arkiv did not return a complete ballot response.");
@@ -113,6 +141,8 @@ export function payloadReply(reply: unknown): Map<string, Hex> {
       !/^0x(?:[0-9a-fA-F]{2})*$/.test(row.payload ?? "")
     ) throw new Error("Malformed Arkiv payload.");
     out.set(row.key!.toLowerCase(), row.payload as Hex);
+    const alias = ballotAlias(Object.fromEntries((row.attributes ?? []).map(({ name, ...value }) => [name, value])), row.payload as Hex);
+    if (alias) out.set(alias, row.payload as Hex);
   }
   return out;
 }

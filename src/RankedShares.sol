@@ -65,7 +65,7 @@ contract RankedShares is PoolBase, PBEAR {
     }
 
     function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
-        external
+        public
         inPhase(Phase.Open)
         beforeDeadline
     {
@@ -73,6 +73,11 @@ contract RankedShares is PoolBase, PBEAR {
         _storeBallot(msg.sender, false, entityKey, payload, expectedRevision);
         _registerVoter(msg.sender);
         emit Voted(msg.sender);
+    }
+
+    function _castBallot(bytes32 id, bytes calldata payload, bool isSealed, uint256 expectedRevision) internal override {
+        if (isSealed) revert InvalidBallot();
+        voteArkiv(id, payload, expectedRevision);
     }
 
     function voterRefsFrom(uint256 start, uint256 count)

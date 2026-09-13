@@ -225,7 +225,7 @@ abstract contract SealedPool is PoolBase {
     }
 
     function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
-        external
+        public
         inPhase(Phase.Open)
         beforeDeadline
     {
@@ -239,7 +239,7 @@ abstract contract SealedPool is PoolBase {
     }
 
     function voteSealedArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
-        external
+        public
         inPhase(Phase.Open)
         beforeDeadline
     {
@@ -248,6 +248,11 @@ abstract contract SealedPool is PoolBase {
         _storeBallot(msg.sender, true, entityKey, payload, expectedRevision);
         _register(msg.sender);
         emit SealedVote(msg.sender);
+    }
+
+    function _castBallot(bytes32 id, bytes calldata payload, bool isSealed, uint256 expectedRevision) internal override {
+        if (isSealed) voteSealedArkiv(id, payload, expectedRevision);
+        else voteArkiv(id, payload, expectedRevision);
     }
 
     function voterRefsFrom(uint256 start, uint256 count)

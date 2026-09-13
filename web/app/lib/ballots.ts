@@ -239,6 +239,25 @@ export async function readVoting(
 }
 export type VotingRound = Awaited<ReturnType<typeof readVoting>>;
 
+export function votingBlockReason(round: VotingRound, account: Address | undefined, sealed: boolean): string | undefined {
+  if (!account) return "Connect your wallet to vote.";
+  if (!round.enabled) return "The organizer must enable Arkiv ballot storage before voting opens.";
+  if (round.phase !== 1 || round.timestamp >= round.deadline) return "This round is not open for voting.";
+  if (sealed) {
+    if (round.kind === "public") return "This round only accepts public ballots.";
+    if (!((round.seats > 0n && round.seats >= round.minimumSealed) || round.lpEligible)) {
+      return "Encrypted voting requires an eligible sponsored seat or liquidity position.";
+    }
+  } else {
+    if (round.kind !== "public" && round.publicRef?.revision !== 0n) {
+      return "This wallet's public ballot is already final. It cannot cast another public ballot in this round.";
+    }
+    if (round.direct <= 0n || round.direct < round.minimum) {
+      return "Public voting requires a direct contribution to this round. Enter a contribution with your vote.";
+    }
+  }
+}
+
 export async function publicResults(
   client: PublicClient,
   pool: Address,

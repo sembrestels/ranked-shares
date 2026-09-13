@@ -204,3 +204,41 @@ its own locally provisioned account and configuration.
 Add `--broadcast` to a simulation only when ready to submit reports to these demo
 pools. Simulation is manually invoked; this setup does not run an automatic DON
 workflow or an unattended tally service.
+
+### New contribution-and-vote flow (version 2 pools)
+
+New deployment artifacts include `castBallot`: the contribution and ballot are
+accepted in one pool transaction. Existing allowance needs no approval; EIP-2612
+uses a token permission signature followed by that one transaction. A token without
+permit support needs an approval transaction first. The web app follows these steps
+from one **Contribute and vote** action. Sponsored seat voting only sends the vote.
+A failed vote rolls back its contribution.
+
+Arkiv writes happen after acceptance, using an operator's funded Tiramisu wallet.
+Start one storage worker for the new pools from `cre/`:
+
+```sh
+bun scripts/sync-ballots.ts --pools 0xNEW_EURC_POOL,0xNEW_USDC_POOL --watch
+```
+
+The default signer is the encrypted `ethonline-demo` Foundry account. Other operators
+can provide `ARKIV_STORAGE_PRIVATE_KEY` through their secret manager. Never use a
+`VITE_` variable for this key. `ARKIV_RPC_URL` overrides the Tiramisu RPC;
+`--rpc` overrides the pool RPC; `--state` selects a private journal file. Without
+`--watch` the script performs one synchronization pass and exits. It scans only the
+supplied pools, and uploads only accepted public bytes or ciphertext from their
+on-chain events. It cannot vote or transfer pool tokens for a voter.
+
+Keep the worker running separately from the frontend, so closing a browser does not
+interrupt storage. It retries failed polls every 15 seconds and preserves signed
+transactions before broadcasting. Do not share one storage wallet among concurrent
+workers with different journals. The journal has a process lock; after a crash,
+check that its recorded PID is no longer running before removing the `.lock` file
+and restarting with the same journal. Never delete the journal to retry an upload.
+
+A vote counts as soon as its pool transaction succeeds. The UI reports Arkiv sync
+separately. Browser results and Noir witness recovery can use the accepted event if
+storage is delayed. CRE normal reads require synced entities, so run the worker
+before the tally. New entities expire approximately 15 days after the voting deadline.
+The storage operator owns the entities and can extend or delete them; blockchain
+history retains the original public ranks or encrypted bytes.

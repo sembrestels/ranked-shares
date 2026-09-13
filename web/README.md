@@ -37,22 +37,27 @@ before calling `openVoting()`. Existing deployed pools cannot be upgraded in pla
 This does not move old votes, proposals or funds to a new round automatically.
 
 Proposal content remains in Swarm. Arkiv stores ballot bytes and typed searchable
-metadata; the pool binds each accepted revision to its entity key and payload hash.
+metadata; the pool binds each accepted revision to a deterministic ballot ID and
+payload hash. Arkiv entities carry a verified alias for that ID.
 The frontend fetches every accepted public ballot and runs the shared PB-EAR tally
 every fifteen seconds. Encrypted ballots stay encrypted and are excluded from the
 public projection. Final proof/attestation verification remains on-chain.
 
-1. Connect a wallet with eligible contribution or sponsored-seat weight.
-2. Rank accepted projects. The form fetches their titles from Swarm.
-3. **Store ballot in Arkiv** switches to Tiramisu (chain 7738577). Fund that wallet
-   with testGLM using the [Arkiv faucet](https://hub.arkiv.network/faucet).
-4. **Confirm ballot in the round** switches back to the pool's configured network
-   and submits the checked payload/reference. Only this successful transaction counts.
+1. Connect a wallet and rank accepted projects. Titles load from public Swarm reads.
+2. Enter a contribution for a public vote, or use existing contribution/sponsored-seat weight.
+3. Press **Contribute and vote** (or **Vote** with existing weight). With existing
+   allowance or an EIP-2612 permission signature, one `castBallot` transaction
+   deposits the contribution and records the ballot atomically. Unsupported tokens
+   need an approval transaction first; the combined vote follows automatically.
+4. The vote counts immediately. The operator's funded
+   [background Arkiv worker](../demo/README.md#new-contribution-and-vote-flow-version-2-pools)
+   stores the accepted bytes and metadata afterwards. Voters stay on the pool network
+   and do not need Arkiv gas or another storage/confirmation transaction.
 
 An interrupted flow resumes from the local draft. It contains public ranks or sealed
 ciphertext and transaction hashes, never plaintext sealed ranks or an encryption key.
-A declined pool signature can be retried without paying for another upload. A draft
-can be discarded, but that does not undo an upload or cancel a sent transaction.
+Known transaction hashes are checked on resume without another contribution or vote.
+Unsent drafts can be discarded. A reverted vote rolls back its contribution and permit.
 
 After the deadline, **Advance pool tally** drives the public implementation with
 hash-checked ballot witnesses. For the sealed variants, **Prepare next batch for final
@@ -61,7 +66,8 @@ Results cannot be calculated from a partial set of accepted ballots. If an entit
 missing, browser/prover readers try the original vote transaction in its recorded block.
 
 `VITE_ARKIV_RPC_URL` can override the default Tiramisu endpoint. It is public
-configuration; no backend key, tally service or result snapshots are needed.
+configuration. The storage worker uses a separate operator key, never a `VITE_`
+secret. Public live results do not require a tally service or result snapshots.
 New Arkiv ballots are readonly and expire approximately **15 days after the voting
 deadline**, for all pool implementations. This is a fixed deadline, not 15 days
 from each upload or from the tally. The publisher converts the target timestamp
@@ -71,7 +77,8 @@ cleanup job, automatic deletion, review copy or result snapshot sets the cutoff.
 
 New entities disable permissionless extension. Their owner can still extend,
 transfer or delete them. Existing entities keep their original lifetime and flags;
-legacy pending drafts can still be confirmed. Expiry cannot be shortened in place.
+historical references remain readable. The new form only submits to version 2 pools.
+Expiry cannot be shortened in place.
 
 After voting closes, **Ballot review** displays current public ranks and encrypted
 payloads directly from Arkiv. Each refresh checks the current on-chain references,

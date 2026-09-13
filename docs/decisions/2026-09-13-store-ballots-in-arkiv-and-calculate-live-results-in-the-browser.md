@@ -154,3 +154,9 @@ Live natural expiry and funded publication remain separate unverified demo steps
 - [ETHRome hacker manual](https://www.ethrome.org/hackermanual)
 - [Arkiv SDK source, version 0.8.0](https://github.com/Arkiv-Network/arkiv-sdk-js)
 - [Foundry compiler profiles](https://getfoundry.sh/reference/config/solidity-compiler)
+
+## Voting-flow update — 2026-09-13
+
+The voter upload-first steps are superseded for new pools by
+[combined contribution and voting with background storage](2026-09-13-cast-contributions-and-ballots-together.md).
+The tally, encryption and retention rules remain in effect.

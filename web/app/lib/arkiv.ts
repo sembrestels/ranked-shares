@@ -19,6 +19,7 @@ import {
 } from "viem";
 import {
   ARKIV_RPC,
+  ballotAlias,
   BALLOT_SCHEMA,
   checkedPayload,
 } from "../../../cre/src/lib/arkiv";
@@ -84,12 +85,14 @@ export async function loadPayloads(
 ): Promise<Map<string, Hex>> {
   const out = new Map<string, Hex>();
   for (let start = 0; start < keys.length; start += 100) {
-    let page = await arkiv.select({ key: true, payload: true }).where(
-      or(...keys.slice(start, start + 100).map((k) => eq("$key", key(k)))),
+    let page = await arkiv.select({ key: true, payload: true, attributes: true }).where(
+      or(...keys.slice(start, start + 100).flatMap((k) => [eq("$key", key(k)), eq("ballot_id", bytes32(k))])),
     ).limit(200).fetch();
     for (;;) {
       for (const e of page.entities) {
         out.set(e.key.toLowerCase(), toHex(e.payload));
+        const alias = ballotAlias(e.attributes, toHex(e.payload));
+        if (alias) out.set(alias, toHex(e.payload));
       }
       if (!page.hasNextPage()) break;
       page = await page.next();

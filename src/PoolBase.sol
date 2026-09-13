@@ -3,6 +3,7 @@ pragma solidity ^0.8.28;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -38,6 +39,7 @@ error ProposalAlreadyReviewed();
 error ZeroProposalCost();
 error UnauthorizedProposalEditor();
 error StaleProposalRevision(uint256 expected, uint256 actual);
+error SealedContribution();
 
 /// @title PoolBase
 /// @notice What every RankedShares pool does around the tally: token custody, projects,
@@ -66,6 +68,8 @@ abstract contract PoolBase is Ownable, ArkivBallots {
     );
     event VotingOpened();
     event Contributed(address indexed contributor, uint256 amount);
+    /// @notice An accepted ballot ready for permissionless background storage.
+    event BallotPublished(address indexed voter, bool indexed isSealed, bytes32 indexed ballotId, uint256 revision, bytes payload);
     event Sponsored(uint256 indexed sponsorshipId, address indexed sponsor, uint256 amount, uint256 seats, address nft);
     event SeatClaimed(uint256 indexed sponsorshipId, uint256 indexed tokenId, address indexed holder, address previous);
     event Claimed(uint256 indexed projectId, address indexed recipient, uint256 amount);
@@ -95,6 +99,13 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         address recipient;
         ProposalStatus status;
         uint256 projectId; // meaningful only when status is Accepted (project zero is valid)
+    }
+
+    struct Permit {
+        uint256 deadline; // zero uses an existing ERC20 allowance
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
     }
 
     // --------------------------------------------------------------- storage
@@ -284,6 +295,33 @@ abstract contract PoolBase is Ownable, ArkivBallots {
         emit Contributed(msg.sender, amount);
     }
 
+    function ballotFlowVersion() external pure returns (uint256) {
+        return 2;
+    }
+
+    /// @notice Deposit and cast atomically. Arkiv indexes the emitted bytes afterwards.
+    /// A rejected ballot rolls back the deposit and permit. Amount zero votes with
+    /// existing weight. Sponsored encrypted ballots never spend the voter's tokens.
+    function castBallot(uint256 amount, bool isSealed, bytes calldata payload, uint256 expectedRevision, Permit calldata permit)
+        external onlyOpen beforeDeadline
+    {
+        if (isSealed && amount != 0) revert SealedContribution();
+        if (amount != 0) {
+            if (permit.deadline != 0) {
+                // A third party may already have submitted this exact permit.
+                // transferFrom still enforces the caller's allowance and balance.
+                try IERC20Permit(address(token)).permit(msg.sender, address(this), amount, permit.deadline, permit.v, permit.r, permit.s) {}
+                catch {}
+            }
+            _deposit(amount);
+            _onContribution(msg.sender, amount);
+            emit Contributed(msg.sender, amount);
+        }
+        bytes32 id = keccak256(abi.encode(block.chainid, address(this), msg.sender, isSealed, expectedRevision + 1, keccak256(payload)));
+        _castBallot(id, payload, isSealed, expectedRevision);
+        emit BallotPublished(msg.sender, isSealed, id, expectedRevision + 1, payload);
+    }
+
     /// @notice Deposit `amount` split equally among `members`, one seat per entry.
     function sponsor(uint256 amount, address[] calldata members) external onlyOpen beforeDeadline returns (uint256 id) {
         if (members.length == 0) revert NoSeats();
@@ -395,6 +433,7 @@ abstract contract PoolBase is Ownable, ArkivBallots {
     // ----------------------------------------------------------------- hooks
 
     function _isSetup() internal view virtual returns (bool);
+    function _castBallot(bytes32 id, bytes calldata payload, bool isSealed, uint256 expectedRevision) internal virtual;
     function _isOpen() internal view virtual returns (bool);
     function _isDone() internal view virtual returns (bool);
     function _registerProject(uint256 cost_) internal virtual returns (uint256 id);

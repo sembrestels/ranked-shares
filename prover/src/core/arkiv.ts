@@ -52,6 +52,15 @@ export async function recoverPayload(
   isSealed: boolean,
   ref: BallotRef,
 ): Promise<Hex> {
+  const publications = await client.getLogs({
+    address: pool,
+    event: parseAbiItem("event BallotPublished(address indexed voter,bool indexed isSealed,bytes32 indexed ballotId,uint256 revision,bytes payload)"),
+    args: { voter, isSealed, ballotId: ref.entityKey },
+    fromBlock: ref.blockNumber, toBlock: ref.blockNumber,
+  });
+  for (const log of publications) {
+    if (log.args.ballotId?.toLowerCase() === ref.entityKey.toLowerCase() && log.args.revision === ref.revision) return checkedPayload(ref, log.args.payload);
+  }
   const logs = await client.getLogs({
     address: pool,
     event: parseAbiItem(

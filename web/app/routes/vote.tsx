@@ -1,53 +1,55 @@
 import { readArkivVoters } from "../../../prover/src/core/arkiv";
 import { useEffect, useState } from "react";
+import { formatUnits } from "viem";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAccount, usePublicClient, useSwitchChain, useWalletClient } from "wagmi";
+import { useAccount, usePublicClient, useSwitchChain } from "wagmi";
 import { getWalletClient } from "wagmi/actions";
-import { chain, config, useRound, useSwarm } from "../context/providers";
-import { Button, Notice } from "../components/ui";
+import { chain, config, useRound } from "../context/providers";
+import { Button, Field, Input, Notice } from "../components/ui";
 import { BallotForm, BallotReview, PublicResults } from "../components/voting";
 import { useBallotReview } from "../hooks/use-ballot-review";
+import { contributionAmount, readContribution } from "../lib/contribution";
+import { castVote, prepareVote, readPendingCast, savePendingCast, type PendingCast } from "../lib/cast-vote";
 import { BALLOT_RETENTION_SECONDS, ballotRetentionUntil } from "../lib/ballot-retention";
 import { errorMessage } from "../lib/proposals";
-import {
-  arkivChain,
-  publishBallot,
-  type PublishedBallot,
-  readPending,
-  resumePublication,
-  savePending,
-} from "../lib/arkiv";
-import { ballotPayload, commitBallot, publicResults, readVoting } from "../lib/ballots";
+import { loadPayloads } from "../lib/arkiv";
+import { publicResults, readVoting, votingBlockReason } from "../lib/ballots";
+import { tierRanks, type TierAssignments } from "../lib/ballot-tiers";
 import { assertWallet } from "../lib/transactions";
 import { readProposalContent } from "../lib/private-proposals";
+import { publicSwarmStorage } from "../lib/public-swarm";
 import { ballotAbi } from "../../../cre/src/lib/arkiv";
+
+const publicStorage = publicSwarmStorage();
 
 export default function VotePage() {
   const { pool } = useRound();
-  const { client: swarm } = useSwarm();
   const { address } = useAccount();
   const client = usePublicClient({ chainId: chain.id });
-  const { data: wallet } = useWalletClient();
   const { switchChainAsync } = useSwitchChain();
   const cache = useQueryClient();
-  const [ranks, setRanks] = useState<string[]>([]);
+  const [assignments, setAssignments] = useState<TierAssignments>({});
   const [sealed, setSealed] = useState(false);
-  const [pending, setPending] = useState<PublishedBallot>();
+  const [pending, setPending] = useState<PendingCast>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
   const [message, setMessage] = useState<string>();
   const [reviewLimit, setReviewLimit] = useState(50);
+  const [amountText, setAmountText] = useState<string>();
+  const [accepted, setAccepted] = useState<PendingCast>();
   useEffect(() => {
     try {
-      setPending(readPending());
+      setPending(readPendingCast());
     } catch (e) {
       setError(errorMessage(e));
     }
   }, []);
   useEffect(() => {
-    setRanks([]);
+    setAssignments({});
     setSealed(false);
     setReviewLimit(50);
+    setAmountText(undefined);
+    setAccepted(undefined);
   }, [pool, address]);
   const round = useQuery({
     queryKey: ["voting", chain.id, pool, address],
@@ -56,14 +58,33 @@ export default function VotePage() {
     queryFn: () => readVoting(client!, pool!, address),
   });
   const r = round.data;
+  const funds = useQuery({
+    queryKey: ["vote-funds", chain.id, pool, address], enabled: !!client && !!pool && !!address && !!r,
+    queryFn: () => readContribution(client!, pool!, address!), refetchInterval: 15_000,
+  });
+  const needed = r ? r.minimum > r.direct ? r.minimum - r.direct : r.direct > 0n ? 0n : 1n : 0n;
+  const amountValue = amountText ?? (funds.data ? formatUnits(needed, funds.data.decimals) : "");
+  let amount = 0n;
+  let amountIssue = funds.error ? errorMessage(funds.error) : undefined;
+  if (funds.data) {
+    try {
+      amount = /^0(?:\.0+)?$/.test(amountValue) ? 0n : contributionAmount(amountValue, funds.data.decimals);
+      if (amount < needed) amountIssue = `Contribute at least ${formatUnits(needed, funds.data.decimals)} ${funds.data.symbol} to vote publicly.`;
+      else if (amount > funds.data.balance) amountIssue = `Your wallet needs ${formatUnits(amount - funds.data.balance, funds.data.decimals)} more ${funds.data.symbol}.`;
+    } catch (e) { amountIssue = errorMessage(e); }
+  }
+  const storage = useQuery({
+    queryKey: ["accepted-vote-storage", accepted?.id], enabled: !!accepted,
+    queryFn: async () => (await loadPayloads([accepted!.id])).get(accepted!.id) === accepted!.payload,
+    refetchInterval: (q) => q.state.data ? false : 15_000,
+  });
   const showReview = !!r?.enabled && r.phase > 0 && r.timestamp >= r.deadline;
   const review = useBallotReview(client, chain.id, pool, showReview);
   const canVote = !!r?.enabled && r.phase === 1 && r.timestamp < r.deadline;
-  const canPublic = canVote && !!address && r.direct > 0n &&
-    r.direct >= r.minimum &&
-    (r.kind === "public" || r.publicRef?.revision === 0n);
-  const canSealed = canVote && !!address && r.kind !== "public" &&
-    ((r.seats > 0n && r.seats >= r.minimumSealed) || r.lpEligible);
+  const publicReason = !address ? "Connect your wallet to vote." : amountIssue ?? (!funds.data ? "Loading your token balance…" : r ? votingBlockReason({ ...r, direct: r.direct + amount }, address, false) : undefined);
+  const sealedReason = r ? votingBlockReason(r, address, true) : undefined;
+  const canPublic = !!r && !publicReason;
+  const canSealed = !!r && !sealedReason;
   useEffect(() => {
     if (!canPublic && canSealed) setSealed(true);
     else if (canPublic && !canSealed) setSealed(false);
@@ -79,12 +100,13 @@ export default function VotePage() {
       pool,
       r?.projects.map((p) => `${p.contentRef}:${p.publishedKey}`).join(","),
     ],
-    enabled: !!swarm && !!r,
+    enabled: !!r,
     staleTime: Infinity,
     queryFn: () =>
       Promise.all(r!.projects.map(async (p) => {
+        if (/^0x0{64}$/.test(p.contentRef)) return `Project ${p.id + 1}`;
         try {
-          return (await readProposalContent(swarm!, p.contentRef, {
+          return (await readProposalContent(publicStorage, p.contentRef, {
             publishedKey: p.publishedKey,
             publicOnly: true,
           })).title;
@@ -102,12 +124,13 @@ export default function VotePage() {
     try {
       await action();
       await cache.invalidateQueries({ queryKey: ["voting"] });
+      await cache.invalidateQueries({ queryKey: ["vote-funds"] });
     } catch (e) {
       setError(errorMessage(e));
     } finally {
       setBusy(false);
       try {
-        setPending(readPending());
+        setPending(readPendingCast());
       } catch (e) {
         setError(errorMessage(e));
       }
@@ -121,63 +144,20 @@ export default function VotePage() {
     await assertWallet(client!, w, address);
     return w;
   }
-  async function storeVote() {
-    if (!r || !client || !pool || !address || !wallet) {
-      throw new Error("Connect your wallet and choose a round first.");
+  async function submitVote() {
+    if (!client || !pool || !address) throw new Error("Connect your wallet first.");
+    const saved = readPendingCast();
+    if (!saved && !r) throw new Error("Wait for the round to finish loading.");
+    const draft = saved ?? await prepareVote(client, pool, address, sealed ? 0n : amount, sealed, tierRanks(r!.projects.map((p) => p.id), assignments));
+    if (draft.pool.toLowerCase() !== pool.toLowerCase() || draft.account.toLowerCase() !== address.toLowerCase() || draft.chainId !== chain.id) {
+      throw new Error("Reconnect the wallet and pool belonging to your pending vote.");
     }
-    if (readPending()) {
-      throw new Error(
-        "Finish or discard your pending ballot before preparing another one.",
-      );
-    }
-    const fresh = await readVoting(client, pool, address);
-    if (
-      !fresh.enabled || fresh.phase !== 1 || fresh.timestamp >= fresh.deadline
-    ) throw new Error("This round is not open for Arkiv voting.");
-    const selected = fresh.projects.map((p) => Number(ranks[p.id] ?? "0"));
-    const payload = await ballotPayload(
-      client,
-      pool,
-      address,
-      fresh.kind,
-      sealed,
-      selected,
-    );
-    const ballot: PublishedBallot = {
-      pool,
-      chainId: chain.id,
-      account: address,
-      kind: fresh.kind,
-      isSealed: sealed,
-      revision: ((sealed ? fresh.sealedRef : fresh.publicRef)!.revision + 1n)
-        .toString(),
-      payload,
-      projects: selected.length,
-    };
-    await switchChainAsync({ chainId: arkivChain.id });
-    const storageWallet = await getWalletClient(config, {
-      chainId: arkivChain.id,
-    });
-    await publishBallot(storageWallet, ballot, fresh.deadline);
-    setRanks([]);
-    setMessage(
-      "Your ballot is stored. Confirm it in the round to make it count.",
-    );
-  }
-  async function confirmVote() {
-    if (
-      !pending || pending.pool.toLowerCase() !== pool?.toLowerCase() ||
-      pending.account.toLowerCase() !== address?.toLowerCase() ||
-      pending.chainId !== chain.id
-    ) {
-      throw new Error(
-        "Select the saved ballot's pool and reconnect its wallet before continuing.",
-      );
-    }
-    if (!pending.voteTx) await resumePublication(pending);
-    const w = await onPoolNetwork();
-    await commitBallot(client!, w, pending);
-    setMessage("Your ballot has been accepted by the round.");
+    const wallet = await onPoolNetwork();
+    const result = await castVote(client, wallet, draft, setMessage);
+    setAccepted(result);
+    setAssignments({});
+    setAmountText(undefined);
+    setMessage("Your vote is recorded. Arkiv storage syncs automatically; no further transaction is needed.");
   }
   async function poolAction(action: "enable" | "tally") {
     if (!r || !client || !pool || !address) return;
@@ -247,10 +227,10 @@ export default function VotePage() {
         <p className="eyebrow">COMMUNITY DECISIONS</p>
         <h1>Vote & results</h1>
         <p>
-          Rank the accepted projects. Follow the public result as the round
+          Group proposals by funding priority. Follow the public result as the round
           progresses.
         </p>
-        <a href={`/?pool=${pool}`}>Read the proposals ↗</a>
+        <a href={`/proposals?pool=${pool}`}>Read the proposals ↗</a>
       </header>
       {(error || round.error) && (
         <Notice error>
@@ -290,81 +270,50 @@ export default function VotePage() {
           transaction data or a separately preserved copy.
         </Notice>
       )}
-      {pending && (
-        <section className="voting-pending">
-          <h2>Finish your ballot</h2>
-          <p>
-            Pool <code>{pending.pool}</code> · voter <code>{pending.account}</code>
-          </p>
-          <p>
-            {pending.entityKey
-              ? "Stored in Arkiv. The vote counts only after the pool accepts it."
-              : pending.storageTx
-              ? "Storage transaction pending. Resume to check its receipt."
-              : "No storage transaction hash was received. Check your wallet activity before discarding this draft and preparing another ballot."}
-          </p>
-          {pending.storageTx && (
-            <p>
-              Arkiv transaction: <code>{pending.storageTx}</code>
-            </p>
-          )}
-          {pending.entityKey && (
-            <p>
-              Entity: <code>{pending.entityKey}</code> · expiry block {pending.expiresAt}
-            </p>
-          )}
-          {pending.voteTx && (
-            <p>
-              Pool transaction: <code>{pending.voteTx}</code>
-            </p>
-          )}
-          <div className="actions">
-            <Button disabled={busy} onClick={() => run(confirmVote)}>
-              2. Confirm ballot in the round
-            </Button>
-            <Button
-              variant="secondary"
-              disabled={busy || !!pending.voteTx}
-              onClick={() => {
-                savePending();
-                setPending(undefined);
-              }}
-            >
-              Discard local draft
-            </Button>
-          </div>
-          <p className="hint">
-            Discarding the draft does not remove an Arkiv upload or cancel a
-            sent transaction.
-          </p>
-        </section>
-      )}
+      {accepted && <Notice>
+        {storage.data ? "Ballot synced to Arkiv." : "Your vote counts on-chain. Waiting for the storage worker to sync it to Arkiv."}
+        {" "}Transaction: <code>{accepted.voteTx}</code>
+      </Notice>}
+      {pending && <section className="voting-pending">
+        <h2>{pending.voteTx ? "Vote awaiting confirmation" : "Resume your vote"}</h2>
+        <p>Pool <code>{pending.pool}</code> · voter <code>{pending.account}</code></p>
+        <p>{pending.voteTx ? "Check the transaction already sent. This will not send another contribution or vote." : "Your ranking is saved. Resume authorization and cast your vote."}</p>
+        {(pending.voteTx || pending.approvalTx) && <p>Transaction: <code>{pending.voteTx ?? pending.approvalTx}</code></p>}
+        <Button disabled={busy} onClick={() => run(submitVote)}>{pending.voteTx ? "Check vote confirmation" : "Resume vote"}</Button>
+        {!pending.voteTx && !pending.approvalTx && <Button variant="secondary" disabled={busy} onClick={() => { savePendingCast(); setPending(undefined); }}>Edit ranking</Button>}
+      </section>}
       {canVote && !pending && (
         <>
           <p>
             {!address
               ? "Connect your wallet to vote."
-              : !canPublic && !canSealed
-              ? "This wallet has no eligible voting weight, or its public ballot is already final."
               : r?.kind === "public"
               ? "Your public ballot can be replaced until the deadline."
               : "Public ballots are final once accepted. Encrypted seat ballots can be replaced until the deadline."}
           </p>
           <BallotForm
+            key={`${pool}:${address ?? ""}`}
             titles={titles}
-            ranks={ranks}
+            assignments={assignments}
             sealed={sealed}
             canPublic={canPublic}
             canSealed={canSealed}
             busy={busy}
-            onRank={(id, value) =>
-              setRanks((previous) => {
-                const next = [...previous];
-                next[id] = value;
+            disabledReason={sealed ? sealedReason : publicReason}
+            submitLabel={busy ? "Submitting vote…" : sealed || amount === 0n ? "Vote" : "Contribute and vote"}
+            contribution={!sealed && address ? funds.data ? <Field id="vote-contribution" label={`Contribution (${funds.data.symbol})`} hint={`Wallet balance: ${formatUnits(funds.data.balance, funds.data.decimals)} ${funds.data.symbol}. Your contribution and ballot are recorded together; a rejected ballot also rolls back the contribution.`}>
+              <Input id="vote-contribution" inputMode="decimal" value={amountValue} disabled={busy} aria-invalid={!!amountIssue} aria-describedby="vote-contribution-hint" onChange={(e) => setAmountText(e.target.value)} />
+              {amountIssue && <Notice>{amountIssue}</Notice>}
+            </Field> : <Notice>{amountIssue ?? "Loading contribution requirements…"}</Notice> : undefined}
+            onAssign={(id, tier) =>
+              setAssignments((previous) => {
+                const next = { ...previous };
+                if (tier === undefined) delete next[id];
+                else next[id] = tier;
                 return next;
               })}
             onMode={setSealed}
-            onSubmit={() => run(storeVote)}
+            onSubmit={() => run(submitVote)}
           />
         </>
       )}

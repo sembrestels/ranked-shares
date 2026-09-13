@@ -1,8 +1,8 @@
-import { key } from "@arkiv-network/sdk/attr";
+import { bytes32, key } from "@arkiv-network/sdk/attr";
 import { eq, or } from "@arkiv-network/sdk/query";
 import { type Address, type Hex, type PublicClient, toHex } from "viem";
 import {
-  ballotAbi, checkedPayload, MAX_VOTERS, rosterPage, type BallotRef,
+  ballotAbi, ballotAlias, checkedPayload, MAX_VOTERS, rosterPage, type BallotRef,
 } from "../../../cre/src/lib/arkiv";
 import { arkiv } from "./arkiv";
 
@@ -58,14 +58,18 @@ export async function readBallotReview(
   const keys = [...new Set(accepted.map(({ ref }) => ref.entityKey.toLowerCase() as Hex))];
   const entities = new Map<string, { payload: Uint8Array; expiresAt: bigint }>();
   for (let start = 0; start < keys.length; start += 100) {
-    let page = await arkiv.select({ key: true, payload: true, expiresAt: true })
-      .where(or(...keys.slice(start, start + 100).map((k) => eq("$key", key(k)))))
+    let page = await arkiv.select({ key: true, payload: true, expiresAt: true, attributes: true })
+      .where(or(...keys.slice(start, start + 100).flatMap((k) => [eq("$key", key(k)), eq("ballot_id", bytes32(k))])))
       .atBlock(arkivBlock).limit(200).fetch();
     for (;;) {
       if (page.blockNumber !== arkivBlock) {
         throw new Error("Arkiv returned a different snapshot. Refresh the ballot review.");
       }
-      for (const entity of page.entities) entities.set(entity.key.toLowerCase(), entity);
+      for (const entity of page.entities) {
+        entities.set(entity.key.toLowerCase(), entity);
+        const alias = ballotAlias(entity.attributes, toHex(entity.payload));
+        if (alias) entities.set(alias, entity);
+      }
       if (!page.hasNextPage()) break;
       page = await page.next();
     }

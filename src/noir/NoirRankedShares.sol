@@ -23,7 +23,7 @@ import {checkWorkflow, deriveWorkflowName} from "../lib/CreMetadata.sol";
 ///      `acceptProvisional` finalise a forged result. `onReport` therefore also checks
 ///      the forwarder's `metadata` — `abi.encodePacked(bytes32 workflowId, bytes10
 ///      workflowName, address workflowOwner)`, optionally followed by a `bytes2
-///      reportId` — against the immutables `workflowOwner` and `workflowName` set from
+///      reportId` — against the constructor-set `workflowOwner` and `workflowName` set from
 ///      `Config`; see `checkWorkflow` in `lib/CreMetadata.sol` for the layout, the
 ///      `address(0)` opt-out and what the check does and does not bind.
 contract NoirRankedShares is PoolBase, IReceiver {
@@ -123,32 +123,34 @@ contract NoirRankedShares is PoolBase, IReceiver {
     ///      not an overflow but a pool nobody can ever end.
     uint64 internal constant MAX_GRACE = 365 days;
 
-    // ------------------------------------------------------------ immutables
+    // ------------------------------------------- constructor-only configuration
 
-    address public immutable forwarder;
+    address public forwarder;
     /// @notice The workflow owner authorized to deliver reports, or `address(0)` to
     ///         disable the check (simulation only; see the contract-level dev note
     ///         above). Such a pool must never hold real funds.
-    address public immutable workflowOwner;
+    address public workflowOwner;
     /// @notice The workflow name authorized to deliver reports, or `bytes10(0)` to accept
     ///         any name from `workflowOwner`. Derive it from a workflow's name string
     ///         with `workflowNameOf`.
-    bytes10 public immutable workflowName;
+    bytes10 public workflowName;
     /// @notice The only address allowed to restart the tally chain (spec B6.5).
-    address public immutable coordinator;
-    IPoseidon2 public immutable poseidon;
-    IHonkVerifier public immutable ingestVerifier;
-    IHonkVerifier public immutable tallyVerifier;
-    uint256 public immutable tallierPkX;
-    uint256 public immutable tallierPkY;
-    bytes32 public immutable keySalt;
-    uint256 public immutable nSealedMax;
-    uint256 public immutable mMax;
-    uint256 public immutable batch;
-    uint256 public immutable minDirectVote;
-    uint256 public immutable minSealedVote;
-    uint64 public immutable proofGrace;
-    uint64 public immutable abandonGrace;
+    address public coordinator;
+    // Constructor-only configuration lives in storage to keep the runtime below
+    // EIP-170; there are no setters for these values.
+    IPoseidon2 public poseidon;
+    IHonkVerifier public ingestVerifier;
+    IHonkVerifier public tallyVerifier;
+    uint256 public tallierPkX;
+    uint256 public tallierPkY;
+    bytes32 public keySalt;
+    uint256 public nSealedMax;
+    uint256 public mMax;
+    uint256 public batch;
+    uint256 public minDirectVote;
+    uint256 public minSealedVote;
+    uint64 public proofGrace;
+    uint64 public abandonGrace;
 
     // --------------------------------------------------------------- storage
 
@@ -400,7 +402,7 @@ contract NoirRankedShares is PoolBase, IReceiver {
     }
 
     function voteArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
-        external
+        public
         inPhase(Phase.Open)
         beforeDeadline
     {
@@ -415,7 +417,7 @@ contract NoirRankedShares is PoolBase, IReceiver {
     }
 
     function voteSealedArkiv(bytes32 entityKey, bytes calldata payload, uint256 expectedRevision)
-        external
+        public
         inPhase(Phase.Open)
         beforeDeadline
     {
@@ -431,6 +433,11 @@ contract NoirRankedShares is PoolBase, IReceiver {
         _storeBallot(msg.sender, true, entityKey, payload, expectedRevision);
         _register(msg.sender);
         emit SealedVote(msg.sender);
+    }
+
+    function _castBallot(bytes32 id, bytes calldata payload, bool isSealed, uint256 expectedRevision) internal override {
+        if (isSealed) voteSealedArkiv(id, payload, expectedRevision);
+        else voteArkiv(id, payload, expectedRevision);
     }
 
     function voterRefsFrom(uint256 start, uint256 count)

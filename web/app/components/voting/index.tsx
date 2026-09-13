@@ -1,57 +1,34 @@
-import { Button, Field, Input, Notice, Status } from "../ui";
+import { Button, Notice, Status } from "../ui";
 import type { BallotReviewData, ReviewRow } from "../../lib/ballot-review";
-
-export function RankField(
-  { id, title, value, count, disabled, onChange }: {
-    id: number;
-    title: string;
-    value: string;
-    count: number;
-    disabled: boolean;
-    onChange: (value: string) => void;
-  },
-) {
-  return (
-    <Field
-      id={`rank-${id}`}
-      label={title}
-      hint={`Project ${id + 1} · 0 means last tier`}
-    >
-      <Input
-        id={`rank-${id}`}
-        type="number"
-        min={0}
-        max={count}
-        step={1}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        aria-describedby={`rank-${id}-hint`}
-        required
-      />
-    </Field>
-  );
-}
+import type { FundingTier, TierAssignments } from "../../lib/ballot-tiers";
+import { TierList } from "./tier-list";
+import type { ReactNode } from "react";
 
 export function BallotForm(
   {
     titles,
-    ranks,
+    assignments,
     sealed,
     canPublic,
     canSealed,
     busy,
-    onRank,
+    disabledReason,
+    contribution,
+    submitLabel = "Vote",
+    onAssign,
     onMode,
     onSubmit,
   }: {
     titles: string[];
-    ranks: string[];
+    assignments: TierAssignments;
     sealed: boolean;
     canPublic: boolean;
     canSealed: boolean;
     busy: boolean;
-    onRank: (id: number, value: string) => void;
+    disabledReason?: string;
+    contribution?: ReactNode;
+    submitLabel?: string;
+    onAssign: (id: number, tier: FundingTier | undefined) => void;
     onMode: (sealed: boolean) => void;
     onSubmit: () => void;
   },
@@ -61,7 +38,7 @@ export function BallotForm(
       className="proposal-form"
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit();
+        if (!busy && (sealed ? canSealed : canPublic)) onSubmit();
       }}
     >
       <fieldset disabled={busy}>
@@ -87,39 +64,28 @@ export function BallotForm(
           Encrypted ballot · sponsored seats
         </label>
       </fieldset>
-      <p>
-        Rank your preferred projects starting at 1. Ties share a rank: 1, 1, 3.
-        Leave a project at 0 to place it in the last tier.
-      </p>
-      {titles.map((title, id) => (
-        <RankField
-          key={id}
-          id={id}
-          title={title}
-          value={ranks[id] ?? "0"}
-          count={titles.length}
-          disabled={busy}
-          onChange={(value) => onRank(id, value)}
-        />
-      ))}
+      <TierList titles={titles} assignments={assignments} disabled={busy} onAssign={onAssign} />
+      {contribution}
       <p className="hint">
         {sealed
           ? "Your ranking is encrypted in this browser. Your wallet address and voting weight remain public."
           : "Your ranking is public and contributes to the live results."}{" "}
-        Storing the ballot and accepting it in the round require two wallet
-        transactions. Arkiv Tiramisu uses testGLM.
+        Your vote is recorded on the round's network. Arkiv storage syncs
+        automatically without another wallet transaction.
       </p>
       <p className="hint">
         New ballots expire from Arkiv approximately 15 days after voting closes.
-        The owner can still extend or delete their entity. Transaction history
+        The storage operator can still extend or delete its entity. Transaction history
         and final results remain available.
       </p>
       <Button
         type="submit"
+        aria-describedby={disabledReason ? "ballot-disabled-reason" : undefined}
         disabled={busy || (sealed ? !canSealed : !canPublic)}
       >
-        1. Store {sealed ? "encrypted " : ""}ballot in Arkiv
+        {submitLabel}
       </Button>
+      {disabledReason && <p id="ballot-disabled-reason" className="hint">{disabledReason}</p>}
     </form>
   );
 }
@@ -144,7 +110,7 @@ export function BallotReviewRow({ row }: { row: ReviewRow }) {
         </details>
       )}
       <p className="hint">
-        Entity <code>{row.entityKey}</code>
+        Ballot reference <code>{row.entityKey}</code>
         {row.expiresAt !== undefined && <> · last observed expiry block {row.expiresAt.toString()}</>}
       </p>
     </li>
