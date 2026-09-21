@@ -1,7 +1,7 @@
 import type { Config } from "@react-router/dev/config";
 import { buildPool, projectIds } from "./app/lib/build-chain";
 
-const FIXED = ["/", "/round", "/proposals", "/vote", "/liquidity", "/submit", "/setup", "/deploy", "/import"];
+const FIXED = ["/", "/round", "/proposals", "/vote", "/liquidity", "/submit", "/setup", "/deploy", "/import", "/onepager"];
 // react-router's ssr:false build refuses to compile ANY route whose module has
 // a `loader` export unless at least one prerendered path resolves to it (see
 // https://reactrouter.com/how-to/pre-rendering#invalid-exports) — regardless

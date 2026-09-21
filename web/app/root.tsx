@@ -234,6 +234,8 @@ export function Shell({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  // The explainer stands alone: no wallet, no round, no chain reads.
+  if (/^\/onepager\/?$/.test(useLocation().pathname)) return <Outlet />;
   return (
     <Providers>
       <Shell>

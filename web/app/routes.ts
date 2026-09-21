@@ -10,4 +10,5 @@ export default [
   route("setup", "routes/setup.tsx"),
   route("deploy", "routes/deploy.tsx"),
   route("import", "routes/import.tsx"),
+  route("onepager", "routes/onepager.tsx"),
 ] satisfies RouteConfig;
