@@ -162,6 +162,11 @@
 .tier-must th { background: var(--color-inverse); color: var(--color-on-inverse); }
 .tier-should th { background: var(--color-info-bg); color: var(--color-primary); }
 .tier-nice th { background: var(--color-sunken); color: var(--color-primary); }
+/* In the dark mapping --color-info-bg equals the cell surface, so the middle tier needs its own green. */
+:root[data-theme="dark"] .tier-should th { background: var(--color-green-muted); color: var(--color-offwhite); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tier-should th { background: var(--color-green-muted); color: var(--color-offwhite); }
+}
 .tier-proposals {
   display: flex;
   flex-wrap: wrap;
