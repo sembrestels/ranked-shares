@@ -120,8 +120,8 @@ export function Stepper() {
                   <p className="op-support-note">
                     {(done || winning) && (
                       <svg className="op-funded-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                        <circle cx="10" cy="10" r="10" />
-                        <path d="m5.5 10.4 3 3 6-6.6" />
+                        <circle cx="10" cy="10" r="8.5" />
+                        <path d="m6.4 10.3 2.5 2.5 4.8-5.3" />
                       </svg>
                     )}
                     {done ? "Funded" : position === "end" ? "Not funded" : winning ? `${usd(support)} behind it, funded now` : `${usd(support)} behind it`}
