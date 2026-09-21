@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BLOCS, blocVoters, PROPOSALS, tally, type Frame } from "../../lib/onepager";
+import { BLOCS, blocVoters, PROPOSALS, tally, type Frame, type Tally } from "../../lib/onepager";
 import { Button } from "../ui";
 import { PoolBar, usd } from "./pool-bar";
 
@@ -9,18 +9,20 @@ const ordinal = (n: number) => `top ${n === 1 ? "choice" : `${n} choices`}`;
 const list = (items: string[]) =>
   items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
 
-function narrate(frame: Frame | undefined, previous: Frame | undefined, position: "start" | "step" | "end", budget: number) {
+function narrate(frame: Frame | undefined, previous: Frame | undefined, position: "start" | "step" | "end", result: Tally) {
+  const { budget, backing, eligible } = result;
   if (position === "start") {
-    return `The fund sponsors 20 badge seats with ${usd(budget / 20)} each, so the pool is ${usd(budget)}. The nine proposals ask for ${usd(costs.reduce((a, b) => a + b, 0))}. The tally starts by looking only at each voter's first choice.`;
+    const excluded = PROPOSALS.flatMap((p, id) => eligible.includes(id) ? [] : [`${p.title} (${usd(backing[id])} backing for a ${usd(p.cost)} ask)`]);
+    return `The fund sponsors 20 badge seats with ${usd(budget / 20)} each, so the pool is ${usd(budget)}. First, count the initial weight of everyone who explicitly ranked each proposal, at any position. Remove ${list(excluded)}. The ${eligible.length} eligible proposals enter PB-EAR with every seat's original weight unchanged.`;
   }
   if (position === "end" || !frame) {
     const left = budget - (previous?.spent ?? 0);
-    return `${usd(left)} is left and no open proposal costs that little, so the tally stops. Unspent seat money goes back to the funder. It is never spent on a voter's behalf.`;
+    return `${usd(left)} is left and no unfunded eligible proposal costs that little, so the tally stops. Unspent seat money goes back to the funder.`;
   }
   if (frame.funded === null) {
     const next = frame.level + 1;
-    const short = BLOCS.filter((b) => b.ranking.length + 1 === next).map((b) => b.name);
-    return `No open proposal has enough unspent money behind it among everyone's ${ordinal(frame.level)}. The tally widens to each voter's ${ordinal(next)}.${short.length ? ` ${list(short)} ranked only ${next - 1}, so from here everything they left unranked counts as a tied last choice.` : ""}`;
+    const short = BLOCS.filter((b) => b.ranking.filter((id) => eligible.includes(id)).length + 1 === next).map((b) => b.name);
+    return `No unfunded eligible proposal has enough unspent money behind it among everyone's ${ordinal(frame.level)}. The tally widens to each voter's ${ordinal(next)}.${short.length ? ` ${list(short)} have only ${next - 1} ranked eligible proposals, so from here eligible proposals they left unranked count as tied last choices.` : ""}`;
   }
   const proposal = PROPOSALS[frame.funded];
   const payers = frame.paid.map((amount, i) => ({ amount, name: BLOCS[i].name })).filter((p) => p.amount > 0);
@@ -51,7 +53,7 @@ export function Stepper() {
       <div className="op-stepper-head">
         <p className="op-stepper-count" aria-live="polite">
           Step {at + 1} of {last + 1}
-          <span> Looking at each voter's {ordinal(level)}</span>
+          <span>{position === "start" ? "Checking initial backing against each ask" : `Looking at each voter's ${ordinal(level)} among eligible proposals`}</span>
         </p>
         <div className="op-stepper-controls">
           <Button variant="secondary" disabled={at === 0} onClick={() => setAt(at - 1)}>Back</Button>
@@ -60,7 +62,7 @@ export function Stepper() {
         </div>
       </div>
 
-      <p className="op-narration">{narrate(frame, previous, position, result.budget)}</p>
+      <p className="op-narration">{narrate(frame, previous, position, result)}</p>
 
       <div className="op-stepper-grid">
         <section aria-label="Voters">
@@ -74,12 +76,12 @@ export function Stepper() {
                   <span>{bloc.seats} seats</span>
                 </p>
                 <ol className="op-ranking">
-                  {bloc.ranking.map((id, position) => (
+                  {bloc.ranking.filter((id) => result.eligible.includes(id)).map((id, position) => (
                     <li key={id} data-open={position < level || undefined} data-funded={fundedNow.includes(id) || undefined}>
                       {PROPOSALS[id].short}
                     </li>
                   ))}
-                  <li className="op-ranking-rest" data-open={level > bloc.ranking.length || undefined}>everything else</li>
+                  <li className="op-ranking-rest" data-open={level > bloc.ranking.filter((id) => result.eligible.includes(id)).length || undefined}>other eligible proposals</li>
                 </ol>
                 <div className="op-wallet">
                   <span className="op-wallet-track">
@@ -97,16 +99,17 @@ export function Stepper() {
         </section>
 
         <section aria-label="Proposals">
-          <h3>Proposals and the money behind them</h3>
+          <h3>{position === "start" ? "Initial backing at any rank" : "Eligible proposals and remaining support"}</h3>
           <ul className="op-proposals">
             {PROPOSALS.map((proposal, id) => {
               const done = fundedBefore.includes(id);
               const winning = frame?.funded === id;
-              const support = position === "start"
-                ? voters.reduce((sum, v) => (v.ballot![id] === 1 ? sum + v.weight : sum), 0)
+              const eligible = result.eligible.includes(id);
+              const support = position === "start" || !eligible
+                ? result.backing[id]
                 : frame ? frame.support[id] : 0;
               return (
-                <li key={id} data-camp={proposal.camp} data-state={done ? "funded" : winning ? "winning" : undefined}>
+                <li key={id} data-camp={proposal.camp} data-state={!eligible ? "excluded" : done ? "funded" : winning ? "winning" : undefined}>
                   <p>
                     <span>{proposal.title}</span>
                     <span className="op-proposal-cost">{usd(proposal.cost)}</span>
@@ -124,13 +127,13 @@ export function Stepper() {
                         <path d="m6.4 10.3 2.5 2.5 4.8-5.3" />
                       </svg>
                     )}
-                    {done ? "Funded" : position === "end" ? "Not funded" : winning ? `${usd(support)} behind it, funded now` : `${usd(support)} behind it`}
+                    {!eligible ? `Excluded: ${usd(result.backing[id])} initial backing is below the ask` : position === "start" ? `Eligible: ${usd(support)} initial backing covers the ask` : done ? "Funded" : position === "end" ? "Not funded" : winning ? `${usd(support)} behind it, funded now` : `${usd(support)} behind it`}
                   </p>
                 </li>
               );
             })}
           </ul>
-          <p className="op-legend"><i className="op-legend-tick" /> the marker is the proposal's cost; a bar that reaches it is affordable</p>
+          <p className="op-legend"><i className="op-legend-tick" />{position === "start" ? "The marker is the ask; initial backing must reach it to qualify." : "The marker is the ask; remaining support must reach it to fund an eligible proposal. Excluded proposals keep their initial backing shown."}</p>
         </section>
       </div>
 

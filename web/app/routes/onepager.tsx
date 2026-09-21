@@ -44,7 +44,8 @@ export default function Onepager() {
           <p className="op-standfirst">
             Round Two asks the ETHSecurity Badge holders to allocate TheDAO Security Fund. Under a majority
             ranking (Condorcet, Borda, most votes first), the largest like-minded group decides every dollar. Blossom Budgeting is a ranked-ballot
-            rule where each group of voters steers a share of the pool equal to its share of the seats. Below
+            rule that protects representation for groups with shared priorities. Projects first need enough
+            initial backing to cover their ask. Below
             is the same small round, tallied both ways.
           </p>
 
@@ -112,9 +113,9 @@ export default function Onepager() {
             <p>
               A proportional rule asks a different question: how much of the pool does each group deserve to
               steer? The answer used here was published by Haris Aziz and Barton Lee at AAAI 2021 as the{" "}
-              <a href={PAPER}>Expanding Approvals Rule for participatory budgeting</a>, PB-EAR. It has been
-              proven on paper and similar rules have been piloted by European cities. Nobody has run it
-              on-chain with real money yet.
+              <a href={PAPER}>Expanding Approvals Rule for participatory budgeting</a>, PB-EAR. We add one
+              eligibility check before that algorithm: the initial budget shares of voters who explicitly
+              rank a proposal must cover its ask. PB-EAR then runs unchanged on the eligible proposals.
             </p>
           </div>
         </section>
@@ -127,23 +128,31 @@ export default function Onepager() {
               weight always equals the pool balance.
             </li>
             <li>
-              <b>Start with first choices.</b> A proposal is affordable when the voters who rank it first hold
+              <b>Initial backing must cover the ask.</b> Add the full initial weight of every voter who places
+              a proposal in any tier, counting each voter once. Remove proposals whose backing is below their
+              ask from every ballot. Check once, before spending; keep every seat and its original weight.
+            </li>
+            <li>
+              <b>Start with eligible first choices.</b> A proposal is affordable when the voters who rank it first hold
               enough unspent money to cover its cost. If several are affordable, the one with the most money
               behind it goes first.
             </li>
             <li>
-              <b>Supporters pay, in proportion.</b> The proposal's cost is deducted from the voters who backed it,
-              each in proportion to what they hold. Spent money cannot back anything else.
+              <b>Current supporters pay, in proportion.</b> The proposal's cost is deducted from the voters
+              whose expanded rankings include it, each in proportion to what they still hold. Spent money
+              cannot pay for anything else.
             </li>
             <li>
               <b>Widen only when stuck.</b> When nothing is affordable, the tally also counts second choices, then
-              third, and so on. It stops when no open proposal fits in what is left.
+              third, and so on. Unplaced eligible proposals count as tied last choices. It stops when no
+              unfunded eligible proposal fits in what is left or no remaining voting weight can pay for one.
             </li>
           </ol>
           <div className="op-prose">
             <p>
-              Step through the miniature round. Every number below comes from the tally code the pool contract
-              is fuzz-tested against.
+              A proposal asking for 10% of the pool needs explicit backing from at least 10% of the voting
+              weight. Passing this check makes it eligible, not guaranteed funding. Step through the example:
+              the filter runs first, followed by the same PB-EAR tally code the pool contract is fuzz-tested against.
             </p>
           </div>
           <Stepper />
@@ -154,10 +163,12 @@ export default function Onepager() {
           <div className="op-prose">
             <p>
               This is the ballot a badge holder fills in. You are a twenty-first seat with {usd(SEAT)}. Proposals
-              in the same tier are tied; anything you leave unplaced ranks below all three tiers. The incident
+              in the same tier are tied. Placing a proposal in any tier counts your seat toward its initial
+              backing; leaving it unplaced adds no backing. Eligible proposals you leave unplaced still rank
+              below all three tiers during the tally and can receive your remaining money. The incident
               responders hold $15,000 and their war room costs $20,000. The researchers hold $10,000 and their
-              course costs $15,000. Your one seat can complete either. So can the public: a direct donation
-              lowers what an initiative asks from the pool, which you can try under the ballot.
+              course costs $15,000. Your one seat can make either eligible. A direct public donation can also
+              lower its ask to meet the threshold, which you can try under the ballot.
             </p>
           </div>
           <Playground />
@@ -167,18 +178,23 @@ export default function Onepager() {
           <h2 id="op-guarantee">What the rule guarantees</h2>
           <div className="op-prose">
             <p>
-              The paper calls it Inclusion PSC, proportionality for solid coalitions. In plain terms: if a group
-              of voters all rank some set of proposals above everything else, and the group's share of the pool
-              can pay for one more of those proposals, the tally will not leave that proposal unfunded. The
-              wallet teams hold 20% of the seats, so their $20,000 blocklist is funded whatever the other 80%
-              do. A 51% bloc cannot direct 100% of the pool, and a 10% minority with a clear priority gets
-              about 10% of the budget spent on it.
+              The paper calls it Inclusion PSC, proportionality for solid coalitions. That guarantee applies
+              to the eligible proposals: groups that agree on their top choices receive representation
+              according to their share, subject to project costs and ties. A group cannot be left short of
+              another jointly preferred proposal if its share can cover that proposal plus the funded projects
+              counted toward its representation. The wallet teams hold 20% of the seats and all rank their
+              $20,000 blocklist first, so it passes the filter and is funded whatever the other 80% do.
             </p>
             <p>
-              Two honest limits. A group can only claim what it can afford in full, because proposals are funded
-              whole or not at all: the responders alone cannot buy a $20,000 war room with $15,000, they need an
-              ally. And the rule does not squeeze the last dollar out of the pool. It stops when nothing open
-              fits, and the remainder goes back to the funder.
+              The filter guarantees that every funded proposal had enough explicit initial backing to cover
+              its ask. That backing is not reserved money: the same voters can back several proposals. The
+              tally may eventually use a voter's remaining money for an eligible proposal they left unplaced.
+              Eligibility is a collective support threshold, not an individual veto on spending.
+            </p>
+            <p>
+              Proposals are funded whole or not at all. The responders alone cannot make a $20,000 war room
+              eligible with $15,000 of backing; they need an ally or a donation. Removed proposals have no
+              funding guarantee. Any money the tally leaves unspent goes back to the funder.
             </p>
           </div>
         </section>
@@ -219,9 +235,9 @@ export default function Onepager() {
               <dd>
                 A co-sponsor deposits stablecoins into the same pool and names who votes with that money: its own
                 address, a list of addresses, or an NFT collection. A wallet company can sponsor $50k voted by
-                its security team, an L2 can sponsor seats for its builders. Their money funds what their voters
-                ranked, never something their group did not support, and the chain records exactly which
-                projects it paid for.
+                its security team, an L2 can sponsor seats for its builders. Those voters' initial weights count
+                toward eligibility, and their rankings guide spending among eligible proposals. Unplaced
+                eligible proposals remain tied last choices that can receive their money.
               </dd>
             </div>
             <div>
@@ -255,11 +271,10 @@ export default function Onepager() {
             <p>
               The same contract can also let the public vote. In that variant anyone deposits their own funds
               into the pool during the voting window, and the deposit is both a donation to the round and
-              their voting weight, in one transaction. Their money is tallied by the same proportional rule:
-              it goes to the highest-ranked proposals on their own ballot that still need funding, and the rest
-              flows down their ranking instead of piling onto a project that is already funded. Badge holders
-              would still decide how the fund's money is spent, and contributors would decide how their own
-              is spent.
+              their voting weight, in one transaction. Their explicit rankings count toward the initial
+              eligibility check, then the same proportional tally spends among eligible proposals. Their
+              remaining money can reach unplaced eligible proposals as tied last choices. Badge holders and
+              contributors would each rank how they want their share spent.
             </p>
             <p>
               We are not proposing it for Round Two, where direct donations fit the round's design better. It
@@ -275,8 +290,10 @@ export default function Onepager() {
               The contracts, the sealed-ballot verifiers, the proposal flow, this voting interface and the
               operator runbooks are written and running on a testnet with live demo rounds. The on-chain tally
               is checked by a differential fuzz against a Python reference of the published algorithm. It was
-              built in ten days for ETHOnline 2026 under the name RankedShares. The prototype implements the deposit-and-rank variant above; direct donations that lower an
-              initiative's ask are a small addition still to be written. It has not run a round with real
+              built in ten days for ETHOnline 2026 under the name RankedShares. The prototype implements
+              deposit-and-rank voting. This page previews the initial-backing filter and donations that lower
+              an initiative's ask; both still need integration into the production contracts and verifiers.
+              It has not run a round with real
               money: Round Two would be the first production run of proportional participatory budgeting
               on-chain.
             </p>

@@ -164,6 +164,8 @@
 .op-proposals { gap: var(--space-3); }
 .op-proposals > li { display: grid; gap: 3px; padding: var(--space-1) var(--space-2); transition: background-color var(--op-ease); }
 .op-proposals > li[data-state="winning"] { background: var(--color-info-bg); outline: var(--rule-width) solid var(--color-primary); }
+.op-proposals > li[data-state="excluded"] { border-inline-start: var(--rule-width) dashed var(--color-edge-strong); }
+.op-proposals > li[data-state="excluded"] .op-support-fill { background: var(--color-secondary); }
 .op-proposals > li > p:first-child { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--text-base); line-height: 1.3; }
 .op-proposal-cost { font-variant-numeric: tabular-nums; color: var(--color-secondary); }
 .op-support { position: relative; height: 0.85rem; background: var(--color-sunken); }
@@ -195,6 +197,8 @@
 .op-funded-list i { display: inline-block; width: 0.7rem; height: 0.7rem; margin-inline-end: 6px; background: var(--c); }
 .op-pool-caption { font-size: var(--text-sm); color: var(--color-secondary); margin-bottom: var(--space-2); font-variant-numeric: tabular-nums; }
 .op-result-pool { font-size: var(--text-sm); color: var(--color-secondary); }
+.op-eligibility { display: grid; gap: var(--space-2); padding-block: var(--space-3); border-block: var(--rule-width) solid var(--color-edge); font-size: var(--text-sm); }
+.op-eligibility ul { margin: 0; padding-inline-start: var(--space-4); display: grid; gap: var(--space-1); }
 .op-result-change { font-size: var(--text-base); line-height: 1.5; min-height: 4.5em; }
 .op-mine { gap: var(--space-2); }
 .op-mine li { display: grid; gap: 2px; }

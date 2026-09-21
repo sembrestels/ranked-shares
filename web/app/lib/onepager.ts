@@ -1,8 +1,8 @@
-/** The worked example behind /onepager: a Round Two in miniature, tallied by the
- * same shared/pbear.ts the pool uses. The frames only replay that transcript so
- * the page can show who paid what at each step. */
+/** The worked example behind /onepager: screen for initial backing, then run the
+ * unchanged shared/pbear.ts on eligible projects. Frames replay that transcript
+ * with original proposal ids so the page can show who paid what at each step. */
 import { cumulativeDeductions, pbearTranscript, type Entry } from "../../../shared/pbear";
-import { effectiveRanks } from "../../../shared/ranks";
+import { effectiveRanks, validate } from "../../../shared/ranks";
 
 export type Camp = "audit" | "wallet" | "response" | "research";
 
@@ -87,6 +87,10 @@ export interface Frame {
 
 export interface Tally {
   budget: number;
+  /** Initial weight of voters explicitly ranking each proposal, before any spending. */
+  backing: number[];
+  /** Original proposal ids that pass the one-time backing >= ask filter. */
+  eligible: number[];
   funded: number[];
   frames: Frame[];
   /** contributions[voter][proposal], in dollars. */
@@ -97,38 +101,55 @@ const NONE = (1n << 64n) - 1n;
 
 export function tally(costs: readonly number[], voters: readonly Voter[]): Tally {
   const m = costs.length;
-  const bigCosts = costs.map(BigInt);
-  const entries: Entry[] = voters.map((v) => ({ weight: BigInt(v.weight), ballot: v.ballot }));
+  for (const voter of voters) {
+    if (voter.ballot !== null && !validate(voter.ballot, m)) throw new Error("invalid ballot");
+  }
+  const backing = costs.map((_, id) =>
+    voters.reduce((sum, voter) => sum + (voter.ballot && voter.ballot[id] > 0 ? voter.weight : 0), 0),
+  );
+  const eligible = costs.map((_, id) => id).filter((id) => backing[id] >= costs[id]);
+  const count = eligible.length;
+  const bigCosts = eligible.map((id) => BigInt(costs[id]));
+  const entries: Entry[] = voters.map((v) => {
+    const surviving = v.ballot === null ? null : eligible.map((id) => v.ballot![id]);
+    // Rebuild competition ranks after removal, preserving ties and omissions.
+    // An emptied submitted ballot stays a ballot; only null means abstention.
+    const ballot = surviving?.map((rank) => rank === 0 ? 0 :
+      1 + surviving.filter((other) => other > 0 && other < rank).length) ?? null;
+    return { weight: BigInt(v.weight), ballot };
+  });
   const budget = voters.reduce((sum, v) => sum + v.weight, 0);
   const { funded, transcript } = pbearTranscript(bigCosts, entries, [], BigInt(budget));
 
-  const ranks = voters.map((v) => (v.ballot ? effectiveRanks(v.ballot, m) : null));
+  const ranks = entries.map((v) => (v.ballot ? effectiveRanks(v.ballot, count) : null));
   const weights = entries.map((e) => e.weight);
   const contributions = voters.map(() => new Array<number>(m).fill(0));
   const fundedSoFar: number[] = [];
   let spent = 0;
   const frames = transcript.map((step): Frame => {
     const level = Number(step[0]);
-    const support = step.slice(1, m + 1).map(Number);
-    const best = step[m + 1];
+    const support = new Array<number>(m).fill(0);
+    eligible.forEach((id, i) => (support[id] = Number(step[i + 1])));
+    const best = step[count + 1];
     const paid = new Array<number>(voters.length).fill(0);
     const before = weights.map(Number);
     if (best !== NONE) {
       const c = Number(best);
+      const id = eligible[c];
       const supporters = voters.map((_, i) => i).filter((i) => ranks[i] !== null && weights[i] !== 0n && ranks[i]![c] <= level);
       const deductions = cumulativeDeductions(supporters.map((i) => weights[i]), bigCosts[c]);
       supporters.forEach((i, j) => {
         weights[i] -= deductions[j];
         paid[i] = Number(deductions[j]);
-        contributions[i][c] += paid[i];
+        contributions[i][id] += paid[i];
       });
-      fundedSoFar.push(c);
-      spent += costs[c];
+      fundedSoFar.push(id);
+      spent += costs[id];
     }
     return {
       level,
       support,
-      funded: best === NONE ? null : Number(best),
+      funded: best === NONE ? null : eligible[Number(best)],
       before,
       paid,
       left: weights.map(Number),
@@ -136,7 +157,7 @@ export function tally(costs: readonly number[], voters: readonly Voter[]): Tally
       spent,
     };
   });
-  return { budget, funded, frames, contributions };
+  return { budget, backing, eligible, funded: funded.map((id) => eligible[id]), frames, contributions };
 }
 
 /** The baseline the page argues against: order proposals by head-to-head weighted
