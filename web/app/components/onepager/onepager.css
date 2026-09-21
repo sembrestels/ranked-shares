@@ -71,7 +71,6 @@
 .op-compare { margin: clamp(2rem, 5vw, 3.5rem) 0 0; display: grid; gap: var(--space-6); }
 .op-compare-row { display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); gap: var(--space-3) var(--space-6); align-items: center; }
 .op-compare figcaption { font-size: var(--text-base); line-height: 1.45; color: var(--color-secondary); }
-.op-compare figcaption b span { display: block; line-height: 1.45; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 400; color: var(--color-secondary); }
 .op-compare figcaption b { display: block; font-family: var(--font-heading); font-size: 1.25rem; color: var(--color-primary); }
 @media (max-width: 760px) { .op-compare-row { grid-template-columns: minmax(0, 1fr); } }
 

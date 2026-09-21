@@ -38,7 +38,7 @@ export default function Onepager() {
           <h1>Eleven of twenty seats should not spend the whole pool.</h1>
           <p className="op-standfirst">
             Round Two asks the ETHSecurity Badge holders to allocate TheDAO Security Fund. Under a majority
-            ranking, the largest like-minded group decides every dollar. Blossom Budgeting is a ranked-ballot
+            ranking (Condorcet, Borda, most votes first), the largest like-minded group decides every dollar. Blossom Budgeting is a ranked-ballot
             rule where each group of voters steers a share of the pool equal to its share of the seats. Below
             is the same small round, tallied both ways.
           </p>
@@ -47,7 +47,7 @@ export default function Onepager() {
             <Seats />
             <div className="op-compare-row">
               <figcaption>
-                <b>Majority ranking <span>(Condorcet, Borda, most votes first)</span></b>
+                <b>Majority ranking</b>
                 Auditors hold {percent(auditSeats, 20)} of the seats and direct {auditShare(majority)} of the pool.
               </figcaption>
               <PoolBar funded={majority} budget={budget} label="Majority ranking" />
@@ -96,8 +96,7 @@ export default function Onepager() {
 
           <div className="op-prose">
             <p>
-              A majority ranking (Condorcet methods such as Schulze or Ranked Pairs, Borda counts, or simply
-              most votes first) orders the proposals by what most voters prefer and funds from the top. Here
+              A majority ranking orders the proposals by what most voters prefer and funds from the top. Here
               every auditing proposal beats every other proposal head to head, because the same eleven seats
               outvote whoever is on the other side, and the Borda and vote-count orders come out the same.
               Their four proposals cost exactly {usd(budget)}. Fund from the top and the other nine seats, 45% of the
