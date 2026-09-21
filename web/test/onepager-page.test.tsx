@@ -8,9 +8,12 @@ afterEach(cleanup);
 
 test("the stepper screens initial backing before walking through the filtered tally", () => {
   render(<Stepper />);
-  expect(screen.getByText(/Step 1 of 11/)).toBeTruthy();
-  expect(screen.getByText("Excluded: $15,000 initial backing is below the ask")).toBeTruthy();
-  expect(screen.getByText("Excluded: $10,000 initial backing is below the ask")).toBeTruthy();
+  expect(screen.getByText(/Step 1 of 9/)).toBeTruthy();
+  expect(screen.getByText(/split equally among the 20 badge holders who submitted a ballot, \$5,000 each/)).toBeTruthy();
+  expect(screen.getByText(/Incident responders and Researchers lose their S-Tier pick/)).toBeTruthy();
+  expect(screen.getByText("Only Incident responders back it: $15,000 is $5,000 short of the $20,000 ask")).toBeTruthy();
+  expect(screen.getByText("Only Researchers back it: $10,000 is $5,000 short of the $15,000 ask")).toBeTruthy();
+  expect(screen.getAllByText("Excluded")).toHaveLength(2);
   const reset = screen.getByRole("button", { name: "Reset" }) as HTMLButtonElement;
   expect(reset.disabled).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Next step" }));
@@ -20,27 +23,29 @@ test("the stepper screens initial backing before walking through the filtered ta
   let widened = false;
   while (!next.disabled) {
     fireEvent.click(next);
-    widened ||= screen.queryByText(/The tally widens to each voter's top 2 choices/) !== null;
+    widened ||= screen.queryByText(/the tally widens a step\. Audit firms, Solo auditors and Wallet teams open their A-Tier\./) !== null;
   }
   expect(widened).toBe(true);
   expect(screen.getByText(/\$5,000 is left and no unfunded eligible proposal costs that little/)).toBeTruthy();
   expect(screen.getByText("$95,000 of $100,000 spent")).toBeTruthy();
-  expect(screen.getByText(/Step 11 of 11/)).toBeTruthy();
+  expect(screen.getByText(/Step 9 of 9/)).toBeTruthy();
   fireEvent.click(reset);
-  expect(screen.getByText(/Step 1 of 11/)).toBeTruthy();
+  expect(screen.getByText(/Step 1 of 9/)).toBeTruthy();
   expect(reset.disabled).toBe(true);
 });
 
 test("a ballot for the war room funds it and spends the whole seat there", () => {
   render(<Playground />);
-  expect(screen.getByText(/your seat changes nothing/)).toBeTruthy();
+  expect(screen.getByText(/so you change nothing/)).toBeTruthy();
+  expect(screen.getByText("$100,000 pool, 20 ballots, $5,000 each")).toBeTruthy();
   const excluded = within(screen.getByRole("list", { name: "Excluded proposals" }));
   expect(excluded.getByText(/Incident war room: \$15,000 backing \/ \$20,000 ask/)).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Back the war room" }));
   expect(excluded.queryByText(/Incident war room:/)).toBeNull();
+  expect(screen.getByText("$105,000 pool, 20 ballots plus yours, $5,000 each")).toBeTruthy();
   expect(screen.getByText(/Funded because of you: Incident war room\./)).toBeTruthy();
   expect(screen.getByText(/\$5,000 to Incident war room/)).toBeTruthy();
-  const must = screen.getByRole("rowheader", { name: "Must fund" }).closest("tr")!;
+  const must = screen.getByRole("rowheader", { name: /^S-Tier\s*Must fund$/ }).closest("tr")!;
   expect(within(must).getByRole("button", { name: /Incident war room/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Clear" }));
   expect(within(screen.getByRole("list", { name: "Excluded proposals" })).getByText(/Incident war room:/)).toBeTruthy();

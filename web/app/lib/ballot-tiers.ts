@@ -1,7 +1,7 @@
 export const FUNDING_TIERS = [
-  { id: "must", label: "Must fund" },
-  { id: "should", label: "Should fund" },
-  { id: "nice", label: "Nice to have" },
+  { id: "must", grade: "S", label: "Must fund" },
+  { id: "should", grade: "A", label: "Should fund" },
+  { id: "nice", grade: "B", label: "Nice to have" },
 ] as const;
 
 export type FundingTier = (typeof FUNDING_TIERS)[number]["id"];

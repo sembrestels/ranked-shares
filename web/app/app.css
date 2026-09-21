@@ -150,13 +150,45 @@
   vertical-align: middle;
 }
 .tier-table th {
-  width: calc(var(--space-12) * 3);
+  width: calc(var(--space-12) * 3.5);
   font-family: var(--font-heading);
   font-size: var(--text-lg);
   font-weight: 400;
   line-height: var(--leading-heading);
   text-align: left;
 }
+/* The grade sits over the label like a tier-list badge: a boxed letter, then small caps. */
+.tier-grade {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0;
+  font-weight: 600;
+  line-height: 1;
+}
+.tier-grade::after {
+  content: "Tier";
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.tier-grade b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: var(--rule-width) solid currentColor;
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+/* S is the loud one, A is solid, B stays an outline. */
+.tier-must .tier-grade b { background: var(--color-signal); border-color: var(--color-signal); color: var(--color-green-deep); }
+.tier-should .tier-grade b { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-page); }
+.tier-label { display: block; }
 .tier-table td { background: var(--color-surface); }
 .tier-table .tier-group { min-height: calc(var(--control-height) + var(--space-6)); align-content: center; }
 .tier-must th { background: var(--color-inverse); color: var(--color-on-inverse); }

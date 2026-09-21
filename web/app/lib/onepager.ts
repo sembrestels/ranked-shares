@@ -3,6 +3,7 @@
  * with original proposal ids so the page can show who paid what at each step. */
 import { cumulativeDeductions, pbearTranscript, type Entry } from "../../../shared/pbear";
 import { effectiveRanks, validate } from "../../../shared/ranks";
+import { FUNDING_TIERS } from "./ballot-tiers";
 
 export type Camp = "audit" | "wallet" | "response" | "research";
 
@@ -17,12 +18,14 @@ export interface Bloc {
   id: string;
   name: string;
   seats: number;
-  /** Proposal ids, most wanted first. Anything left out ranks below all of them. */
-  ranking: number[];
+  /** Proposal ids by tier, S-Tier first. Proposals in one tier are tied; anything left out sits below all of them. */
+  tiers: number[][];
 }
 
-/** Dollars each sponsored badge seat carries in the example. */
+/** Dollars of the pool each submitted ballot steers in the example. */
 export const SEAT = 5_000;
+
+export const TIER_LABELS = FUNDING_TIERS.map((tier) => `${tier.grade}-Tier`);
 
 export const PROPOSALS: Proposal[] = [
   { title: "Bridge fuzzing harness", short: "Fuzzing", cost: 40_000, camp: "audit" },
@@ -37,11 +40,11 @@ export const PROPOSALS: Proposal[] = [
 ];
 
 export const BLOCS: Bloc[] = [
-  { id: "audit-a", name: "Audit firms", seats: 6, ranking: [0, 1, 2, 3] },
-  { id: "audit-b", name: "Solo auditors", seats: 5, ranking: [0, 2, 3, 1] },
-  { id: "wallet", name: "Wallet teams", seats: 4, ranking: [4, 5, 7] },
-  { id: "response", name: "Incident responders", seats: 3, ranking: [6, 7, 5] },
-  { id: "research", name: "Researchers", seats: 2, ranking: [8, 7, 2] },
+  { id: "audit-a", name: "Audit firms", seats: 6, tiers: [[0], [1, 2], [3]] },
+  { id: "audit-b", name: "Solo auditors", seats: 5, tiers: [[0], [2, 3], [1]] },
+  { id: "wallet", name: "Wallet teams", seats: 4, tiers: [[4], [5, 7]] },
+  { id: "response", name: "Incident responders", seats: 3, tiers: [[6], [7, 5]] },
+  { id: "research", name: "Researchers", seats: 2, tiers: [[8], [7, 2]] },
 ];
 
 export const CAMP_OF_BLOC: Record<string, Camp> = {
@@ -60,14 +63,32 @@ export interface Voter {
   ballot: number[] | null;
 }
 
-export function ranksFromOrder(order: readonly number[], m = PROPOSALS.length): number[] {
+/** Competition ranks for tied tiers: a tier's rank is one more than the proposals placed above it. */
+export function ranksFromTiers(tiers: readonly (readonly number[])[], m = PROPOSALS.length): number[] {
   const ranks = new Array<number>(m).fill(0);
-  order.forEach((id, position) => (ranks[id] = position + 1));
+  let next = 1;
+  for (const tier of tiers) {
+    for (const id of tier) ranks[id] = next;
+    next += tier.length;
+  }
   return ranks;
 }
 
+/** The tally level at which each tier opens once excluded proposals are gone (null for an
+ * emptied tier), and the level at which everything the ballot left unplaced opens. */
+export function openingLevels(tiers: readonly (readonly number[])[], eligible: readonly number[]) {
+  let next = 1;
+  const levels = tiers.map((tier) => {
+    const surviving = tier.filter((id) => eligible.includes(id)).length;
+    const level = surviving ? next : null;
+    next += surviving;
+    return level;
+  });
+  return { tiers: levels, rest: next };
+}
+
 export const blocVoters = (): Voter[] =>
-  BLOCS.map((b) => ({ id: b.id, name: b.name, weight: b.seats * SEAT, ballot: ranksFromOrder(b.ranking) }));
+  BLOCS.map((b) => ({ id: b.id, name: b.name, weight: b.seats * SEAT, ballot: ranksFromTiers(b.tiers) }));
 
 export interface Frame {
   level: number;

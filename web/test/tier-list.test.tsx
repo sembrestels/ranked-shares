@@ -23,7 +23,7 @@ function Draft({ names = titles, disabled = false, onAssign = () => {} }: {
 function destination(label: string) {
   return label === "Unplaced proposals"
     ? screen.getByRole("region", { name: /^Unplaced proposals/ })
-    : screen.getByRole("rowheader", { name: label }).closest("tr")!;
+    : screen.getByRole("rowheader", { name: new RegExp(`${label}$`) }).closest("tr")!;
 }
 
 function move(title: string, label: string) {
@@ -42,7 +42,7 @@ function drag(title: string, label: string) {
 
 test("starts with every proposal unplaced and exactly three empty tier rows", () => {
   render(<Draft />);
-  expect(screen.getAllByRole("rowheader").map((r) => r.textContent)).toEqual(["Must fund", "Should fund", "Nice to have"]);
+  expect(screen.getAllByRole("rowheader").map((r) => r.textContent)).toEqual(["S-TierMust fund", "A-TierShould fund", "B-TierNice to have"]);
   expect(within(destination("Unplaced proposals")).getAllByRole("button")).toHaveLength(3);
   expect(screen.queryByRole("spinbutton")).toBeNull();
   expect(screen.getAllByText("Drop proposals here")).toHaveLength(3);

@@ -27,7 +27,7 @@ export function PoolBar({ funded, budget, label, asks }: {
   );
 }
 
-/** One dot per badge seat, grouped by the bloc that holds it. */
+/** One dot per submitted ballot, grouped by the bloc that cast it. */
 export function Seats({ you = false }: { you?: boolean }) {
   return (
     <div className="op-seats" aria-hidden="true">

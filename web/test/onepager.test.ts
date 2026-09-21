@@ -4,8 +4,9 @@ import {
   BLOCS,
   blocVoters,
   majorityOutcome,
+  openingLevels,
   PROPOSALS,
-  ranksFromOrder,
+  ranksFromTiers,
   SEAT,
   spendByCamp,
   tally,
@@ -14,11 +15,11 @@ import {
 
 const costs = PROPOSALS.map((p) => p.cost);
 const titles = (ids: number[]) => ids.map((id) => PROPOSALS[id].short);
-const seat = (order: number[] | null): Voter => ({
+const seat = (tiers: number[][] | null): Voter => ({
   id: "you",
-  name: "Your seat",
+  name: "Your ballot",
   weight: SEAT,
-  ballot: order && ranksFromOrder(order),
+  ballot: tiers && ranksFromTiers(tiers),
 });
 
 test("the example is twenty seats and a pool smaller than the asks", () => {
@@ -41,12 +42,13 @@ test("frames replay unchanged PB-EAR on the filtered election with original prop
   const voters = blocVoters();
   const result = tally(costs, voters);
   const eligible = [0, 1, 2, 3, 4, 5, 7];
+  // Tied tiers share a competition rank; the responders' and researchers' A-Tier moves up once their S-Tier pick is removed.
   const filteredBallots = [
-    [1, 2, 3, 4, 0, 0, 0],
-    [1, 4, 2, 3, 0, 0, 0],
-    [0, 0, 0, 0, 1, 2, 3],
-    [0, 0, 0, 0, 0, 2, 1],
-    [0, 0, 2, 0, 0, 0, 1],
+    [1, 2, 2, 4, 0, 0, 0],
+    [1, 4, 2, 2, 0, 0, 0],
+    [0, 0, 0, 0, 1, 2, 2],
+    [0, 0, 0, 0, 0, 1, 1],
+    [0, 0, 1, 0, 0, 0, 1],
   ];
   const { funded, transcript } = pbearTranscript(
     eligible.map((id) => BigInt(costs[id])),
@@ -129,13 +131,19 @@ test("a round with no eligible proposals retains the pool and spends nothing", (
   expect(result.contributions).toEqual([[0, 0], [0, 0]]);
 });
 
-test("one more seat decides between the war room and the course", () => {
-  const warRoom = tally(costs, [...blocVoters(), seat([6])]);
+test("tier opening levels follow the surviving proposals above each tier", () => {
+  const eligible = tally(costs, blocVoters()).eligible;
+  expect(openingLevels(BLOCS[0].tiers, eligible)).toEqual({ tiers: [1, 2, 4], rest: 5 });
+  expect(openingLevels(BLOCS[3].tiers, eligible)).toEqual({ tiers: [null, 1], rest: 3 });
+});
+
+test("one more ballot decides between the war room and the course", () => {
+  const warRoom = tally(costs, [...blocVoters(), seat([[6]])]);
   expect(titles(warRoom.funded)).toContain("War room");
   expect(titles(warRoom.funded)).not.toContain("Course");
   expect(warRoom.contributions.at(-1)![6]).toBe(SEAT);
 
-  const course = tally(costs, [...blocVoters(), seat([8])]);
+  const course = tally(costs, [...blocVoters(), seat([[8]])]);
   expect(titles(course.funded)).toContain("Course");
   expect(titles(course.funded)).not.toContain("War room");
 });
@@ -151,7 +159,9 @@ test("Borda and most-votes-first sweep the pool the same way", () => {
   const m = costs.length;
   const sweep = (score: (position: number) => number) => {
     const total = new Array<number>(m).fill(0);
-    BLOCS.forEach((bloc, i) => bloc.ranking.forEach((id, position) => (total[id] += voters[i].weight * score(position))));
+    BLOCS.forEach((bloc, i) => ranksFromTiers(bloc.tiers).forEach((rank, id) => {
+      if (rank > 0) total[id] += voters[i].weight * score(rank - 1);
+    }));
     const order = costs.map((_, id) => id).sort((a, b) => total[b] - total[a] || a - b);
     const funded: number[] = [];
     let spent = 0;

@@ -1,35 +1,43 @@
 import { useMemo, useState } from "react";
-import { BLOCS, blocVoters, PROPOSALS, tally, type Frame, type Tally } from "../../lib/onepager";
+import { BLOCS, blocVoters, openingLevels, PROPOSALS, TIER_LABELS, tally, type Frame, type Tally } from "../../lib/onepager";
 import { Button } from "../ui";
 import { PoolBar, usd } from "./pool-bar";
 
 const costs = PROPOSALS.map((p) => p.cost);
 const SCALE = 60_000;
-const ordinal = (n: number) => `top ${n === 1 ? "choice" : `${n} choices`}`;
 const list = (items: string[]) =>
   items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+const backers = (id: number) => BLOCS.filter((b) => b.tiers.some((tier) => tier.includes(id))).map((b) => b.name);
 
 function narrate(frame: Frame | undefined, previous: Frame | undefined, position: "start" | "step" | "end", result: Tally) {
   const { budget, backing, eligible } = result;
+  const ballots = BLOCS.reduce((sum, b) => sum + b.seats, 0);
   if (position === "start") {
     const excluded = PROPOSALS.flatMap((p, id) => eligible.includes(id) ? [] : [`${p.title} (${usd(backing[id])} backing for a ${usd(p.cost)} ask)`]);
-    return `The fund sponsors 20 badge seats with ${usd(budget / 20)} each, so the pool is ${usd(budget)}. First, count the initial weight of everyone who explicitly ranked each proposal, at any position. Remove ${list(excluded)}. The ${eligible.length} eligible proposals enter PB-EAR with every seat's original weight unchanged.`;
+    const promoted = BLOCS.filter((b) => openingLevels(b.tiers, eligible).tiers[0] === null).map((b) => b.name);
+    return `The ${usd(budget)} pool is split equally among the ${ballots} badge holders who submitted a ballot, ${usd(budget / ballots)} each. First, add up the full share of everyone who placed each proposal in any tier. ${list(excluded)} fall short of their ask and are removed from every ballot.${promoted.length ? ` ${list(promoted)} lose their S-Tier pick, so their A-Tier becomes their top tier.` : ""} The ${eligible.length} eligible proposals enter the tally with every voter's share unchanged.`;
   }
   if (position === "end" || !frame) {
     const left = budget - (previous?.spent ?? 0);
-    return `${usd(left)} is left and no unfunded eligible proposal costs that little, so the tally stops. Unspent seat money goes back to the funder.`;
+    return `${usd(left)} is left and no unfunded eligible proposal costs that little, so the tally stops. Unspent money goes back to the funder.`;
   }
   if (frame.funded === null) {
     const next = frame.level + 1;
-    const short = BLOCS.filter((b) => b.ranking.filter((id) => eligible.includes(id)).length + 1 === next).map((b) => b.name);
-    return `No unfunded eligible proposal has enough unspent money behind it among everyone's ${ordinal(frame.level)}. The tally widens to each voter's ${ordinal(next)}.${short.length ? ` ${list(short)} have only ${next - 1} ranked eligible proposals, so from here eligible proposals they left unranked count as tied last choices.` : ""}`;
+    const levels = BLOCS.map((b) => openingLevels(b.tiers, eligible));
+    const opening = TIER_LABELS.flatMap((label, t) => {
+      const names = BLOCS.filter((_, i) => levels[i].tiers[t] === next).map((b) => b.name);
+      return names.length ? [`${list(names)} open their ${label}.`] : [];
+    });
+    const rest = BLOCS.filter((_, i) => levels[i].rest === next).map((b) => b.name);
+    if (rest.length) opening.push(`${list(rest)} have no tiers left, so eligible proposals they left unplaced now count as a tied last tier.`);
+    return `No unfunded eligible proposal has enough unspent money behind it in the tiers open so far, so the tally widens a step. ${opening.join(" ")}`;
   }
   const proposal = PROPOSALS[frame.funded];
   const payers = frame.paid.map((amount, i) => ({ amount, name: BLOCS[i].name })).filter((p) => p.amount > 0);
   const split = payers.length === 1
     ? `${payers[0].name} pay all of it.`
     : `They pay in proportion to what they hold: ${list(payers.map((p) => `${p.name} ${usd(p.amount)}`))}.`;
-  return `${proposal.title} costs ${usd(proposal.cost)}. The voters who rank it in their ${ordinal(frame.level)} hold ${usd(frame.support[frame.funded])} unspent, more than any other affordable proposal, so it is funded. ${split}`;
+  return `${proposal.title} costs ${usd(proposal.cost)}. The voters with it in an open tier hold ${usd(frame.support[frame.funded])} unspent, more than any other affordable proposal, so it is funded. ${split}`;
 }
 
 export function Stepper() {
@@ -53,7 +61,7 @@ export function Stepper() {
       <div className="op-stepper-head">
         <p className="op-stepper-count" aria-live="polite">
           Step {at + 1} of {last + 1}
-          <span>{position === "start" ? "Checking initial backing against each ask" : `Looking at each voter's ${ordinal(level)} among eligible proposals`}</span>
+          <span>{position === "start" ? "Checking initial backing against each ask" : level === 1 ? "Counting each voter's top tier of eligible proposals" : `Counting every tier opened so far, widened ${level - 1} time${level === 2 ? "" : "s"}`}</span>
         </p>
         <div className="op-stepper-controls">
           <Button variant="secondary" disabled={at === 0} onClick={() => setAt(at - 1)}>Back</Button>
@@ -68,20 +76,27 @@ export function Stepper() {
         <section aria-label="Voters">
           <h3>Voters and what they still hold</h3>
           <ul className="op-blocs">
-            {BLOCS.map((bloc, i) => (
+            {BLOCS.map((bloc, i) => {
+              const opens = openingLevels(bloc.tiers, result.eligible);
+              return (
               <li key={bloc.id} data-bloc={bloc.id} data-paying={frame && frame.paid[i] > 0 || undefined}>
                 <p className="op-bloc-name">
                   <i className="op-seat" data-bloc={bloc.id} />
                   {bloc.name}
-                  <span>{bloc.seats} seats</span>
+                  <span>{bloc.seats} ballots</span>
                 </p>
                 <ol className="op-ranking">
-                  {bloc.ranking.filter((id) => result.eligible.includes(id)).map((id, position) => (
-                    <li key={id} data-open={position < level || undefined} data-funded={fundedNow.includes(id) || undefined}>
-                      {PROPOSALS[id].short}
+                  {bloc.tiers.map((tier, t) => (
+                    <li key={t} className="op-tier" data-open={opens.tiers[t] !== null && opens.tiers[t]! <= level || undefined} data-removed={opens.tiers[t] === null || undefined}>
+                      <b>{TIER_LABELS[t]}</b>
+                      {tier.map((id) => (
+                        <span key={id} data-funded={fundedNow.includes(id) || undefined} data-excluded={!result.eligible.includes(id) || undefined}>
+                          {PROPOSALS[id].short}{!result.eligible.includes(id) && <small>excluded</small>}
+                        </span>
+                      ))}
                     </li>
                   ))}
-                  <li className="op-ranking-rest" data-open={level > bloc.ranking.filter((id) => result.eligible.includes(id)).length || undefined}>other eligible proposals</li>
+                  <li className="op-tier op-ranking-rest" data-open={level >= opens.rest || undefined}>other eligible proposals</li>
                 </ol>
                 <div className="op-wallet">
                   <span className="op-wallet-track">
@@ -94,12 +109,13 @@ export function Stepper() {
                   </span>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </section>
 
         <section aria-label="Proposals">
-          <h3>{position === "start" ? "Initial backing at any rank" : "Eligible proposals and remaining support"}</h3>
+          <h3>{position === "start" ? "Initial backing in any tier" : "Eligible proposals and remaining support"}</h3>
           <ul className="op-proposals">
             {PROPOSALS.map((proposal, id) => {
               const done = fundedBefore.includes(id);
@@ -111,7 +127,7 @@ export function Stepper() {
               return (
                 <li key={id} data-camp={proposal.camp} data-state={!eligible ? "excluded" : done ? "funded" : winning ? "winning" : undefined}>
                   <p>
-                    <span>{proposal.title}</span>
+                    <span>{proposal.title}{!eligible && <b className="op-excluded-tag">Excluded</b>}</span>
                     <span className="op-proposal-cost">{usd(proposal.cost)}</span>
                   </p>
                   <div className="op-support">
@@ -127,13 +143,19 @@ export function Stepper() {
                         <path d="m6.4 10.3 2.5 2.5 4.8-5.3" />
                       </svg>
                     )}
-                    {!eligible ? `Excluded: ${usd(result.backing[id])} initial backing is below the ask` : position === "start" ? `Eligible: ${usd(support)} initial backing covers the ask` : done ? "Funded" : position === "end" ? "Not funded" : winning ? `${usd(support)} behind it, funded now` : `${usd(support)} behind it`}
+                    {!eligible && (
+                      <svg className="op-excluded-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                        <circle cx="10" cy="10" r="8.5" />
+                        <path d="m6.8 6.8 6.4 6.4m0-6.4-6.4 6.4" />
+                      </svg>
+                    )}
+                    {!eligible ? `Only ${list(backers(id))} back it: ${usd(result.backing[id])} is ${usd(proposal.cost - result.backing[id])} short of the ${usd(proposal.cost)} ask` : position === "start" ? `Eligible: ${usd(support)} initial backing covers the ask` : done ? "Funded" : position === "end" ? "Not funded" : winning ? `${usd(support)} behind it, funded now` : `${usd(support)} behind it`}
                   </p>
                 </li>
               );
             })}
           </ul>
-          <p className="op-legend"><i className="op-legend-tick" />{position === "start" ? "The marker is the ask; initial backing must reach it to qualify." : "The marker is the ask; remaining support must reach it to fund an eligible proposal. Excluded proposals keep their initial backing shown."}</p>
+          <p className="op-legend"><i className="op-legend-tick" />{position === "start" ? "The marker is the ask; initial backing must reach it to qualify. The excluded proposals stop short of theirs and leave the round." : "The marker is the ask; remaining support must reach it to fund an eligible proposal. Excluded proposals keep their initial backing shown."}</p>
         </section>
       </div>
 

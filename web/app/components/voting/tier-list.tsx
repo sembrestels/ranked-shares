@@ -165,7 +165,7 @@ export function TierList({ titles, assignments, disabled, onAssign }: {
       <div className="tier-intro">
         <h2>Set your funding priorities</h2>
         <p id={`${prefix}-instructions`}>Drag proposals into a tier, or select a proposal and choose “Move here”.</p>
-        <p className="hint">Proposals in the same row have equal priority. Unplaced proposals rank below all three tiers.</p>
+        <p className="hint">Proposals in the same row have equal priority. Unplaced proposals sit below all three tiers.</p>
       </div>
       <section
         className="tier-unplaced"
@@ -178,9 +178,12 @@ export function TierList({ titles, assignments, disabled, onAssign }: {
       </section>
       <table className="tier-table" aria-label="Funding priorities">
         <tbody>
-          {FUNDING_TIERS.map(({ id, label }) => (
+          {FUNDING_TIERS.map(({ id, grade, label }) => (
             <tr key={id} className={`tier-row tier-${id}`} data-drag-over={over === id || undefined} {...dropEvents(id)}>
-              <th scope="row">{label}</th>
+              <th scope="row">
+                <span className="tier-grade"><b>{grade}</b>-Tier</span>
+                <span className="tier-label">{label}</span>
+              </th>
               <td>{group(id, label)}</td>
             </tr>
           ))}

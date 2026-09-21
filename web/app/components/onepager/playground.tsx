@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { FUNDING_TIERS, tierRanks, type FundingTier, type TierAssignments } from "../../lib/ballot-tiers";
-import { blocVoters, PROPOSALS, SEAT, tally, type Voter } from "../../lib/onepager";
+import { BLOCS, blocVoters, PROPOSALS, SEAT, tally, type Voter } from "../../lib/onepager";
 import { TierList } from "../voting/tier-list";
 import { Button, Select } from "../ui";
 import { PoolBar, Seats, usd } from "./pool-bar";
@@ -8,6 +8,7 @@ import { PoolBar, Seats, usd } from "./pool-bar";
 const costs = PROPOSALS.map((p) => p.cost);
 const ids = PROPOSALS.map((_, id) => id);
 const DONATION = 5_000;
+const BALLOTS = BLOCS.reduce((sum, b) => sum + b.seats, 0);
 const list = (items: string[]) =>
   items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
 
@@ -27,17 +28,17 @@ export function Playground() {
   const placed = ids.some((id) => assignments[id] !== undefined);
   const { result, baseline, undonated, you } = useMemo(() => {
     const others = blocVoters();
-    const seat = (ballot: number[] | null): Voter => ({ id: "you", name: "Your seat", weight: SEAT, ballot });
-    const mine = seat(placed ? tierRanks(ids, assignments) : null);
+    // The pool is split among submitted ballots, so an empty ballot is not a voter at all.
+    const mine: Voter[] = placed ? [{ id: "you", name: "Your ballot", weight: SEAT, ballot: tierRanks(ids, assignments) }] : [];
     return {
-      result: tally(asks, [...others, mine]),
-      undonated: tally(costs, [...others, mine]),
-      baseline: tally(asks, [...others, seat(null)]),
+      result: tally(asks, [...others, ...mine]),
+      undonated: tally(costs, [...others, ...mine]),
+      baseline: tally(asks, others),
       you: others.length,
     };
   }, [assignments, asks, placed]);
 
-  const mine = result.contributions[you];
+  const mine = result.contributions[you] ?? costs.map(() => 0);
   const spent = mine.reduce((a, b) => a + b, 0);
   const added = result.funded.filter((id) => !baseline.funded.includes(id));
   const dropped = baseline.funded.filter((id) => !result.funded.includes(id));
@@ -80,8 +81,8 @@ export function Playground() {
 
       <div className="op-playground-result" aria-live="polite">
         <h3>The round with your ballot in it</h3>
-        <Seats you />
-        <p className="op-result-pool">{usd(result.budget)} pool, 20 sponsored seats plus yours</p>
+        <Seats you={placed} />
+        <p className="op-result-pool">{usd(result.budget)} pool, {placed ? `${BALLOTS} ballots plus yours` : `${BALLOTS} ballots`}, {usd(SEAT)} each</p>
         <div className="op-eligibility">
           <h3>Initial backing check</h3>
           <p>{result.eligible.length} of {ids.length} proposals qualify. Backing counts each voter's full initial weight when they place a proposal in any tier.</p>
@@ -98,21 +99,21 @@ export function Playground() {
 
         <p className="op-result-change">
           {!placed
-            ? "You have not ranked anything yet, so your seat changes nothing. This is the outcome the other 20 seats reach on their own."
+            ? `You have not placed anything yet, so you change nothing. This is the outcome the other ${BALLOTS} voters reach on their own.`
             : added.length || dropped.length
             ? `Your ballot changed the outcome. ${added.length ? `Funded because of you: ${list(added.map((id) => PROPOSALS[id].title))}.` : ""} ${dropped.length ? `No longer funded: ${list(dropped.map((id) => PROPOSALS[id].title))}.` : ""}`
-            : "Your ballot did not change which proposals are funded this time. See below how the tally spent your seat's money."}
+            : "Your ballot did not change which proposals are funded this time. See below how the tally spent your share."}
         </p>
 
         {donatedTo !== undefined && (
           <p className="op-result-change">
             {result.funded.includes(donatedTo) && !undonated.funded.includes(donatedTo)
-              ? `The ${usd(DONATION)} donation is what got ${PROPOSALS[donatedTo].title} funded: at its full price the seats behind it fell short.`
+              ? `The ${usd(DONATION)} donation is what got ${PROPOSALS[donatedTo].title} funded: at its full price the voters behind it fell short.`
               : result.funded.includes(donatedTo)
               ? `${PROPOSALS[donatedTo].title} was going to be funded anyway. The ${usd(DONATION)} donation frees that much of the pool for other initiatives.`
               : !result.eligible.includes(donatedTo)
               ? `Even ${usd(DONATION)} cheaper, ${PROPOSALS[donatedTo].title} still falls short of the initial backing threshold.`
-              : `${PROPOSALS[donatedTo].title} passes the initial backing check, but the tally does not fund it with the available money and rankings.`}
+              : `${PROPOSALS[donatedTo].title} passes the initial backing check, but the tally does not fund it with the available money and ballots.`}
           </p>
         )}
 
@@ -125,7 +126,7 @@ export function Playground() {
                   <span className="op-mine-bar" style={{ width: `${(mine[id] / SEAT) * 100}%` }} />
                   <span className="op-mine-label">
                     {usd(mine[id])} to {PROPOSALS[id].title}
-                    <em>{tierOf(id) ? `you ranked it “${tierOf(id)}”` : "unranked, paid as a last choice"}</em>
+                    <em>{tierOf(id) ? `you placed it in “${tierOf(id)}”` : "unplaced, paid as a last tier"}</em>
                   </span>
                 </li>
               ))}
@@ -137,7 +138,7 @@ export function Playground() {
               )}
             </ul>
           )
-          : <p className="op-mine-empty">Nowhere yet. A seat that does not vote is swept back to the funder.</p>}
+          : <p className="op-mine-empty">Nowhere yet. A badge holder who submits no ballot steers no money.</p>}
       </div>
     </div>
   );
