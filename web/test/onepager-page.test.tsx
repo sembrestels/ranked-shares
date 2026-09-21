@@ -8,7 +8,9 @@ afterEach(cleanup);
 
 test("the stepper walks from first choices to the closing frame", () => {
   render(<Stepper />);
-  expect(screen.getByText(/Step 0 of/)).toBeTruthy();
+  expect(screen.getByText(/Step 1 of 10/)).toBeTruthy();
+  const reset = screen.getByRole("button", { name: "Reset" }) as HTMLButtonElement;
+  expect(reset.disabled).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Next step" }));
   expect(screen.getByText(/Bridge fuzzing harness costs \$40,000/)).toBeTruthy();
   expect(screen.getByText(/Audit firms \$21,818 and Solo auditors \$18,182/)).toBeTruthy();
@@ -21,6 +23,10 @@ test("the stepper walks from first choices to the closing frame", () => {
   expect(widened).toBe(true);
   expect(screen.getByText(/\$5,000 is left and no open proposal costs that little/)).toBeTruthy();
   expect(screen.getByText("$95,000 of $100,000 spent")).toBeTruthy();
+  expect(screen.getByText(/Step 10 of 10/)).toBeTruthy();
+  fireEvent.click(reset);
+  expect(screen.getByText(/Step 1 of 10/)).toBeTruthy();
+  expect(reset.disabled).toBe(true);
 });
 
 test("a ballot for the war room funds it and spends the whole seat there", () => {

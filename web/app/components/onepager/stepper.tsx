@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { BLOCS, blocVoters, PROPOSALS, tally, type Frame } from "../../lib/onepager";
 import { Button } from "../ui";
 import { PoolBar, usd } from "./pool-bar";
@@ -35,14 +35,6 @@ export function Stepper() {
   const result = useMemo(() => tally(costs, voters), [voters]);
   const last = result.frames.length + 1;
   const [at, setAt] = useState(0);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    if (!playing) return;
-    if (at >= last) { setPlaying(false); return; }
-    const timer = setTimeout(() => setAt((value) => value + 1), 2600);
-    return () => clearTimeout(timer);
-  }, [playing, at, last]);
 
   const position = at === 0 ? "start" : at === last ? "end" : "step";
   const frame = position === "step" ? result.frames[at - 1] : undefined;
@@ -58,13 +50,13 @@ export function Stepper() {
     <div className="op-stepper">
       <div className="op-stepper-head">
         <p className="op-stepper-count" aria-live="polite">
-          Step {at} of {last}
+          Step {at + 1} of {last + 1}
           <span> Looking at each voter's {ordinal(level)}</span>
         </p>
         <div className="op-stepper-controls">
-          <Button variant="secondary" disabled={at === 0} onClick={() => { setPlaying(false); setAt(at - 1); }}>Back</Button>
-          <Button disabled={at === last} onClick={() => { setPlaying(false); setAt(at + 1); }}>Next step</Button>
-          <Button variant="secondary" onClick={() => { if (at === last) setAt(0); setPlaying(!playing); }}>{playing ? "Pause" : "Play"}</Button>
+          <Button variant="secondary" disabled={at === 0} onClick={() => setAt(at - 1)}>Back</Button>
+          <Button disabled={at === last} onClick={() => setAt(at + 1)}>Next step</Button>
+          <Button variant="secondary" disabled={at === 0} onClick={() => setAt(0)}>Reset</Button>
         </div>
       </div>
 
