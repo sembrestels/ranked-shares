@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
 import { FUNDING_TIERS, tierRanks, type FundingTier, type TierAssignments } from "../../lib/ballot-tiers";
-import { blocVoters, PROPOSALS, ranksFromOrder, SEAT, tally, type Voter } from "../../lib/onepager";
+import { blocVoters, PROPOSALS, SEAT, tally, type Voter } from "../../lib/onepager";
 import { TierList } from "../voting/tier-list";
 import { Button } from "../ui";
 import { PoolBar, Seats, usd } from "./pool-bar";
 
 const costs = PROPOSALS.map((p) => p.cost);
 const ids = PROPOSALS.map((_, id) => id);
-const titles = PROPOSALS.map((p) => `${p.title} (${usd(p.cost / 1000)}k)`);
-const DONOR = 10_000;
+const DONATION = 5_000;
 const list = (items: string[]) =>
   items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
 
@@ -20,21 +19,23 @@ const PRESETS: { label: string; assignments: TierAssignments }[] = [
 
 export function Playground() {
   const [assignments, setAssignments] = useState<TierAssignments>({});
-  const [donor, setDonor] = useState(false);
+  const [donatedTo, setDonatedTo] = useState<number>();
+  // A direct donation is money the pool no longer has to find: it lowers that proposal's ask.
+  const asks = useMemo(() => costs.map((cost, id) => (id === donatedTo ? cost - DONATION : cost)), [donatedTo]);
+  const titles = useMemo(() => PROPOSALS.map((p, id) => `${p.title} (${usd(asks[id] / 1000)}k)`), [asks]);
 
   const placed = ids.some((id) => assignments[id] !== undefined);
-  const { result, baseline, you } = useMemo(() => {
-    const others: Voter[] = [
-      ...blocVoters(),
-      ...(donor ? [{ id: "donor", name: "Open contributor", weight: DONOR, ballot: ranksFromOrder([8, 6]) }] : []),
-    ];
+  const { result, baseline, undonated, you } = useMemo(() => {
+    const others = blocVoters();
     const seat = (ballot: number[] | null): Voter => ({ id: "you", name: "Your seat", weight: SEAT, ballot });
+    const mine = seat(placed ? tierRanks(ids, assignments) : null);
     return {
-      result: tally(costs, [...others, seat(placed ? tierRanks(ids, assignments) : null)]),
-      baseline: tally(costs, [...others, seat(null)]),
+      result: tally(asks, [...others, mine]),
+      undonated: tally(costs, [...others, mine]),
+      baseline: tally(asks, [...others, seat(null)]),
       you: others.length,
     };
-  }, [assignments, donor, placed]);
+  }, [assignments, asks, placed]);
 
   const mine = result.contributions[you];
   const spent = mine.reduce((a, b) => a + b, 0);
@@ -58,20 +59,30 @@ export function Playground() {
           disabled={false}
           onAssign={(id: number, tier: FundingTier | undefined) => setAssignments((previous) => ({ ...previous, [id]: tier }))}
         />
-        <label className="op-donor">
-          <input type="checkbox" checked={donor} onChange={(event) => setDonor(event.target.checked)} />
-          <span>
-            Add open money: a contributor deposits {usd(DONOR)} of their own and ranks the course first, then the war room.
-            Their deposit joins the pool and is tallied by the same rule.
-          </span>
-        </label>
+        <div className="op-donor">
+          <label htmlFor="op-donation">Add a public donation of {usd(DONATION)}, sent directly to</label>
+          <select
+            id="op-donation"
+            className="input"
+            value={donatedTo ?? ""}
+            onChange={(event) => setDonatedTo(event.target.value === "" ? undefined : Number(event.target.value))}
+          >
+            <option value="">no initiative</option>
+            {PROPOSALS.map((p, id) => <option key={id} value={id}>{p.title}</option>)}
+          </select>
+          <p>
+            {donatedTo === undefined
+              ? "The public does not vote. A donation goes straight to an initiative and lowers what it asks from the pool, so it needs less badge-holder weight to pass."
+              : `${PROPOSALS[donatedTo].title} now asks the pool for ${usd(asks[donatedTo])} instead of ${usd(costs[donatedTo])}.`}
+          </p>
+        </div>
       </div>
 
       <div className="op-playground-result" aria-live="polite">
         <h3>The round with your ballot in it</h3>
         <Seats you />
-        <p className="op-result-pool">{usd(result.budget)} pool, {donor ? "20 sponsored seats, yours and one open contributor" : "20 sponsored seats plus yours"}</p>
-        <PoolBar funded={result.funded} budget={result.budget} label="Funded with your ballot" />
+        <p className="op-result-pool">{usd(result.budget)} pool, 20 sponsored seats plus yours</p>
+        <PoolBar funded={result.funded} budget={result.budget} asks={asks} label="Funded with your ballot" />
         <ul className="op-funded-list" aria-label="Funded proposals">
           {result.funded.map((id) => <li key={id}><i data-camp={PROPOSALS[id].camp} />{PROPOSALS[id].title}</li>)}
         </ul>
@@ -83,6 +94,16 @@ export function Playground() {
             ? `Your ballot changed the outcome. ${added.length ? `Funded because of you: ${list(added.map((id) => PROPOSALS[id].title))}.` : ""} ${dropped.length ? `No longer funded: ${list(dropped.map((id) => PROPOSALS[id].title))}.` : ""}`
             : "Your ballot did not change which proposals are funded this time. Your money still went where your ranking sent it."}
         </p>
+
+        {donatedTo !== undefined && (
+          <p className="op-result-change">
+            {result.funded.includes(donatedTo) && !undonated.funded.includes(donatedTo)
+              ? `The ${usd(DONATION)} donation is what got ${PROPOSALS[donatedTo].title} funded: at its full price the seats behind it fell short.`
+              : result.funded.includes(donatedTo)
+              ? `${PROPOSALS[donatedTo].title} was going to be funded anyway. The ${usd(DONATION)} donation frees that much of the pool for other initiatives.`
+              : `Even ${usd(DONATION)} cheaper, ${PROPOSALS[donatedTo].title} does not have enough seat money behind it.`}
+          </p>
+        )}
 
         <h3>Where your {usd(SEAT)} went</h3>
         {placed

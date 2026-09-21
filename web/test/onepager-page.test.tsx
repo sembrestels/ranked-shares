@@ -32,11 +32,15 @@ test("a ballot for the war room funds it and spends the whole seat there", () =>
   expect(within(must).getByRole("button", { name: /Incident war room/ })).toBeTruthy();
 });
 
-test("open money lets both minority first choices through", () => {
+test("a public donation lowers the ask so both minority first choices pass", () => {
   render(<Playground />);
-  fireEvent.click(screen.getByRole("checkbox"));
-  fireEvent.click(screen.getByRole("button", { name: "Back the war room" }));
+  fireEvent.change(screen.getByLabelText(/Add a public donation/), { target: { value: "6" } });
+  expect(screen.getByText(/Incident war room now asks the pool for \$15,000 instead of \$20,000/)).toBeTruthy();
   const funded = within(screen.getByRole("list", { name: "Funded proposals" }));
   expect(funded.getByText("Incident war room")).toBeTruthy();
+  expect(screen.getByText(/The \$5,000 donation is what got Incident war room funded/)).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Back the course" }));
+  expect(funded.getByText("Incident war room")).toBeTruthy();
   expect(funded.getByText("Formal verification course")).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Incident war room \(\$15k\)/ })).toBeTruthy();
 });

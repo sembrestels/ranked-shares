@@ -118,8 +118,8 @@ export default function Onepager() {
           <h2 id="op-tally">How the tally works</h2>
           <ol className="op-rules">
             <li>
-              <b>Money is weight.</b> Every sponsored seat carries an equal share of the pool, and every open
-              deposit carries its own amount. Total voting weight always equals the pool balance.
+              <b>Money is weight.</b> Every sponsored seat carries an equal share of the pool, so total voting
+              weight always equals the pool balance.
             </li>
             <li>
               <b>Start with first choices.</b> A proposal is affordable when the voters who rank it first hold
@@ -151,7 +151,8 @@ export default function Onepager() {
               This is the ballot a badge holder fills in. You are a twenty-first seat with {usd(SEAT)}. Proposals
               in the same tier are tied; anything you leave unplaced ranks below all three tiers. The incident
               responders hold $15,000 and their war room costs $20,000. The researchers hold $10,000 and their
-              course costs $15,000. Your one seat can complete either.
+              course costs $15,000. Your one seat can complete either. So can the public: a direct donation
+              lowers what an initiative asks from the pool, which you can try under the ballot.
             </p>
           </div>
           <Playground />
@@ -199,13 +200,13 @@ export default function Onepager() {
               </dd>
             </div>
             <div>
-              <dt>Badge seats and open money in one pool</dt>
+              <dt>Badge holders vote, the public donates</dt>
               <dd>
                 TheDAO Security Fund sponsors the pool to the ETHSecurity Badge collection. Each badge is one
-                seat that its current holder claims, around $5,000 per seat on a $1M pool. Anyone else can
-                deposit their own funds and rank alongside them, a donation and a ballot in one transaction.
-                Badge holders decide how the fund's money is spent, contributors decide how their own is spent,
-                and the two combine wherever they agree.
+                seat that its current holder claims, around $5,000 per seat on a $1M pool. The public does not
+                vote. Anyone can donate directly to an initiative, and every dollar donated is a dollar that
+                initiative no longer asks from the pool. A well-supported initiative gets cheaper for the badge
+                holders to pass, which is the market signal Round Two is built around.
               </dd>
             </div>
             <div>
@@ -236,11 +237,30 @@ export default function Onepager() {
             <div>
               <dt>Everything published</dt>
               <dd>
-                A public retrospective and as much round data as can be released: how the badge holders and the
-                open contributors ranked, how much weight each group brought, and where they disagreed.
+                A public retrospective and as much round data as can be released: how the badge holders ranked,
+                what the public donated, and where the two disagreed.
               </dd>
             </div>
           </dl>
+        </section>
+
+        <section className="op-section" aria-labelledby="op-variant">
+          <h2 id="op-variant">A possible modification: voting with your own money</h2>
+          <div className="op-prose">
+            <p>
+              The same contract can also let the public vote. In that variant anyone deposits their own funds
+              into the pool during the voting window, and the deposit is both a donation to the round and
+              their voting weight, in one transaction. Their money is tallied by the same proportional rule:
+              it goes to the highest-ranked proposals on their own ballot that still need funding, and the rest
+              flows down their ranking instead of piling onto a project that is already funded. Badge holders
+              would still decide how the fund's money is spent, and contributors would decide how their own
+              is spent.
+            </p>
+            <p>
+              We are not proposing it for Round Two, where direct donations fit the round's design better. It
+              is there if the curators want the crowd to rank as well as give.
+            </p>
+          </div>
         </section>
 
         <section className="op-section" aria-labelledby="op-status">
@@ -250,8 +270,9 @@ export default function Onepager() {
               The contracts, the sealed-ballot verifiers, the proposal flow, this voting interface and the
               operator runbooks are written and running on a testnet with live demo rounds. The on-chain tally
               is checked by a differential fuzz against a Python reference of the published algorithm. It was
-              built in ten days for ETHOnline 2026 under the name RankedShares. It has not run a round with
-              real money: Round Two would be the first production run of proportional participatory budgeting
+              built in ten days for ETHOnline 2026 under the name RankedShares. The prototype implements the deposit-and-rank variant above; direct donations that lower an
+              initiative's ask are a small addition still to be written. It has not run a round with real
+              money: Round Two would be the first production run of proportional participatory budgeting
               on-chain.
             </p>
             <p>
