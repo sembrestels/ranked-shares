@@ -238,13 +238,13 @@ export default function Onepager() {
               </dd>
             </div>
             <div>
-              <dt>Co-sponsors choose their voters</dt>
+              <dt>Co-sponsors could also participate in the vote</dt>
               <dd>
-                A co-sponsor deposits stablecoins into the same pool and names who votes with that money: its own
-                address, a list of addresses, or an NFT collection. A wallet company can sponsor $50k voted by
-                its security team, an L2 can sponsor its builders. Those voters' initial weights count toward
-                eligibility, and their tiers guide spending among eligible proposals. Unplaced eligible
-                proposals remain a tied last tier that can receive their money.
+                The mechanism allows it if the curators want it. A co-sponsor would deposit tokens into
+                the same pool and name who votes with that money: its own address, a list of addresses, or an
+                NFT collection. A wallet company could sponsor $50k voted by its security team, an L2 could
+                sponsor its builders. Those voters' initial weights would count toward eligibility, and their
+                tiers would guide spending among eligible proposals like any other ballot.
               </dd>
             </div>
             <div>
