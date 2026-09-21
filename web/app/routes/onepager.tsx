@@ -277,8 +277,11 @@ export default function Onepager() {
               and contributors would each sort into tiers how they want their share spent.
             </p>
             <p>
-              We are not proposing it for Round Two, where direct donations fit the round's design better. It
-              is there if the curators want the crowd to vote as well as give.
+              Curators could choose this instead of encouraging direct donations: the public votes with its
+              money. A ballot that places a single project works much like a direct donation to it. The reason
+              to do it is that a donor gets more than one choice: they can place several projects in tiers, and
+              if their top pick falls short their money moves to the next tier. The crowd then steers the round
+              in proportion to what it gives, under the same rule as the badge holders.
             </p>
           </div>
         </section>
