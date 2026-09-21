@@ -4,6 +4,7 @@ import { CampKey, PoolBar, Seats, percent, usd } from "../components/onepager/po
 import { Stepper } from "../components/onepager/stepper";
 import { Playground } from "../components/onepager/playground";
 import { BlossomMark } from "../components/onepager/blossom-mark";
+import { ThemeToggle } from "../components/onepager/theme-toggle";
 import "../components/onepager/onepager.css";
 
 const PAPER = "https://ojs.aaai.org/index.php/AAAI/article/view/16646/16453";
@@ -35,7 +36,10 @@ export default function Onepager() {
     <div className="onepager">
       <header className="op-hero">
         <div className="op-wrap">
-          <p className="op-brand">Blossom Budgeting <span>a voting mechanism for Round Two, by <BlossomMark /> Blossom Labs</span></p>
+          <div className="op-masthead">
+            <p className="op-brand">Blossom Budgeting <span>a voting mechanism for Round Two, by <BlossomMark /> Blossom Labs</span></p>
+            <ThemeToggle />
+          </div>
           <h1>51% of the seats should not spend the whole pool.</h1>
           <p className="op-standfirst">
             Round Two asks the ETHSecurity Badge holders to allocate TheDAO Security Fund. Under a majority

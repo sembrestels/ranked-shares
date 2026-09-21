@@ -2,6 +2,7 @@ import { afterEach, expect, test } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { Stepper } from "../app/components/onepager/stepper";
 import { Playground } from "../app/components/onepager/playground";
+import { ThemeToggle } from "../app/components/onepager/theme-toggle";
 
 afterEach(cleanup);
 
@@ -43,4 +44,18 @@ test("a public donation lowers the ask so both minority first choices pass", () 
   expect(funded.getByText("Incident war room")).toBeTruthy();
   expect(funded.getByText("Formal verification course")).toBeTruthy();
   expect(screen.getByRole("button", { name: /Incident war room \(\$15k\)/ })).toBeTruthy();
+});
+
+test("the theme toggle sets and remembers the theme", () => {
+  localStorage.clear();
+  delete document.documentElement.dataset.theme;
+  render(<ThemeToggle />);
+  fireEvent.click(screen.getByRole("button", { name: "Dark theme" }));
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  expect(localStorage.getItem("theme")).toBe("dark");
+  fireEvent.click(screen.getByRole("button", { name: "Light theme" }));
+  expect(document.documentElement.dataset.theme).toBe("light");
+  cleanup();
+  render(<ThemeToggle />);
+  expect(screen.getByRole("button", { name: "Dark theme" })).toBeTruthy();
 });
