@@ -170,7 +170,11 @@
 .op-support-fill { display: block; height: 100%; background: var(--c); transition: width var(--op-ease); }
 .op-support-cost { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-inline-start: -1.5px; background: var(--color-primary); }
 .op-support-note { font-size: var(--text-xs); color: var(--color-secondary); font-variant-numeric: tabular-nums; }
-[data-state="funded"] .op-support-note { color: var(--color-primary); font-weight: 600; }
+.op-support-note { display: flex; align-items: center; gap: 6px; min-height: 1.3rem; }
+[data-state="funded"] .op-support-note, [data-state="winning"] .op-support-note { color: var(--color-primary); font-size: var(--text-sm); font-weight: 600; }
+.op-funded-icon { flex: none; width: 1.15rem; height: 1.15rem; }
+.op-funded-icon circle { fill: var(--color-success); }
+.op-funded-icon path { fill: none; stroke: var(--color-page); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .op-legend { margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-secondary); }
 .op-legend-tick { display: inline-block; width: 3px; height: 1rem; margin-inline-end: var(--space-2); vertical-align: -3px; background: var(--color-primary); }
 .op-stepper-pool { border-top: var(--rule-width) solid var(--color-edge); padding-top: var(--space-4); }
