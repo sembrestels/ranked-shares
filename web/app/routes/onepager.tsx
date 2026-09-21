@@ -3,6 +3,7 @@ import { BLOCS, blocVoters, majorityOutcome, PROPOSALS, SEAT, spendByCamp, tally
 import { CampKey, PoolBar, Seats, percent, usd } from "../components/onepager/pool-bar";
 import { Stepper } from "../components/onepager/stepper";
 import { Playground } from "../components/onepager/playground";
+import { BlossomMark } from "../components/onepager/blossom-mark";
 import "../components/onepager/onepager.css";
 
 const PAPER = "https://ojs.aaai.org/index.php/AAAI/article/view/16646/16453";
@@ -34,8 +35,8 @@ export default function Onepager() {
     <div className="onepager">
       <header className="op-hero">
         <div className="op-wrap">
-          <p className="op-brand">Blossom Budgeting <span>a voting mechanism for Round Two, by Blossom Labs</span></p>
-          <h1>Eleven of twenty seats should not spend the whole pool.</h1>
+          <p className="op-brand">Blossom Budgeting <span>a voting mechanism for Round Two, by <BlossomMark /> Blossom Labs</span></p>
+          <h1>51% of the seats should not spend the whole pool.</h1>
           <p className="op-standfirst">
             Round Two asks the ETHSecurity Badge holders to allocate TheDAO Security Fund. Under a majority
             ranking (Condorcet, Borda, most votes first), the largest like-minded group decides every dollar. Blossom Budgeting is a ranked-ballot

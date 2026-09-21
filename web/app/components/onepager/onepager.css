@@ -12,6 +12,7 @@
   --camp-research-on: #ffffff;
   --camp-you: #ff6a6a;
   --op-hero-bg: var(--color-peach);
+  --op-mark: var(--color-pink-coral);
   --op-measure: 41rem;
   --op-ease: calc(var(--duration-normal) * 2) var(--ease-default);
   min-height: 100vh;
@@ -32,6 +33,7 @@
   --camp-research-on: #16261b;
   --camp-you: #fd8c8c;
   --op-hero-bg: var(--color-green-deep);
+  --op-mark: #f8b9b6;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .onepager {
@@ -46,6 +48,7 @@
     --camp-research-on: #16261b;
     --camp-you: #fd8c8c;
     --op-hero-bg: var(--color-green-deep);
+  --op-mark: #f8b9b6;
   }
 }
 
@@ -66,6 +69,7 @@
 .op-hero { background: var(--op-hero-bg); padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem); }
 .op-brand { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
 .op-brand span { display: block; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 400; color: var(--color-secondary); }
+.op-mark { display: inline-block; width: 1.15em; height: 1.15em; margin-inline: 0.15em 0.05em; vertical-align: -0.25em; fill: var(--op-mark); }
 .op-hero h1 { font-size: clamp(2.3rem, 5.4vw, 4.5rem); max-width: 17ch; text-wrap: balance; }
 .op-standfirst { max-width: var(--op-measure); margin-top: var(--space-6); font-size: 1.15rem; line-height: 1.6; }
 .op-compare { margin: clamp(2rem, 5vw, 3.5rem) 0 0; display: grid; gap: var(--space-6); }
