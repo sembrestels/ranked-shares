@@ -75,3 +75,19 @@ test("an abstaining seat enlarges the pool but never pays", () => {
   expect(result.budget).toBe(21 * SEAT);
   expect(result.contributions.at(-1)!.every((amount) => amount === 0)).toBe(true);
 });
+
+test("Borda and most-votes-first sweep the pool the same way", () => {
+  const voters = blocVoters();
+  const m = costs.length;
+  const sweep = (score: (position: number) => number) => {
+    const total = new Array<number>(m).fill(0);
+    BLOCS.forEach((bloc, i) => bloc.ranking.forEach((id, position) => (total[id] += voters[i].weight * score(position))));
+    const order = costs.map((_, id) => id).sort((a, b) => total[b] - total[a] || a - b);
+    const funded: number[] = [];
+    let spent = 0;
+    for (const id of order) if (spent + costs[id] <= 20 * SEAT) { funded.push(id); spent += costs[id]; }
+    return spendByCamp(funded).audit;
+  };
+  expect(sweep((position) => m - position)).toBe(100_000);
+  expect(sweep(() => 1)).toBe(100_000);
+});

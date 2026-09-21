@@ -47,7 +47,7 @@ export default function Onepager() {
             <Seats />
             <div className="op-compare-row">
               <figcaption>
-                <b>Majority ranking</b>
+                <b>Majority ranking <span>(Condorcet, Borda, most votes first)</span></b>
                 Auditors hold {percent(auditSeats, 20)} of the seats and direct {auditShare(majority)} of the pool.
               </figcaption>
               <PoolBar funded={majority} budget={budget} label="Majority ranking" />
@@ -96,9 +96,11 @@ export default function Onepager() {
 
           <div className="op-prose">
             <p>
-              Rank these proposals by head-to-head votes and every auditing proposal beats every other
-              proposal, because the same eleven seats outvote whoever is on the other side. Their four
-              proposals cost exactly {usd(budget)}. Fund from the top and the other nine seats, 45% of the
+              A majority ranking (Condorcet methods such as Schulze or Ranked Pairs, Borda counts, or simply
+              most votes first) orders the proposals by what most voters prefer and funds from the top. Here
+              every auditing proposal beats every other proposal head to head, because the same eleven seats
+              outvote whoever is on the other side, and the Borda and vote-count orders come out the same.
+              Their four proposals cost exactly {usd(budget)}. Fund from the top and the other nine seats, 45% of the
               electorate, get nothing they asked for. Quadratic funding softens this with matching but still
               rewards whatever is most popular. Any rule that asks “what do most voters prefer?” and then
               spends the whole pool on the answer has the same shape.
