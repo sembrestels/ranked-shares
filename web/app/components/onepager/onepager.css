@@ -69,9 +69,9 @@
 .op-hero { background: var(--op-hero-bg); padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem); }
 .op-masthead { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3) var(--space-6); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
 .op-brand { font-family: var(--font-heading); font-size: 1.35rem; font-weight: 700; }
-.op-theme { display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--control-height); height: var(--control-height); padding: 0; background: transparent; color: var(--color-primary); border: var(--rule-width) solid var(--color-edge-strong); border-radius: 50%; transition: background-color var(--duration-fast) var(--ease-default); }
-.op-theme:hover { background: var(--color-surface); }
-.op-theme svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.op-theme { display: inline-flex; align-items: center; justify-content: center; flex: none; width: var(--control-height); height: var(--control-height); padding: 0; background: transparent; color: var(--color-primary); border: 0; transition: color var(--duration-fast) var(--ease-default); }
+.op-theme:hover { color: var(--color-signal-text); }
+.op-theme svg { width: 1.5rem; height: 1.5rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .op-brand span { display: block; font-family: var(--font-body); font-size: var(--text-sm); font-weight: 400; color: var(--color-secondary); }
 .op-mark { display: inline-block; width: 1.15em; height: 1.15em; margin-inline: 0.15em 0.05em; vertical-align: -0.25em; fill: var(--op-mark); }
 .op-hero h1 { font-size: clamp(2.3rem, 5.4vw, 4.5rem); max-width: 17ch; text-wrap: balance; }
