@@ -3,7 +3,7 @@
 .onepager {
   --camp-audit: #2c4a34;
   --camp-audit-on: #fafaf9;
-  --camp-audit-alt: #678a74;
+  --bloc-solo: #1f8a80;
   --camp-wallet: #2f6f9f;
   --camp-wallet-on: #ffffff;
   --camp-response: #e3a53f;
@@ -23,7 +23,7 @@
 :root[data-theme="dark"] .onepager {
   --camp-audit: #afc7b9;
   --camp-audit-on: #16261b;
-  --camp-audit-alt: #7fa08b;
+  --bloc-solo: #5cc4b8;
   --camp-wallet: #86b9de;
   --camp-wallet-on: #16261b;
   --camp-response: #e9b55c;
@@ -37,7 +37,7 @@
   :root:not([data-theme="light"]) .onepager {
     --camp-audit: #afc7b9;
     --camp-audit-on: #16261b;
-    --camp-audit-alt: #7fa08b;
+    --bloc-solo: #5cc4b8;
     --camp-wallet: #86b9de;
     --camp-wallet-on: #16261b;
     --camp-response: #e9b55c;
@@ -50,7 +50,7 @@
 }
 
 .onepager [data-camp="audit"], .onepager [data-bloc="audit-a"] { --c: var(--camp-audit); --c-on: var(--camp-audit-on); }
-.onepager [data-bloc="audit-b"] { --c: var(--camp-audit-alt); --c-on: var(--camp-audit-on); }
+.onepager [data-bloc="audit-b"] { --c: var(--bloc-solo); --c-on: var(--camp-audit-on); }
 .onepager [data-camp="wallet"], .onepager [data-bloc="wallet"] { --c: var(--camp-wallet); --c-on: var(--camp-wallet-on); }
 .onepager [data-camp="response"], .onepager [data-bloc="response"] { --c: var(--camp-response); --c-on: var(--camp-response-on); }
 .onepager [data-camp="research"], .onepager [data-bloc="research"] { --c: var(--camp-research); --c-on: var(--camp-research-on); }
