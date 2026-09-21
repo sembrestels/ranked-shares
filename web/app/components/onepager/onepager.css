@@ -187,7 +187,6 @@
 .op-presets { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .op-donor { display: grid; gap: var(--space-2); padding: var(--space-4); background: var(--color-surface); border: var(--rule-width) dashed var(--color-edge-strong); font-size: var(--text-base); line-height: 1.5; }
 .op-donor label { font-weight: 600; }
-.op-donor select { width: 100%; min-height: var(--control-height); }
 .op-donor p { color: var(--color-secondary); min-height: 3em; }
 .op-playground-result { position: sticky; top: var(--space-4); display: grid; gap: var(--space-3); padding: clamp(1rem, 3vw, 1.75rem); background: var(--color-surface); border: var(--rule-width) solid var(--color-edge-strong); min-width: 0; }
 @media (max-width: 960px) { .op-playground-result { position: static; } }

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { FUNDING_TIERS, tierRanks, type FundingTier, type TierAssignments } from "../../lib/ballot-tiers";
 import { blocVoters, PROPOSALS, SEAT, tally, type Voter } from "../../lib/onepager";
 import { TierList } from "../voting/tier-list";
-import { Button } from "../ui";
+import { Button, Select } from "../ui";
 import { PoolBar, Seats, usd } from "./pool-bar";
 
 const costs = PROPOSALS.map((p) => p.cost);
@@ -61,15 +61,14 @@ export function Playground() {
         />
         <div className="op-donor">
           <label htmlFor="op-donation">Add a public donation of {usd(DONATION)}, sent directly to</label>
-          <select
+          <Select
             id="op-donation"
-            className="input"
             value={donatedTo ?? ""}
             onChange={(event) => setDonatedTo(event.target.value === "" ? undefined : Number(event.target.value))}
           >
             <option value="">no initiative</option>
             {PROPOSALS.map((p, id) => <option key={id} value={id}>{p.title}</option>)}
-          </select>
+          </Select>
           <p>
             {donatedTo === undefined
               ? "The public does not vote. A donation goes straight to an initiative and lowers what it asks from the pool, so it needs less badge-holder weight to pass."
