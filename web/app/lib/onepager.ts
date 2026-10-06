@@ -1,8 +1,9 @@
-/** The worked example behind /onepager: screen for initial backing, then run the
- * unchanged shared/pbear.ts on eligible projects. Frames replay that transcript
- * with original proposal ids so the page can show who paid what at each step. */
+/** The worked example behind /onepager: the unchanged shared/pbear.ts on ballots that
+ * return what they have left to TheDAO. The proposals a voter left unplaced are
+ * withheld, so that voter's money never reaches them. Frames replay the transcript so
+ * the page can show who paid what at each step. */
 import { cumulativeDeductions, pbearTranscript, type Entry } from "../../../shared/pbear";
-import { effectiveRanks, validate } from "../../../shared/ranks";
+import { effectiveRanks, validate, WITHHELD } from "../../../shared/ranks";
 import { FUNDING_TIERS } from "./ballot-tiers";
 
 export type Camp = "audit" | "wallet" | "response" | "research";
@@ -18,7 +19,7 @@ export interface Bloc {
   id: string;
   name: string;
   seats: number;
-  /** Proposal ids by tier, S-Tier first. Proposals in one tier are tied; anything left out sits below all of them. */
+  /** Proposal ids by tier, S-Tier first. Proposals in one tier are tied; anything left out gets none of the voter's money. */
   tiers: number[][];
 }
 
@@ -29,8 +30,8 @@ export const TIER_LABELS = FUNDING_TIERS.map((tier) => `${tier.grade}-Tier`);
 
 export const PROPOSALS: Proposal[] = [
   { title: "Bridge fuzzing harness", short: "Fuzzing", cost: 40_000, camp: "audit" },
-  { title: "Vyper static analyzer", short: "Analyzer", cost: 20_000, camp: "audit" },
-  { title: "Audit findings database", short: "Findings DB", cost: 15_000, camp: "audit" },
+  { title: "Vyper static analyzer", short: "Analyzer", cost: 17_000, camp: "audit" },
+  { title: "Audit findings database", short: "Findings DB", cost: 17_000, camp: "audit" },
   { title: "Compiler bug bounty", short: "Bounty", cost: 25_000, camp: "audit" },
   { title: "Phishing blocklist API", short: "Blocklist", cost: 20_000, camp: "wallet" },
   { title: "Transaction simulation warnings", short: "Simulation", cost: 10_000, camp: "wallet" },
@@ -44,7 +45,7 @@ export const BLOCS: Bloc[] = [
   { id: "audit-b", name: "Solo auditors", seats: 5, tiers: [[0], [2, 3], [1]] },
   { id: "wallet", name: "Wallet teams", seats: 4, tiers: [[4], [5, 7]] },
   { id: "response", name: "Incident responders", seats: 3, tiers: [[6], [7, 5]] },
-  { id: "research", name: "Researchers", seats: 2, tiers: [[8], [7, 2]] },
+  { id: "research", name: "Researchers", seats: 2, tiers: [[8], [7, 2], [5]] },
 ];
 
 export const CAMP_OF_BLOC: Record<string, Camp> = {
@@ -74,17 +75,15 @@ export function ranksFromTiers(tiers: readonly (readonly number[])[], m = PROPOS
   return ranks;
 }
 
-/** The tally level at which each tier opens once excluded proposals are gone (null for an
- * emptied tier), and the level at which everything the ballot left unplaced opens. */
-export function openingLevels(tiers: readonly (readonly number[])[], eligible: readonly number[]) {
+/** The tally level at which each tier opens: one step for each proposal in the tiers
+ * above it. What the ballot left unplaced never opens. */
+export function openingLevels(tiers: readonly (readonly number[])[]): number[] {
   let next = 1;
-  const levels = tiers.map((tier) => {
-    const surviving = tier.filter((id) => eligible.includes(id)).length;
-    const level = surviving ? next : null;
-    next += surviving;
+  return tiers.map((tier) => {
+    const level = next;
+    next += tier.length;
     return level;
   });
-  return { tiers: levels, rest: next };
 }
 
 export const blocVoters = (): Voter[] =>
@@ -108,10 +107,6 @@ export interface Frame {
 
 export interface Tally {
   budget: number;
-  /** Initial weight of voters explicitly ranking each proposal, before any spending. */
-  backing: number[];
-  /** Original proposal ids that pass the one-time backing >= ask filter. */
-  eligible: number[];
   funded: number[];
   frames: Frame[];
   /** contributions[voter][proposal], in dollars. */
@@ -125,40 +120,31 @@ export function tally(costs: readonly number[], voters: readonly Voter[]): Tally
   for (const voter of voters) {
     if (voter.ballot !== null && !validate(voter.ballot, m)) throw new Error("invalid ballot");
   }
-  const backing = costs.map((_, id) =>
-    voters.reduce((sum, voter) => sum + (voter.ballot && voter.ballot[id] > 0 ? voter.weight : 0), 0),
-  );
-  const eligible = costs.map((_, id) => id).filter((id) => backing[id] >= costs[id]);
-  const count = eligible.length;
-  const bigCosts = eligible.map((id) => BigInt(costs[id]));
-  const entries: Entry[] = voters.map((v) => {
-    const surviving = v.ballot === null ? null : eligible.map((id) => v.ballot![id]);
-    // Rebuild competition ranks after removal, preserving ties and omissions.
-    // An emptied submitted ballot stays a ballot; only null means abstention.
-    const ballot = surviving?.map((rank) => rank === 0 ? 0 :
-      1 + surviving.filter((other) => other > 0 && other < rank).length) ?? null;
-    return { weight: BigInt(v.weight), ballot };
-  });
+  const bigCosts = costs.map(BigInt);
+  // What a voter left unplaced is withheld: their leftover goes back to TheDAO instead
+  // of paying for it. Only a null ballot abstains.
+  const entries: Entry[] = voters.map((v) => ({
+    weight: BigInt(v.weight),
+    ballot: v.ballot?.map((rank) => (rank === 0 ? WITHHELD : rank)) ?? null,
+  }));
   const budget = voters.reduce((sum, v) => sum + v.weight, 0);
   const { funded, transcript } = pbearTranscript(bigCosts, entries, [], BigInt(budget));
 
-  const ranks = entries.map((v) => (v.ballot ? effectiveRanks(v.ballot, count) : null));
+  const ranks = entries.map((v) => (v.ballot ? effectiveRanks(v.ballot, m) : null));
   const weights = entries.map((e) => e.weight);
   const contributions = voters.map(() => new Array<number>(m).fill(0));
   const fundedSoFar: number[] = [];
   let spent = 0;
   const frames = transcript.map((step): Frame => {
     const level = Number(step[0]);
-    const support = new Array<number>(m).fill(0);
-    eligible.forEach((id, i) => (support[id] = Number(step[i + 1])));
-    const best = step[count + 1];
+    const support = step.slice(1, m + 1).map(Number);
+    const best = step[m + 1];
     const paid = new Array<number>(voters.length).fill(0);
     const before = weights.map(Number);
     if (best !== NONE) {
-      const c = Number(best);
-      const id = eligible[c];
-      const supporters = voters.map((_, i) => i).filter((i) => ranks[i] !== null && weights[i] !== 0n && ranks[i]![c] <= level);
-      const deductions = cumulativeDeductions(supporters.map((i) => weights[i]), bigCosts[c]);
+      const id = Number(best);
+      const supporters = voters.map((_, i) => i).filter((i) => ranks[i] !== null && weights[i] !== 0n && ranks[i]![id] <= level);
+      const deductions = cumulativeDeductions(supporters.map((i) => weights[i]), bigCosts[id]);
       supporters.forEach((i, j) => {
         weights[i] -= deductions[j];
         paid[i] = Number(deductions[j]);
@@ -170,7 +156,7 @@ export function tally(costs: readonly number[], voters: readonly Voter[]): Tally
     return {
       level,
       support,
-      funded: best === NONE ? null : eligible[Number(best)],
+      funded: best === NONE ? null : Number(best),
       before,
       paid,
       left: weights.map(Number),
@@ -178,7 +164,9 @@ export function tally(costs: readonly number[], voters: readonly Voter[]): Tally
       spent,
     };
   });
-  return { budget, backing, eligible, funded: funded.map((id) => eligible[id]), frames, contributions };
+  // Once the last proposal is funded the tally only widens with nothing left to open.
+  while (frames.length && frames.at(-1)!.funded === null) frames.pop();
+  return { budget, funded, frames, contributions };
 }
 
 /** The baseline the page argues against: order proposals by head-to-head weighted
