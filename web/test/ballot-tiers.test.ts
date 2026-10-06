@@ -29,13 +29,15 @@ test("project identity and requested order govern ranks; stale assignments are i
   expect(tierRanks([0], {})).toEqual([0]);
 });
 
-test("255 proposals encode valid competition ranks including rank 255", () => {
-  const ids = Array.from({ length: 255 }, (_, id) => id);
+test("254 proposals, the most a round can hold, encode valid competition ranks including rank 254", () => {
+  const ids = Array.from({ length: 254 }, (_, id) => id);
   const assignments: Record<number, "must" | "should" | "nice"> = {};
-  for (const id of ids) assignments[id] = id < 253 ? "must" : id === 253 ? "should" : "nice";
+  for (const id of ids) assignments[id] = id < 252 ? "must" : id === 252 ? "should" : "nice";
   const ranks = tierRanks(ids, assignments);
-  expect(ranks).toEqual([...Array(253).fill(1), 254, 255]);
-  expect(validate(ranks, 255)).toBe(true);
+  expect(ranks).toEqual([...Array(252).fill(1), 253, 254]);
+  expect(validate(ranks, 254)).toBe(true);
+  // Byte 255 is the withheld mark, so a 255th proposal would leave it no room.
+  expect(validate([...Array(253).fill(1), 254, 255], 255)).toBe(false);
 });
 
 test("every assignment across three proposals produces valid ranks", () => {

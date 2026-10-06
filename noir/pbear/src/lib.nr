@@ -4,6 +4,8 @@
 use sealed::{decrypt, effective_ranks, NONE, pk_matches, sponge, sponge_var, unpack_and_validate};
 use std::embedded_curve_ops::EmbeddedCurveScalar;
 
+mod withhold_cases;
+
 pub struct State<let E: u32, let M: u32> {
     pub weights: [u64; E],
     pub ballots: [Field; E],

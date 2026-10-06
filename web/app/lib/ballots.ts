@@ -156,7 +156,7 @@ export async function readVoting(
     abi: proposalAbi,
     functionName: "proposalPrivacy",
   }).catch(() => undefined);
-  if (m > 255n) throw new Error("Invalid project count.");
+  if (m > 254n) throw new Error("Invalid project count.");
   const projects = await Promise.all(
     Array.from({ length: Number(m) }, async (_, id) => ({
       id,

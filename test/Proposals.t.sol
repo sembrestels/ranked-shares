@@ -287,7 +287,7 @@ contract ProposalsTest is Test {
     function test_failedAcceptanceLeavesPendingAndCanBeRejected() public {
         submit();
         vm.startPrank(owner);
-        for (uint256 i; i < 255; i++) {
+        for (uint256 i; i < 254; i++) {
             pool.addProject(1, recipient);
         }
         vm.expectRevert(PBEAR.TooManyProjects.selector);

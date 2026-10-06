@@ -35,8 +35,8 @@ contract PBEARStateTest is Test {
         engine.addProject(0);
     }
 
-    function test_addProjectRejectsMoreThan255() public {
-        addProjects(255);
+    function test_addProjectRejectsMoreThan254() public {
+        addProjects(254);
         vm.expectRevert(PBEAR.TooManyProjects.selector);
         engine.addProject(10);
     }
@@ -80,6 +80,62 @@ contract PBEARStateTest is Test {
         assertEq(engine.effectiveRank(alice, 1), 3);
         assertEq(engine.effectiveRank(alice, 2), 1);
         assertEq(engine.effectiveRank(alice, 3), 3);
+    }
+
+    function test_ballotAcceptsWithheldProjectsOutsideTheRanking() public {
+        addProjects(4);
+        engine.setBallot(alice, hex"01ff0200");
+        engine.setBallot(alice, hex"ffffffff");
+        engine.setBallot(alice, hex"0101ff03");
+        // Withheld projects do not count towards the ranks above them.
+        vm.expectRevert(PBEAR.InvalidBallot.selector);
+        engine.setBallot(alice, hex"01ff0300");
+        // Only the mark itself is accepted above the project count.
+        vm.expectRevert(PBEAR.InvalidBallot.selector);
+        engine.setBallot(alice, hex"01fe0200");
+    }
+
+    function test_effectiveRankKeepsWithheldOutOfTheLastTier() public {
+        addProjects(4);
+        engine.setBallot(alice, hex"01ff0200");
+        assertEq(engine.effectiveRank(alice, 1), engine.WITHHELD());
+        assertEq(engine.effectiveRank(alice, 3), 3);
+    }
+
+    function test_leftoverWeightFundsAnUnrankedProjectUnlessWithheld() public {
+        // Both voters want project 0, which costs 4 of their 10. Neither ranked
+        // project 1, which costs 6: their leftover funds it unless one withholds.
+        engine.addProject(4);
+        engine.addProject(6);
+        engine.increaseTotalWeight(10);
+        engine.grantWeight(alice, 5);
+        engine.grantWeight(bob, 5);
+        engine.setBallot(alice, hex"0100");
+        engine.setBallot(bob, hex"01ff");
+        engine.startTally();
+        engine.run(type(uint256).max);
+        uint256[] memory order = engine.fundedProjects();
+        assertEq(order.length, 1);
+        assertEq(order[0], 0);
+        assertEq(engine.weightOf(alice), 3);
+        assertEq(engine.weightOf(bob), 3);
+        assertTrue(engine.tallyDone());
+    }
+
+    function test_withholdingIsNotAVeto() public {
+        engine.addProject(4);
+        engine.addProject(6);
+        engine.increaseTotalWeight(14);
+        engine.grantWeight(alice, 5);
+        engine.grantWeight(bob, 9);
+        engine.setBallot(alice, hex"01ff");
+        engine.setBallot(bob, hex"0102");
+        engine.startTally();
+        engine.run(type(uint256).max);
+        assertEq(engine.fundedProjects().length, 2);
+        // Alice paid her part of project 0 and nothing of project 1.
+        assertEq(engine.weightOf(alice), 4);
+        assertEq(engine.weightOf(bob), 0);
     }
 
     function test_emptyBallotMeansIndifferent() public {

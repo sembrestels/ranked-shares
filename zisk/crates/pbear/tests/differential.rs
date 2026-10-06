@@ -28,11 +28,15 @@ fn random_ranks(rng: &mut Rng, m: usize) -> Vec<u8> {
         .collect()
 }
 
-fn reference_py() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../reference/pbear.py")
+fn reference_py(script: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../reference").join(script)
 }
 
 fn oracle(costs: &[u64], entries: &[Entry], abstaining: u64) -> Vec<u8> {
+    oracle_from("pbear.py", costs, entries, abstaining)
+}
+
+fn oracle_from(script: &str, costs: &[u64], entries: &[Entry], abstaining: u64) -> Vec<u8> {
     let voters: Vec<String> = entries
         .iter()
         .map(|e| match &e.ranks {
@@ -46,7 +50,7 @@ fn oracle(costs: &[u64], entries: &[Entry], abstaining: u64) -> Vec<u8> {
         voters.join(", "),
         abstaining
     );
-    let out = Command::new("python3").arg(reference_py()).arg(&payload).output().expect("python3 runs");
+    let out = Command::new("python3").arg(reference_py(script)).arg(&payload).output().expect("python3 runs");
     assert!(out.status.success(), "{}", String::from_utf8_lossy(&out.stderr));
     let hex = String::from_utf8(out.stdout).unwrap();
     let hex = hex.trim().trim_start_matches("0x");
@@ -80,4 +84,49 @@ fn matches_python_reference_on_random_instances() {
         let abstaining = rng.below(abstaining_bound) * scale;
         assert_eq!(tally(&costs, &entries, abstaining), oracle(&costs, &entries, abstaining), "round {round}: costs {costs:?} entries {entries:?} abstaining {abstaining}");
     }
+}
+
+/// Ballots that withhold some unranked projects, against the unchanged reference run on
+/// the padded ballots `reference/withhold.py` builds for it.
+#[test]
+fn withholding_matches_the_reference_on_padded_ballots() {
+    let mut rng = Rng(0x0FF5_E7ED_5EED_0001);
+    let mut withheld_rounds = 0;
+    for round in 0..300 {
+        let m = 1 + rng.below(5) as usize;
+        let huge = round % 5 == 4;
+        let scale: u64 = if huge { 1 << 58 } else { 1 };
+        let costs: Vec<u64> = (0..m).map(|_| (1 + rng.below(60)) * scale).collect();
+        let n = rng.below(9) as usize;
+        let weight_bound: u64 = if huge { 4 } else { 50 };
+        let abstaining_bound: u64 = if huge { 8 } else { 40 };
+        let entries: Vec<Entry> = (0..n)
+            .map(|_| Entry {
+                weight: rng.below(weight_bound) * scale,
+                ranks: if rng.below(8) == 0 {
+                    None
+                } else {
+                    // A third withhold everything unranked, a third some, a third nothing.
+                    let habit = rng.below(3);
+                    let mut ranks = random_ranks(&mut rng, m);
+                    for r in ranks.iter_mut() {
+                        if *r == 0 && (habit == 0 || (habit == 1 && rng.below(2) == 0)) {
+                            *r = pbear::WITHHELD;
+                        }
+                    }
+                    Some(ranks)
+                },
+            })
+            .collect();
+        let abstaining = rng.below(abstaining_bound) * scale;
+        if entries.iter().any(|e| e.ranks.as_ref().is_some_and(|r| r.contains(&pbear::WITHHELD))) {
+            withheld_rounds += 1;
+        }
+        assert_eq!(
+            tally(&costs, &entries, abstaining),
+            oracle_from("withhold.py", &costs, &entries, abstaining),
+            "round {round}: costs {costs:?} entries {entries:?} abstaining {abstaining}"
+        );
+    }
+    assert!(withheld_rounds > 150);
 }

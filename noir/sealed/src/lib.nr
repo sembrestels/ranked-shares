@@ -12,6 +12,11 @@ pub global DOMAIN: Field = 0x52616e6b65645368617265732f7365616c65642f7632;
 pub global GEN_X: Field = 1;
 pub global GEN_Y: Field = 0x2cf135e7506a45d632d270d45f1181294833fc48d823f272c;
 pub global NONE: u64 = 18446744073709551615;
+/// Ballot byte for an unranked project the voter's weight must not fund
+/// (`PBEAR.WITHHELD`). It is above every rank level, so the tally never counts it as
+/// support. `reference/withhold.py` gives the longer ballot on which this is the
+/// unchanged algorithm.
+pub global WITHHELD: u8 = 255;
 
 /// Poseidon2 sponge over BN254, t = 4, rate 3: Barretenberg's FieldSponge, as
 /// `reference/poseidon2.py::hash`.
@@ -45,8 +50,9 @@ pub fn sponge_var<let N: u32>(inputs: [Field; N], len: u32) -> Field {
 }
 
 /// Bytes of a packed ballot and whether it is a competition ranking over `m`
-/// projects: `packed < 256^m`, every rank `<= m`, and a rank `r` is used only if
-/// exactly `r - 1` projects carry a smaller non-zero rank (`PBEAR._setBallot`).
+/// projects: `packed < 256^m`, every rank `<= m` or `WITHHELD`, and a rank `r` is used
+/// only if exactly `r - 1` projects carry a smaller non-zero rank (`PBEAR._setBallot`).
+/// Withheld projects are not ranked: the counts below only reach `M < WITHHELD`.
 pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M]) {
     assert(m <= M);
     let bytes: [u8; 32] = packed.to_le_bytes();
@@ -59,7 +65,7 @@ pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M])
         ok &= in_range | (byte == 0);
         if c < M {
             ranks[c] = byte;
-            ok &= (!in_range) | (byte as u32 <= m);
+            ok &= (!in_range) | (byte as u32 <= m) | (byte == WITHHELD);
         }
     }
     // counts[r] for r in 1..=M
@@ -80,12 +86,12 @@ pub fn unpack_and_validate<let M: u32>(packed: Field, m: u32) -> (bool, [u8; M])
 }
 
 /// The rank used by the tally: the stored rank, or `1 + number of ranked projects`
-/// for an unranked one (`PBEAR._defaultRank`).
+/// for an unranked one (`PBEAR._defaultRank`). A withheld project keeps its mark.
 pub fn effective_ranks<let M: u32>(ranks: [u8; M], m: u32) -> [u8; M] {
     assert(m <= M);
     let mut nonzero: u32 = 0;
     for c in 0..M {
-        nonzero += if (c < m) & (ranks[c] != 0) { 1 } else { 0 };
+        nonzero += if (c < m) & (ranks[c] != 0) & (ranks[c] != WITHHELD) { 1 } else { 0 };
     }
     let default = (nonzero + 1) as u8;
     let mut out: [u8; M] = [0; M];
@@ -192,6 +198,21 @@ mod ballot_tests {
         let (gap, _) = unpack_and_validate::<4>(0x00030301, 4); // [1, 3, 3, 0]
         assert(!gap);
         let (beyond_m, _) = unpack_and_validate::<4>(0x01000000, 3); // byte 3 set, m = 3
+        assert(!beyond_m);
+    }
+
+    #[test]
+    fn withheld_projects_are_outside_the_ranking() {
+        let (ok, ranks) = unpack_and_validate::<4>(0x0002ff01, 4); // [1, withheld, 2, 0]
+        assert(ok);
+        assert(effective_ranks::<4>(ranks, 4) == [1, 255, 2, 3]);
+        let (all, _) = unpack_and_validate::<4>(0xffffffff, 4);
+        assert(all);
+        let (gap, _) = unpack_and_validate::<4>(0x0003ff01, 4); // [1, withheld, 3, 0]
+        assert(!gap);
+        let (other, _) = unpack_and_validate::<4>(0x0002fe01, 4); // 254 is not the mark
+        assert(!other);
+        let (beyond_m, _) = unpack_and_validate::<4>(0xff000201, 3); // byte 3 set, m = 3
         assert(!beyond_m);
     }
 

@@ -46,6 +46,17 @@ contract PBEARDifferentialTest is Test {
     }
 
     function testFuzz_matchesReferenceAndSatisfiesIPSC(uint256 seed, bool allVote) public {
+        _tallyAndCompare(seed, allVote, false);
+    }
+
+    /// @dev Ballots that withhold some unranked projects, against the unchanged
+    ///      reference run on the padded ballots `reference/withhold.py` builds: one
+    ///      "return the money" candidate ranked above the withheld projects.
+    function testFuzz_withholdingMatchesReferenceOnPaddedBallots(uint256 seed, bool allVote) public {
+        _tallyAndCompare(seed, allVote, true);
+    }
+
+    function _tallyAndCompare(uint256 seed, bool allVote, bool withholding) internal {
         uint256 n = 1 + rand(seed, 1) % 7;
         uint256 m = 1 + rand(seed, 2) % 5;
 
@@ -66,6 +77,15 @@ contract PBEARDifferentialTest is Test {
             string memory ballotJson = "null";
             if (votes) {
                 bytes memory ranks = randomBallot(rand(seed, 60 + i), m);
+                if (withholding) {
+                    // A third of the voters withhold everything they did not rank, a
+                    // third some of it, a third nothing.
+                    uint256 habit = rand(seed, 80 + i) % 3;
+                    for (uint256 c = 0; c < m; c++) {
+                        if (ranks[c] != 0 || habit == 2) continue;
+                        if (habit == 0 || rand(seed, 400 + 16 * i + c) % 2 == 0) ranks[c] = bytes1(engine.WITHHELD());
+                    }
+                }
                 engine.setBallot(voter, ranks);
                 ballotJson = ranksJson(ranks);
             }
@@ -82,7 +102,7 @@ contract PBEARDifferentialTest is Test {
 
         string[] memory cmd = new string[](3);
         cmd[0] = "python3";
-        cmd[1] = "reference/pbear.py";
+        cmd[1] = withholding ? "reference/withhold.py" : "reference/pbear.py";
         cmd[2] = json;
         uint256[] memory ref = abi.decode(vm.ffi(cmd), (uint256[]));
 
@@ -92,8 +112,11 @@ contract PBEARDifferentialTest is Test {
             assertEq(onChain[k], ref[k + 2], "funded order differs from reference");
         }
         if (allVote) {
+            // With withholding the reference judges the padded outcome, in which the
+            // returned money is spent on the return candidate; the engine may then
+            // end with money left and projects it could still afford.
             assertEq(ref[1], 1, "not exhaustive");
-            assertTrue(engine.isExhausted());
+            if (!withholding) assertTrue(engine.isExhausted());
         }
         assertTrue(engine.tallyDone());
     }

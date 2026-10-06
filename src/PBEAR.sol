@@ -16,7 +16,12 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 ///
 ///         Ballots are `bytes` with one byte per project holding a competition
 ///         rank (1 + number of strictly preferred projects; ties share a value;
-///         0 = unranked, i.e. the last tier).
+///         0 = unranked, i.e. the last tier). An unranked project may instead
+///         carry `WITHHELD`: the voter's weight then never supports it, and
+///         whatever weight the voter has left when the tally ends is unspent.
+///         This is the same algorithm on a longer ballot, in which the voter
+///         ranks a "return the money" candidate above the withheld projects;
+///         `reference/withhold.py` builds that ballot for the reference tally.
 abstract contract PBEAR {
     // ---------------------------------------------------------------- errors
 
@@ -39,7 +44,11 @@ abstract contract PBEAR {
 
     // --------------------------------------------------------------- storage
 
-    uint256 internal constant MAX_PROJECTS = 255;
+    /// @dev One less than a byte can count, so that `WITHHELD` is never a rank.
+    uint256 internal constant MAX_PROJECTS = 254;
+    /// @notice Ballot byte for an unranked project the voter's weight must not fund.
+    ///         It is above every rank level, so the tally never counts it as support.
+    uint8 public constant WITHHELD = 255;
 
     uint256[] internal _costs;
     address[] internal _voters;
@@ -99,8 +108,8 @@ abstract contract PBEAR {
         return totalWeight - _grantedWeight;
     }
 
-    /// @notice Rank used by the tally: the stored rank, or the last tier if unranked.
-    ///         Reverts for a voter without a ballot.
+    /// @notice Rank used by the tally: the stored rank, the last tier if unranked,
+    ///         or `WITHHELD`. Reverts for a voter without a ballot.
     function effectiveRank(address voter, uint256 projectId) public view virtual returns (uint8) {
         bytes storage ballot = _ballot[voter];
         if (ballot.length == 0) revert InvalidBallot();
@@ -172,8 +181,8 @@ abstract contract PBEAR {
 
         if (!found) {
             if (level >= m) {
-                // Every ballot already approves every project; the remaining
-                // weight is abstaining and can fund nothing.
+                // Every ballot already approves every project it did not
+                // withhold; the remaining weight can fund nothing.
                 _finish();
                 return;
             }
@@ -259,10 +268,12 @@ abstract contract PBEAR {
         if (ranks.length != m) revert InvalidBallot();
 
         // Competition ranking check: a rank value r may only be used if exactly
-        // r - 1 projects carry a smaller non-zero rank.
+        // r - 1 projects carry a smaller non-zero rank. Withheld projects are
+        // not ranked.
         uint256[] memory counts = new uint256[](m + 1);
         for (uint256 c = 0; c < m; c++) {
             uint8 r = uint8(ranks[c]);
+            if (r == WITHHELD) continue;
             if (r > m) revert InvalidBallot();
             counts[r]++;
         }

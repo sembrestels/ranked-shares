@@ -16,14 +16,24 @@ pub struct Entry {
     pub ranks: Option<Vec<u8>>,
 }
 
-/// `PBEAR._setBallot`'s check: length `m`, every rank `<= m`, no gaps.
+/// Ballot byte for an unranked project the voter's weight must not fund
+/// (`PBEAR.WITHHELD`). It is above every rank level, so the tally never counts it as
+/// support, and whatever the voter has left at the end is unspent. This is the same
+/// algorithm on a longer ballot, in which the voter ranks a "return the money"
+/// candidate above the withheld projects; `reference/withhold.py` builds that ballot.
+pub const WITHHELD: u8 = 255;
+
+/// `PBEAR._setBallot`'s check: length `m`, every rank `<= m` or withheld, no gaps
+/// among the ranked ones.
 pub fn validate(ranks: &[u8], m: usize) -> bool {
-    if ranks.len() != m || ranks.iter().any(|&r| r as usize > m) {
+    if ranks.len() != m || m >= WITHHELD as usize || ranks.iter().any(|&r| r != WITHHELD && r as usize > m) {
         return false;
     }
     let mut counts = vec![0usize; m + 1];
     for &r in ranks {
-        counts[r as usize] += 1;
+        if r != WITHHELD {
+            counts[r as usize] += 1;
+        }
     }
     let mut seen = 0usize;
     for r in 1..=m {
@@ -36,8 +46,9 @@ pub fn validate(ranks: &[u8], m: usize) -> bool {
 }
 
 /// Unranked projects (`0`) form the last tier: `1 +` the number of ranked projects.
+/// Withheld ones keep their mark.
 pub fn effective_ranks(ranks: &[u8]) -> Vec<u16> {
-    let default = 1 + ranks.iter().filter(|&&r| r != 0).count() as u16;
+    let default = 1 + ranks.iter().filter(|&&r| r != 0 && r != WITHHELD).count() as u16;
     ranks.iter().map(|&r| if r == 0 { default } else { r as u16 }).collect()
 }
 
@@ -143,6 +154,24 @@ mod tests {
     fn effective_ranks_put_unranked_last() {
         assert_eq!(effective_ranks(&[2, 1, 0, 0]), vec![2, 1, 3, 3]);
         assert_eq!(effective_ranks(&[0, 0]), vec![1, 1]);
+    }
+
+    #[test]
+    fn withheld_projects_are_outside_the_ranking() {
+        assert!(validate(&[1, 255, 2, 0], 4));
+        assert!(validate(&[255, 255, 255, 255], 4));
+        assert!(!validate(&[1, 255, 3, 0], 4));
+        assert!(!validate(&[1, 254, 2, 0], 4));
+        assert_eq!(effective_ranks(&[1, 255, 2, 0]), vec![1, 255, 2, 3]);
+    }
+
+    #[test]
+    fn leftover_weight_funds_an_unranked_project_unless_withheld() {
+        // Both voters want project 0 (4 of their 10); neither ranked project 1 (6).
+        assert_eq!(tally(&[4, 6], &[e(5, &[1, 0]), e(5, &[1, 0])], 0), vec![0, 1]);
+        assert_eq!(tally(&[4, 6], &[e(5, &[1, 0]), e(5, &[1, WITHHELD])], 0), vec![0]);
+        // Withholding is not a veto: the other voter can pay for it alone.
+        assert_eq!(tally(&[4, 6], &[e(5, &[1, WITHHELD]), e(9, &[1, 2])], 0), vec![0, 1]);
     }
 
     #[test]
