@@ -30,7 +30,7 @@ import sys
 
 from quiet_ending import RULES, _ear, extension_lengths, remove_projects, run_round, tally
 from pbear import effective_ranks
-from quiet_ending_steps import counted_part_kept, rearranged_below, run_daily, run_in_steps
+from quiet_ending_steps import counted_part_kept, rearranged_below, run_daily, run_in_steps, run_on_time
 
 POOL = 1_000_000 * 10**6  # one million dollars in 6-decimal token units
 with open(os.path.join(os.path.dirname(__file__), "thedao_initiatives.json")) as source:
@@ -251,6 +251,8 @@ class World:
         payment_tolerance=None,
         lock_supporters=False,
         attack=None,
+        on_time=None,
+        calm=False,
     ):
         """Quiet Ending by tiers with a daily tally (`run_daily`). Day 0 is the ballots
         when the quiet window opens and day 1 the deadline, when the late group has
@@ -289,10 +291,21 @@ class World:
         "fresh"      they push a different such proposal over the line at every tally
                      and never take one off.
 
+        With `on_time` there is also "step out below": as "step out", but from the
+        provisionally funded proposals of every open tier, not only the first.
+
         The result lists them as `attackers`.
+
+        `on_time` plays the round with `run_on_time` instead: it is the `(first,
+        minimum)` hours of a tier's extensions, and the round only extends when a tier
+        changed. `accept`, `max_days` and `hours` are then ignored and the roll is
+        closed at the deadline. With `calm` the holders who would arrive during the
+        quiet window vote before it, so nothing moves on the last day.
         """
         late = newcomers in ("units", "wait")
         joins = [a if a is not None and (late or a <= 1) else None for a in self.arrival]  # the day each ballot arrives
+        if calm:
+            joins = [0 if a == 1 else a for a in joins]
         voting = [i for i in range(self.n) if joins[i] is not None]
         share = POOL // (self.n if late else len(voting))
         weights = [share if late or joins[i] is not None else 0 for i in range(self.n)]
@@ -351,8 +364,10 @@ class World:
                         best = (short, c)
                 return None if best is None else best[1]
 
-            if attack == "step out":
-                for c in state["provisional"]:
+            if attack == "step out below":
+                level = state["open_level"]
+            if attack in ("step out", "step out below"):
+                for c in state["provisional_all" if attack == "step out below" else "provisional"]:
                     theirs = backing(c, attackers)
                     if theirs and backing(c, voting) - theirs >= self.costs[c]:
                         for i in attackers:
@@ -400,20 +415,32 @@ class World:
                 act(day, state, ballots)
             return ballots
 
-        result = run_daily(
-            self.costs,
-            voters,
-            POOL - sum(weights),
-            ballots_for_day,
-            3,
-            max_days,
-            accept,
-            hours,
-            baseline,
-            newcomers == "wait",
-            payment_tolerance,
-            lock_supporters,
-        )
+        if on_time:
+            result = run_on_time(
+                self.costs,
+                voters,
+                POOL - sum(weights),
+                ballots_for_day,
+                3,
+                on_time,
+                payment_tolerance=payment_tolerance,
+                lock_supporters=lock_supporters,
+            )
+        else:
+            result = run_daily(
+                self.costs,
+                voters,
+                POOL - sum(weights),
+                ballots_for_day,
+                3,
+                max_days,
+                accept,
+                hours,
+                baseline,
+                newcomers == "wait",
+                payment_tolerance,
+                lock_supporters,
+            )
         result["attackers"] = attackers
         result["hours_after_deadline"] = sum(24 if d["hours"] is None else d["hours"] for d in result["days"][1:])
         result["voters"] = [(weights[i], b) for i, b in enumerate(result["ballots"])]
@@ -859,6 +886,80 @@ def main_attacks(rounds):
             )
 
 
+HALF_DAY = (12, 1 / 60)  # 12 h, 6 h, ... down to about 84 seconds: 10 extensions
+
+
+def on_time(world, attack=None, defence=None, calm=False):
+    """A round that extends only when a tier changed, with the roll closed at the
+    deadline and each tier's extensions halving from 12 hours down to a minute."""
+    return world.play_daily(payers_locked=False, attack=attack, on_time=HALF_DAY, calm=calm, **(defence or {}))
+
+
+ON_TIME_DEFENCES = DEFENCES + [
+    ("both, every open tier", dict(lock_supporters="all", payment_tolerance=20_000 * 10**6)),
+]
+
+
+def main_on_time(rounds):
+    print("\nExtending only when a tier changed, against a day's pause after every tier:")
+    print("  last day  rule            hours after deadline (mean, max)  ended at deadline  tiers confirmed at deadline  extensions  tiers cut off  exact")
+    for calm in (True, False):
+        for label, play in (
+            ("pause per tier", lambda w: w.play_daily("tier", payers_locked=False, hours=ONE_MINUTE, calm=calm, **DEFENCES[3][1])),
+            ("only on change", lambda w: on_time(w, None, DEFENCES[3][1], calm)),
+        ):
+            rows = []
+            for seed in range(rounds):
+                world = World(seed)
+                result = play(world)
+                plain = tally(world.costs, result["voters"], POOL - sum(w for w, _ in result["voters"]))[0]
+                first = result["days"][0]
+                rows.append(
+                    (
+                        result["hours_after_deadline"],
+                        len(result["days"]) == 1,
+                        len([s for s in first.get("confirmed", [0] if first["quiet"] else []) if s < 3]),
+                        len(result["days"]) - (1 if "confirmed" in first else 4),
+                        len(result["forced"]),
+                        result["funded"] == plain,
+                    )
+                )
+            print(
+                f"  {'quiet' if calm else 'busy':8}  {label:14}  {mean(r[0] for r in rows):8.1f} {max(r[0] for r in rows):6.1f}"
+                f"                   {sum(r[1] for r in rows):3d}/{rounds}             {mean(r[2] for r in rows):6.2f}"
+                f"                     {mean(r[3] for r in rows):6.2f}  {sum(r[4] for r in rows):13d}  {sum(r[5] for r in rows)}/{rounds}"
+            )
+
+    print("\nA group acting together against it (each tier's extensions halve from 12 hours down to a minute, 10 per tier):")
+    print("  attack          defence                tallies (max)  hours after deadline (mean, max)  tiers cut off  ballots refused  group pays   group's category  exact")
+    for attack in (None, "step out", "step out below", "flip flop", "fresh"):
+        for label, defence in ON_TIME_DEFENCES:
+            rows = []
+            for seed in range(rounds):
+                world = World(seed)
+                result = on_time(world, attack, defence)
+                members = result["attackers"] or on_time(world, "step out")["attackers"]
+                group = world.group[members[0]]
+                paid = sum(d for shares in result["paid"].values() for i, d in shares.items() if i in members) / 10**6
+                plain = tally(world.costs, result["voters"], POOL - sum(w for w, _ in result["voters"]))[0]
+                rows.append(
+                    (
+                        len(result["days"]),
+                        result["hours_after_deadline"],
+                        len(result["forced"]),
+                        sum(d["refused"] for d in result["days"]),
+                        paid,
+                        world.group_money(group, result["funded"]),
+                        result["funded"] == plain,
+                    )
+                )
+            print(
+                f"  {attack or 'none':14}  {label:21}  {mean(r[0] for r in rows):6.1f} ({max(r[0] for r in rows):2d})"
+                f"    {mean(r[1] for r in rows):8.1f} {max(r[1] for r in rows):6.1f}                {sum(r[2] for r in rows):5d}  {mean(r[3] for r in rows):15.1f}"
+                f"  ${mean(r[4] for r in rows):8,.0f}  ${mean(r[5] for r in rows):9,.0f}        {sum(r[6] for r in rows)}/{rounds}"
+            )
+
+
 if __name__ == "__main__":
     main(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
     main_steps(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
@@ -867,4 +968,5 @@ if __name__ == "__main__":
     main_schedules(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
     main_newcomers(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
     main_attacks(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
+    main_on_time(int(sys.argv[1]) if len(sys.argv) > 1 else 20)
     main_sealed(int(sys.argv[1]) if len(sys.argv) > 1 else 20)

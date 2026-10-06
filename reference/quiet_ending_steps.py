@@ -425,3 +425,198 @@ def run_daily(
     result = state(ballots, stage, set())
     result["days"], result["forced"] = days, forced
     return result
+
+
+def tier_of(ballot, proposal):
+    """Which tier of ``ballot`` holds ``proposal``: 0 for the first; unplaced proposals
+    come after every tier."""
+    if ballot is None or not ballot[proposal]:
+        return len(ballot or ()) + 1
+    return sorted({r for r in ballot if r}).index(ballot[proposal])
+
+
+def run_on_time(
+    costs,
+    voters,
+    abstaining,
+    ballots_for_day,
+    tiers=3,
+    hours=(12, 1),
+    quiet_window=24,
+    payment_tolerance=None,
+    lock_supporters=False,
+    asks_for_day=None,
+):
+    """Quiet Ending by tiers that extends only when a tier changed.
+
+    Tally 0 is taken when the quiet window opens and tally 1 at the deadline. Every
+    tally covers all the tiers still open, one stage per tier and a last one for the
+    unplaced proposals, each stage starting from what the stages before it would fund
+    (``run_daily`` describes a stage). A tally is compared with the previous one stage
+    by stage, in order. A stage is quiet if both fund the same proposals and, with
+    ``payment_tolerance``, no more than that amount of their cost changed hands. A
+    quiet stage is accepted whole, with the payments of the later tally, and the
+    comparison goes on to the next stage. When the last tier is accepted so is the
+    stage of the unplaced proposals, which nobody could change any more, and the round
+    ends. If every tier is quiet at the deadline, that is the deadline.
+
+    The first stage that is not quiet stops the comparison. Nothing from it or from
+    the stages below is accepted, and the next tally is taken after an extension:
+    ``hours`` is ``(first, minimum)``, the first extension a stage gets and the
+    shortest one worth running, each extension being half the one before. Every stage
+    starts its own count. A stage that is still not quiet after its last extension is
+    accepted as it stands, and the comparison goes on below it.
+
+    With ``lock_supporters`` a voter who would pay for a proposal in the previous
+    tally may not move it to a lower tier or take it off: ``"first"`` (or ``True``)
+    binds the supporters of the first open stage, ``"all"`` those of every open stage.
+    A revised ballot that breaks this is refused whole.
+
+    ``ballots_for_day(day, state)`` and the result are as in ``run_daily``, with
+    ``stage`` the first stage still open. Each day record has the stage the comparison
+    started at, ``confirmed`` (the stages accepted that day), ``hours`` since the
+    previous tally, and ``shifted`` for the stage where the comparison stopped.
+    """
+    m = len(costs)
+    weights = [w for w, _ in voters]
+    budget = sum(weights) + abstaining
+    funded, paid, days, forced = [], {}, [], []
+    lengths = extension_lengths(*hours)
+    scope = "first" if lock_supporters is True else lock_supporters
+
+    def bound(ballots, stage):
+        if stage >= tiers:
+            return m
+        highest = 1
+        for level in tier_levels(ballots, tiers)[: stage + 1]:
+            highest = highest if level is None else max(highest, level)
+        return highest
+
+    def tally_open(ballots, first):
+        """The open stages' tallies, ``(order, shares)`` from stage ``first`` down."""
+        ranks = []
+        for ballot in ballots:
+            if ballot is None:
+                ranks.append(None)
+            else:
+                validate_ballot(ballot, m)
+                ranks.append(effective_ranks(ballot))
+        held, done = list(weights), set(paid)
+        spent = sum(sum(shares.values()) for shares in paid.values())
+        out = []
+        for stage in range(first, tiers + 1):
+            candidates = [c for c in range(m) if c not in done]
+            order, shares, _ = _ear(costs, held, ranks, budget, spent, candidates, max_level=bound(ballots, stage))
+            done |= set(order)
+            spent += sum(sum(shares[c].values()) for c in order)
+            out.append((order, shares))
+        return out
+
+    def moved(shares, earlier, earlier_costs):
+        total = 0
+        for c, now in shares.items():
+            if c not in earlier:
+                continue
+            was = {i: d * costs[c] // earlier_costs[c] for i, d in earlier[c].items()}
+            total += sum(abs(now.get(i, 0) - was.get(i, 0)) for i in set(now) | set(was)) // 2
+        return total
+
+    def supporters(tallies):
+        held = {}
+        for order, shares in tallies[:1] if scope == "first" else tallies:
+            for c in order:
+                for i in shares[c]:
+                    held.setdefault(i, set()).add(c)
+        return held
+
+    def state(ballots, first, contested, window=None):
+        return {
+            "window": window,
+            "provisional": list(previous[0][0]),
+            "provisional_all": [c for order, _ in previous for c in order],
+            "open_level": bound(ballots, tiers - 1),
+            "locks": {i: set(cs) for i, cs in locks.items()},
+            "funded": list(funded),
+            "weights": list(weights),
+            "stage": first,
+            "locked_level": bound(ballots, first - 1) if first else 0,
+            "stage_level": bound(ballots, min(first, tiers)),
+            "contested": set(contested),
+            "ballots": list(ballots),
+            "paid": {c: dict(shares) for c, shares in paid.items()},
+            "budget": budget,
+            "spent": sum(sum(shares.values()) for shares in paid.values()),
+        }
+
+    costs = list(asks_for_day(0)) if asks_for_day else list(costs)
+    ballots = list(ballots_for_day(0, None))
+    previous, previous_costs = tally_open(ballots, 0), costs
+    locks = supporters(previous) if scope else {}
+    contested = set(previous[0][0])
+    first, extensions, day, window = 0, 0, 0, quiet_window
+    while first <= tiers:
+        day += 1
+        before = ballots
+        if asks_for_day:
+            costs = list(asks_for_day(day))
+        ballots = list(ballots_for_day(day, state(ballots, first, contested, window)))
+        refused = 0
+        for i, held in locks.items():
+            old, new = before[i], ballots[i]
+            if old is None or new == old:
+                continue
+            if new is None or any(tier_of(new, c) > tier_of(old, c) for c in held):
+                ballots[i] = old
+                refused += 1
+        current = tally_open(ballots, first)
+        started, stage, confirmed, accepted, cut, shifted = first, first, [], 0, False, None
+        while stage <= tiers:
+            order, shares = current[stage - started]
+            if stage < tiers:
+                earlier_order, earlier_shares = previous[stage - started]
+                shifted = moved(shares, earlier_shares, previous_costs)
+                steady = payment_tolerance is None or shifted <= payment_tolerance
+                if set(order) != set(earlier_order) or not steady:
+                    if stage != first or extensions < len(lengths):
+                        break
+                    forced.append(stage)
+                    cut = True
+            for c in order:
+                for i, d in shares[c].items():
+                    weights[i] -= d
+                paid[c] = shares[c]
+                funded.append(c)
+            confirmed.append(stage)
+            accepted += len(order)
+            stage += 1
+        days.append(
+            {
+                "day": day,
+                "stage": started,
+                "confirmed": confirmed,
+                "tally": len(current[0][0]),
+                "accepted": accepted,
+                "quiet": stage > tiers,
+                "hours": window,
+                "closed_by_schedule": cut,
+                "shifted": shifted,
+                "refused": refused,
+            }
+        )
+        if stage > tiers:
+            first = stage
+            break
+        if stage != first:
+            first, extensions = stage, 0
+        window = lengths[extensions]
+        extensions += 1
+        open_now = current[stage - started :]
+        contested = set(open_now[0][0])
+        for (order, _), (earlier_order, _) in zip(open_now, previous[stage - started :]):
+            contested |= set(order) ^ set(earlier_order)
+        previous, previous_costs = open_now, costs
+        locks = supporters(previous) if scope else {}
+    previous = [([], {})]
+    result = state(ballots, first, set())
+    result["days"], result["forced"] = days, forced
+    return result
