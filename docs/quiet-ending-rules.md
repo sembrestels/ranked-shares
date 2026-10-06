@@ -1,16 +1,24 @@
-# Quiet Ending by tiers: the rules
+# Quiet Ending and Slow Quiet Ending: the rules
 
-Draft, 5 October 2026. This replaces the lock-in mechanism of the first Quiet Ending
+Draft, 6 October 2026. This replaces the lock-in mechanism of the first Quiet Ending
 proposal ("proposals that held are settled, proposals that flipped get an extension").
 It keeps that proposal's goal: nobody should win by moving last.
 
+There are two systems here. **Quiet Ending** extends a round only when a tier's result
+changed. **Slow Quiet Ending** is an optional switch on top of it: every tier gets a
+pause of its own, so the result is always revealed in three parts. Rules 1 to 7
+describe Quiet Ending; the section after them says what the switch changes.
+
 ## The idea in short
 
-After the deadline, the tally is run one tier at a time: first everyone's S tier, then
-A, then B. Each tier gets its own quiet ending. A tier's result is confirmed only when
-two tallies taken some time apart agree; if they do not, voting on that tier continues
-for half as long as before. When a tier is confirmed, it is final and the next tier
-begins.
+A day before the deadline the round takes a first tally of every tier. At the deadline
+it tallies again and compares the two, one tier at a time: first everyone's S tier,
+then A, then B. A tier whose two tallies agree is confirmed and the comparison moves
+on. If they all agree, the round ends on its deadline.
+
+The first tier that does not agree stops the comparison. The tiers above it are
+final and are published as partial results. Voting continues on that tier and the ones
+below it, for half as long each time, until two tallies in a row agree.
 
 The result is the same one the plain Blossom Budgeting tally gives on the ballots as
 they stand at the end.
@@ -19,11 +27,11 @@ they stand at the end.
 
 - **Tier:** the S, A or B group of proposals on a ballot. Proposals a voter leaves out
   are "unplaced".
-- **Tally of a tier:** the normal tally, started from the tiers already confirmed and
-  the weight their supporters have left, and stopped once this tier has been counted for
-  every voter.
-- **Baseline:** the first tally of a tier, which later tallies are compared with.
-- **Window:** the time between two tallies of the same tier.
+- **Tally of a tier:** the normal tally, started from the tiers above it and the weight
+  their supporters have left, and stopped once this tier has been counted for every
+  voter.
+- **Open tier:** a tier that is not confirmed yet.
+- **Window:** the time between two tallies that are compared.
 - **Supporter:** a voter who would pay part of a proposal's cost in a given tally.
 
 ## The rules
@@ -34,25 +42,32 @@ New ballots are accepted until the deadline. After it, only holders who already 
 can change their ballots. Each voter's share is the pool divided by the number of
 ballots in at the deadline, and it does not change afterwards.
 
-### 2. Tiers are decided in order, one at a time
+### 2. Every tally covers all the open tiers, in order
 
-S first, then A, then B. A tier's tally only starts when the tier before it is
-confirmed. Proposals a voter left unplaced are folded into the B slot: when B is
-confirmed, the tally runs on through them to the end, with no window of its own.
+A tally counts S first, then A, then B, each tier starting from what the tiers above
+it would fund in that same tally. The first tally is taken one day before the
+deadline, the second at the deadline, and one more at the end of every extension.
+Proposals a voter left unplaced are folded into the B slot: when B is confirmed, the
+tally runs on through them to the end, with no comparison of their own.
 
-### 3. Each tier has its own quiet ending
+### 3. Tiers are confirmed in order, and the first one that changed stops the round
 
-1. When the tier opens, a baseline tally is taken. For the S tier the baseline is taken
-   one day before the deadline; for the others, at the moment the previous tier is
-   confirmed.
-2. After 24 hours a second tally is taken and compared with the baseline.
-3. If the two agree (rule 4), the tier is confirmed.
-4. If they do not, voting on that tier continues for 12 hours and a new tally is
-   compared with the previous one. Then 6 hours, then 3, and so on, each window half the
-   last, down to about one minute.
-5. When no window is left, the latest tally is confirmed as it stands.
+1. Each tally is compared with the previous one, tier by tier, starting with the first
+   open tier.
+2. If the two agree on a tier (rule 4), that tier is confirmed and the comparison
+   moves on to the next one.
+3. If every tier is confirmed, the round ends. When this happens at the deadline, the
+   round has no extension at all.
+4. If the two do not agree on a tier, the comparison stops there. Nothing from that
+   tier or the ones below it is confirmed. Voting continues for 12 hours, and a new
+   tally is compared with the previous one in the same way.
+5. A tier that fails again gets half the time: 6 hours, then 3, and so on down to
+   about one minute. Every tier starts its own count at 12 hours.
+6. When a tier has no window left, its latest tally is confirmed as it stands, and the
+   comparison moves on.
 
-That is at most 11 windows and always less than two days per tier.
+That is at most 10 extensions and always less than a day per tier, so a round with
+three tiers ends less than three days after its deadline.
 
 ### 4. Two tallies agree when both the result and the payers are the same
 
@@ -76,99 +91,168 @@ latest tally. Earlier tallies are only used for comparison and charge nobody.
 ### 6. Confirmed tiers are locked
 
 Once a tier is confirmed, no voter can change that tier on their ballot. Voters can
-still rearrange the tiers that have not been counted yet.
+still rearrange the open tiers.
 
 ### 7. Supporters of a provisionally funded proposal cannot step back
 
-From the moment a tally of the open tier is taken, a voter who is a supporter of a
-proposal that tally funds cannot remove it or give it a worse position until the tier
-is confirmed. A revised ballot that does so is refused. The voter can still:
+From the moment a tally is taken, a voter who is a supporter of a proposal that tally
+funds in an open tier cannot remove it or move it to a lower tier until that tier is
+confirmed. A revised ballot that does so is refused. The voter can still:
 
-- add proposals to the same tier, and
-- move proposals in tiers that have not been counted.
+- add proposals to a tier, and
+- move the proposals they are not bound to.
 
 Each new tally renews the list: supporters of proposals it funds are bound, and
-supporters of proposals that dropped out are released.
+supporters of proposals that dropped out are released. The first tally binds from one
+day before the deadline.
+
+## Slow Quiet Ending
+
+With the switch on, rules 1 and 4 to 7 stay as they are. Rules 2 and 3 are replaced:
+
+### 2S. Tiers are tallied one at a time
+
+A tally covers the first open tier only. A tier's first tally is taken when the tier
+before it is confirmed; for the S tier, one day before the deadline. The unplaced
+proposals are folded into the B slot as in rule 2.
+
+### 3S. Each tier waits a full window before its first comparison
+
+1. A tier's second tally is taken 24 hours after its first, and the two are compared.
+2. If they agree (rule 4), the tier is confirmed and the next tier gets its first
+   tally.
+3. If they do not, voting on that tier continues for 12 hours, then 6, then 3, and so
+   on, as in rule 3.
+4. When no window is left, the latest tally is confirmed as it stands.
+
+That is at most 11 windows and always less than two days per tier. The earliest a
+round can end is two days after its deadline.
+
+Rule 7 then binds the supporters of one tier at a time, since only one tier has a
+tally.
+
+## The two side by side
+
+| | Quiet Ending | Slow Quiet Ending |
+| --- | --- | --- |
+| First tally, a day before the deadline | Every tier | The S tier |
+| After a tier is confirmed | The next tier is compared at once | The next tier waits 24 hours |
+| A round with a quiet last day ends | At the deadline | 2 days after it |
+| Latest possible end | Less than 3 days after the deadline | Less than 5 days after it |
+| Results are announced | All at once, or tier by tier if something moved | Always in three parts |
+| Time a lower tier has after the one above is final | None if it stood still in the last window; otherwise its own extensions | At least 24 hours |
 
 ## A round, day by day
 
-Voting lasts 7 days. Times are counted from the deadline.
+Voting lasts 7 days. Times are counted from the deadline. In both rounds a late group
+moves two proposals of the S tier on the last day, and nothing else changes.
+
+Quiet Ending:
 
 | When | What happens |
 | --- | --- |
-| 1 day before | Baseline tally of the S tier. Supporters of the proposals it funds are bound (rule 7). |
-| Deadline | The roll closes. Second S tally. A late group has moved two proposals, so the tallies differ: 12 more hours. |
-| +12 h | Third S tally. It matches the previous one and the payers are the same: the S tier is confirmed, its proposals are accepted and paid, and S tiers are locked on every ballot. Baseline tally of the A tier. |
-| +36 h | Second A tally, 24 hours after its baseline. It matches: the A tier is confirmed. Baseline tally of the B tier. |
-| +60 h | Second B tally. It matches: the B tier is confirmed. |
+| 1 day before | First tally of S, A and B. Supporters of the proposals it funds are bound (rule 7). |
+| Deadline | The roll closes. Second tally. The S tier differs, so nothing is confirmed: 12 more hours, with every tier open. |
+| +12 h | Third tally. S matches the previous one and the payers are the same: the S tier is confirmed, its proposals are accepted and paid. A and B match too, so they are confirmed, the tally runs through the unplaced proposals, and the round ends. |
 
-If every tier is given a fixed two-day slot, results are announced on days 2, 4 and 6
-after the S baseline, or earlier when a tier is confirmed early.
+Slow Quiet Ending:
+
+| When | What happens |
+| --- | --- |
+| 1 day before | First tally of the S tier. Its supporters are bound. |
+| Deadline | The roll closes. Second S tally. It differs: 12 more hours. |
+| +12 h | Third S tally. It matches: the S tier is confirmed and announced. First tally of the A tier. |
+| +36 h | Second A tally, 24 hours after the first. It matches: the A tier is confirmed and announced. First tally of the B tier. |
+| +60 h | Second B tally. It matches: the B tier is confirmed and the round ends. |
+
+With Slow Quiet Ending, if every tier is given a fixed two-day slot, results are
+announced on days 2, 4 and 6 after the first S tally, or earlier when a tier is
+confirmed early.
 
 ## Donations
 
 A public donation lowers a proposal's ask. The tally is all or nothing for each
 proposal, so it only checks whether the proposal can be funded at its ask at that
 moment. A donation therefore counts from the next tally on, like any other change: if
-it alters a tier's result, that tier's window is extended. A donation that only makes
-the bill smaller does not extend anything, because rule 4 compares shares. Donations to
+it alters a tier's result, that tier is not confirmed. A donation that only makes the
+bill smaller does not extend anything, because rule 4 compares shares. Donations to
 proposals already accepted change nothing.
 
 ## What the rules guarantee
 
-Checked by the tests listed below; none of this is a formal proof.
+Checked by the tests listed below, for both systems; none of this is a formal proof.
 
 - **The result is the plain tally of the final ballots.** In every simulated round, and
-  in 184,000 small random rounds with heavy revisions, the funded proposals and the
-  order they were funded in were exactly those of the plain tally. This is what carries
-  the proportionality guarantee over.
+  in the small random rounds with heavy revisions (24,000 for Quiet Ending, 184,000
+  for Slow Quiet Ending), the funded proposals and the order they were funded in were
+  exactly those of the plain tally. This is what carries the proportionality guarantee
+  over.
 - **Weight is never used twice.** A voter's payments never exceed their share, each
   funded proposal is paid exactly its cost, and the pool is never overspent.
 - **A late move can be answered.** A change in a tier's result, or a large shift in who
   pays, keeps that tier open.
 - **A funded result is final.** Once a tier is confirmed, nothing later can fund or
   unfund its proposals.
-- **The round has a known end.** Each tier takes less than two days.
+- **The round has a known end.** Each tier takes less than a day of extensions with
+  Quiet Ending, and less than two days in all with Slow Quiet Ending.
+- **Quiet Ending costs nothing when the last day is quiet.** The round ends at its
+  deadline with the plain result.
 
 ## What they do not do
 
-- **They do not stop a voter from declining to support a proposal before a baseline is
-  taken.** That happens in public with at least a full window for others to respond.
+- **They do not stop a voter from declining to support a proposal before the first
+  tally.** That happens in public with at least a full window for others to respond.
 - **They do not remove the last window.** A move in the final one-minute window of a
-  tier cannot be answered. Reaching it takes ten earlier changes in a row, each a real
-  one, and under rule 7 each a commitment. In the simulations no attack reached it.
+  tier cannot be answered. Reaching it takes a real change in every window before it,
+  and under rule 7 each one is a commitment. In the simulations no attack reached it
+  with rule 7 in force.
 - **They do not prevent redirecting support.** A voter can add a proposal that is
   funded ahead of one they are bound to, and so carry less of the second one's cost.
   They pay for the first instead. Rule 4 notices it when the shift is large.
+- **Quiet Ending does not give a lower tier time of its own unless it moved.** A and B
+  can be confirmed in the same tally that settles S, if they stood still through the
+  last window, however short that window was. Slow Quiet Ending always gives them a
+  day with the tiers above already final.
 
 ## Still to decide
 
-- **Fixed slots or early starts.** Whether a tier that is confirmed early waits for the
-  end of its two-day slot before the next one begins.
+- **Who rule 7 binds.** As written, the supporters of every open tier. Binding only the
+  first open tier is simpler to explain but lets a group step back from A and B
+  proposals on the last day.
+- **Whether the halving restarts for each tier** (as written) or runs once for the
+  whole round, which would end every round less than a day after its deadline and
+  leave lower tiers very short windows.
+- **Fixed slots or early starts** (Slow Quiet Ending). Whether a tier that is confirmed
+  early waits for the end of its two-day slot before the next one begins.
 - **The payment threshold** in rule 4.
-- **The first comparison.** The S baseline is taken before the roll closes, when shares
-  are larger. The suggestion is to take each tally with the shares of its own moment,
-  as the live result showed them.
+- **The first comparison.** The first tally is taken before the roll closes, when
+  shares are larger. The suggestion is to take each tally with the shares of its own
+  moment, as the live result showed them.
 - **The shortest window.** A ballot only counts once it is recorded on-chain, so
   windows shorter than the time that takes cannot be used by ordinary voters. One
   minute assumes votes can be submitted directly during extensions.
-- **Who rule 7 binds.** As written, every supporter of a provisionally funded proposal.
 
 ## Evidence
 
 Simulated on the 49 initiatives of TheDAO Security Fund (asks reduced by 25% and capped
-at $200,000), a $1,000,000 pool and 200 invented badge holders, 30 rounds each.
+at $200,000), a $1,000,000 pool and 200 invented badge holders, 30 rounds each. Unless
+it says otherwise, a late group votes during the last day, which moves the S tier in
+every round.
 
-| | Result |
-| --- | --- |
-| Rounds ending on the plain tally of the final ballots | 30 of 30 |
-| Time after the deadline | about 84 hours on average |
-| Tiers needing an extension | the S tier in nearly every round; A and B almost never |
-| A group stepping out of funded proposals, no rules 4 and 7 | its category gains about 21% |
-| The same, with rules 4 and 7 | no gain; about 59 ballots refused per round |
-| A group flip-flopping to reach the last window, no rule 7 | reaches it in every round |
-| The same, with rule 7 | the tier is confirmed in two or three tallies |
-| A group pushing a new proposal every window | runs out after 9 windows at most, and loses funding for its own category |
+| | Quiet Ending | Slow Quiet Ending |
+| --- | --- | --- |
+| Rounds ending on the plain tally of the final ballots | 30 of 30 | 30 of 30 |
+| Time after the deadline, nothing moving on the last day | none | about 73 hours |
+| Time after the deadline, with the late group | about 17 hours on average, 30 at most | about 85 hours on average, 96 at most |
+| A group stepping out of funded proposals, no rules 4 and 7 | its category gains about 22% | its category gains about 21% |
+| The same, with rules 4 and 7 | no gain; about 51 ballots refused per round | no gain; about 59 ballots refused per round |
+| A group flip-flopping to reach the last window, no rule 7 | 45 tiers closed by the schedule in 30 rounds | the S tier closed by the schedule in every round |
+| The same, with rule 7 | no tier closed by the schedule; five tallies at most | the tier is confirmed in two or three tallies |
+| A group pushing a new proposal every window | runs out after 10 tallies at most, and loses funding for its own category | runs out after 9 windows at most, and loses funding for its own category |
+| A group stepping out of A and B proposals on the last day | the crude version tried lost the group funding; it is refused in full only if rule 7 binds every open tier | cannot happen: A and B have no tally yet |
+
+The model gives the unplaced proposals a window of their own in Slow Quiet Ending,
+which rule 2S does not, so its times are about a day longer than the rule's.
 
 Alternatives that were tried and set aside:
 
@@ -182,6 +266,14 @@ Alternatives that were tried and set aside:
 - **Sealing the last day's ballots with a hard deadline.** A group stepping out gained
   about as much as with public ballots.
 
-The model and tests are in `reference/`: `quiet_ending_steps.py` (`run_daily`),
-`quiet_ending_sim.py`, `test_quiet_ending_daily.py` and `test_quiet_ending_scale.py`.
-`python3 reference/quiet_ending_sim.py 30` prints the figures.
+The model and tests are in [`reference/`](https://github.com/sembrestels/ranked-shares/tree/quiet-ending/reference):
+
+- Quiet Ending is `run_on_time` in [`quiet_ending_steps.py`](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/reference/quiet_ending_steps.py),
+  tested in [`test_quiet_ending_on_time.py`](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/reference/test_quiet_ending_on_time.py).
+- Slow Quiet Ending is `run_daily` in the same file, tested in
+  [`test_quiet_ending_daily.py`](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/reference/test_quiet_ending_daily.py) and
+  [`test_quiet_ending_scale.py`](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/reference/test_quiet_ending_scale.py).
+- [`quiet_ending_sim.py`](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/reference/quiet_ending_sim.py) is the simulator:
+  `python3 reference/quiet_ending_sim.py 30` prints the figures for both.
+
+The proposal these rules belong to is [Quiet Ending · Blossom Budgeting](https://github.com/sembrestels/ranked-shares/blob/quiet-ending/docs/quiet-ending.md).
