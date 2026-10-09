@@ -112,21 +112,32 @@ With the switch on, rules 1 and 4 to 7 stay as they are. Rules 2 and 3 are repla
 
 ### 2S. Tiers are tallied one at a time
 
-A tally covers the first open tier only. A tier's first tally is taken when the tier
-before it is confirmed; for the S tier, one day before the deadline. The unplaced
-proposals are folded into the B slot as in rule 2.
+A tally covers the first open tier only. Every tier has a slot of two days, and the
+slots are fixed before the round opens: they do not overlap, and the S slot starts one
+day before the deadline. A tier's first tally is taken at the start of its slot,
+whenever the tier before it was confirmed. The unplaced proposals are folded into the
+B slot as in rule 2.
 
-### 3S. Each tier waits a full window before its first comparison
+### 3S. A tier is settled by the first quiet window that ends as it began
 
-1. A tier's second tally is taken 24 hours after its first, and the two are compared.
-2. If they agree (rule 4), the tier is confirmed and the next tier gets its first
-   tally.
-3. If they do not, voting on that tier continues for 12 hours, then 6, then 3, and so
-   on, as in rule 3.
-4. When no window is left, the latest tally is confirmed as it stands.
+With fixed slots nothing is extended, so here every window is called a quiet window
+and named by its length: the 24h quiet window, the 12h quiet window, the 6h one, and so
+on. A tier that is confirmed is called settled.
 
-That is at most 11 windows and always less than two days per tier. The earliest a
-round can end is two days after its deadline.
+1. A tier's first tally opens a quiet window of 24 hours. At its end the tier is
+   tallied again, and the two tallies are compared.
+2. If they agree (rule 4), the tier is settled. The next tier gets its first tally
+   when its own slot starts.
+3. If they do not, a new quiet window opens, half as long: 12 hours, then 6, then 3,
+   and so on, with the halving and the minimum of rule 3.
+4. When no quiet window is left, the latest tally is settled as it stands.
+
+That is at most 11 quiet windows and always less than two days per tier, so a tier is
+always settled before its slot ends. Its winners are presented in public at the end of
+the slot, on a date known in advance; since every tally is public, the result is known
+from the moment the tier is settled, up to a day earlier. With the slots back to back,
+a round in which nothing moves ends four days after its deadline, and no round ends
+later than five days after it.
 
 Rule 7 then binds the supporters of one tier at a time, since only one tier has a
 tally.
@@ -136,10 +147,10 @@ tally.
 | | Quiet Ending | Slow Quiet Ending |
 | --- | --- | --- |
 | First tally, a day before the deadline | Every tier | The S tier |
-| After a tier is confirmed | The next tier is compared at once | The next tier waits 24 hours |
-| A round with a quiet last day ends | At the deadline | 2 days after it |
+| After a tier is confirmed | The next tier is compared at once | The next tier gets its first tally when its slot starts, and waits 24 hours |
+| A round with a quiet last day ends | At the deadline | 4 days after it, with the slots back to back |
 | Latest possible end | Less than 3 days after the deadline | Less than 5 days after it |
-| Results are announced | All at once, or tier by tier if something moved | Always in three parts |
+| Results are announced | All at once, or tier by tier if something moved | Presented in three parts, on fixed dates |
 | Time a lower tier has after the one above is final | None if it stood still in the last window; otherwise its own extensions | At least 24 hours |
 
 ## A round, day by day
@@ -160,14 +171,17 @@ Slow Quiet Ending:
 | When | What happens |
 | --- | --- |
 | 1 day before | First tally of the S tier. Its supporters are bound. |
-| Deadline | The roll closes. Second S tally. It differs: 12 more hours. |
-| +12 h | Third S tally. It matches: the S tier is confirmed and announced. First tally of the A tier. |
-| +36 h | Second A tally, 24 hours after the first. It matches: the A tier is confirmed and announced. First tally of the B tier. |
-| +60 h | Second B tally. It matches: the B tier is confirmed and the round ends. |
+| Deadline | The roll closes. The 24h quiet window ends with a second S tally. It differs: a 12h quiet window opens. |
+| +12 h | Third S tally. It matches: the S tier is settled. |
+| +1 day | The S slot ends and the S tier's winners are presented. The A slot starts: first tally of the A tier. |
+| +2 days | The 24h quiet window ends with a second A tally. It matches: the A tier is settled. |
+| +3 days | The A tier's winners are presented. The B slot starts: first tally of the B tier. |
+| +4 days | The 24h quiet window ends with a second B tally. It matches: the B tier is settled and the round ends. |
+| +5 days | The B tier's winners are presented. |
 
-With Slow Quiet Ending, if every tier is given a fixed two-day slot, results are
-announced on days 2, 4 and 6 after the first S tally, or earlier when a tier is
-confirmed early.
+With the slots back to back, winners are presented on days 2, 4 and 6 after the first
+S tally. The slots can also be set further apart, to put each presentation on a chosen
+date.
 
 ## Donations
 
@@ -222,8 +236,6 @@ Checked by the tests listed below, for both systems; none of this is a formal pr
 - **Whether the halving restarts for each tier** (as written) or runs once for the
   whole round, which would end every round less than a day after its deadline and
   leave lower tiers very short windows.
-- **Fixed slots or early starts** (Slow Quiet Ending). Whether a tier that is confirmed
-  early waits for the end of its two-day slot before the next one begins.
 - **The payment threshold** in rule 4.
 - **The first comparison.** The first tally is taken before the roll closes, when
   shares are larger. The suggestion is to take each tally with the shares of its own
@@ -252,7 +264,9 @@ every round.
 | A group stepping out of A and B proposals on the last day | the crude version tried lost the group funding; it is refused in full only if rule 7 binds every open tier | cannot happen: A and B have no tally yet |
 
 The model gives the unplaced proposals a window of their own in Slow Quiet Ending,
-which rule 2S does not, so its times are about a day longer than the rule's.
+which rule 2S does not. It also takes a tier's first tally at the moment the tier
+before it is confirmed, not at the start of a fixed slot, so its times for Slow Quiet
+Ending are not the ones the rule gives.
 
 Alternatives that were tried and set aside:
 

@@ -87,19 +87,19 @@ The result is the plain tally of the final ballots. Nothing in a tier is paid un
 
 Slow Quiet Ending is a switch on top of Quiet Ending. It puts a pause after every tier, so the result is revealed in three parts whether or not anything moved.
 
-With the switch on, each tally covers one tier only. When a tier is confirmed, the next one gets its first tally, and that tally stands in public for a full quiet window before it is compared. Everything else stays the same: the comparison, the halving extensions, the locked tiers and the rule that supporters cannot step back.
+With the switch on, each tally covers one tier only, and each tier has a slot of two days, fixed before the round opens. A tier's first tally is taken at the start of its slot and opens a quiet window of one day. If the result is the same when the window ends, the tier is settled. If it changed, a new quiet window opens, half as long: 12 hours, then 6, then 3. With fixed slots nothing is extended, so these are all called quiet windows and named by their length. They always add up to less than two days, so every tier is settled before its slot ends, and its winners are presented in public at the end of the slot, on a date known in advance. Because every tally is public, the result is known from the moment the tier is settled, up to a day before it is presented. Everything else stays the same: the comparison, the halving, the locked tiers and the rule that supporters cannot step back.
 
 | | Quiet Ending | Slow Quiet Ending |
 | --- | --- | --- |
 | First tally, a day before the deadline | Every tier | The S tier only |
-| After a tier is confirmed | The next tier is compared at once | The next tier waits a full quiet window |
-| A 7-day round with a quiet ending closes | On day 7 | On day 9 |
+| After a tier is confirmed | The next tier is compared at once | The next tier gets its first tally when its slot starts, and waits a full quiet window |
+| A 7-day round with a quiet ending closes | On day 7 | On day 11, with the slots back to back |
 | Latest possible close | Before day 10 | Before day 12 |
-| Results are announced | All at once, or tier by tier if something moved | Always in three parts: S, then A, then B |
+| Results are announced | All at once, or tier by tier if something moved | Presented in three parts, on fixed dates: S, then A, then B |
 
 The pause buys two things. Every tier is settled with the tiers above it already final, so voters know exactly how much money is left when they decide on A and B, and they always get a full day to do it. And the last days of the round become something to follow: first the proposals funded from everyone's S tier, then A, then B, while voters can still change the tiers that are not confirmed yet.
 
-The price is time. A round in which nothing moves still closes two days after its deadline. The guarantees above hold either way; only the closing times change.
+The price is time. A round in which nothing moves still closes four days after its deadline. The guarantees above hold either way; only the closing times change.
 
 ## How it fits with the rest of the mechanism
 
@@ -123,7 +123,7 @@ Three durations, one amount and one switch, all fixed before the round opens.
 | Payment tolerance | How much of the cost may change hands, counting each voter's share of each proposal, before a tier is kept open | 2% of the pool |
 | Slow Quiet Ending | Whether every tier gets a pause of its own before it is compared | Off |
 
-With these values, a 7-day round with three tiers closes on day 7 if its last day is quiet and never later than day 10. With Slow Quiet Ending on, it closes on day 9 at the earliest and never later than day 12.
+With these values, a 7-day round with three tiers closes on day 7 if its last day is quiet and never later than day 10. With Slow Quiet Ending on and the slots back to back, it closes on day 11 if nothing moves and never later than day 12.
 
 ## Rules and simulations
 

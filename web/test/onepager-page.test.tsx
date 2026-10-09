@@ -1,8 +1,8 @@
 import { afterEach, expect, test } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { Stepper } from "../app/components/onepager/stepper";
 import { Playground } from "../app/components/onepager/playground";
-import { QuietEnding } from "../app/components/onepager/quiet-ending";
+import { LEAD, QuietEnding } from "../app/components/onepager/quiet-ending";
 import { ThemeToggle } from "../app/components/onepager/theme-toggle";
 
 afterEach(cleanup);
@@ -49,40 +49,123 @@ test("the stepper walks through the tally and returns what is left", () => {
   expect(reset.disabled).toBe(true);
 });
 
-test("a quiet ending follows a late ballot, an extension and a donation until two results agree", () => {
+test("a slow quiet ending is read by scrolling: each tier is settled by a quiet window that ends as it began, then presented", async () => {
   const { container } = render(<QuietEnding />);
-  const narration = () => container.querySelector(".op-narration [data-current]")!.textContent!;
+  // Every moment's text is in the box at the bottom; only the current one shows.
+  const current = () => container.querySelector<HTMLElement>(".op-quiet-step[data-current]")!;
+  const narration = () => current().querySelector(".op-quiet-text")!.textContent!;
+  const when = () => current().querySelector(".op-quiet-when")!.textContent!;
   const chart = () => screen.getByRole("img").getAttribute("aria-label")!;
-  const next = screen.getByRole("button", { name: "Next step" }) as HTMLButtonElement;
-  expect(screen.getByText(/Step 1 of 6/)).toBeTruthy();
-  expect(screen.getByText("20 ballots, $5,000 each")).toBeTruthy();
-  expect(chart()).toMatch(/funded: .*Phishing blocklist API.*\. Not funded: .*Incident war room/);
-  fireEvent.click(next);
+  // Scroll until the chart is drawn down to an hour after the first tally: ten pixels
+  // an hour, with the text that stays at the bottom at the top of the screen.
+  const plot = container.querySelector(".op-fate-plot")!;
+  const scrollTo = async (hour: number) => {
+    plot.getBoundingClientRect = () => ({ top: -LEAD - hour * 10, height: 2160 }) as DOMRect;
+    await act(async () => {
+      fireEvent.scroll(window);
+      await new Promise((done) => requestAnimationFrame(done));
+    });
+  };
+  // The first place a label appears on the chart: every tier has the same quiet windows.
+  const ahead = (text: string) => within(container.querySelector<HTMLElement>(".op-fate")!).getAllByText(text)[0].closest("[data-ahead]") !== null;
+  // The box at the bottom waits until the chart reaches the place where its lines are drawn.
+  const waiting = () => container.querySelector(".op-quiet-panel")!.hasAttribute("data-waiting");
+  expect(waiting()).toBe(true);
+  await scrollTo(-5);
+  expect(waiting()).toBe(true);
+  await scrollTo(0);
+  expect(waiting()).toBe(false);
+  expect(container.querySelectorAll(".op-quiet-step[data-current]")).toHaveLength(1);
+  expect(when()).toMatch(/December 1/);
+  // Only the S-Tier has a tally so far, and nothing below the first line is drawn.
+  expect(narration()).toMatch(/Bridge fuzzing harness and Phishing blocklist API would be funded from it/);
+  expect(chart()).toMatch(/funded: Bridge fuzzing harness, Phishing blocklist API\. Not funded: /);
+  expect(ahead("Dec 1")).toBe(false);
+  expect(ahead("Dec 2")).toBe(true);
+  expect(ahead("A late ballot")).toBe(true);
+  await scrollTo(14);
+  expect(ahead("A late ballot")).toBe(true);
+  await scrollTo(15);
+  expect(when()).toMatch(/December 1, the afternoon/);
   // One more ballot shrinks every share: the blocklist the wallet teams could exactly afford
   // drops out, and the late voter's own first choice is just as short.
+  expect(ahead("A late ballot")).toBe(false);
   expect(narration()).toMatch(/every share shrinks from \$5,000 to \$4,761/);
   expect(narration()).toMatch(/Now they hold \$19,044 and it drops out, \$956 short/);
   expect(narration()).toMatch(/its backers hold \$19,044 for a \$20,000 ask/);
-  expect(screen.getByText("21 ballots, $4,761 each")).toBeTruthy();
-  expect(chart()).toMatch(/Not funded: .*Phishing blocklist API.*Incident war room/);
-  fireEvent.click(next);
-  expect(screen.getByText("Changed: voting is extended")).toBeTruthy();
-  fireEvent.click(next);
-  // The donation rescues the war room; nobody rescues the blocklist.
-  expect(narration()).toMatch(/A donor gives \$1,000 to the war room, which now asks the pool for \$19,000/);
-  expect(chart()).toMatch(/funded: .*Incident war room.*\. Not funded: .*Phishing blocklist API/);
-  fireEvent.click(next);
-  expect(screen.getByText("Changed: extended again, half as long")).toBeTruthy();
-  // The last rule is only named once the round is known to end there.
-  expect(screen.getByText("Finally settled").hasAttribute("data-hidden")).toBe(true);
-  fireEvent.click(next);
-  expect(screen.getByText("Finally settled").hasAttribute("data-hidden")).toBe(false);
-  expect(next.disabled).toBe(true);
-  expect(screen.getByText("Unchanged: the round is settled")).toBeTruthy();
-  expect(narration()).toMatch(/Incident war room.* are funded, and the \$4,000 left goes back to TheDAO/);
-  // The timeline jumps to any moment.
-  fireEvent.click(screen.getByRole("button", { name: /The deadline/ }));
-  expect(screen.getByText(/Step 3 of 6/)).toBeTruthy();
+  expect(chart()).toMatch(/funded: Bridge fuzzing harness\. Not funded: /);
+  await scrollTo(24);
+  expect(when()).toMatch(/December 2, the deadline/);
+  expect(ahead("Dec 2")).toBe(false);
+  expect(ahead("12h")).toBe(false);
+  expect(ahead("6h")).toBe(true);
+  expect(within(current()).getByText("Changed: a new quiet window, half as long")).toBeTruthy();
+  await scrollTo(30);
+  // The donation rescues the blocklist; nobody rescues the war room.
+  expect(narration()).toMatch(/A donor gives \$1,000 to the blocklist, which now asks the pool for \$19,000/);
+  expect(chart()).toMatch(/funded: Bridge fuzzing harness, Phishing blocklist API\. Not funded: /);
+  await scrollTo(36);
+  expect(when()).toMatch(/December 2, midday/);
+  expect(narration()).toMatch(/The 12-hour quiet window ends, and the result changed again/);
+  // The third quiet window ends as it began: the tier is settled, a day before it is presented.
+  const shaded = () => container.querySelectorAll(".op-fate-spans [data-shaded]").length;
+  await scrollTo(41);
+  expect(shaded()).toBe(0);
+  // The window that settles the tier is only coloured once the lines have passed it.
+  await scrollTo(42);
+  expect(shaded()).toBe(1);
+  expect(when()).toMatch(/December 2, the evening/);
+  expect(within(current()).getByText("Unchanged: the S-Tier is settled")).toBeTruthy();
+  expect(narration()).toMatch(/the S-Tier is settled: Bridge fuzzing harness and Phishing blocklist API are funded/);
+  // The quiet windows that are not needed pass without anything happening.
+  await scrollTo(47);
+  expect(when()).toMatch(/December 2, the evening/);
+  await scrollTo(48);
+  expect(when()).toMatch(/December 3.*S-Tier winners presented/);
+  await scrollTo(96);
+  // The A-Tier's two days start with its first tally, paid for with what the S-Tier left.
+  expect(when()).toMatch(/December 5/);
+  expect(narration()).toMatch(/Whitehat legal retainer and Audit findings database would be funded from it/);
+  // What moves the lines is said beside the moment.
+  expect(ahead("The money the S-Tier left pays for the retainer and the findings database.")).toBe(false);
+  await scrollTo(120);
+  expect(when()).toMatch(/December 6.*A-Tier settled/);
+  expect(within(current()).getByText("Unchanged: the A-Tier is settled")).toBeTruthy();
+  await scrollTo(144);
+  expect(when()).toMatch(/December 7.*A-Tier winners presented/);
+  expect(chart()).toMatch(/Not funded: .*Transaction simulation warnings.*Incident war room/);
+  await scrollTo(168);
+  // The B-Tier's first tally funds nothing; the late voter then adds the proposal that
+  // was just short, which changes the result inside the quiet window.
+  expect(when()).toMatch(/December 8.*First B-Tier tally/);
+  expect(narration()).toMatch(/Nothing would be funded from it: Transaction simulation warnings comes closest, \$158 short/);
+  expect(chart()).toMatch(/Not funded: .*Transaction simulation warnings/);
+  await scrollTo(183);
+  expect(when()).toMatch(/December 8, the afternoon.*A ballot is changed/);
+  expect(narration()).toMatch(/The late voter still holds \$3,096, more than the \$158 missing/);
+  expect(chart()).toMatch(/funded: .*Transaction simulation warnings.*\. Not funded: .*Incident war room/);
+  await scrollTo(192);
+  expect(when()).toMatch(/December 9.*Not the same result/);
+  expect(within(current()).getByText("Changed: a new quiet window, half as long")).toBeTruthy();
+  await scrollTo(204);
+  expect(when()).toMatch(/December 9, midday.*B-Tier settled/);
+  expect(narration()).toMatch(/the B-Tier is settled: Transaction simulation warnings is funded/);
+  await scrollTo(216);
+  expect(when()).toMatch(/December 10.*B-Tier winners presented/);
+  expect(within(current()).getByText("The round is settled")).toBeTruthy();
+  // A little further down, the result as a whole, tier by tier.
+  await scrollTo(400);
+  expect(when()).toMatch(/The final result/);
+  const result = within(current());
+  const tier = (label: string) => result.getByText(label).nextElementSibling!.textContent;
+  expect(tier("S-Tier")).toBe("Bridge fuzzing harnessPhishing blocklist API");
+  expect(tier("A-Tier")).toBe("Whitehat legal retainerAudit findings database");
+  expect(tier("B-Tier")).toBe("Transaction simulation warnings");
+  expect(tier("Back to TheDAO")).toBe("$4,000");
+  // Scrolling back up goes back in time.
+  await scrollTo(24);
+  expect(when()).toMatch(/December 2, the deadline/);
+  expect(ahead("Dec 3")).toBe(true);
 });
 
 test("a ballot for the war room funds it and spends the whole seat there", () => {

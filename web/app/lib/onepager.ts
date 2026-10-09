@@ -86,6 +86,16 @@ export function openingLevels(tiers: readonly (readonly number[])[]): number[] {
   });
 }
 
+// The level at which each tier has been counted for every voter: the last level at which
+// any ballot opens it. Once nothing more can be funded there, the tier is settled.
+export const TIER_ENDS = TIER_LABELS
+  .map((_, t) => Math.max(...BLOCS.map((b) => openingLevels(b.tiers)[t] ?? 0)))
+  .map((_, t, ends) => Math.max(...ends.slice(0, t + 1)));
+export const tierAt = (level: number) => {
+  const t = TIER_ENDS.findIndex((end) => level <= end);
+  return t === -1 ? TIER_ENDS.length - 1 : t;
+};
+
 export const blocVoters = (): Voter[] =>
   BLOCS.map((b) => ({ id: b.id, name: b.name, weight: b.seats * SEAT, ballot: ranksFromTiers(b.tiers) }));
 

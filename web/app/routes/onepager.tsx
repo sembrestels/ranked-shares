@@ -220,14 +220,21 @@ export default function Onepager() {
         </section>
 
         <section className="op-section" aria-labelledby="op-quiet">
-          <h2 id="op-quiet">A quiet ending: the last ballot should not get the last word</h2>
+          <h2 id="op-quiet">A slow quiet ending: the last ballot should not get the last word</h2>
           <div className="op-prose">
             <p>
               With a hard deadline, whoever moves last can change what is funded and nobody has time to
-              answer. So the round closes with a quiet ending. A day before the deadline it takes a first
-              tally. If the result at the deadline is the same, the round closes on time. If it changed,
-              voting stays open a little longer so everyone can answer, and every extension is half as long
-              as the one before. Below, one late move is followed to the end.
+              answer. So the round closes with a slow quiet ending, one tier at a time. Each tier gets two
+              days. They start with a first tally of the tier and a quiet window of 24 hours. If the result
+              is the same when the window ends, the tier is settled. If it changed, a new quiet window
+              starts, half as long, so everyone can answer, and so on until one of them ends as it began.
+            </p>
+            <p>
+              The quiet windows always add up to less than two days, so every tier is settled within its
+              two days and its winners can be presented on a day fixed in advance. In this example the{" "}
+              {TIER_LABELS[0]} is presented on December 3, the {TIER_LABELS[1]} on December 7 and the{" "}
+              {TIER_LABELS[2]} on December 10. A settled tier is final, and voters can still rearrange the
+              tiers below it. Below, one late move is followed to the end: scroll down to see it happen.
             </p>
           </div>
           <QuietEnding />

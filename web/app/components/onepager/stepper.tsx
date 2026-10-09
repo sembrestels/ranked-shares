@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { BLOCS, blocVoters, openingLevels, PROPOSALS, TIER_LABELS, tally, type Frame, type Tally } from "../../lib/onepager";
+import { BLOCS, blocVoters, openingLevels, PROPOSALS, TIER_ENDS, TIER_LABELS, tally, tierAt, type Frame, type Tally } from "../../lib/onepager";
 import { StepControls } from "./step-controls";
 import { PoolBar, usd } from "./pool-bar";
 
@@ -7,15 +7,6 @@ const costs = PROPOSALS.map((p) => p.cost);
 const SCALE = 60_000;
 const list = (items: string[]) =>
   items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
-// The level at which each tier has been counted for every voter: the last level at which
-// any ballot opens it. Once nothing more can be funded there, the tier is settled.
-const TIER_ENDS = TIER_LABELS
-  .map((_, t) => Math.max(...BLOCS.map((b) => openingLevels(b.tiers)[t] ?? 0)))
-  .map((_, t, ends) => Math.max(...ends.slice(0, t + 1)));
-const tierAt = (level: number) => {
-  const t = TIER_ENDS.findIndex((end) => level <= end);
-  return t === -1 ? TIER_ENDS.length - 1 : t;
-};
 const fundedFrom = (frames: Frame[], t: number) =>
   frames.flatMap((f) => (f.funded !== null && tierAt(f.level) === t ? [f.funded] : []));
 const outcome = (frames: Frame[], t: number) => {
