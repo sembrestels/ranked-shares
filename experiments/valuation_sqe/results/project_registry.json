@@ -1,0 +1,345 @@
+[
+  {
+    "address": "0x0000000000000000000000000000000000001000",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 279000,
+    "project_id": 0,
+    "title": "Source-Level Debugging for Solidity: ethdebug in solc"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001001",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 600000,
+    "project_id": 1,
+    "title": "End-to-End Formally Verified Vyper Compiler"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001002",
+    "ask_micro_usd": 112500000000,
+    "original_ask_usd": 150000,
+    "project_id": 2,
+    "title": "Community Fuzzing Tooling for Ethereum Ecosystem Projects"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001003",
+    "ask_micro_usd": 10500000000,
+    "original_ask_usd": 14000,
+    "project_id": 3,
+    "title": "Safe Lockdown Guard: An Emergency Freeze for Kidnapping and Coercion"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001004",
+    "ask_micro_usd": 187500000000,
+    "original_ask_usd": 250000,
+    "project_id": 4,
+    "title": "Wallet Security for Post-Quantum Ethereum"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001005",
+    "ask_micro_usd": 180000000000,
+    "original_ask_usd": 240000,
+    "project_id": 5,
+    "title": "Preventing Theft in Mainstream Wallets with Vaults"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001006",
+    "ask_micro_usd": 24142000000,
+    "original_ask_usd": 32190,
+    "project_id": 6,
+    "title": "LeekWallet: an open DIY hardware wallet with a secure element PIN gate, and build workshops in Mexico"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001007",
+    "ask_micro_usd": 180000000000,
+    "original_ask_usd": 240000,
+    "project_id": 7,
+    "title": "EquiVM: End-to-End Formal Verification for EVM Bytecode"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001008",
+    "ask_micro_usd": 33750000000,
+    "original_ask_usd": 45000,
+    "project_id": 8,
+    "title": "thatsRekt: EVM exploit alerts for the public good."
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001009",
+    "ask_micro_usd": 15000000000,
+    "original_ask_usd": 20000,
+    "project_id": 9,
+    "title": "HackViz \u2014 Interactive Real-World Ethereum Exploit Learning Sandbox"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100a",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 300000,
+    "project_id": 10,
+    "title": "Decentralized, Privacy-Preserving EDR"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100b",
+    "ask_micro_usd": 60000000000,
+    "original_ask_usd": 80000,
+    "project_id": 11,
+    "title": "$1 OpSec Audits"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100c",
+    "ask_micro_usd": 198750000000,
+    "original_ask_usd": 265000,
+    "project_id": 12,
+    "title": "Actual Rollup Exit Guarantees for DeFi and Multisigs"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100d",
+    "ask_micro_usd": 25875000000,
+    "original_ask_usd": 34500,
+    "project_id": 13,
+    "title": "Preparing encrypted mempools for inclusion in the earliest EIP possible"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100e",
+    "ask_micro_usd": 150000000000,
+    "original_ask_usd": 200000,
+    "project_id": 14,
+    "title": "Audit Coverage Attestations: bind every audit report to the exact verified bytecode it covered"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000100f",
+    "ask_micro_usd": 33750000000,
+    "original_ask_usd": 45000,
+    "project_id": 15,
+    "title": "Onay: Local signing companion"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001010",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 350000,
+    "project_id": 16,
+    "title": "Towards a Formally Verified Solc"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001011",
+    "ask_micro_usd": 90000000000,
+    "original_ask_usd": 120000,
+    "project_id": 17,
+    "title": "Shift-Left Security for Ethereum Open Source: Agent-Enforced Security ADRs"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001012",
+    "ask_micro_usd": 9000000000,
+    "original_ask_usd": 12000,
+    "project_id": 18,
+    "title": "Etherform: A Hardened CI/CD Standard for Foundry Smart Contracts"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001013",
+    "ask_micro_usd": 56250000000,
+    "original_ask_usd": 75000,
+    "project_id": 19,
+    "title": "State of Ethereum AI Agent Security"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001014",
+    "ask_micro_usd": 37500000000,
+    "original_ask_usd": 50000,
+    "project_id": 20,
+    "title": "DPRK IT Worker Screening for the Ethereum Ecosystem"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001015",
+    "ask_micro_usd": 7500000000,
+    "original_ask_usd": 10000,
+    "project_id": 21,
+    "title": "NanoJS Investigations: Sustaining Independent Ethereum Forensic Casework and Open Tooling"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001016",
+    "ask_micro_usd": 101250000000,
+    "original_ask_usd": 135000,
+    "project_id": 22,
+    "title": "Self-serve scoped permissions and pre-signature checks for Safes and AI agents"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001017",
+    "ask_micro_usd": 90000000000,
+    "original_ask_usd": 120000,
+    "project_id": 23,
+    "title": "EEZ Extends Ethereum: Making Its Contracts Safe for Chains to Adopt"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001018",
+    "ask_micro_usd": 18750000000,
+    "original_ask_usd": 25000,
+    "project_id": 24,
+    "title": "Hookscope: Evidence-Backed Uniswap v4 Hook Warnings"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001019",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 300000,
+    "project_id": 25,
+    "title": "Expiring Approvals (ERC-8255): Registry, Tooling, Audits and Adoption"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101a",
+    "ask_micro_usd": 37500000000,
+    "original_ask_usd": 50000,
+    "project_id": 26,
+    "title": "Onchain Risk Map: An Open Operational Incident Graph for Ethereum Security"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101b",
+    "ask_micro_usd": 75000000000,
+    "original_ask_usd": 100000,
+    "project_id": 27,
+    "title": "Exploit Exposure Layer: Free Data on Every Wallet Still Approved to an Exploited Contract"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101c",
+    "ask_micro_usd": 13500000000,
+    "original_ask_usd": 18000,
+    "project_id": 28,
+    "title": "TEE Security Handbook: practical verification, failure analysis and recovery for Ethereum"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101d",
+    "ask_micro_usd": 67500000000,
+    "original_ask_usd": 90000,
+    "project_id": 29,
+    "title": "From Community Contracts to OpenZeppelin Contracts: ERC-7540 Asynchronous Vaults"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101e",
+    "ask_micro_usd": 7500000000,
+    "original_ask_usd": 10000,
+    "project_id": 30,
+    "title": "Solidity (Wake) VS Code Extension Maintenance and AI Fuzzing"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000101f",
+    "ask_micro_usd": 15000000000,
+    "original_ask_usd": 20000,
+    "project_id": 31,
+    "title": "Wake v5 Maintenance and AI-Assisted Fuzzing"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001020",
+    "ask_micro_usd": 90000000000,
+    "original_ask_usd": 120000,
+    "project_id": 32,
+    "title": "Ethereum Decompiler Benchmark & Open Bytecode Analysis Standard"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001021",
+    "ask_micro_usd": 75000000000,
+    "original_ask_usd": 100000,
+    "project_id": 33,
+    "title": "Spec Bank: a public, composable registry of formal specifications for DeFi"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001022",
+    "ask_micro_usd": 18750000000,
+    "original_ask_usd": 25000,
+    "project_id": 34,
+    "title": "EtherWorld Security News & Reports: EIP-7702, Encrypted Mempools and Post-Quantum Ethereum"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001023",
+    "ask_micro_usd": 36000000000,
+    "original_ask_usd": 48000,
+    "project_id": 35,
+    "title": "Fund Echidna Development Through 2027"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001024",
+    "ask_micro_usd": 56250000000,
+    "original_ask_usd": 75000,
+    "project_id": 36,
+    "title": "Open EVM Compiler Differential Fuzzing Platform"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001025",
+    "ask_micro_usd": 33750000000,
+    "original_ask_usd": 45000,
+    "project_id": 37,
+    "title": "Account Abstraction and Mempool Security Analytics"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001026",
+    "ask_micro_usd": 200000000000,
+    "original_ask_usd": 640000,
+    "project_id": 38,
+    "title": "Colibri \u2014 Production Infrastructure and Ecosystem Adoption for Trustless Ethereum Access"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001027",
+    "ask_micro_usd": 33000000000,
+    "original_ask_usd": 44000,
+    "project_id": 39,
+    "title": "The Ethernaut: Six New Levels Built from Real-World Exploits"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001028",
+    "ask_micro_usd": 112500000000,
+    "original_ask_usd": 150000,
+    "project_id": 40,
+    "title": "Open Standard and Automated Triage Tooling for Ethereum Security Issues"
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001029",
+    "ask_micro_usd": 150000000000,
+    "original_ask_usd": 200000,
+    "project_id": 41,
+    "title": "Securing Ethereum with Formal Verification"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102a",
+    "ask_micro_usd": 112500000000,
+    "original_ask_usd": 150000,
+    "project_id": 42,
+    "title": "Provider-Independent, Client-Verified ENS Resolution"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102b",
+    "ask_micro_usd": 90000000000,
+    "original_ask_usd": 120000,
+    "project_id": 43,
+    "title": "Production-Ready Local-First Safe UI"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102c",
+    "ask_micro_usd": 101250000000,
+    "original_ask_usd": 135000,
+    "project_id": 44,
+    "title": "ForensIQ: Faster Ethereum Incident Response Through Evidence Reconstruction"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102d",
+    "ask_micro_usd": 138750000000,
+    "original_ask_usd": 185000,
+    "project_id": 45,
+    "title": "Directory of Value"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102e",
+    "ask_micro_usd": 187500000000,
+    "original_ask_usd": 250000,
+    "project_id": 46,
+    "title": "A Unified Platform for Web3 OpSec"
+  },
+  {
+    "address": "0x000000000000000000000000000000000000102f",
+    "ask_micro_usd": 112500000000,
+    "original_ask_usd": 150000,
+    "project_id": 47,
+    "title": "OPSEC Ratings Coalition to Build & Maintain an \"L2Beat for OPSEC\""
+  },
+  {
+    "address": "0x0000000000000000000000000000000000001030",
+    "ask_micro_usd": 15000000000,
+    "original_ask_usd": 20000,
+    "project_id": 48,
+    "title": "Automated EIP Compliance Checks for Ethereum Clients"
+  }
+]

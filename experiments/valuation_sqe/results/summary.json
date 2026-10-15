@@ -1,0 +1,3378 @@
+{
+  "configuration": {
+    "USD_unit": 1000000,
+    "currency_scales": {
+      "ALT": 1000000000000000000,
+      "ETH": 1000000000000000000,
+      "USDC": 1000000
+    },
+    "first_tallies_seconds": [
+      86400,
+      259200,
+      432000
+    ],
+    "fixture_sha256": "00b4714d29b237ebb1f92de166a6d012e6aacd23ad0a7c45adeb12d479096c4e",
+    "fixture_tier_sizes": [
+      4,
+      7,
+      9
+    ],
+    "initial_window_seconds": 86400,
+    "max_windows_including_initial": 4,
+    "seed_range": [
+      0,
+      29
+    ]
+  },
+  "differential": {
+    "fully_ranked_differential_cases": 1000,
+    "seed": 917
+  },
+  "fixture": {
+    "correlated_fall": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 532633500316,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 356671117081,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 352213600000,
+        "scalar_deficit_usd_runs": 28,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 30
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 29,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 125499764173,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 87700000000,
+        "scalar_deficit_usd_runs": 8,
+        "undercoverage_usd_max": 73462500000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 11,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 479013600000,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 479013600000,
+        "scalar_deficit_usd_runs": 30,
+        "undercoverage_usd_max": 122376700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 356671117081,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 352213600000,
+        "scalar_deficit_usd_runs": 28,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "divergent": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 11,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 426106799685,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 6,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 213053400000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 14,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 146925000000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 14,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 244753400000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 6,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 213053400000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "flat": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 7,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "flat_support": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "gradual_down": {
+      "fixed_currency": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 9,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 429264694962,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 193121732992,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 172213600000,
+        "scalar_deficit_usd_runs": 10,
+        "undercoverage_usd_max": 68177088000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 30
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 6865876230,
+        "nft_overdraw_usd_runs": 26,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 47016000000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 300504857610,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 299013600000,
+        "scalar_deficit_usd_runs": 30,
+        "undercoverage_usd_max": 78321088000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 193121732992,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 172213600000,
+        "scalar_deficit_usd_runs": 11,
+        "undercoverage_usd_max": 68177088000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "gradual_up": {
+      "fixed_currency": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 9,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 422058523868,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 5,
+        "fresh_set_diff_runs": 29,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 94629360000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 5
+      },
+      "reserve30": {
+        "end_time_max": 583200,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 66330000000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 78321088000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 6,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 80897088000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "pledge_correction": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 14
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 73462500000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 7,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 122376700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "pledge_double_count": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 106526700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 106526700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 5
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 73462500000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 7,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 122376700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 106526700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "pledge_fulfilment": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "shock_down_50": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 532633500130,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 356671117081,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 352213600000,
+        "scalar_deficit_usd_runs": 28,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 30
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 29,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 125499764173,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 87700000000,
+        "scalar_deficit_usd_runs": 8,
+        "undercoverage_usd_max": 73462500000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 11,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 479013600000,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 479013600000,
+        "scalar_deficit_usd_runs": 30,
+        "undercoverage_usd_max": 122376700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 356671117081,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 352213600000,
+        "scalar_deficit_usd_runs": 28,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "shock_up_50": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 13,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 532633499870,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 6,
+        "fresh_set_diff_runs": 29,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 106526700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 1
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 12,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 73462500000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 15,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 122376700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 6,
+        "fresh_set_diff_runs": 29,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 106526700000,
+        "overcoverage_usd_runs": 30,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "stablecoin_depeg": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 255664080269,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 96269026166,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 52213600000,
+        "scalar_deficit_usd_runs": 1,
+        "undercoverage_usd_max": 85221360000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 26
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 58770000000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 9,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 182883489865,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 179013600000,
+        "scalar_deficit_usd_runs": 30,
+        "undercoverage_usd_max": 97901360000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 10,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 30,
+        "nft_overdraw_usd_max": 96269026166,
+        "nft_overdraw_usd_runs": 30,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 52213600000,
+        "scalar_deficit_usd_runs": 1,
+        "undercoverage_usd_max": 85221360000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "withdrawal": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 30,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 14
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 73462500000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 7,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 122376700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 30,
+        "fresh_order_diff_runs": 30,
+        "fresh_set_diff_max": 8,
+        "fresh_set_diff_runs": 30,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 30,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 106526700000,
+        "undercoverage_usd_runs": 30,
+        "winner_finality_broken_runs": 0
+      }
+    }
+  },
+  "small": {
+    "exhaustive_cases": 3888,
+    "final_input_infeasible_or_ipsc_violations": {
+      "fixed_currency": 1312,
+      "fixed_usd": 632,
+      "recompute": 0,
+      "reserve30": 2850,
+      "round_lock": 2841,
+      "tier_lock": 632
+    },
+    "first_set_disagreement": {
+      "fixed_currency": {
+        "input": {
+          "asks": [
+            20000000,
+            60000000,
+            60000000
+          ],
+          "ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "name": "small-35",
+          "revisions": null,
+          "snapshots": [
+            [
+              -1,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1000000,
+                  "USDC": 1000000
+                }
+              }
+            ],
+            [
+              172801,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1400000,
+                  "USDC": 1000000
+                }
+              }
+            ]
+          ]
+        },
+        "result": {
+          "allocations_usd": {
+            "0": 28000000,
+            "1": 60000000
+          },
+          "charges_usd": {
+            "1": 44000000,
+            "2": 44000000
+          },
+          "currency_reservations": {
+            "0": {
+              "1": {
+                "ETH": 10000000000000000000
+              },
+              "2": {
+                "ETH": 10000000000000000000
+              }
+            },
+            "1": {
+              "1": {
+                "ETH": 21428571428571428572
+              },
+              "2": {
+                "ETH": 21428571428571428572
+              }
+            }
+          },
+          "final_ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "forced_stages": [],
+          "fresh_funded": [
+            0,
+            1,
+            2
+          ],
+          "fresh_payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "1": {
+              "1": 30000000,
+              "2": 30000000
+            },
+            "2": {
+              "1": 30000000,
+              "2": 30000000
+            }
+          },
+          "funded": [
+            0,
+            1
+          ],
+          "metrics": {
+            "end_time": 518400,
+            "final_budget_usd": 140000000,
+            "forced_tiers": 0,
+            "fresh_nominal_payments_diff": true,
+            "fresh_order_diff": true,
+            "fresh_set_diff": 1,
+            "funded_count": 2,
+            "negative_capacity_checkpoints": 0,
+            "nft_overdraw_usd": 0,
+            "overcoverage_usd": 8000000,
+            "payment_finality_broken": false,
+            "quantity_overdraw": false,
+            "registered_nfts": 2,
+            "rejected_revisions": 0,
+            "scalar_deficit_usd": 0,
+            "spent_usd": 88000000,
+            "undercoverage_usd": 0,
+            "winner_finality_broken": false
+          },
+          "payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "1": {
+              "1": 30000000,
+              "2": 30000000
+            }
+          },
+          "policy": "fixed_currency",
+          "rejections": [],
+          "scenario": "small-35",
+          "trace": [
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 86400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 1
+            },
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 172800,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 1
+            },
+            {
+              "actual_budget": 140000000,
+              "budget": 140000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 259200,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                1
+              ],
+              "payments": {
+                "1": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 2
+            },
+            {
+              "actual_budget": 140000000,
+              "budget": 140000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 345600,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                1
+              ],
+              "payments": {
+                "1": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 2
+            },
+            {
+              "actual_budget": 140000000,
+              "budget": 140000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 432000,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 3
+            },
+            {
+              "actual_budget": 140000000,
+              "budget": 140000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                60000000,
+                60000000
+              ],
+              "cutoff": 518400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 3
+            }
+          ]
+        }
+      },
+      "fixed_usd": {
+        "input": {
+          "asks": [
+            60000000,
+            20000000,
+            20000000
+          ],
+          "ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "name": "small-72",
+          "revisions": null,
+          "snapshots": [
+            [
+              -1,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1000000,
+                  "USDC": 1000000
+                }
+              }
+            ],
+            [
+              172801,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 400000,
+                  "USDC": 1000000
+                }
+              }
+            ]
+          ]
+        },
+        "result": {
+          "allocations_usd": {
+            "0": 60000000
+          },
+          "charges_usd": {
+            "1": 30000000,
+            "2": 30000000
+          },
+          "currency_reservations": {},
+          "final_ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "forced_stages": [],
+          "fresh_funded": [
+            1,
+            2
+          ],
+          "fresh_payments": {
+            "1": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "2": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "funded": [
+            0
+          ],
+          "metrics": {
+            "end_time": 518400,
+            "final_budget_usd": 40000000,
+            "forced_tiers": 0,
+            "fresh_nominal_payments_diff": true,
+            "fresh_order_diff": true,
+            "fresh_set_diff": 3,
+            "funded_count": 1,
+            "negative_capacity_checkpoints": 4,
+            "nft_overdraw_usd": 20000000,
+            "overcoverage_usd": 0,
+            "payment_finality_broken": false,
+            "quantity_overdraw": false,
+            "registered_nfts": 2,
+            "rejected_revisions": 0,
+            "scalar_deficit_usd": 20000000,
+            "spent_usd": 60000000,
+            "undercoverage_usd": 0,
+            "winner_finality_broken": false
+          },
+          "payments": {
+            "0": {
+              "1": 30000000,
+              "2": 30000000
+            }
+          },
+          "policy": "fixed_usd",
+          "rejections": [],
+          "scenario": "small-72",
+          "trace": [
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 86400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 1
+            },
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 172800,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 1
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 259200,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 345600,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 432000,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 3
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 518400,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 3
+            }
+          ]
+        }
+      },
+      "reserve30": {
+        "input": {
+          "asks": [
+            20000000,
+            20000000,
+            20000000
+          ],
+          "ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "name": "small-0",
+          "revisions": null,
+          "snapshots": [
+            [
+              -1,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1000000,
+                  "USDC": 1000000
+                }
+              }
+            ],
+            [
+              172801,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 400000,
+                  "USDC": 1000000
+                }
+              }
+            ]
+          ]
+        },
+        "result": {
+          "allocations_usd": {
+            "0": 20000000
+          },
+          "charges_usd": {
+            "1": 10000000,
+            "2": 10000000
+          },
+          "currency_reservations": {},
+          "final_ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "forced_stages": [],
+          "fresh_funded": [
+            0,
+            1
+          ],
+          "fresh_payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "1": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "funded": [
+            0
+          ],
+          "metrics": {
+            "end_time": 518400,
+            "final_budget_usd": 40000000,
+            "forced_tiers": 0,
+            "fresh_nominal_payments_diff": true,
+            "fresh_order_diff": true,
+            "fresh_set_diff": 1,
+            "funded_count": 1,
+            "negative_capacity_checkpoints": 0,
+            "nft_overdraw_usd": 0,
+            "overcoverage_usd": 0,
+            "payment_finality_broken": false,
+            "quantity_overdraw": false,
+            "registered_nfts": 2,
+            "rejected_revisions": 0,
+            "scalar_deficit_usd": 0,
+            "spent_usd": 20000000,
+            "undercoverage_usd": 0,
+            "winner_finality_broken": false
+          },
+          "payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "policy": "reserve30",
+          "rejections": [],
+          "scenario": "small-0",
+          "trace": [
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 86400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 1
+            },
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 172800,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 1
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 259200,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 345600,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 432000,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 3
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 518400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 3
+            }
+          ]
+        }
+      },
+      "round_lock": {
+        "input": {
+          "asks": [
+            20000000,
+            20000000,
+            20000000
+          ],
+          "ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "name": "small-0",
+          "revisions": null,
+          "snapshots": [
+            [
+              -1,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1000000,
+                  "USDC": 1000000
+                }
+              }
+            ],
+            [
+              172801,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 400000,
+                  "USDC": 1000000
+                }
+              }
+            ]
+          ]
+        },
+        "result": {
+          "allocations_usd": {
+            "0": 20000000,
+            "1": 20000000,
+            "2": 20000000
+          },
+          "charges_usd": {
+            "1": 30000000,
+            "2": 30000000
+          },
+          "currency_reservations": {},
+          "final_ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "forced_stages": [],
+          "fresh_funded": [
+            0,
+            1
+          ],
+          "fresh_payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "1": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "funded": [
+            0,
+            1,
+            2
+          ],
+          "metrics": {
+            "end_time": 518400,
+            "final_budget_usd": 40000000,
+            "forced_tiers": 0,
+            "fresh_nominal_payments_diff": true,
+            "fresh_order_diff": true,
+            "fresh_set_diff": 1,
+            "funded_count": 3,
+            "negative_capacity_checkpoints": 0,
+            "nft_overdraw_usd": 20000000,
+            "overcoverage_usd": 0,
+            "payment_finality_broken": false,
+            "quantity_overdraw": false,
+            "registered_nfts": 2,
+            "rejected_revisions": 0,
+            "scalar_deficit_usd": 20000000,
+            "spent_usd": 60000000,
+            "undercoverage_usd": 0,
+            "winner_finality_broken": false
+          },
+          "payments": {
+            "0": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "1": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "2": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "policy": "round_lock",
+          "rejections": [],
+          "scenario": "small-0",
+          "trace": [
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 86400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 1
+            },
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 172800,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 1
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 259200,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                1
+              ],
+              "payments": {
+                "1": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 345600,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                1
+              ],
+              "payments": {
+                "1": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 432000,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                2
+              ],
+              "payments": {
+                "2": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 3
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                20000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 518400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                2
+              ],
+              "payments": {
+                "2": {
+                  "1": 10000000,
+                  "2": 10000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 3
+            }
+          ]
+        }
+      },
+      "tier_lock": {
+        "input": {
+          "asks": [
+            60000000,
+            20000000,
+            20000000
+          ],
+          "ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "name": "small-72",
+          "revisions": null,
+          "snapshots": [
+            [
+              -1,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 1000000,
+                  "USDC": 1000000
+                }
+              }
+            ],
+            [
+              172801,
+              {
+                "donations": [
+                  {
+                    "USDC": 0
+                  },
+                  {},
+                  {}
+                ],
+                "pledges": [
+                  [],
+                  [],
+                  []
+                ],
+                "pool": {
+                  "ETH": 100000000000000000000
+                },
+                "prices": {
+                  "ALT": 100000000,
+                  "ETH": 400000,
+                  "USDC": 1000000
+                }
+              }
+            ]
+          ]
+        },
+        "result": {
+          "allocations_usd": {
+            "0": 60000000
+          },
+          "charges_usd": {
+            "1": 30000000,
+            "2": 30000000
+          },
+          "currency_reservations": {},
+          "final_ballots": {
+            "1": [
+              1,
+              2,
+              3
+            ],
+            "2": [
+              1,
+              2,
+              3
+            ]
+          },
+          "forced_stages": [],
+          "fresh_funded": [
+            1,
+            2
+          ],
+          "fresh_payments": {
+            "1": {
+              "1": 10000000,
+              "2": 10000000
+            },
+            "2": {
+              "1": 10000000,
+              "2": 10000000
+            }
+          },
+          "funded": [
+            0
+          ],
+          "metrics": {
+            "end_time": 518400,
+            "final_budget_usd": 40000000,
+            "forced_tiers": 0,
+            "fresh_nominal_payments_diff": true,
+            "fresh_order_diff": true,
+            "fresh_set_diff": 3,
+            "funded_count": 1,
+            "negative_capacity_checkpoints": 4,
+            "nft_overdraw_usd": 20000000,
+            "overcoverage_usd": 0,
+            "payment_finality_broken": false,
+            "quantity_overdraw": false,
+            "registered_nfts": 2,
+            "rejected_revisions": 0,
+            "scalar_deficit_usd": 20000000,
+            "spent_usd": 60000000,
+            "undercoverage_usd": 0,
+            "winner_finality_broken": false
+          },
+          "payments": {
+            "0": {
+              "1": 30000000,
+              "2": 30000000
+            }
+          },
+          "policy": "tier_lock",
+          "rejections": [],
+          "scenario": "small-72",
+          "trace": [
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 86400,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": false,
+              "settles": false,
+              "stage": 1
+            },
+            {
+              "actual_budget": 100000000,
+              "budget": 100000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 172800,
+              "negative_policy_capacity": false,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [
+                0
+              ],
+              "payments": {
+                "0": {
+                  "1": 30000000,
+                  "2": 30000000
+                }
+              },
+              "quiet": true,
+              "settles": true,
+              "stage": 1
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 259200,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 345600,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 2
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 0,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 432000,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": false,
+              "settles": false,
+              "stage": 3
+            },
+            {
+              "actual_budget": 40000000,
+              "budget": 40000000,
+              "comparison": 1,
+              "costs": [
+                60000000,
+                20000000,
+                20000000
+              ],
+              "cutoff": 518400,
+              "negative_policy_capacity": true,
+              "normalized_shift_den": 1,
+              "normalized_shift_num": 0,
+              "order": [],
+              "payments": {},
+              "quiet": true,
+              "settles": true,
+              "stage": 3
+            }
+          ]
+        }
+      }
+    },
+    "fresh_positive_cost_ipsc_violations": 0,
+    "policies": {
+      "fixed_currency": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 2443,
+        "fresh_order_diff_runs": 1505,
+        "fresh_set_diff_max": 3,
+        "fresh_set_diff_runs": 1457,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 73600000,
+        "overcoverage_usd_runs": 1312,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 72160000,
+        "undercoverage_usd_runs": 2227,
+        "winner_finality_broken_runs": 0
+      },
+      "fixed_usd": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 1292,
+        "fresh_order_diff_runs": 845,
+        "fresh_set_diff_max": 3,
+        "fresh_set_diff_runs": 809,
+        "negative_capacity_checkpoints_runs": 1030,
+        "nft_overdraw_usd_max": 70000000,
+        "nft_overdraw_usd_runs": 1030,
+        "overcoverage_usd_max": 34000000,
+        "overcoverage_usd_runs": 186,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 70000000,
+        "scalar_deficit_usd_runs": 509,
+        "undercoverage_usd_max": 39000000,
+        "undercoverage_usd_runs": 164,
+        "winner_finality_broken_runs": 0
+      },
+      "recompute": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 0,
+        "fresh_order_diff_runs": 0,
+        "fresh_set_diff_max": 0,
+        "fresh_set_diff_runs": 0,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 0,
+        "nft_overdraw_usd_runs": 0,
+        "overcoverage_usd_max": 0,
+        "overcoverage_usd_runs": 0,
+        "payment_finality_broken_runs": 1292,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 0,
+        "scalar_deficit_usd_runs": 0,
+        "undercoverage_usd_max": 0,
+        "undercoverage_usd_runs": 0,
+        "winner_finality_broken_runs": 821
+      },
+      "reserve30": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 3623,
+        "fresh_order_diff_runs": 3119,
+        "fresh_set_diff_max": 3,
+        "fresh_set_diff_runs": 3068,
+        "negative_capacity_checkpoints_runs": 813,
+        "nft_overdraw_usd_max": 49000000,
+        "nft_overdraw_usd_runs": 179,
+        "overcoverage_usd_max": 34000000,
+        "overcoverage_usd_runs": 129,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 49000000,
+        "scalar_deficit_usd_runs": 136,
+        "undercoverage_usd_max": 39000000,
+        "undercoverage_usd_runs": 118,
+        "winner_finality_broken_runs": 0
+      },
+      "round_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 3580,
+        "fresh_order_diff_runs": 3024,
+        "fresh_set_diff_max": 3,
+        "fresh_set_diff_runs": 2965,
+        "negative_capacity_checkpoints_runs": 0,
+        "nft_overdraw_usd_max": 77000000,
+        "nft_overdraw_usd_runs": 2233,
+        "overcoverage_usd_max": 34000000,
+        "overcoverage_usd_runs": 322,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 77000000,
+        "scalar_deficit_usd_runs": 2066,
+        "undercoverage_usd_max": 40000000,
+        "undercoverage_usd_runs": 277,
+        "winner_finality_broken_runs": 0
+      },
+      "tier_lock": {
+        "end_time_max": 518400,
+        "forced_tiers_max": 0,
+        "forced_tiers_runs": 0,
+        "fresh_nominal_payments_diff_runs": 1292,
+        "fresh_order_diff_runs": 845,
+        "fresh_set_diff_max": 3,
+        "fresh_set_diff_runs": 809,
+        "negative_capacity_checkpoints_runs": 1030,
+        "nft_overdraw_usd_max": 70000000,
+        "nft_overdraw_usd_runs": 1030,
+        "overcoverage_usd_max": 34000000,
+        "overcoverage_usd_runs": 186,
+        "payment_finality_broken_runs": 0,
+        "quantity_overdraw_runs": 0,
+        "runs": 4888,
+        "scalar_deficit_usd_max": 70000000,
+        "scalar_deficit_usd_runs": 509,
+        "undercoverage_usd_max": 39000000,
+        "undercoverage_usd_runs": 164,
+        "winner_finality_broken_runs": 0
+      }
+    },
+    "positive_final_cost_cases_checked_for_ipsc": 4747,
+    "random_cases": 1000,
+    "seed": 20261015
+  }
+}

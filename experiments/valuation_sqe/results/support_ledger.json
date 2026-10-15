@@ -1,0 +1,24 @@
+{
+  "balance_spent_or_withdrawn": {
+    "balance_only_cannot_identify_purpose": true,
+    "final_need": 100,
+    "initial_need": 60
+  },
+  "pledge_conversion": {
+    "ask": 100,
+    "correct_need": 60,
+    "naive_need": 20,
+    "outstanding": 0,
+    "received": 40
+  },
+  "round_payment": {
+    "ask": 100,
+    "correct_total_grant_target": 100,
+    "cumulative_entitlement": 100,
+    "delivered": 20,
+    "remaining_pool": 80,
+    "undelivered_obligation": 80,
+    "wrong_total_grant_target": 80
+  },
+  "units": "whole USD, illustrative ledger identities"
+}
